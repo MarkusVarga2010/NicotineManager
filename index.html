@@ -666,7 +666,11 @@ tbody tr:hover{background:var(--paper3)}
               <div class="sr-label" style="margin-bottom:9px">Neuer Benutzer</div>
               <div class="mr2" style="margin-bottom:8px"><input id="nu-name" placeholder="Benutzername"/><input type="password" id="nu-pw" placeholder="Passwort"/></div>
               <div style="margin-bottom:10px"><label class="fl" style="margin-bottom:5px">Rolle</label>
-                <select id="nu-role"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option></select>
+                <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option></select>
+              </div>
+              <div style="margin-bottom:10px" id="nu-linked-wrap"><label class="fl" style="margin-bottom:5px">Verknüpft mit (Spezial-Konto)</label>
+                <select id="nu-linked"><option value="">Keine Verknüpfung</option></select>
+                <div class="ps" style="margin-top:5px">Bestellungen dieses Benutzers erscheinen dann zusätzlich im verknüpften Spezial-Konto.</div>
               </div>
               <button class="btn btn-ghost btn-sm" onclick="addUser()" style="width:100%;justify-content:center">＋ Benutzer anlegen</button>
             </div>
@@ -969,11 +973,11 @@ async function loadAllData(){
     sb.from('service_status').select('*').eq('user_id', currentUserId).maybeSingle(),
     sb.from('service_log').select('*').order('service_date', {ascending:false}),
   ]);
-  S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname}));
+  S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id}));
   S.bestellungen = (bestRes.data||[]).map(b=>({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, date:b.bestelldatum
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, date:b.bestelldatum, userId:b.user_id
   }));
   S.preise = {};
   (preiseRes.data||[]).forEach(p=>{ S.preise[p.produkt_id]=Number(p.preis); });
@@ -1119,7 +1123,7 @@ async function addKunde(){
   if(!v||!n){showToast('Vor- und Nachname eingeben.','⚠');return;}
   const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
   if(error){ showToast('Kunde konnte nicht angelegt werden.','⚠'); return; }
-  S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname});
+  S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
   document.getElementById('nk-vorname').value='';document.getElementById('nk-nachname').value='';
   closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
 }
@@ -1139,8 +1143,10 @@ function renderKunden(){
   g.innerHTML=S.kunden.map(k=>{
     const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
+    const foreign = k.userId!==currentUserId;
+    const nameTag = foreign ? ` <span class="badge" style="font-size:9px;margin-left:4px;background:var(--paper2);color:var(--ink-faint)">↳ ${usernameOf(k.userId)}</span>` : '';
     return `<div class="kcard">
-      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}</div><button class="ic-btn" onclick="delKunde(${k.id})">🗑</button></div>
+      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="delKunde(${k.id})">🗑</button>`}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -1148,12 +1154,17 @@ function renderKunden(){
     </div>`;
   }).join('');
 }
+function usernameOf(userId){
+  const u=M.users.find(x=>x.id===userId);
+  return u ? u.username : '—';
+}
 function fillSelects(){
-  const opts=S.kunden.map(k=>`<option value="${k.id}">${k.vorname} ${k.nachname}</option>`).join('');
+  const allOpts=S.kunden.map(k=>`<option value="${k.id}">${k.vorname} ${k.nachname}</option>`).join('');
+  const ownOpts=S.kunden.filter(k=>k.userId===currentUserId).map(k=>`<option value="${k.id}">${k.vorname} ${k.nachname}</option>`).join('');
   const fk=document.getElementById('filter-kunde');
-  if(fk) fk.innerHTML='<option value="">Alle Kunden</option>'+opts;
+  if(fk) fk.innerHTML='<option value="">Alle Kunden</option>'+allOpts;
   const nb=document.getElementById('nb-kunde');
-  if(nb) nb.innerHTML=opts || '<option value="">Keine Kunden vorhanden</option>';
+  if(nb) nb.innerHTML=ownOpts || '<option value="">Keine Kunden vorhanden</option>';
 }
 
 // ══════════════════════════════════════════════
@@ -1233,7 +1244,7 @@ async function addBestellung(){
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, date:data.bestelldatum
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, date:data.bestelldatum, userId:data.user_id
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung angelegt.');
 }
@@ -1309,8 +1320,10 @@ function renderBestellungen(){
     const actionBtn = bestellungenTab==='bestellt'
       ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
       : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
+    const foreign = b.userId!==currentUserId;
+    const originTag = foreign ? ` <span class="badge" style="font-size:9px;margin-left:4px;background:var(--paper2);color:var(--ink-faint)">↳ ${usernameOf(b.userId)}</span>` : '';
     return `<tr>
-      <td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}</td>
+      <td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}${originTag}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td class="mono" style="font-weight:700">${fmt(b.total)}${discBadge}</td>
@@ -1318,7 +1331,7 @@ function renderBestellungen(){
       <td style="text-align:right;white-space:nowrap">
         ${actionBtn}
         <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
-        <button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>
+        ${foreign?'':`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`}
       </td>
     </tr>`;
   }).join('');
@@ -1672,24 +1685,58 @@ function renderSettings(){
   const userCard=document.getElementById('set-card-benutzer');
   if(userCard) userCard.style.display = isAdmin ? '' : 'none';
 }
+function roleLabel(r){
+  return r==='service'?'Service':r==='admin'?'Admin':r==='special'?'Spezial-Konto':'Benutzer';
+}
+function fillLinkedUsersSelect(){
+  const specials = M.users.filter(u=>u.role==='special');
+  const opts = specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
+  const nu=document.getElementById('nu-linked');
+  if(nu) nu.innerHTML='<option value="">Keine Verknüpfung</option>'+opts;
+}
+function onNuRoleChange(){
+  const r=document.getElementById('nu-role').value;
+  const wrap=document.getElementById('nu-linked-wrap');
+  if(wrap) wrap.style.display = r==='special' ? 'none' : '';
+}
 function renderUserList(){
   const el=document.getElementById('user-list');if(!el)return;
-  el.innerHTML=M.users.map(u=>`
+  fillLinkedUsersSelect();
+  const specials = M.users.filter(u=>u.role==='special');
+  el.innerHTML=M.users.map(u=>{
+    const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${s.username}</option>`).join('');
+    const linkSelect = u.role==='special' ? '' : `
+      <select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)">
+        <option value="">Keine Verknüpfung</option>${linkOpts}
+      </select>`;
+    return `
     <div class="ul-item">
       <div class="ul-av">${u.username[0].toUpperCase()}</div>
-      <div class="ul-info"><div class="ul-name">${u.username}</div><div class="ul-role">${u.role==='service'?'Service':u.role==='admin'?'Admin':'Benutzer'}${u.id===currentUserId?' (du)':''}</div></div>
+      <div class="ul-info"><div class="ul-name">${u.username}</div><div class="ul-role">${roleLabel(u.role)}${u.id===currentUserId?' (du)':''}</div></div>
+      ${linkSelect}
       ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}','${u.username}')">🗑</button>`:'<span style="font-size:10px;color:var(--sage)">●</span>'}
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+async function setUserLink(userId, linkedTo){
+  const { error } = await sb.rpc('set_user_link', { p_user_id:userId, p_linked_to: linkedTo || null });
+  if(error){ showToast(error.message || 'Verknüpfung konnte nicht geändert werden.', '⚠'); renderUserList(); return; }
+  const u=M.users.find(x=>x.id===userId);
+  if(u) u.linked_to = linkedTo || null;
+  showToast(linkedTo?'Verknüpfung gespeichert. ✓':'Verknüpfung entfernt.');
+  renderUserList();
 }
 async function addUser(){
   const n=document.getElementById('nu-name').value.trim();
   const p=document.getElementById('nu-pw').value;
   const r=document.getElementById('nu-role').value;
+  const linked=document.getElementById('nu-linked')?.value||'';
   if(!n||p.length<3){showToast('Name + Passwort (≥3 Zeichen) eingeben.','⚠');return;}
-  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r });
+  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: r==='special' ? null : (linked||null) });
   if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
-  M.users.push({ id:data, username:n, role:r, first_login:r==='user' });
+  M.users.push({ id:data, username:n, role:r, first_login:r==='user', linked_to: r==='special' ? null : (linked||null) });
   document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
+  document.getElementById('nu-linked').value='';
   renderUserList();showToast('Benutzer angelegt.');
 }
 async function delUser(id, name){
