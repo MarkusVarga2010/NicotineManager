@@ -603,7 +603,7 @@ tbody tr:hover{background:var(--paper3)}
       </div>
       <div class="ps" id="best-tab-hint" style="margin:-8px 0 16px;color:var(--ink-faint)"></div>
       <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th></tr></thead><tbody id="b-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr id="b-thead-row"><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th></tr></thead><tbody id="b-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="b-empty" style="display:none">
         <div class="ec-ic">▤</div>
@@ -759,6 +759,12 @@ tbody tr:hover{background:var(--paper3)}
     <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
     <div class="modal-body">
       <div style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
+      <div id="nb-lieferant-wrap" style="display:none;margin-bottom:16px">
+        <label class="sr" style="border:1px solid var(--line2);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line2)" onclick="document.getElementById('nb-lieferant').click()">
+          <div><div class="sr-label">An meinen Lieferanten übermitteln</div><div class="sr-sub" id="nb-lieferant-name">—</div></div>
+          <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="nb-lieferant"><div class="tt"></div></label>
+        </label>
+      </div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="order-items"></div>
       <button class="add-item-btn" onclick="addOrderItem()">＋ Produkt hinzufügen</button>
@@ -795,6 +801,7 @@ tbody tr:hover{background:var(--paper3)}
   <div class="modal wide">
     <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')">✕</button></div>
     <div class="modal-body">
+      <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von"></span></div>
       <div class="about-row"><span>Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row"><span>Datum</span><span id="od-datum"></span></div>
       <div class="about-row"><span>Status</span><span id="od-status"></span></div>
@@ -983,7 +990,7 @@ async function loadAllData(){
   S.bestellungen = (bestRes.data||[]).map(b=>({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, date:b.bestelldatum, userId:b.user_id
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, userId:b.user_id
   }));
   S.preise = {};
   (preiseRes.data||[]).forEach(p=>{ S.preise[p.produkt_id]=Number(p.preis); });
@@ -1064,6 +1071,16 @@ function openModal(id){
     document.getElementById('discount-value').value='';
     document.getElementById('discount-value').disabled=true;
     renderOrderItems();
+    const lieferantWrap=document.getElementById('nb-lieferant-wrap');
+    const supplierId = M.profile?.linked_to || null;
+    if(supplierId){
+      const supplier=M.users.find(u=>u.id===supplierId);
+      lieferantWrap.style.display='';
+      document.getElementById('nb-lieferant-name').textContent = supplier ? `Wird bei "${supplier.username}" sichtbar` : 'Wird beim Lieferanten sichtbar';
+      document.getElementById('nb-lieferant').checked=false;
+    } else {
+      lieferantWrap.style.display='none';
+    }
   }
 }
 function closeModal(id){ document.getElementById('modal-'+id).classList.remove('show'); }
@@ -1241,18 +1258,20 @@ async function addBestellung(){
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
   const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:S.preise[it.prod]||0,sub:(S.preise[it.prod]||0)*(it.stueck||1)}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
+  const fuerLieferant = !!document.getElementById('nb-lieferant')?.checked;
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, delivered:false, bestelldatum: today()
+    total, paid:false, delivered:false, fuer_lieferant:fuerLieferant, bestelldatum: today()
   }).select().single();
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, date:data.bestelldatum, userId:data.user_id
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, userId:data.user_id
   });
-  closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung angelegt.');
+  closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
+  showToast(fuerLieferant?'Bestellung angelegt und an Lieferant übermittelt. ✓':'Bestellung angelegt.');
 }
 async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -1311,6 +1330,14 @@ function renderBestellungen(){
     ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Bestellt“, sobald erledigt.'
     : 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald der Kunde bezahlt hat — die Rechnung wird dann automatisch erstellt.';
 
+  const showVon = currentRole()==='special';
+  const theadRow=document.getElementById('b-thead-row');
+  if(theadRow){
+    theadRow.innerHTML = showVon
+      ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
+      : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>';
+  }
+
   if(!list.length){
     tbody.innerHTML='';empty.style.display='block';
     document.getElementById('b-empty-text').textContent = bestellungenTab==='bestellt'
@@ -1327,9 +1354,11 @@ function renderBestellungen(){
       ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
       : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
     const foreign = b.userId!==currentUserId;
-    const originTag = foreign ? ` <span class="badge" style="font-size:9px;margin-left:4px;background:var(--paper2);color:var(--ink-faint)">↳ ${usernameOf(b.userId)}</span>` : '';
+    const vonCell = showVon ? `<td style="font-weight:600">${foreign?usernameOf(b.userId):'<span style="color:var(--ink-faint)">(eigene)</span>'}</td>` : '';
+    const ownTag = (!foreign && !showVon && b.fuerLieferant) ? ` <span class="badge" style="font-size:9px;margin-left:4px;background:var(--paper2);color:var(--ink-faint)">→ Lieferant</span>` : '';
     return `<tr>
-      <td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}${originTag}</td>
+      ${vonCell}
+      <td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}${ownTag}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td class="mono" style="font-weight:700">${fmt(b.total)}${discBadge}</td>
@@ -1484,6 +1513,13 @@ function openOrderDetail(id){
   const k=S.kunden.find(x=>x.id===b.kId);
 
   document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
+  const vonRow=document.getElementById('od-von-row');
+  if(b.userId!==currentUserId){
+    vonRow.style.display='flex';
+    document.getElementById('od-von').textContent = usernameOf(b.userId);
+  } else {
+    vonRow.style.display='none';
+  }
   document.getElementById('od-kunde').textContent = k?`${k.vorname} ${k.nachname}`:'—';
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
