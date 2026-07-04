@@ -242,6 +242,14 @@ button{font-family:inherit;cursor:pointer}
   letter-spacing:.03em;transition:all .15s;white-space:nowrap;
 }
 .pay-btn:hover{background:var(--sage-deep);color:var(--paper)}
+.status-btn{
+  background:none;border:1px solid var(--line2);color:var(--ink-faint);padding:5px 11px;
+  border-radius:99px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.03em;transition:all .15s;white-space:nowrap;margin-right:5px;
+}
+.status-btn:hover{color:var(--ink)}
+.status-btn.active-offen{background:var(--rust-bg);border-color:color-mix(in srgb, var(--rust) 35%, transparent);color:var(--rust)}
+.status-btn.active-bezahlt{background:var(--sage-bg);border-color:color-mix(in srgb, var(--sage) 35%, transparent);color:var(--sage-deep)}
 
 /* ════════════════════════════════════════════════════════
    DOSAGE SCALE — signature data visualization
@@ -733,13 +741,6 @@ tbody tr:hover{background:var(--paper3)}
     <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
     <div class="modal-body">
       <div style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
-      <div style="margin-bottom:16px">
-        <label class="fl">Status</label>
-        <select id="nb-status">
-          <option value="offen">Bestellt (offen)</option>
-          <option value="bezahlt">Bestellt und bezahlt</option>
-        </select>
-      </div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="order-items"></div>
       <button class="add-item-btn" onclick="addOrderItem()">＋ Produkt hinzufügen</button>
@@ -767,6 +768,30 @@ tbody tr:hover{background:var(--paper3)}
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('bestellung')">Abbrechen</button>
       <button class="btn btn-primary" onclick="addBestellung()">Bestellung anlegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Bestellung Details -->
+<div class="modal-bg" id="modal-orderdetail">
+  <div class="modal wide">
+    <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')">✕</button></div>
+    <div class="modal-body">
+      <div class="about-row"><span>Kunde</span><span id="od-kunde"></span></div>
+      <div class="about-row"><span>Datum</span><span id="od-datum"></span></div>
+      <div class="about-row"><span>Status</span><span id="od-status"></span></div>
+      <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
+      <div class="order-total-row" id="od-subtotal-row">
+        <span class="otl">Zwischensumme</span><span class="otv mono" id="od-subtotal" style="font-size:13px;color:var(--ink-soft)"></span>
+      </div>
+      <div class="order-total-row" id="od-discount-row" style="display:none">
+        <span class="otl" id="od-discount-label" style="color:var(--rust)">Rabatt</span><span class="otv mono" id="od-discount" style="font-size:13px;color:var(--rust)"></span>
+      </div>
+      <div class="order-total-row"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="od-total"></span></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('orderdetail')">Schließen</button>
+      <button class="btn btn-primary" onclick="printInvoiceFromDetail()">🖨 Rechnung herunterladen</button>
     </div>
   </div>
 </div>
@@ -1017,7 +1042,6 @@ function openModal(id){
   document.getElementById('modal-'+id).classList.add('show');
   if(id==='bestellung'){
     orderItems=[]; addOrderItem(); fillSelects();
-    document.getElementById('nb-status').value='offen';
     document.getElementById('discount-type').value='';
     document.getElementById('discount-value').value='';
     document.getElementById('discount-value').disabled=true;
@@ -1192,11 +1216,10 @@ async function addBestellung(){
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
   const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:S.preise[it.prod]||0,sub:(S.preise[it.prod]||0)*(it.stueck||1)}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
-  const isPaid = document.getElementById('nb-status').value==='bezahlt';
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:isPaid, bestelldatum: today()
+    total, paid:false, bestelldatum: today()
   }).select().single();
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
@@ -1204,12 +1227,11 @@ async function addBestellung(){
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
     total:Number(data.total), paid:data.paid, date:data.bestelldatum
   });
-  closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();showToast(isPaid?'Bestellung angelegt (bezahlt). ✓':'Bestellung angelegt.');
+  closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung angelegt.');
 }
-async function togglePaid(id){
+async function setPaid(id, newPaid){
   const b=S.bestellungen.find(x=>x.id===id);
-  if(!b)return;
-  const newPaid=!b.paid;
+  if(!b || b.paid===newPaid)return;
   const { error } = await sb.from('bestellungen').update({ paid:newPaid }).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
   b.paid=newPaid;renderBestellungen();renderKunden();renderDashboard();
@@ -1245,8 +1267,9 @@ function renderBestellungen(){
       <td class="mono" style="font-weight:700">${fmt(b.total)}${discBadge}</td>
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
       <td style="text-align:right;white-space:nowrap">
-        ${!b.paid?`<button class="pay-btn" onclick="togglePaid(${b.id})">✓ Bezahlt</button>`:`<button class="btn btn-ghost btn-sm" onclick="togglePaid(${b.id})">↺ Offen</button>`}
-        <button class="ic-btn" onclick="printInvoice(${b.id})" title="Rechnung drucken">🖨</button>
+        <button class="status-btn ${!b.paid?'active-offen':''}" onclick="setPaid(${b.id},false)">Bestellt</button>
+        <button class="status-btn ${b.paid?'active-bezahlt':''}" onclick="setPaid(${b.id},true)">Bezahlt</button>
+        <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
         <button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>
       </td>
     </tr>`;
@@ -1381,6 +1404,45 @@ function downloadOpenOrdersPDF(){
 
   doc.save(`offene-bestellungen-${today()}.pdf`);
   showToast('PDF wird heruntergeladen. ⭳');
+}
+
+// ══════════════════════════════════════════════
+// BESTELLUNG DETAILS
+// ══════════════════════════════════════════════
+let currentDetailOrderId = null;
+function openOrderDetail(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b){showToast('Bestellung nicht gefunden.','⚠');return;}
+  currentDetailOrderId = id;
+  const k=S.kunden.find(x=>x.id===b.kId);
+
+  document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
+  document.getElementById('od-kunde').textContent = k?`${k.vorname} ${k.nachname}`:'—';
+  document.getElementById('od-datum').textContent = fmtDate(b.date);
+  document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
+
+  document.getElementById('od-items').innerHTML = b.items.map(it=>{
+    const p=PROD_MAP[it.prod];
+    const preis=(it.preis!=null?it.preis:(S.preise[it.prod]||0));
+    return `<tr><td>${p?p.icon+' '+p.name:it.prod}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
+  }).join('');
+
+  document.getElementById('od-subtotal').textContent = fmt(b.subtotal);
+  const discRow=document.getElementById('od-discount-row');
+  if(b.discountType){
+    discRow.style.display='flex';
+    const discAmt = b.subtotal - b.total;
+    document.getElementById('od-discount-label').textContent = b.discountType==='percent' ? `Rabatt (-${b.discountValue}%)` : 'Rabatt';
+    document.getElementById('od-discount').textContent = '−'+fmt(discAmt);
+  } else {
+    discRow.style.display='none';
+  }
+  document.getElementById('od-total').textContent = fmt(b.total);
+
+  openModal('orderdetail');
+}
+function printInvoiceFromDetail(){
+  if(currentDetailOrderId!=null) printInvoice(currentDetailOrderId);
 }
 
 // ══════════════════════════════════════════════
