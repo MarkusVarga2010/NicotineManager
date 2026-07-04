@@ -646,6 +646,12 @@ tbody tr:hover{background:var(--paper3)}
             <div style="margin-bottom:12px"><label class="fl">Neues Passwort</label><input type="password" id="set-pw1" placeholder="Leer = nicht ändern"/></div>
             <div style="margin-bottom:14px"><label class="fl">Bestätigen</label><input type="password" id="set-pw2" placeholder="Wiederholen"/></div>
             <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="saveAccount()">Speichern</button></div>
+            <div id="set-lieferant-wrap" style="display:none;border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+              <label class="fl" style="margin-bottom:5px">Mein Lieferant</label>
+              <select id="set-lieferant"><option value="">Keinen Lieferanten auswählen</option></select>
+              <div class="ps" style="margin-top:5px">Deine Bestellungen erscheinen dann zusätzlich im Konto dieses Lieferanten.</div>
+              <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="saveOwnLink()">Lieferant speichern</button></div>
+            </div>
           </div>
         </div>
         <div class="set-card" id="set-card-anzeige">
@@ -1679,6 +1685,17 @@ function renderSettings(){
   const isAdmin=role==='admin';
   const konto=document.getElementById('set-card-konto');
   if(konto) konto.style.display=''; // Passwort ändern: für alle Rollen sichtbar, auch Admin
+  const lieferantWrap=document.getElementById('set-lieferant-wrap');
+  if(lieferantWrap){
+    const showLieferant = role==='user' || role==='service';
+    lieferantWrap.style.display = showLieferant ? '' : 'none';
+    if(showLieferant){
+      const specials = M.users.filter(u=>u.role==='special');
+      const sel=document.getElementById('set-lieferant');
+      sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
+      sel.value = M.profile?.linked_to || '';
+    }
+  }
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
@@ -1755,6 +1772,13 @@ async function saveAccount(){
   if(error){ showToast('Passwort konnte nicht geändert werden.','⚠'); return; }
   document.getElementById('set-pw1').value='';document.getElementById('set-pw2').value='';
   showToast('Passwort gespeichert. ✓');
+}
+async function saveOwnLink(){
+  const val=document.getElementById('set-lieferant')?.value||'';
+  const { error } = await sb.rpc('set_own_link', { p_linked_to: val || null });
+  if(error){ showToast(error.message || 'Lieferant konnte nicht gespeichert werden.', '⚠'); return; }
+  if(M.profile) M.profile.linked_to = val || null;
+  showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
 }
 function exportData(){
   const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
