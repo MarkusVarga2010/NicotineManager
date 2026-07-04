@@ -250,6 +250,14 @@ button{font-family:inherit;cursor:pointer}
 .status-btn:hover{color:var(--ink)}
 .status-btn.active-offen{background:var(--rust-bg);border-color:color-mix(in srgb, var(--rust) 35%, transparent);color:var(--rust)}
 .status-btn.active-bezahlt{background:var(--sage-bg);border-color:color-mix(in srgb, var(--sage) 35%, transparent);color:var(--sage-deep)}
+.tab-btn{
+  background:var(--paper2);border:1px solid var(--line2);color:var(--ink-soft);
+  padding:10px 16px;border-radius:var(--r-lg);font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;gap:8px;transition:all .15s;
+}
+.tab-btn:hover{color:var(--ink);border-color:var(--line2)}
+.tab-btn.active{background:var(--sage-bg);border-color:color-mix(in srgb, var(--sage) 40%, transparent);color:var(--sage-deep)}
+.tab-btn .badge{pointer-events:none}
 
 /* ════════════════════════════════════════════════════════
    DOSAGE SCALE — signature data visualization
@@ -586,20 +594,20 @@ tbody tr:hover{background:var(--paper3)}
           <button class="btn btn-primary" onclick="openModal('bestellung')">＋ Neue Bestellung</button>
         </div>
       </div>
-      <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:8px" id="best-tabs">
+          <button class="tab-btn active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
+          <button class="tab-btn" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
+        </div>
         <select id="filter-kunde" onchange="renderBestellungen()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
-        <select id="filter-status" onchange="renderBestellungen()" style="width:auto;min-width:150px">
-          <option value="offen">Offene Bestellungen</option>
-          <option value="alle">Alle anzeigen</option>
-          <option value="bezahlt">Nur bezahlte</option>
-        </select>
       </div>
+      <div class="ps" id="best-tab-hint" style="margin:-8px 0 16px;color:var(--ink-faint)"></div>
       <div class="card">
         <div class="tbl-wrap"><table><thead><tr><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th></tr></thead><tbody id="b-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="b-empty" style="display:none">
         <div class="ec-ic">▤</div>
-        <div class="ec-t">Keine Bestellungen</div>
+        <div class="ec-t" id="b-empty-text">Keine Bestellungen</div>
         <div class="ec-s">Lege eine neue Bestellung an, um zu starten.</div>
       </div>
     </div>
@@ -965,7 +973,7 @@ async function loadAllData(){
   S.bestellungen = (bestRes.data||[]).map(b=>({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, date:b.bestelldatum
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, date:b.bestelldatum
   }));
   S.preise = {};
   (preiseRes.data||[]).forEach(p=>{ S.preise[p.produkt_id]=Number(p.preis); });
@@ -1219,15 +1227,23 @@ async function addBestellung(){
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, bestelldatum: today()
+    total, paid:false, delivered:false, bestelldatum: today()
   }).select().single();
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, date:data.bestelldatum
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, date:data.bestelldatum
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung angelegt.');
+}
+async function setDelivered(id, newVal){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b || b.delivered===newVal)return;
+  const { error } = await sb.from('bestellungen').update({ delivered:newVal }).eq('id', id);
+  if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
+  b.delivered=newVal;renderBestellungen();
+  showToast('Als bestellt markiert. ✓');
 }
 async function setPaid(id, newPaid){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -1235,7 +1251,12 @@ async function setPaid(id, newPaid){
   const { error } = await sb.from('bestellungen').update({ paid:newPaid }).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
   b.paid=newPaid;renderBestellungen();renderKunden();renderDashboard();
-  showToast(b.paid?'Als bezahlt markiert. ✓':'Als offen markiert.');
+  if(newPaid){
+    showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓');
+    printInvoice(id);
+  } else {
+    showToast('Als offen markiert.');
+  }
 }
 async function delBestellung(id){
   if(!confirm('Bestellung wirklich löschen?'))return;
@@ -1244,22 +1265,50 @@ async function delBestellung(id){
   S.bestellungen=S.bestellungen.filter(x=>x.id!==id);
   renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung gelöscht.','🗑');
 }
+let bestellungenTab = 'bestellt'; // 'bestellt' | 'bezahlt'
+function switchBestellungenTab(tab){
+  bestellungenTab = tab;
+  document.getElementById('tab-btn-bestellt').classList.toggle('active', tab==='bestellt');
+  document.getElementById('tab-btn-bezahlt').classList.toggle('active', tab==='bezahlt');
+  renderBestellungen();
+}
 function renderBestellungen(){
   const tbody=document.getElementById('b-tbody'),empty=document.getElementById('b-empty');
   if(!tbody)return;
   const fk=document.getElementById('filter-kunde')?.value||'';
-  const fs=document.getElementById('filter-status')?.value||'offen';
+
+  // Zähler für beide Register (unabhängig vom Kundenfilter)
+  const countBestellt = S.bestellungen.filter(b=>!b.delivered).length;
+  const countBezahlt = S.bestellungen.filter(b=>!b.paid).length;
+  document.getElementById('tab-count-bestellt').textContent = countBestellt;
+  document.getElementById('tab-count-bezahlt').textContent = countBezahlt;
+
   let list=[...S.bestellungen];
   if(fk) list=list.filter(b=>String(b.kId)===fk);
-  if(fs==='offen') list=list.filter(b=>!b.paid);
-  if(fs==='bezahlt') list=list.filter(b=>b.paid);
+  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.delivered);
+  else list=list.filter(b=>!b.paid);
   list.sort((a,b)=>b.id-a.id);
-  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+
+  const hint=document.getElementById('best-tab-hint');
+  hint.textContent = bestellungenTab==='bestellt'
+    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Bestellt“, sobald erledigt.'
+    : 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald der Kunde bezahlt hat — die Rechnung wird dann automatisch erstellt.';
+
+  if(!list.length){
+    tbody.innerHTML='';empty.style.display='block';
+    document.getElementById('b-empty-text').textContent = bestellungenTab==='bestellt'
+      ? 'Keine offenen Bestellungen zum Abholen.'
+      : 'Keine offenen Zahlungen.';
+    return;
+  }
   empty.style.display='none';
   tbody.innerHTML=list.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
+    const actionBtn = bestellungenTab==='bestellt'
+      ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
+      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
     return `<tr>
       <td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}</td>
       <td style="font-size:12px">${prods}</td>
@@ -1267,8 +1316,7 @@ function renderBestellungen(){
       <td class="mono" style="font-weight:700">${fmt(b.total)}${discBadge}</td>
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
       <td style="text-align:right;white-space:nowrap">
-        <button class="status-btn ${!b.paid?'active-offen':''}" onclick="setPaid(${b.id},false)">Bestellt</button>
-        <button class="status-btn ${b.paid?'active-bezahlt':''}" onclick="setPaid(${b.id},true)">Bezahlt</button>
+        ${actionBtn}
         <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
         <button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>
       </td>
@@ -1616,7 +1664,9 @@ function renderSettings(){
   // Karten je nach Rolle ein-/ausblenden (gleich auf Desktop und Handy).
   const role=currentRole();
   const isAdmin=role==='admin';
-  ['set-card-konto','set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
+  const konto=document.getElementById('set-card-konto');
+  if(konto) konto.style.display=''; // Passwort ändern: für alle Rollen sichtbar, auch Admin
+  ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
   const userCard=document.getElementById('set-card-benutzer');
