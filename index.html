@@ -54,8 +54,8 @@
   --kunde:#63C4D4;
   --kunde-deep:#8FDCE8;
   --kunde-bg:#122B31;
-  --r:3px;
-  --r-lg:6px;
+  --r:5px;
+  --r-lg:10px;
   --nav-h:64px;
   --scale-h:46px;
 }
@@ -221,9 +221,9 @@ button{font-family:inherit;cursor:pointer}
 /* ════════════════════════════════════════════════════════
    PAGE HEADER — label-style, like a pharmacy datasheet header
    ════════════════════════════════════════════════════════ */
-.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--line2)}
-.ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
-.pt{font-size:26px;font-weight:600;letter-spacing:-.02em}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--line2)}
+.ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.pt{font-family:'Fraunces',serif;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
 .ps{color:var(--ink-soft);font-size:13px;margin-top:4px}
 .pa{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
@@ -305,10 +305,11 @@ button{font-family:inherit;cursor:pointer}
 .card{
   background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);margin-bottom:20px;
   box-shadow:0 1px 0 rgba(255,255,255,.02) inset, 0 8px 20px -10px rgba(0,0,0,.5);
+  overflow:hidden;
 }
 .card-head{
-  display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
-  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:15px 20px;
+  border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--paper3) 55%, transparent);
 }
 .card-head h3{font-size:14px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:0}
 .badge{
@@ -327,12 +328,14 @@ button{font-family:inherit;cursor:pointer}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{
-  text-align:left;padding:11px 20px;font-size:9px;font-weight:600;color:var(--ink-faint);
+  text-align:left;padding:12px 20px;font-size:9px;font-weight:600;color:var(--ink-faint);
   text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;
-  background:var(--paper3);
+  background:color-mix(in srgb, var(--paper3) 70%, transparent);
 }
-td{padding:13px 20px;font-size:13px;border-bottom:1px solid var(--line)}
+td{padding:14px 20px;font-size:13px;border-bottom:1px solid var(--line)}
 tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:color-mix(in srgb, var(--paper3) 45%, transparent)}
 tbody tr:hover{background:var(--paper3)}
 .ec{text-align:center;padding:48px 20px;color:var(--ink-faint)}
 .ec-ic{font-size:30px;margin-bottom:10px;opacity:.5}
@@ -355,7 +358,8 @@ tbody tr:hover{background:var(--paper3)}
    KUNDEN GRID
    ════════════════════════════════════════════════════════ */
 .kg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.kcard{background:var(--paper);border:1px solid var(--line2);border-radius:var(--r-lg);padding:18px;position:relative}
+.kcard{background:var(--paper);border:1px solid var(--line2);border-radius:var(--r-lg);padding:18px;position:relative;transition:border-color .15s, transform .15s, box-shadow .15s}
+.kcard:hover{border-color:var(--line2);transform:translateY(-1px);box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
 .kc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .kc-name{font-weight:600;font-size:14px}
 .kc-stats{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
