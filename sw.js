@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.2.1'; // Supabase-Umstellung: zentrale Datenbank statt nur lokalem Speicher
+const APP_VERSION = '2.1.1'; // Fix: Lieferant-Anzeige zeigt "Ich" bei eigenen Bestellungen als Lieferant
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

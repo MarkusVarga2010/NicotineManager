@@ -1353,7 +1353,7 @@ function renderBestellungen(){
     const foreign = b.userId!==currentUserId;
     const lockedForOwner = !foreign && b.fuerLieferant;
     const nameCell = b.fuerLieferant
-      ? `<span style="color:var(--lieferant-deep)">◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+      ? `<span style="color:var(--lieferant-deep)">◆ ${foreign ? 'Ich' : (M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant')}</span>`
       : (k?k.vorname+' '+k.nachname:'—');
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
@@ -1527,9 +1527,10 @@ function openOrderDetail(id){
   } else {
     vonRow.style.display='none';
   }
+  const isForeignOrder = b.userId!==currentUserId;
   document.getElementById('od-kunde-label').textContent = b.fuerLieferant ? 'Lieferant' : 'Kunde';
   document.getElementById('od-kunde').innerHTML = b.fuerLieferant
-    ? `<span style="color:var(--lieferant-deep)">${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+    ? `<span style="color:var(--lieferant-deep)">${isForeignOrder ? 'Ich' : (M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant')}</span>`
     : (k?`${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
