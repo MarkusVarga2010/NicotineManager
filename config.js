@@ -3,5 +3,5 @@
 // Hier NUR die zwei Werte aus deinem Supabase-Dashboard eintragen
 // (Settings → API Keys). Mehr ist nicht nötig.
 // ════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://hrmlwwxfiroyzkqsupwx.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_59gJ3DufuNVc9mp674Ms4Q_d8Z_0TB5';
+const SUPABASE_URL = 'https://evmiuhvcwfluxujafxae.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_7i07dC-4qykoM4QBw4xH6w_Ryu5h3QU';
