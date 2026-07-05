@@ -1403,7 +1403,9 @@ function renderBestellungen(){
     const foreign = b.userId!==currentUserId;
     const lockedForOwner = !foreign && b.fuerLieferant;
     const nameCell = b.fuerLieferant
-      ? `<span style="color:var(--lieferant-deep)">◆ Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`
+      ? (foreign
+          ? `<span style="color:var(--lieferant-deep)">◆ Lieferant: Ich</span>`
+          : `<span style="color:var(--lieferant-deep)">◆ Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`)
       : (k?'Kunde: '+k.vorname+' '+k.nachname:'—');
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
@@ -1578,8 +1580,11 @@ function openOrderDetail(id){
     vonRow.style.display='none';
   }
   document.getElementById('od-kunde-label').textContent = b.fuerLieferant ? 'Lieferant' : 'Kunde';
+  const odForeign = b.userId!==currentUserId;
   document.getElementById('od-kunde').innerHTML = b.fuerLieferant
-    ? `<span style="color:var(--lieferant-deep)">Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`
+    ? (odForeign
+        ? `<span style="color:var(--lieferant-deep)">Lieferant: Ich</span>`
+        : `<span style="color:var(--lieferant-deep)">Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`)
     : (k?`Kunde: ${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
@@ -2041,20 +2046,29 @@ async function clearAll(){
 // Nur für Rolle 'user', einmalig nach dem ersten Passwortwechsel.
 // ══════════════════════════════════════════════
 const TOUR_STEPS_USER=[
+  {page:'dashboard', target:'.ph',          title:'Willkommen bei NicotineManager', text:'Kurze Führung durchs Programm: Übersicht, Bestellungen, Kunden, Preise und Einstellungen. Weiter mit „Weiter →“.'},
   {page:'dashboard', target:'.stat-strip', title:'Deine Übersicht', text:'Hier siehst du auf einen Blick die offenen Schulden, Bestellungen und wie viele Kunden noch etwas schulden.'},
   {page:'dashboard', target:'.dose-card',  title:'Größte Schuldner', text:'Dieser Balken zeigt, welche Kunden den größten Anteil an der Gesamtschuld haben.'},
+  {page:'dashboard', target:'#page-dashboard .card', title:'Offene Bestellungen', text:'Alle noch offenen Bestellungen auf einen Blick — als PDF-Liste herunterladbar.'},
   {page:'bestellungen', target:'.pa',      title:'Neue Bestellung', text:'Über diesen Button legst du eine neue Bestellung an: Kunde wählen, Produkte hinzufügen, fertig. Hast du einen Lieferanten hinterlegt, kannst du hier auch direkt bei ihm bestellen.'},
+  {page:'bestellungen', target:'#best-tabs', title:'Bestellt & Bezahlt', text:'„Bestellt“ zeigt, was noch abgeholt/geliefert werden muss. „Bezahlt“ zeigt offene Zahlungen. Ein Klick auf den Status-Button erledigt den jeweiligen Schritt.'},
   {page:'kunden', target:'.pa',            title:'Kundenverwaltung', text:'Hier legst du Kunden an und siehst direkt, wer noch offene Beträge hat.'},
   {page:'preise', target:'.pg',            title:'Preise pflegen', text:'Stückpreise für jedes Produkt lassen sich hier jederzeit anpassen.'},
-  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit Benutzername, Passwort und deinen Lieferanten anpassen. Viel Erfolg!'},
+  {page:'preise', target:'#price-table',   title:'Mengenrabatte im Blick', text:'Die Tabelle darunter zeigt automatisch die Gesamtpreise für 10, 25, 50 und 100 Stück.'},
+  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit Benutzername, Passwort und deinen Lieferanten anpassen.'},
+  {page:'einstellungen', target:'#set-card-anzeige', title:'Anzeige anpassen', text:'Akzentfarbe, Animationen und eine kompaktere Ansicht lassen sich hier nach Geschmack einstellen.'},
+  {page:'dashboard', target:'.ph', title:'Du kennst dich jetzt aus', text:'Diese Tour lässt sich unter Einstellungen → Daten & Backup jederzeit erneut starten. Viel Erfolg!'},
 ];
 const TOUR_STEPS_SPECIAL=[
+  {page:'dashboard', target:'.ph', title:'Willkommen als Lieferant', text:'Kurze Führung durchs Programm: als Lieferant siehst du zusätzlich die Bestellungen aller Benutzer, die dich verknüpft haben. Weiter mit „Weiter →“.'},
   {page:'dashboard', target:'.stat-strip', title:'Deine Übersicht', text:'Hier siehst du auf einen Blick offene Schulden und Bestellungen — auch die deiner verknüpften Benutzer.'},
   {page:'bestellungen', target:'#best-tabs', title:'Bestellt & Bezahlt', text:'Diese zwei Register zeigen alle offenen Bestellungen — auch von Benutzern, die mit deinem Konto verknüpft sind.'},
-  {page:'bestellungen', target:'#b-thead-row', title:'Von wem?', text:'Bestellungen von verknüpften Benutzern erkennst du an der Spalte „Von". Über das Augensymbol öffnest du die Details und kannst dort einen Lieferschein herunterladen.'},
+  {page:'bestellungen', target:'#b-thead-row', title:'Von wem?', text:'Bestellungen von verknüpften Benutzern erkennst du an der Spalte „Von" mit „Kunde: Name". Über das Augensymbol öffnest du die Details und kannst dort einen Lieferschein herunterladen.'},
   {page:'kunden', target:'.pa', title:'Kunden', text:'Hier verwaltest du deine eigenen Kunden. Kunden verknüpfter Benutzer erscheinen hier automatisch mit einem Tag — nur lesend, nicht löschbar.'},
   {page:'preise', target:'.pg', title:'Preise pflegen', text:'Diese Preise gelten automatisch, sobald ein verknüpfter Benutzer bei dir bestellt.'},
-  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit dein Passwort ändern. Viel Erfolg!'},
+  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit dein Passwort ändern.'},
+  {page:'einstellungen', target:'#set-card-meinekunden', title:'Meine Kunden', text:'Hier siehst du alle Benutzer, die dich als Lieferant hinterlegt haben — jeweils als „Kunde: Name" gekennzeichnet.'},
+  {page:'dashboard', target:'.ph', title:'Du kennst dich jetzt aus', text:'Diese Tour lässt sich unter Einstellungen jederzeit erneut starten. Viel Erfolg!'},
 ];
 let currentTourSteps=TOUR_STEPS_USER;
 let tourIdx=0;
