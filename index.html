@@ -758,12 +758,16 @@ tbody tr:hover{background:var(--paper3)}
   <div class="modal wide">
     <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
-      <div id="nb-lieferant-wrap" style="display:none;margin-bottom:16px">
-        <label class="sr" style="border:1px solid var(--line2);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line2)" onclick="document.getElementById('nb-lieferant').click()">
-          <div><div class="sr-label">An meinen Lieferanten übermitteln</div><div class="sr-sub" id="nb-lieferant-name">—</div></div>
-          <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="nb-lieferant"><div class="tt"></div></label>
-        </label>
+      <div id="nb-modus-wrap" style="display:none;margin-bottom:16px">
+        <label class="fl" style="margin-bottom:6px">Bestellung für</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="tab-btn active" id="nb-modus-kunde" onclick="setBestellModus('kunde')" style="flex:1;justify-content:center">Eigener Kunde</button>
+          <button type="button" class="tab-btn" id="nb-modus-lieferant" onclick="setBestellModus('lieferant')" style="flex:1;justify-content:center">Bei Lieferant bestellen</button>
+        </div>
+      </div>
+      <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
+      <div id="nb-lieferant-info" style="display:none;margin-bottom:16px">
+        <div class="ps">Diese Bestellung wird direkt bei <strong id="nb-lieferant-name2">deinem Lieferanten</strong> aufgegeben — er sieht sie unter deinem Namen in seinem Konto, berechnet wird mit seiner Preisliste. Der Lieferant erfährt nichts von deinen eigenen Kunden.</div>
       </div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="order-items"></div>
@@ -993,7 +997,11 @@ async function loadAllData(){
     total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, userId:b.user_id
   }));
   S.preise = {};
-  (preiseRes.data||[]).forEach(p=>{ S.preise[p.produkt_id]=Number(p.preis); });
+  S.lieferantPreise = {};
+  (preiseRes.data||[]).forEach(p=>{
+    if(p.user_id===currentUserId) S.preise[p.produkt_id]=Number(p.preis);
+    else if(M.profile && p.user_id===M.profile.linked_to) S.lieferantPreise[p.produkt_id]=Number(p.preis);
+  });
   M.users = usersRes.data||[];
   if(svcStatusRes.data){
     M.service.lastDate = svcStatusRes.data.last_date;
@@ -1070,17 +1078,16 @@ function openModal(id){
     document.getElementById('discount-type').value='';
     document.getElementById('discount-value').value='';
     document.getElementById('discount-value').disabled=true;
-    renderOrderItems();
-    const lieferantWrap=document.getElementById('nb-lieferant-wrap');
+    const modusWrap=document.getElementById('nb-modus-wrap');
     const supplierId = M.profile?.linked_to || null;
     if(supplierId){
       const supplier=M.users.find(u=>u.id===supplierId);
-      lieferantWrap.style.display='';
-      document.getElementById('nb-lieferant-name').textContent = supplier ? `Wird bei "${supplier.username}" sichtbar` : 'Wird beim Lieferanten sichtbar';
-      document.getElementById('nb-lieferant').checked=false;
+      modusWrap.style.display='';
+      document.getElementById('nb-lieferant-name2').textContent = supplier ? supplier.username : 'deinem Lieferanten';
     } else {
-      lieferantWrap.style.display='none';
+      modusWrap.style.display='none';
     }
+    setBestellModus('kunde');
   }
 }
 function closeModal(id){ document.getElementById('modal-'+id).classList.remove('show'); }
@@ -1194,6 +1201,16 @@ function fillSelects(){
 // BESTELLUNGEN (Order-Builder im Modal)
 // ══════════════════════════════════════════════
 let orderItems=[];
+let bestellModus='kunde'; // 'kunde' | 'lieferant'
+function activePreise(){ return bestellModus==='lieferant' ? S.lieferantPreise : S.preise; }
+function setBestellModus(mode){
+  bestellModus=mode;
+  document.getElementById('nb-modus-kunde').classList.toggle('active', mode==='kunde');
+  document.getElementById('nb-modus-lieferant').classList.toggle('active', mode==='lieferant');
+  document.getElementById('nb-kunde-wrap').style.display = mode==='kunde' ? '' : 'none';
+  document.getElementById('nb-lieferant-info').style.display = mode==='lieferant' ? '' : 'none';
+  renderOrderItems();
+}
 function addOrderItem(){
   orderItems.push({uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1});
   renderOrderItems();
@@ -1218,7 +1235,8 @@ function onDiscountTypeChange(){
   renderOrderItems();
 }
 function calcOrderTotals(){
-  const subtotal=orderItems.reduce((s,it)=>s+(S.preise[it.prod]||0)*(it.stueck||1),0);
+  const preise=activePreise();
+  const subtotal=orderItems.reduce((s,it)=>s+(preise[it.prod]||0)*(it.stueck||1),0);
   const dType=document.getElementById('discount-type')?.value||'';
   const dValRaw=parseFloat(document.getElementById('discount-value')?.value)||0;
   let discountAmount=0;
@@ -1230,11 +1248,12 @@ function calcOrderTotals(){
 function renderOrderItems(){
   const wrap=document.getElementById('order-items');
   if(!wrap)return;
+  const preise=activePreise();
   wrap.innerHTML=orderItems.map(it=>{
-    const sub=fmt((S.preise[it.prod]||0)*(it.stueck||1));
+    const sub=fmt((preise[it.prod]||0)*(it.stueck||1));
     return `<div class="oi">
       <select onchange="updateOrderItem(${it.uid},'prod',this.value)">
-        ${PRODUCTS.map(p=>`<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(S.preise[p.id]||0)}</option>`).join('')}
+        ${PRODUCTS.map(p=>`<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(preise[p.id]||0)}</option>`).join('')}
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono">${sub}</div>
@@ -1253,12 +1272,16 @@ function renderOrderItems(){
   document.getElementById('order-total').textContent=fmt(total);
 }
 async function addBestellung(){
-  const kId=parseInt(document.getElementById('nb-kunde').value);
-  if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
+  const fuerLieferant = bestellModus==='lieferant';
+  let kId=null;
+  if(!fuerLieferant){
+    kId=parseInt(document.getElementById('nb-kunde').value);
+    if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
+  }
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
-  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:S.preise[it.prod]||0,sub:(S.preise[it.prod]||0)*(it.stueck||1)}));
+  const preise=activePreise();
+  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:preise[it.prod]||0,sub:(preise[it.prod]||0)*(it.stueck||1)}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
-  const fuerLieferant = !!document.getElementById('nb-lieferant')?.checked;
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
@@ -1271,7 +1294,7 @@ async function addBestellung(){
     total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, userId:data.user_id
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
-  showToast(fuerLieferant?'Bestellung angelegt und an Lieferant übermittelt. ✓':'Bestellung angelegt.');
+  showToast(fuerLieferant?'Bestellung beim Lieferanten aufgegeben. ✓':'Bestellung angelegt.');
 }
 async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
