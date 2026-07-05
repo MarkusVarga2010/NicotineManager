@@ -17,7 +17,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -27,35 +27,35 @@
    TOKENS
    ════════════════════════════════════════════════════════ */
 :root{
-  --paper:#17130F;
-  --paper2:#1E1811;
-  --paper3:#271F16;
-  --line:#372C1F;
-  --line2:#4C3E2B;
-  --ink:#F2E8D6;
-  --ink-soft:#B7A98D;
-  --ink-faint:#71634D;
-  --sage:#C89B4A;
-  --sage-deep:#E3BE6E;
-  --sage-bg:#2B2113;
-  --accent2:#C89B4A;
-  --accent3:#7C9C7A;
-  --accent4:#9C7BA0;
-  --rust:#C1543A;
-  --rust-bg:#2C1B14;
-  --gold:#C89B4A;
-  --gold-bg:#2B2113;
-  --success:#8CA36F;
-  --success-deep:#B3C795;
-  --success-bg:#1E2417;
-  --lieferant:#9C7BA0;
-  --lieferant-deep:#C4A6C8;
-  --lieferant-bg:#241C28;
-  --kunde:#6C93A6;
-  --kunde-deep:#9AB9C7;
-  --kunde-bg:#16232A;
-  --r:2px;
-  --r-lg:4px;
+  --paper:#0B0F14;
+  --paper2:#121821;
+  --paper3:#19212C;
+  --line:#232E3A;
+  --line2:#34455A;
+  --ink:#EAF0F5;
+  --ink-soft:#8FA0AF;
+  --ink-faint:#566778;
+  --sage:#4C8DFF;
+  --sage-deep:#8FB6FF;
+  --sage-bg:#162338;
+  --accent2:#D4AC5C;
+  --accent3:#7DD3C8;
+  --accent4:#C792EA;
+  --rust:#E08A6B;
+  --rust-bg:#2E2019;
+  --gold:#D4AC5C;
+  --gold-bg:#2B2418;
+  --success:#5FBF8A;
+  --success-deep:#8DDDB0;
+  --success-bg:#12291F;
+  --lieferant:#C792EA;
+  --lieferant-deep:#DAB4F2;
+  --lieferant-bg:#241934;
+  --kunde:#63C4D4;
+  --kunde-deep:#8FDCE8;
+  --kunde-bg:#122B31;
+  --r:3px;
+  --r-lg:6px;
   --nav-h:64px;
   --scale-h:46px;
 }
@@ -63,8 +63,6 @@
 html,body{height:100%}
 body{
   background:var(--paper);
-  background-image:repeating-linear-gradient(to bottom, transparent, transparent 39px, var(--line) 39px, var(--line) 40px);
-  background-size:100% 200px;
   color:var(--ink);
   font-family:'Inter',system-ui,sans-serif;
   font-size:14px;
@@ -79,7 +77,7 @@ button,.scale-tick,.ic-btn,input[type="checkbox"]+.tt{touch-action:manipulation}
 
 h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-.01em}
 
-.mono{font-family:'Courier Prime',monospace}
+.mono{font-family:'JetBrains Mono',monospace}
 
 input,select,textarea{
   background:var(--paper);
@@ -100,7 +98,7 @@ select{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6660' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
 }
-label.fl{display:block;font-size:10px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-family:'Courier Prime',monospace}
+label.fl{display:block;font-size:10px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
 
 button{font-family:inherit;cursor:pointer}
 
@@ -117,43 +115,36 @@ button{font-family:inherit;cursor:pointer}
 }
 .login-wrap{width:100%;max-width:380px}
 .login-label{
-  font-family:'Courier Prime',monospace;font-size:11px;font-weight:700;color:var(--sage-deep);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--sage);
   text-transform:uppercase;letter-spacing:.14em;text-align:center;margin-bottom:10px;
 }
 .login-brand{text-align:center;margin-bottom:30px}
 .login-brand h1{font-size:34px;color:var(--ink);line-height:1}
-.login-brand .sub{color:var(--ink-soft);font-size:13px;margin-top:8px;font-family:'Courier Prime',monospace;letter-spacing:.02em}
+.login-brand .sub{color:var(--ink-soft);font-size:13px;margin-top:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
 .login-card{
   background:var(--paper2);
   border:1px solid var(--line2);
   border-radius:var(--r-lg);
-  padding:30px 26px 26px;
+  padding:26px;
   position:relative;
 }
 .login-card::before{
-  content:'';position:absolute;top:-1px;left:0;right:0;height:0;
-  border-top:2px dashed var(--line2);
-}
-.login-card::after{
-  content:'✂ RECHNUNG · KONTO · SCHULDEN';
-  position:absolute;top:9px;left:26px;right:26px;
-  font-family:'Courier Prime',monospace;font-size:8px;letter-spacing:.16em;
-  color:var(--ink-faint);text-transform:uppercase;white-space:nowrap;overflow:hidden;
+  content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:var(--line2);
 }
 .fw{margin-bottom:16px}
 .primary-btn{
-  width:100%;background:var(--sage-deep);color:var(--paper);border:none;border-radius:var(--r);
-  padding:13px;font-size:13px;font-weight:700;letter-spacing:.03em;margin-top:6px;
-  transition:filter .15s;font-family:'Courier Prime',monospace;text-transform:uppercase;
+  width:100%;background:var(--sage-deep);color:var(--paper);border:none;border-radius:99px;
+  padding:13px;font-size:13px;font-weight:600;letter-spacing:.02em;margin-top:6px;
+  transition:filter .15s;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 2px 0 0 color-mix(in srgb, var(--paper) 60%, transparent) inset, 0 3px 10px -2px rgba(0,0,0,.5);
+  box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);
 }
 .primary-btn:hover{filter:brightness(1.1)}
 .login-err{
   color:var(--rust);font-size:12px;margin-top:12px;text-align:center;display:none;
-  background:var(--rust-bg);border-radius:var(--r);padding:9px 12px;font-family:'Courier Prime',monospace;
+  background:var(--rust-bg);border-radius:var(--r);padding:9px 12px;font-family:'JetBrains Mono',monospace;
 }
-.login-hint{text-align:center;margin-top:16px;font-size:11px;color:var(--ink-faint);font-family:'Courier Prime',monospace}
+.login-hint{text-align:center;margin-top:16px;font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
 .login-hint b{color:var(--ink-soft)}
 
 /* ════════════════════════════════════════════════════════
@@ -172,9 +163,8 @@ button{font-family:inherit;cursor:pointer}
 }
 .tb-left{display:flex;align-items:center;gap:14px}
 .tb-mark{
-  width:34px;height:34px;border-radius:50%;border:2px solid var(--sage);
-  box-shadow:0 0 0 3px var(--paper), 0 0 0 4px var(--line2);
-  display:flex;align-items:center;justify-content:center;color:var(--sage-deep);
+  width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);
+  display:flex;align-items:center;justify-content:center;
   font-family:'Fraunces',serif;font-weight:700;font-size:15px;flex-shrink:0;
 }
 .tb-name{font-family:'Fraunces',serif;font-weight:600;font-size:17px;letter-spacing:-.01em}
@@ -183,15 +173,15 @@ button{font-family:inherit;cursor:pointer}
 .tb-user{display:flex;align-items:center;gap:9px}
 .tb-user-info{text-align:right;line-height:1.25}
 .tb-user-name{font-size:12px;font-weight:600}
-.tb-user-role{font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;font-family:'Courier Prime',monospace}
+.tb-user-role{font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
 .tb-av{
   width:30px;height:30px;border-radius:50%;background:var(--sage-bg);color:var(--sage-deep);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
-  font-family:'Courier Prime',monospace;
+  font-family:'JetBrains Mono',monospace;
 }
 .logout-btn{
   background:none;border:1px solid var(--line2);color:var(--ink-soft);border-radius:var(--r);
-  padding:8px 12px;font-size:11px;font-weight:600;font-family:'Courier Prime',monospace;
+  padding:8px 12px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;
   transition:all .15s;letter-spacing:.03em;
 }
 .logout-btn:hover{border-color:var(--rust);color:var(--rust);background:var(--rust-bg)}
@@ -216,7 +206,7 @@ button{font-family:inherit;cursor:pointer}
 }
 .scale-tick:hover{color:var(--ink);background:var(--paper3)}
 .scale-tick .tk-ic{font-size:13px;opacity:.7}
-.scale-tick .tk-n{font-family:'Courier Prime',monospace;font-size:10px;color:var(--ink-faint)}
+.scale-tick .tk-n{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint)}
 .scale-tick.active{color:var(--sage-deep);background:var(--paper)}
 .scale-tick.active::after{
   content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--sage-deep);
@@ -231,8 +221,8 @@ button{font-family:inherit;cursor:pointer}
 /* ════════════════════════════════════════════════════════
    PAGE HEADER — label-style, like a pharmacy datasheet header
    ════════════════════════════════════════════════════════ */
-.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:16px;border-bottom:3px double var(--line2)}
-.ph-eyebrow{font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;color:var(--sage-deep);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--line2)}
+.ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
 .pt{font-size:26px;font-weight:600;letter-spacing:-.02em}
 .ps{color:var(--ink-soft);font-size:13px;margin-top:4px}
 .pa{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -246,10 +236,10 @@ button{font-family:inherit;cursor:pointer}
   font-family:'Inter',sans-serif;letter-spacing:.01em;
 }
 .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--ink-soft)}
-.btn-ghost:hover{border-color:var(--sage);color:var(--sage-deep)}
-.btn-primary{background:var(--sage-deep);color:var(--paper);font-family:'Courier Prime',monospace;text-transform:uppercase;font-weight:700;box-shadow:0 2px 0 0 color-mix(in srgb, var(--paper) 60%, transparent) inset, 0 3px 10px -2px rgba(0,0,0,.5);border-radius:var(--r);padding:10px 20px}
-.btn-primary:hover{filter:brightness(1.12)}
-.btn-danger{background:var(--rust-bg);border:1px solid #4A3528;color:var(--rust);border-radius:var(--r)}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.btn-primary{background:var(--sage-deep);color:var(--paper);box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);border-radius:99px;padding:10px 20px}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-danger{background:var(--rust-bg);border:1px solid #4A3528;color:var(--rust);border-radius:var(--r-lg)}
 .btn-danger:hover{background:var(--rust);color:var(--paper)}
 .btn-sm{padding:7px 12px;font-size:11px}
 .btn-sm.btn-primary{padding:7px 16px}
@@ -257,7 +247,7 @@ button{font-family:inherit;cursor:pointer}
 .ic-btn:hover{background:var(--rust-bg);color:var(--rust)}
 .status-btn{
   background:none;border:1px solid var(--line2);color:var(--ink-faint);padding:5px 11px;
-  border-radius:var(--r);font-size:10px;font-weight:700;font-family:'Courier Prime',monospace;
+  border-radius:99px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
   letter-spacing:.03em;transition:all .15s;white-space:nowrap;margin-right:5px;
 }
 .status-btn:hover{color:var(--ink)}
@@ -281,18 +271,18 @@ button{font-family:inherit;cursor:pointer}
    ════════════════════════════════════════════════════════ */
 .dose-card{
   background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);
-  padding:22px 24px;margin-bottom:24px;position:relative;border-top:3px double var(--line2);
+  padding:22px 24px;margin-bottom:24px;
   box-shadow:0 8px 20px -10px rgba(0,0,0,.5);
 }
 .dose-row{margin-bottom:14px}
-.dose-label{font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;color:var(--sage-deep);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
-.dose-vals{display:flex;gap:18px;flex-wrap:wrap;font-family:'Courier Prime',monospace;font-size:12px}
+.dose-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.dose-vals{display:flex;gap:18px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px}
 .dose-vals span{font-weight:700;display:flex;align-items:center;gap:6px}
-.dose-vals span::before{content:'';width:8px;height:8px;border-radius:0;background:currentColor;display:inline-block;transform:rotate(45deg)}
-.dose-track{position:relative;height:14px;background:var(--paper3);border-radius:var(--r);overflow:hidden;border:1px solid var(--line2)}
+.dose-vals span::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.dose-track{position:relative;height:14px;background:var(--paper3);border-radius:99px;overflow:hidden;border:1px solid var(--line2)}
 .dose-fill-seg{position:absolute;top:0;bottom:0;transition:width .5s ease,left .5s ease}
 .dose-ticks{display:flex;justify-content:space-between;margin-top:6px}
-.dose-ticks span{font-family:'Courier Prime',monospace;font-size:9px;color:var(--ink-faint)}
+.dose-ticks span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint)}
 
 /* ════════════════════════════════════════════════════════
    STAT LABELS — pharmacy datasheet style, replaces stat cards
@@ -304,8 +294,8 @@ button{font-family:inherit;cursor:pointer}
 .stat-cell{padding:18px 20px;border-right:1px solid var(--line2);background:var(--paper2);transition:background .15s}
 .stat-cell:hover{background:var(--paper3)}
 .stat-cell:last-child{border-right:none}
-.stat-cell .sc-lab{font-family:'Courier Prime',monospace;font-size:9px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
-.stat-cell .sc-v{font-family:'Courier Prime',monospace;font-size:24px;font-weight:700;letter-spacing:-.02em}
+.stat-cell .sc-lab{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.stat-cell .sc-v{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:-.02em}
 .stat-cell.s-debt .sc-v{color:var(--rust)}
 .stat-cell .sc-sub{font-size:10px;color:var(--ink-faint);margin-top:4px}
 
@@ -322,8 +312,8 @@ button{font-family:inherit;cursor:pointer}
 }
 .card-head h3{font-size:14px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:0}
 .badge{
-  font-size:9px;font-weight:700;padding:3px 9px;border-radius:var(--r);font-family:'Courier Prime',monospace;
-  text-transform:uppercase;letter-spacing:.05em;border:1px solid currentColor;
+  font-size:9px;font-weight:700;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace;
+  text-transform:uppercase;letter-spacing:.05em;
 }
 .b-offen{background:var(--rust-bg);color:var(--rust)}
 .b-bezahlt{background:var(--success-bg);color:var(--success-deep)}
@@ -338,7 +328,7 @@ button{font-family:inherit;cursor:pointer}
 table{width:100%;border-collapse:collapse}
 th{
   text-align:left;padding:11px 20px;font-size:9px;font-weight:600;color:var(--ink-faint);
-  text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'Courier Prime',monospace;
+  text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;
   background:var(--paper3);
 }
 td{padding:13px 20px;font-size:13px;border-bottom:1px solid var(--line)}
@@ -354,10 +344,10 @@ tbody tr:hover{background:var(--paper3)}
    ════════════════════════════════════════════════════════ */
 .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
 .pc{background:var(--paper);border:1px solid var(--line2);border-radius:var(--r-lg);padding:18px;position:relative}
-.pc-eyebrow{font-family:'Courier Prime',monospace;font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.pc-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
 .pc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .pc-ic{font-size:16px}
-.pc-val{font-family:'Courier Prime',monospace;font-size:24px;font-weight:700;color:var(--sage-deep);margin-bottom:12px}
+.pc-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--sage-deep);margin-bottom:12px}
 .pc-edit{display:flex;gap:8px}
 .pc-edit input{flex:1}
 
@@ -369,8 +359,8 @@ tbody tr:hover{background:var(--paper3)}
 .kc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .kc-name{font-weight:600;font-size:14px}
 .kc-stats{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
-.kc-stat-lab{font-family:'Courier Prime',monospace;font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
-.kc-stat-v{font-family:'Courier Prime',monospace;font-size:14px;font-weight:700}
+.kc-stat-lab{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.kc-stat-v{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
 .kc-stat-v.debt{color:var(--rust)}
 
 /* ════════════════════════════════════════════════════════
@@ -397,15 +387,15 @@ tbody tr:hover{background:var(--paper3)}
 .mr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .about-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
 .about-row:last-child{border-bottom:none}
-.about-row span:first-child{color:var(--ink-faint);font-family:'Courier Prime',monospace;font-size:11px}
+.about-row span:first-child{color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:11px}
 .about-row span:last-child{font-weight:600}
 
 .ul-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ul-item:last-child{border-bottom:none}
-.ul-av{width:28px;height:28px;border-radius:50%;background:var(--sage-bg);color:var(--sage-deep);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Courier Prime',monospace;flex-shrink:0}
+.ul-av{width:28px;height:28px;border-radius:50%;background:var(--sage-bg);color:var(--sage-deep);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
 .ul-info{flex:1;min-width:0}
 .ul-name{font-size:12px;font-weight:600}
-.ul-role{font-size:10px;color:var(--ink-faint);font-family:'Courier Prime',monospace}
+.ul-role{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
 
 .danger-zone{border:1px solid #4A3528;background:var(--rust-bg);border-radius:var(--r-lg);padding:20px}
 .danger-zone h3{color:var(--rust);font-size:13px;font-weight:700;margin-bottom:5px;font-family:'Inter',sans-serif}
@@ -444,13 +434,13 @@ tbody tr:hover{background:var(--paper3)}
 .oi{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r);padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
 .oi select{flex:2}
 .oi input{flex:1;max-width:70px}
-.oi .oi-total{font-family:'Courier Prime',monospace;font-weight:700;font-size:13px;min-width:64px;text-align:right}
+.oi .oi-total{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;min-width:64px;text-align:right}
 .oi .oi-rm{flex-shrink:0}
 .add-item-btn{width:100%;background:none;border:1px dashed var(--line2);border-radius:var(--r);padding:10px;color:var(--ink-soft);font-size:12px;font-weight:600;margin-bottom:14px}
 .add-item-btn:hover{border-color:var(--sage);color:var(--sage-deep)}
 .order-total-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 0;border-top:1px solid var(--line2);margin-top:6px}
-.order-total-row .otl{font-family:'Courier Prime',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint)}
-.order-total-row .otv{font-family:'Courier Prime',monospace;font-size:20px;font-weight:700;color:var(--sage-deep)}
+.order-total-row .otl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint)}
+.order-total-row .otv{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--sage-deep)}
 
 /* ════════════════════════════════════════════════════════
    TOAST
@@ -480,7 +470,7 @@ tbody tr:hover{background:var(--paper3)}
   padding:18px 20px;box-shadow:0 16px 40px rgba(0,0,0,.5);
   transition:top .35s cubic-bezier(.4,0,.2,1),left .35s cubic-bezier(.4,0,.2,1);
 }
-.tour-eyebrow{font-family:'Courier Prime',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.tour-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
 .tour-pop h3{font-size:15px;margin-bottom:6px}
 .tour-pop p{font-size:12px;color:var(--ink-soft);line-height:1.55;margin-bottom:16px}
 .tour-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -498,7 +488,7 @@ tbody tr:hover{background:var(--paper3)}
 #update-banner.show{display:flex}
 #update-banner .ub-text{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink)}
 #update-banner .ub-ic{font-size:16px}
-#update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'Courier Prime',monospace}
+#update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
 
 /* ════════════════════════════════════════════════════════
    RESPONSIVE
@@ -672,15 +662,10 @@ tbody tr:hover{background:var(--paper3)}
             <div id="set-lieferant-wrap" style="display:none;border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
               <label class="fl" style="margin-bottom:5px;color:var(--lieferant-deep)">◆ Mein Lieferant</label>
               <select id="set-lieferant"><option value="">Keinen Lieferanten auswählen</option></select>
-              <div class="ps mono" id="set-lieferant-status" style="margin-top:8px;font-weight:700;color:var(--lieferant-deep)"></div>
               <div class="ps" style="margin-top:5px">Bei neuen Bestellungen kannst du dann wählen, ob sie an ihn übermittelt werden — er sieht sie dann unter deinem Namen in seinem Konto.</div>
               <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="saveOwnLink()">Lieferant speichern</button></div>
             </div>
           </div>
-        </div>
-        <div class="set-card" id="set-card-meinekunden" style="display:none">
-          <div class="sch"><div class="sch-ic">◆</div><div><h3>Meine Kunden</h3><p>Benutzer, die dich als Lieferant führen</p></div></div>
-          <div class="scb"><div id="meine-kunden-list"></div></div>
         </div>
         <div class="set-card" id="set-card-anzeige">
           <div class="sch"><div class="sch-ic">◑</div><div><h3>Anzeige</h3><p>Design anpassen</p></div></div>
@@ -855,21 +840,6 @@ tbody tr:hover{background:var(--paper3)}
 </div>
 
 <!-- MODAL: Passwort ändern (erstes Login) -->
-<div class="modal-bg" id="modal-pw">
-  <div class="modal">
-    <div class="modal-head"><h3>Passwort festlegen</h3></div>
-    <div class="modal-body">
-      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:16px">Beim ersten Login bitte ein eigenes Passwort vergeben.</p>
-      <div style="margin-bottom:6px"><label class="fl">Neues Passwort</label><input type="password" id="pw-new" oninput="checkStr()" placeholder="Mind. 4 Zeichen"/></div>
-      <div style="height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px"><div id="str-bar" style="height:100%;width:0;background:var(--line2);transition:.2s"></div></div>
-      <div><label class="fl">Wiederholen</label><input type="password" id="pw-rep" placeholder="Passwort wiederholen"/></div>
-      <div class="login-err" id="pw-err" style="margin-top:12px">Passwörter stimmen nicht überein oder zu kurz.</div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="savePw()">Speichern</button>
-    </div>
-  </div>
-</div>
 
 <!-- EINFÜHRUNGSTOUR -->
 <div id="tour-spot" class="tour-spot"></div>
@@ -995,9 +965,14 @@ async function onLoggedIn(authUser, displayName){
   applyRoleUI();
   checkServiceDue();
   nav(homePage());
-  // Nur normale Benutzer ('user') werden beim ersten Login zur Passwortänderung
-  // aufgefordert; direkt danach folgt die Einführungstour. Admin/Service nie.
-  if((prof.role==='user' || prof.role==='special') && prof.first_login) openModal('pw');
+  // Benutzer und Spezial-Konten bekommen beim ersten Login automatisch die
+  // Einführungstour — ganz ohne Zwang zur Passwortänderung. Das Passwort
+  // kann jederzeit freiwillig unter Einstellungen → Mein Konto geändert werden.
+  if((prof.role==='user' || prof.role==='special') && prof.first_login){
+    M.profile.first_login=false;
+    await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
+    startTour();
+  }
 }
 async function doLogout(){
   await sb.auth.signOut();
@@ -1066,35 +1041,6 @@ function applyRoleUI(){
   document.querySelectorAll('.scale-tick').forEach((el,i)=>{
     el.style.display = allowed.includes(NAV_IDS[i]) ? 'flex' : 'none';
   });
-}
-
-// ══════════════════════════════════════════════
-// PW CHANGE
-// ══════════════════════════════════════════════
-function checkStr(){
-  const v=document.getElementById('pw-new').value;
-  const bar=document.getElementById('str-bar');
-  let s=0;
-  if(v.length>=4)s++;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9!@#$%]/.test(v))s++;
-  const cols=['var(--line2)','var(--rust)','var(--gold)','var(--sage)','var(--sage)'];
-  const ws=['0%','25%','50%','75%','100%'];
-  bar.style.background=cols[s];bar.style.width=ws[s];
-}
-async function savePw(){
-  const n=document.getElementById('pw-new').value;
-  const r=document.getElementById('pw-rep').value;
-  const err=document.getElementById('pw-err');
-  if(n.length<4||n!==r){err.style.display='block';return;}
-  err.style.display='none';
-  const { error: pwErr } = await sb.auth.updateUser({ password: n });
-  if(pwErr){ showToast('Passwort konnte nicht geändert werden.','⚠'); return; }
-  await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
-  M.profile.first_login=false;
-  closeModal('pw');
-  document.getElementById('pw-new').value='';
-  document.getElementById('pw-rep').value='';
-  showToast('Passwort gespeichert. ✓');
-  startTour();
 }
 
 // ══════════════════════════════════════════════
@@ -1403,10 +1349,8 @@ function renderBestellungen(){
     const foreign = b.userId!==currentUserId;
     const lockedForOwner = !foreign && b.fuerLieferant;
     const nameCell = b.fuerLieferant
-      ? (foreign
-          ? `<span style="color:var(--lieferant-deep)">◆ Lieferant: Ich</span>`
-          : `<span style="color:var(--lieferant-deep)">◆ Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`)
-      : (k?'Kunde: '+k.vorname+' '+k.nachname:'—');
+      ? `<span style="color:var(--lieferant-deep)">◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+      : (k?k.vorname+' '+k.nachname:'—');
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
     const actionBtn = lockedForOwner
@@ -1414,7 +1358,7 @@ function renderBestellungen(){
       : (bestellungenTab==='bestellt'
           ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
           : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
-    const vonCell = showVon ? `<td style="font-weight:600">${foreign?`<span style="color:var(--lieferant-deep)">Kunde: ${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>'}</td>` : '';
+    const vonCell = showVon ? `<td style="font-weight:600">${foreign?`<span style="color:var(--lieferant-deep)">${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>'}</td>` : '';
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}</td>
@@ -1460,7 +1404,7 @@ function renderDashboard(){
   const valsWrap=document.getElementById('dose-vals-wrap');
   const trackWrap=document.getElementById('dose-track-wrap');
   if(!debt){
-    valsWrap.innerHTML=`<span style="color:var(--ink-faint);font-family:'Courier Prime',monospace;font-size:12px">Keine offenen Schulden</span>`;
+    valsWrap.innerHTML=`<span style="color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:12px">Keine offenen Schulden</span>`;
     trackWrap.innerHTML='';
   } else {
     valsWrap.innerHTML=top.map((r,i)=>{
@@ -1580,12 +1524,9 @@ function openOrderDetail(id){
     vonRow.style.display='none';
   }
   document.getElementById('od-kunde-label').textContent = b.fuerLieferant ? 'Lieferant' : 'Kunde';
-  const odForeign = b.userId!==currentUserId;
   document.getElementById('od-kunde').innerHTML = b.fuerLieferant
-    ? (odForeign
-        ? `<span style="color:var(--lieferant-deep)">Lieferant: Ich</span>`
-        : `<span style="color:var(--lieferant-deep)">Lieferant: ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'—'}</span>`)
-    : (k?`Kunde: ${k.vorname} ${k.nachname}`:'—');
+    ? `<span style="color:var(--lieferant-deep)">${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+    : (k?`${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
   document.getElementById('od-lieferschein-btn').style.display = b.fuerLieferant ? '' : 'none';
@@ -1909,22 +1850,6 @@ function renderSettings(){
       const sel=document.getElementById('set-lieferant');
       sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
       sel.value = M.profile?.linked_to || '';
-      const statusEl=document.getElementById('set-lieferant-status');
-      if(statusEl) statusEl.textContent = M.profile?.linked_to
-        ? 'Lieferant: '+usernameOf(M.profile.linked_to)
-        : 'Kein Lieferant ausgewählt';
-    }
-    const kundenCard=document.getElementById('set-card-meinekunden');
-    if(kundenCard){
-      const isSpecial = role==='special';
-      kundenCard.style.display = isSpecial ? '' : 'none';
-      if(isSpecial){
-        const meineKunden = M.users.filter(u=>u.linked_to===currentUserId);
-        const listEl=document.getElementById('meine-kunden-list');
-        listEl.innerHTML = meineKunden.length
-          ? meineKunden.map(u=>`<div class="ul-item"><div class="ul-av">${u.username.slice(0,2).toUpperCase()}</div><div class="ul-info"><div class="ul-name">Kunde: ${u.username}</div><div class="ul-role">${roleLabel(u.role)}</div></div></div>`).join('')
-          : `<div class="ps">Noch kein Benutzer hat dich als Lieferant hinterlegt.</div>`;
-      }
     }
   }
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
@@ -2012,8 +1937,6 @@ async function saveOwnLink(){
   const { error } = await sb.rpc('set_own_link', { p_linked_to: val || null });
   if(error){ showToast(error.message || 'Lieferant konnte nicht gespeichert werden.', '⚠'); return; }
   if(M.profile) M.profile.linked_to = val || null;
-  const statusEl=document.getElementById('set-lieferant-status');
-  if(statusEl) statusEl.textContent = val ? 'Lieferant: '+usernameOf(val) : 'Kein Lieferant ausgewählt';
   showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
 }
 function exportData(){
@@ -2046,29 +1969,20 @@ async function clearAll(){
 // Nur für Rolle 'user', einmalig nach dem ersten Passwortwechsel.
 // ══════════════════════════════════════════════
 const TOUR_STEPS_USER=[
-  {page:'dashboard', target:'.ph',          title:'Willkommen bei NicotineManager', text:'Kurze Führung durchs Programm: Übersicht, Bestellungen, Kunden, Preise und Einstellungen. Weiter mit „Weiter →“.'},
   {page:'dashboard', target:'.stat-strip', title:'Deine Übersicht', text:'Hier siehst du auf einen Blick die offenen Schulden, Bestellungen und wie viele Kunden noch etwas schulden.'},
   {page:'dashboard', target:'.dose-card',  title:'Größte Schuldner', text:'Dieser Balken zeigt, welche Kunden den größten Anteil an der Gesamtschuld haben.'},
-  {page:'dashboard', target:'#page-dashboard .card', title:'Offene Bestellungen', text:'Alle noch offenen Bestellungen auf einen Blick — als PDF-Liste herunterladbar.'},
   {page:'bestellungen', target:'.pa',      title:'Neue Bestellung', text:'Über diesen Button legst du eine neue Bestellung an: Kunde wählen, Produkte hinzufügen, fertig. Hast du einen Lieferanten hinterlegt, kannst du hier auch direkt bei ihm bestellen.'},
-  {page:'bestellungen', target:'#best-tabs', title:'Bestellt & Bezahlt', text:'„Bestellt“ zeigt, was noch abgeholt/geliefert werden muss. „Bezahlt“ zeigt offene Zahlungen. Ein Klick auf den Status-Button erledigt den jeweiligen Schritt.'},
   {page:'kunden', target:'.pa',            title:'Kundenverwaltung', text:'Hier legst du Kunden an und siehst direkt, wer noch offene Beträge hat.'},
   {page:'preise', target:'.pg',            title:'Preise pflegen', text:'Stückpreise für jedes Produkt lassen sich hier jederzeit anpassen.'},
-  {page:'preise', target:'#price-table',   title:'Mengenrabatte im Blick', text:'Die Tabelle darunter zeigt automatisch die Gesamtpreise für 10, 25, 50 und 100 Stück.'},
-  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit Benutzername, Passwort und deinen Lieferanten anpassen.'},
-  {page:'einstellungen', target:'#set-card-anzeige', title:'Anzeige anpassen', text:'Akzentfarbe, Animationen und eine kompaktere Ansicht lassen sich hier nach Geschmack einstellen.'},
-  {page:'dashboard', target:'.ph', title:'Du kennst dich jetzt aus', text:'Diese Tour lässt sich unter Einstellungen → Daten & Backup jederzeit erneut starten. Viel Erfolg!'},
+  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit Benutzername, Passwort und deinen Lieferanten anpassen. Viel Erfolg!'},
 ];
 const TOUR_STEPS_SPECIAL=[
-  {page:'dashboard', target:'.ph', title:'Willkommen als Lieferant', text:'Kurze Führung durchs Programm: als Lieferant siehst du zusätzlich die Bestellungen aller Benutzer, die dich verknüpft haben. Weiter mit „Weiter →“.'},
   {page:'dashboard', target:'.stat-strip', title:'Deine Übersicht', text:'Hier siehst du auf einen Blick offene Schulden und Bestellungen — auch die deiner verknüpften Benutzer.'},
   {page:'bestellungen', target:'#best-tabs', title:'Bestellt & Bezahlt', text:'Diese zwei Register zeigen alle offenen Bestellungen — auch von Benutzern, die mit deinem Konto verknüpft sind.'},
-  {page:'bestellungen', target:'#b-thead-row', title:'Von wem?', text:'Bestellungen von verknüpften Benutzern erkennst du an der Spalte „Von" mit „Kunde: Name". Über das Augensymbol öffnest du die Details und kannst dort einen Lieferschein herunterladen.'},
+  {page:'bestellungen', target:'#b-thead-row', title:'Von wem?', text:'Bestellungen von verknüpften Benutzern erkennst du an der Spalte „Von". Über das Augensymbol öffnest du die Details und kannst dort einen Lieferschein herunterladen.'},
   {page:'kunden', target:'.pa', title:'Kunden', text:'Hier verwaltest du deine eigenen Kunden. Kunden verknüpfter Benutzer erscheinen hier automatisch mit einem Tag — nur lesend, nicht löschbar.'},
   {page:'preise', target:'.pg', title:'Preise pflegen', text:'Diese Preise gelten automatisch, sobald ein verknüpfter Benutzer bei dir bestellt.'},
-  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit dein Passwort ändern.'},
-  {page:'einstellungen', target:'#set-card-meinekunden', title:'Meine Kunden', text:'Hier siehst du alle Benutzer, die dich als Lieferant hinterlegt haben — jeweils als „Kunde: Name" gekennzeichnet.'},
-  {page:'dashboard', target:'.ph', title:'Du kennst dich jetzt aus', text:'Diese Tour lässt sich unter Einstellungen jederzeit erneut starten. Viel Erfolg!'},
+  {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Unter Einstellungen kannst du jederzeit dein Passwort ändern. Viel Erfolg!'},
 ];
 let currentTourSteps=TOUR_STEPS_USER;
 let tourIdx=0;

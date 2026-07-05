@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.1.0'; // Neues Design (Ledger/Kassenbuch-Look) + Lieferant/Kunde-Beschriftungen + erweiterte Tour
+const APP_VERSION = '2.0.0'; // Supabase-Umstellung: zentrale Datenbank statt nur lokalem Speicher
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
