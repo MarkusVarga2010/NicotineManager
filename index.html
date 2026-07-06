@@ -491,16 +491,22 @@ tbody tr:hover{background:var(--paper3)}
    UPDATE-BANNER (PWA)
    ════════════════════════════════════════════════════════ */
 #update-banner{
-  display:none;position:fixed;left:0;right:0;bottom:0;z-index:95;
-  background:var(--paper2);border-top:1px solid var(--line2);
-  padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));
-  align-items:center;justify-content:space-between;gap:14px;
-  box-shadow:0 -8px 24px rgba(0,0,0,.4);
+  display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:95;
+  background:var(--paper2);border:1px solid var(--line2);border-left:3px solid var(--sage-deep);
+  border-radius:var(--r-lg);
+  padding:14px 18px;padding-bottom:calc(14px + env(safe-area-inset-bottom));
+  align-items:center;justify-content:space-between;gap:14px;max-width:640px;margin:0 auto;
+  box-shadow:0 12px 32px -8px rgba(0,0,0,.55);
+  animation:slideUp .3s ease both;
 }
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #update-banner.show{display:flex}
-#update-banner .ub-text{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink)}
-#update-banner .ub-ic{font-size:16px}
-#update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
+#update-banner .ub-text{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink)}
+#update-banner .ub-ic{
+  font-size:17px;width:36px;height:36px;border-radius:50%;background:var(--sage-bg);color:var(--sage-deep);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+#update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:2px}
 
 /* ════════════════════════════════════════════════════════
    RESPONSIVE
@@ -2116,27 +2122,37 @@ applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-
 // PWA: SERVICE WORKER + UPDATES
 // ══════════════════════════════════════════════
 let waitingWorker=null;
+let swReg=null;
+function watchInstalling(reg){
+  const nw=reg.installing;
+  if(!nw) return;
+  nw.addEventListener('statechange', ()=>{
+    if(nw.state==='installed'){
+      if(navigator.serviceWorker.controller){
+        // Es lief bereits eine Version -> das hier ist ein echtes Update
+        showUpdateBanner(nw);
+      }else{
+        // Allererste Installation (noch keine Seite unter Kontrolle) -> kein Update-Hinweis nötig
+        showToast('App ist jetzt offline verfügbar. ✓','⬇');
+      }
+    }
+  });
+}
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').then(reg=>{
-      // Bereits ein wartender Worker beim Laden? (z.B. Tab war offen, Update kam dazwischen)
-      if(reg.waiting) showUpdateBanner(reg.waiting);
-      reg.addEventListener('updatefound', ()=>{
-        const nw=reg.installing;
-        if(!nw)return;
-        nw.addEventListener('statechange', ()=>{
-          if(nw.state==='installed' && navigator.serviceWorker.controller){
-            showUpdateBanner(nw);
-          }
-        });
-      });
-      // Periodisch auf neue Version prüfen (z.B. beim erneuten Fokussieren der App)
+    // updateViaCache:'none' erzwingt, dass sw.js NIE aus dem HTTP-Cache des Browsers
+    // kommt, sondern bei jeder Prüfung wirklich frisch vom Server geholt wird.
+    // Ohne das kann es passieren, dass Änderungen an sw.js stundenlang nicht erkannt werden.
+    navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg=>{
+      swReg=reg;
+      if(reg.waiting) showUpdateBanner(reg.waiting); // Update kam schon an, während der Tab offen war
+      reg.addEventListener('updatefound', ()=>watchInstalling(reg));
+      // Bei jedem Sichtbar-Werden der App (z.B. Tab-Wechsel, App wieder geöffnet) aktiv nachfragen
       document.addEventListener('visibilitychange', ()=>{
         if(document.visibilityState==='visible') reg.update();
       });
     }).catch(()=>{ /* Service Worker konnte nicht registriert werden, App läuft trotzdem online weiter */ });
   });
-  // Wenn der neue Worker übernimmt, Seite einmalig neu laden, um die neue Version zu zeigen
   let reloaded=false;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{
     if(reloaded)return; reloaded=true;
@@ -2149,17 +2165,33 @@ function showUpdateBanner(worker){
 }
 async function checkForUpdates(){
   if(!('serviceWorker' in navigator)){ showToast('Service Worker wird von diesem Browser nicht unterstützt.','⚠'); return; }
-  const reg = await navigator.serviceWorker.getRegistration();
+  const reg = swReg || await navigator.serviceWorker.getRegistration();
   if(!reg){ showToast('Keine Service-Worker-Registrierung gefunden.','⚠'); return; }
+  if(reg.waiting){ showUpdateBanner(reg.waiting); return; } // Update war schon fertig, nur noch nicht angezeigt
   showToast('Suche nach Updates…','⟲');
+  // Statt fest zu warten (unzuverlässig, da Installation je nach Verbindung
+  // unterschiedlich lange dauert), hören wir direkt auf das echte Event.
+  let handled=false;
+  const onFound=()=>{
+    handled=true;
+    reg.removeEventListener('updatefound', onFound);
+    watchInstalling(reg);
+  };
+  reg.addEventListener('updatefound', onFound);
   try{
     await reg.update();
-  }catch(e){ showToast('Update-Prüfung fehlgeschlagen.','⚠'); return; }
-  // Kurz warten, da 'updatefound' asynchron nach reg.update() feuert
+  }catch(e){
+    reg.removeEventListener('updatefound', onFound);
+    showToast('Update-Prüfung fehlgeschlagen. Verbindung prüfen.','⚠');
+    return;
+  }
+  // reg.update() ist zwar fertig, aber 'installing' kann noch minimal nachlaufen — kurz nachschauen.
   setTimeout(()=>{
-    if(reg.waiting) showUpdateBanner(reg.waiting);
-    else showToast('Du verwendest bereits die neueste Version. ✓');
-  }, 800);
+    reg.removeEventListener('updatefound', onFound);
+    if(!handled && !reg.installing && !reg.waiting){
+      showToast('Du verwendest bereits die neueste Version. ✓');
+    }
+  }, 300);
 }
 function applyUpdate(){
   if(waitingWorker) waitingWorker.postMessage('SKIP_WAITING');

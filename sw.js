@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.2.0'; // Sidebar-Navigation + Konto (Benutzername/Passwort) nicht mehr änderbar
+const APP_VERSION = '2.3.0'; // Update-Erkennung überarbeitet: kein Rate-Timeout mehr, updateViaCache:none, schöneres Update-Banner
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
