@@ -414,9 +414,11 @@ tbody tr:hover{background:var(--paper3)}
 .danger-zone p{font-size:12px;color:var(--ink-soft);margin-bottom:14px}
 .danger-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-.theme-grid{display:flex;gap:8px}
-.t-d{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
+.theme-grid{display:flex;flex-wrap:wrap;gap:10px}
+.t-d{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s;box-shadow:0 2px 6px -2px rgba(0,0,0,.5);position:relative}
+.t-d:hover{transform:scale(1.12)}
 .t-d.on{border-color:var(--ink)}
+.t-d.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 
 /* ════════════════════════════════════════════════════════
    SERVICE PAGE
@@ -924,10 +926,18 @@ const PROD_MAP = {};
 PRODUCTS.forEach(p => PROD_MAP[p.id] = p);
 
 const THEMES = [
-  {name:'Azur',   accent:'#4C8DFF', accentDeep:'#8FB6FF', accentBg:'#162338', sec:['#D4AC5C','#7DD3C8','#C792EA']},
+  {name:'Azur',      accent:'#4C8DFF', accentDeep:'#8FB6FF', accentBg:'#162338', sec:['#D4AC5C','#7DD3C8','#C792EA']},
   {name:'Bernstein', accent:'#E0B868', accentDeep:'#F0D199', accentBg:'#2E2614', sec:['#4C8DFF','#7DD3C8','#E08A6B']},
-  {name:'Smaragd', accent:'#4CC38A', accentDeep:'#8FE0B8', accentBg:'#13291F', sec:['#D4AC5C','#4C8DFF','#C792EA']},
-  {name:'Magenta', accent:'#C792EA', accentDeep:'#DEB8F5', accentBg:'#241B30', sec:['#D4AC5C','#4C8DFF','#7DD3C8']},
+  {name:'Smaragd',   accent:'#4CC38A', accentDeep:'#8FE0B8', accentBg:'#13291F', sec:['#D4AC5C','#4C8DFF','#C792EA']},
+  {name:'Magenta',   accent:'#C792EA', accentDeep:'#DEB8F5', accentBg:'#241B30', sec:['#D4AC5C','#4C8DFF','#7DD3C8']},
+  {name:'Rubin',     accent:'#E2566B', accentDeep:'#F19AA6', accentBg:'#301419', sec:['#E0B868','#4C8DFF','#7DD3C8']},
+  {name:'Türkis',    accent:'#3FC1C9', accentDeep:'#8EE3E8', accentBg:'#12292B', sec:['#E0B868','#C792EA','#E08A6B']},
+  {name:'Koralle',   accent:'#E58A5B', accentDeep:'#F0B694', accentBg:'#2E1E13', sec:['#4C8DFF','#3FC1C9','#C792EA']},
+  {name:'Indigo',    accent:'#6C7BFF', accentDeep:'#A6AEFF', accentBg:'#1B1E33', sec:['#E0B868','#4CC38A','#E2566B']},
+  {name:'Rosé',      accent:'#E36FA0', accentDeep:'#F0A8C6', accentBg:'#301A26', sec:['#4C8DFF','#4CC38A','#E0B868']},
+  {name:'Lindgrün',  accent:'#A8D14A', accentDeep:'#CBE68C', accentBg:'#262E13', sec:['#4C8DFF','#C792EA','#E2566B']},
+  {name:'Zinnober',  accent:'#E0654A', accentDeep:'#F0A18C', accentBg:'#2E1A14', sec:['#3FC1C9','#E0B868','#6C7BFF']},
+  {name:'Graphit',   accent:'#7C93A8', accentDeep:'#AFC1D0', accentBg:'#1E2529', sec:['#E0B868','#4CC38A','#E2566B']},
 ];
 
 // ══════════════════════════════════════════════
@@ -2123,6 +2133,7 @@ applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-
 // ══════════════════════════════════════════════
 let waitingWorker=null;
 let swReg=null;
+let swRegError=null;
 function watchInstalling(reg){
   const nw=reg.installing;
   if(!nw) return;
@@ -2151,7 +2162,7 @@ if('serviceWorker' in navigator){
       document.addEventListener('visibilitychange', ()=>{
         if(document.visibilityState==='visible') reg.update();
       });
-    }).catch(()=>{ /* Service Worker konnte nicht registriert werden, App läuft trotzdem online weiter */ });
+    }).catch(err=>{ swRegError=err; /* z.B. sw.js nicht erreichbar (404) oder unsicherer Kontext */ });
   });
   let reloaded=false;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{
@@ -2164,9 +2175,20 @@ function showUpdateBanner(worker){
   document.getElementById('update-banner').classList.add('show');
 }
 async function checkForUpdates(){
-  if(!('serviceWorker' in navigator)){ showToast('Service Worker wird von diesem Browser nicht unterstützt.','⚠'); return; }
-  const reg = swReg || await navigator.serviceWorker.getRegistration();
-  if(!reg){ showToast('Keine Service-Worker-Registrierung gefunden.','⚠'); return; }
+  if(!('serviceWorker' in navigator)){ showToast('Dieser Browser unterstützt keine Service Worker.','⚠'); return; }
+  if(!window.isSecureContext){ showToast('Service Worker benötigen HTTPS (oder localhost). Diese Seite läuft unsicher (z.B. über file:// oder http://).','⚠'); return; }
+  let reg = swReg || await navigator.serviceWorker.getRegistration();
+  if(!reg){
+    // Registrierung erneut versuchen und den echten Fehlergrund anzeigen, statt nur "nicht gefunden"
+    try{
+      reg = await navigator.serviceWorker.register('sw.js', { updateViaCache:'none' });
+      swReg=reg;
+    }catch(err){
+      swRegError=err;
+      showToast('Service Worker konnte nicht registriert werden: '+(err?.message||swRegError?.message||'sw.js nicht erreichbar (404?)'),'⚠');
+      return;
+    }
+  }
   if(reg.waiting){ showUpdateBanner(reg.waiting); return; } // Update war schon fertig, nur noch nicht angezeigt
   showToast('Suche nach Updates…','⟲');
   // Statt fest zu warten (unzuverlässig, da Installation je nach Verbindung
