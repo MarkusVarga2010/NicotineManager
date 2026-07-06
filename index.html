@@ -188,12 +188,12 @@ button{font-family:inherit;cursor:pointer}
 /* Mobile top header (hamburger + brand + avatar) — nur < 900px sichtbar */
 .mobile-topbar{
   display:none;
-  height:calc(var(--nav-h) + env(safe-area-inset-top) + 10px);
-  padding-top:calc(env(safe-area-inset-top) + 10px);
+  height:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
+  padding-top:calc(max(env(safe-area-inset-top), 44px) + 14px);
   border-bottom:1px solid var(--line2);
   background:var(--paper);
   align-items:center;justify-content:space-between;
-  padding-left:16px;padding-right:16px;position:sticky;top:0;z-index:45;
+  padding-left:16px;padding-right:16px;position:sticky;top:0;z-index:101;
 }
 .hamburger{
   width:36px;height:36px;border-radius:var(--r);border:1px solid var(--line2);background:var(--paper2);
@@ -585,6 +585,10 @@ tbody tr:hover{background:var(--paper3)}
   .sb-brand{display:none}
   .ic-btn{min-width:40px;min-height:40px;font-size:15px}
   .card-head{flex-wrap:wrap;gap:10px}
+  #offline-banner{
+    top:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
+    padding-top:9px;
+  }
 }
 @media(max-width:600px){
   .main{padding:24px 16px 50px}
@@ -818,7 +822,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">2.7.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">2.8.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -1277,18 +1281,16 @@ function applyMode(mode){
 function renderPrices(){
   const grid=document.getElementById('price-grid');
   if(grid) grid.innerHTML=PRODUCTS.map(p=>{
-    const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0, gewinn=verkauf-einkauf;
+    const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0;
     return `
     <div class="pc">
       <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
       <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
-      <div class="pc-val mono" id="pp-${p.id}">${fmt(verkauf)}</div>
-      <div class="ps" style="margin:-6px 0 10px;color:${gewinn>=0?'var(--success)':'var(--rust)'}">Gewinn/Stk: ${fmt(gewinn)}</div>
-      <div class="pc-edit" style="flex-direction:column;align-items:stretch;gap:8px">
-        <div><label class="fl" style="margin-bottom:4px">Einkaufspreis</label><input type="number" id="pei-${p.id}" value="${einkauf.toFixed(2)}" step="0.01" min="0" placeholder="Einkauf"/></div>
-        <div><label class="fl" style="margin-bottom:4px">Verkaufspreis</label><input type="number" id="pi-${p.id}" value="${verkauf.toFixed(2)}" step="0.01" min="0" placeholder="Verkauf"/></div>
-        <button class="btn btn-ghost btn-sm" onclick="savePrice('${p.id}')">Speichern</button>
+      <div class="pc-edit" style="gap:8px;margin-top:10px">
+        <div style="flex:1"><label class="fl" style="margin-bottom:4px">Einkauf €</label><input type="number" id="pei-${p.id}" value="${einkauf.toFixed(2)}" step="0.01" min="0" inputmode="decimal" oninput="previewProfit('${p.id}')" onchange="savePrice('${p.id}')"/></div>
+        <div style="flex:1"><label class="fl" style="margin-bottom:4px">Verkauf €</label><input type="number" id="pi-${p.id}" value="${verkauf.toFixed(2)}" step="0.01" min="0" inputmode="decimal" oninput="previewProfit('${p.id}')" onchange="savePrice('${p.id}')"/></div>
       </div>
+      <div class="ps" id="pg-${p.id}" style="margin-top:8px;font-weight:600;color:${(verkauf-einkauf)>=0?'var(--success)':'var(--rust)'}">Gewinn/Stk: ${fmt(verkauf-einkauf)}</div>
     </div>`;
   }).join('');
   const tbl=document.getElementById('price-table');
@@ -1305,18 +1307,31 @@ function renderPrices(){
     <td class="mono">${fmt(verkauf*100)}</td></tr>`;
   }).join('');
 }
+// Zeigt den Gewinn/Stk sofort beim Tippen an (ohne schon zu speichern) — fühlt sich
+// direkt und einfach an. Gespeichert wird erst automatisch, wenn man das Feld verlässt.
+function previewProfit(id){
+  const v=parseFloat(document.getElementById('pi-'+id).value)||0;
+  const ek=parseFloat(document.getElementById('pei-'+id).value)||0;
+  const el=document.getElementById('pg-'+id);
+  if(el){
+    const g=v-ek;
+    el.textContent=`Gewinn/Stk: ${fmt(g)}`;
+    el.style.color = g>=0 ? 'var(--success)' : 'var(--rust)';
+  }
+}
+// Auto-Speichern, sobald ein Preisfeld verlassen wird (kein extra Button/Klick nötig).
 async function savePrice(id){
   const v=parseFloat(document.getElementById('pi-'+id).value);
   const ek=parseFloat(document.getElementById('pei-'+id).value);
-  if(isNaN(v)||v<0){showToast('Ungültiger Verkaufspreis.','⚠');return;}
-  if(isNaN(ek)||ek<0){showToast('Ungültiger Einkaufspreis.','⚠');return;}
+  if(isNaN(v)||v<0||isNaN(ek)||ek<0){showToast('Bitte gültige Preise eingeben.','⚠');return;}
+  if(v===(S.preise[id]||0) && ek===(S.einkauf[id]||0)) return; // nichts geändert — kein unnötiges Speichern/Toast
   // upsert auf (user_id, produkt_id) — user_id kommt automatisch von RLS/auth.uid()
   const { error } = await sb.from('preise').upsert(
     { user_id:currentUserId, produkt_id:id, preis:v, einkaufspreis:ek },
     { onConflict:'user_id,produkt_id' }
   );
   if(error){ showToast(dbErrorMsg(error,'Preis konnte nicht gespeichert werden. Wurde die Spalte "einkaufspreis" in der Tabelle "preise" schon angelegt?'),'⚠'); return; }
-  S.preise[id]=v; S.einkauf[id]=ek; renderPrices(); renderDashboard(); showToast('Preise gespeichert.');
+  S.preise[id]=v; S.einkauf[id]=ek; renderPrices(); renderDashboard(); showToast('Gespeichert ✓');
 }
 
 // ══════════════════════════════════════════════
@@ -2115,10 +2130,10 @@ function renderSettings(){
   if(konto) konto.style.display=''; // Passwort ändern: für alle Rollen sichtbar, auch Admin
   const lieferantWrap=document.getElementById('set-lieferant-wrap');
   if(lieferantWrap){
-    const showLieferant = role==='user' || role==='service';
+    const showLieferant = role==='user' || role==='service' || role==='special';
     lieferantWrap.style.display = showLieferant ? '' : 'none';
     if(showLieferant){
-      const specials = M.users.filter(u=>u.role==='special');
+      const specials = M.users.filter(u=>u.role==='special' && u.id!==currentUserId);
       const sel=document.getElementById('set-lieferant');
       sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
       sel.value = M.profile?.linked_to || '';
@@ -2145,7 +2160,7 @@ function fillLinkedUsersSelect(){
 function onNuRoleChange(){
   const r=document.getElementById('nu-role').value;
   const wrap=document.getElementById('nu-linked-wrap');
-  if(wrap) wrap.style.display = r==='special' ? 'none' : '';
+  if(wrap) wrap.style.display = '';
 }
 function renderUserList(){
   const el=document.getElementById('user-list');if(!el)return;
@@ -2153,7 +2168,7 @@ function renderUserList(){
   const specials = M.users.filter(u=>u.role==='special');
   el.innerHTML=M.users.map(u=>{
     const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${s.username}</option>`).join('');
-    const linkSelect = u.role==='special' ? '' : `
+    const linkSelect = `
       <select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)">
         <option value="">Keine Verknüpfung</option>${linkOpts}
       </select>`;
@@ -2180,9 +2195,9 @@ async function addUser(){
   const r=document.getElementById('nu-role').value;
   const linked=document.getElementById('nu-linked')?.value||'';
   if(!n||p.length<3){showToast('Name + Passwort (≥3 Zeichen) eingeben.','⚠');return;}
-  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: r==='special' ? null : (linked||null) });
+  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
   if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
-  M.users.push({ id:data, username:n, role:r, first_login:(r==='user'||r==='special'), linked_to: r==='special' ? null : (linked||null) });
+  M.users.push({ id:data, username:n, role:r, first_login:(r==='user'||r==='special'), linked_to: (linked||null) });
   document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
   document.getElementById('nu-linked').value='';
   renderUserList();showToast('Benutzer angelegt.');

@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.7.0'; // Einkaufs-/Verkaufspreis getrennt, Gesamtgewinn-Karte im Dashboard, Topbar-Abstand für Dynamic Island
+const APP_VERSION = '2.8.0'; // Topbar garantiert vollständig sichtbar (iPhone Dynamic Island), einfachere Preis-Eingabe mit Auto-Speichern, Spezial-Konten können jetzt auch verknüpft werden
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
