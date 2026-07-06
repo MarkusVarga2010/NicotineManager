@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.5.2'; // TEST: Service-fällig-Banner wird erzwungen angezeigt (DEBUG_FORCE_SERVICE_DUE)
+const APP_VERSION = '2.5.3'; // Test-Override für Service-fällig-Banner wieder deaktiviert
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

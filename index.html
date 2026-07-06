@@ -1851,10 +1851,8 @@ function printLieferschein(id){
 // ══════════════════════════════════════════════
 // SERVICE
 // ══════════════════════════════════════════════
-// ⚠ TEMPORÄRER TEST: erzwingt "Service heute fällig" im Dashboard, OHNE die
-// Datenbank zu verändern. Einfach die Zeile wieder auf false setzen bzw.
-// entfernen, um zum normalen Verhalten zurückzukehren.
-const DEBUG_FORCE_SERVICE_DUE = true;
+// Test-Override deaktiviert — Service-Banner zeigt wieder den echten Status aus der Datenbank.
+const DEBUG_FORCE_SERVICE_DUE = false;
 
 async function checkServiceDue(){
   const svc=M.service;
