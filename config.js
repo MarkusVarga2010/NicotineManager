@@ -5,4 +5,3 @@
 // ════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://evmiuhvcwfluxujafxae.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_7i07dC-4qykoM4QBw4xH6w_Ryu5h3QU';
- 
