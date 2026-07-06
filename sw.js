@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.8.0'; // Topbar garantiert vollständig sichtbar (iPhone Dynamic Island), einfachere Preis-Eingabe mit Auto-Speichern, Spezial-Konten können jetzt auch verknüpft werden
+const APP_VERSION = '3.0.0'; // Neue native iOS-Tabbar unten (Übersicht/Bestellungen/Kunden/Preise/Mehr), Hamburger-Menü ersetzt durch Konto-Sheet über den Avatar
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

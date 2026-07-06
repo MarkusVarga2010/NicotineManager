@@ -234,6 +234,24 @@ button{font-family:inherit;cursor:pointer}
 .scale-tick.active{color:var(--sage-deep);background:var(--sage-bg)}
 .scale-tick.active .tk-ic{opacity:1}
 
+.ios-tabbar{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
+  background:color-mix(in srgb, var(--paper2) 86%, transparent);
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-top:1px solid var(--line2);
+  padding:6px 4px calc(4px + env(safe-area-inset-bottom));
+}
+.itb-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:none;border:none;color:var(--ink-faint);padding:6px 2px;border-radius:12px;
+  font-family:'Inter',sans-serif;transition:color .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
+}
+.itb-btn:active{transform:scale(.9)}
+.itb-ic{font-size:21px;line-height:1;transition:transform .15s ease}
+.itb-lab{font-size:10px;font-weight:600;letter-spacing:.01em}
+.itb-btn.active{color:var(--sage-deep)}
+.itb-btn.active .itb-ic{transform:translateY(-1px) scale(1.08)}
+
 /* Sidebar footer: Benutzer + Abmelden */
 .sb-footer{border-top:1px solid var(--line2);padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 .tb-user{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -574,15 +592,28 @@ tbody tr:hover{background:var(--paper3)}
   .stat-strip{grid-template-columns:1fr 1fr}
   .stat-cell:nth-child(2){border-right:none}
 }
-/* < 900px: Sidebar wird zur ausklappbaren Drawer-Navigation, mobile Topbar erscheint */
+/* < 900px: Sidebar wird zum kompakten Konto-Sheet (Navigation übernimmt die Tabbar unten) */
 @media(max-width:900px){
   .mobile-topbar{display:flex}
+  .ios-tabbar{display:flex}
+  .main{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+  .content-area.no-tabbar .main{padding-bottom:24px}
   .sidebar{
-    position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);
-    transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.5);
+    position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;height:auto;
+    max-height:60vh;transform:translateY(100%);
+    transition:transform .25s cubic-bezier(.32,.72,0,1);
+    border-right:none;border-top:1px solid var(--line2);
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -12px 40px rgba(0,0,0,.5);
+    padding-bottom:env(safe-area-inset-bottom);
   }
-  .sidebar.show{transform:translateX(0)}
+  .sidebar::before{
+    content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
+    width:40px;height:4px;border-radius:99px;background:var(--line2);
+  }
+  .sidebar.show{transform:translateY(0)}
   .sb-brand{display:none}
+  .scalebar{display:none}
   .ic-btn{min-width:40px;min-height:40px;font-size:15px}
   .card-head{flex-wrap:wrap;gap:10px}
   #offline-banner{
@@ -662,10 +693,17 @@ tbody tr:hover{background:var(--paper3)}
 
     <div class="content-area">
       <div class="mobile-topbar">
-        <button class="hamburger" onclick="openSidebar()">☰</button>
         <div class="tb-name" style="font-size:15px">Nicotine<span style="color:var(--sage-deep)">Manager</span></div>
-        <div class="tb-av" id="tb-av-mobile">A</div>
+        <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer">A</button>
       </div>
+
+      <nav class="ios-tabbar" id="ios-tabbar">
+        <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic">◎</span><span class="itb-lab">Übersicht</span></button>
+        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤</span><span class="itb-lab">Bestellungen</span></button>
+        <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic">◐</span><span class="itb-lab">Kunden</span></button>
+        <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic">⚖</span><span class="itb-lab">Preise</span></button>
+        <button class="itb-btn" data-page="einstellungen" onclick="nav('einstellungen')"><span class="itb-ic">⚙</span><span class="itb-lab">Mehr</span></button>
+      </nav>
 
       <div class="main">
 
@@ -688,7 +726,7 @@ tbody tr:hover{background:var(--paper3)}
 
       <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
         <div class="dose-row">
-          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus aktueller Einkaufspreis, über alle Bestellungen</span></div>
+          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Kundenbestellungen</span></div>
         </div>
         <div class="sc-v mono" id="d-gewinn" style="font-size:26px;color:var(--success-deep);margin-top:4px">0,00 €</div>
       </div>
@@ -822,7 +860,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">2.8.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">3.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -1181,6 +1219,7 @@ function nav(id){
   document.querySelectorAll('.scale-tick').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.scale-tick')[NAV_IDS.indexOf(id)]?.classList.add('active');
+  document.querySelectorAll('.itb-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
   if(id==='einstellungen') renderSettings();
   if(id==='service') renderService();
   refresh();
@@ -1206,6 +1245,13 @@ function applyRoleUI(){
   document.querySelectorAll('.scale-tick').forEach((el,i)=>{
     el.style.display = allowed.includes(NAV_IDS[i]) ? 'flex' : 'none';
   });
+  document.querySelectorAll('.itb-btn').forEach(b=>{
+    b.style.display = allowed.includes(b.dataset.page) ? '' : 'none';
+  });
+  const tabbar=document.getElementById('ios-tabbar');
+  const showTabbar = allowed.length>1;
+  if(tabbar) tabbar.style.display = showTabbar ? '' : 'none';
+  document.querySelector('.content-area')?.classList.toggle('no-tabbar', !showTabbar);
 }
 
 // ══════════════════════════════════════════════
@@ -1507,7 +1553,7 @@ async function addBestellung(){
   }
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
   const preise=activePreise();
-  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:preise[it.prod]||0,sub:(preise[it.prod]||0)*(it.stueck||1)}));
+  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:preise[it.prod]||0,sub:(preise[it.prod]||0)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
@@ -1658,15 +1704,17 @@ function renderDashboard(){
   document.getElementById('d-count').textContent=open.length;
 
   // Gesamtgewinn: pro Bestellposition der tatsächlich verrechnete Verkaufspreis (it.preis,
-  // so wie er bei Bestellung galt) minus dem AKTUELLEN Einkaufspreis des Produkts, mal Stückzahl.
-  // Hinweis: der Einkaufspreis wird nicht rückwirkend pro Bestellung gespeichert — bei einer
-  // nachträglichen Preisänderung verschiebt sich der ausgewiesene Gewinn für alte Bestellungen
-  // entsprechend dem aktuell hinterlegten Einkaufspreis.
+  // so wie er bei Bestellung galt) minus dem zu diesem Zeitpunkt eingefrorenen Einkaufspreis
+  // (it.ek). Bestellungen, die VOR Einführung dieses Features angelegt wurden, haben noch
+  // kein it.ek gespeichert — dafür wird ersatzweise der aktuell hinterlegte Einkaufspreis
+  // verwendet. Bestellungen beim eigenen Lieferanten (Nachbestellungen) zählen nicht mit,
+  // da das keine Verkäufe an Kunden sind.
   let gewinn=0;
   S.bestellungen.forEach(b=>{
+    if(b.fuerLieferant) return;
     (b.items||[]).forEach(it=>{
       const verkaufStk = it.preis!=null ? it.preis : (S.preise[it.prod]||0);
-      const einkaufStk = S.einkauf?.[it.prod]||0;
+      const einkaufStk = it.ek!=null ? it.ek : (S.einkauf?.[it.prod]||0);
       gewinn += (verkaufStk-einkaufStk) * (it.stueck||0);
     });
   });
