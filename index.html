@@ -261,17 +261,21 @@ button{font-family:inherit;cursor:pointer}
 .status-btn:hover{color:var(--ink)}
 .status-btn.active-offen{background:var(--rust-bg);border-color:color-mix(in srgb, var(--rust) 35%, transparent);color:var(--rust)}
 .status-btn.active-bezahlt{background:var(--success-bg);border-color:color-mix(in srgb, var(--success) 35%, transparent);color:var(--success-deep)}
-.tab-btn{
-  background:var(--paper2);border:1px solid var(--line2);color:var(--ink-soft);
-  padding:10px 16px;border-radius:var(--r-lg);font-size:12px;font-weight:600;
-  display:inline-flex;align-items:center;gap:8px;transition:all .15s;
+.tab-group{
+  display:inline-flex;gap:3px;background:var(--paper2);border:1px solid var(--line2);
+  border-radius:999px;padding:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
 }
-.tab-btn:hover{color:var(--ink);border-color:var(--line2)}
-.tab-btn.active{background:var(--sage-bg);border-color:color-mix(in srgb, var(--sage) 40%, transparent);color:var(--sage-deep)}
-.tab-btn.active.tab-bestellt{background:var(--rust-bg);border-color:color-mix(in srgb, var(--rust) 40%, transparent);color:var(--rust)}
-.tab-btn.active.tab-bezahlt{background:var(--success-bg);border-color:color-mix(in srgb, var(--success) 40%, transparent);color:var(--success-deep)}
-.tab-btn.active.tab-kunde{background:var(--kunde-bg);border-color:color-mix(in srgb, var(--kunde) 40%, transparent);color:var(--kunde-deep)}
-.tab-btn.active.tab-lieferant{background:var(--lieferant-bg);border-color:color-mix(in srgb, var(--lieferant) 40%, transparent);color:var(--lieferant-deep)}
+.tab-btn{
+  background:transparent;border:none;color:var(--ink-soft);
+  padding:9px 18px;border-radius:999px;font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;gap:8px;transition:all .2s cubic-bezier(.4,0,.2,1);
+}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{background:var(--sage-bg);color:var(--sage-deep);box-shadow:0 3px 10px -3px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--sage) 30%, transparent)}
+.tab-btn.active.tab-bestellt{background:var(--rust-bg);color:var(--rust);box-shadow:0 3px 10px -3px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--rust) 35%, transparent)}
+.tab-btn.active.tab-bezahlt{background:var(--success-bg);color:var(--success-deep);box-shadow:0 3px 10px -3px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--success) 35%, transparent)}
+.tab-btn.active.tab-kunde{background:var(--kunde-bg);color:var(--kunde-deep);box-shadow:0 3px 10px -3px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--kunde) 35%, transparent)}
+.tab-btn.active.tab-lieferant{background:var(--lieferant-bg);color:var(--lieferant-deep);box-shadow:0 3px 10px -3px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--lieferant) 35%, transparent)}
 .tab-btn .badge{pointer-events:none}
 
 /* ════════════════════════════════════════════════════════
@@ -424,11 +428,17 @@ tbody tr:hover{background:var(--paper3)}
    SERVICE PAGE
    ════════════════════════════════════════════════════════ */
 .service-banner{
-  background:var(--rust-bg);border:1px solid #4A3528;border-radius:var(--r-lg);
-  padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:24px;
+  background:var(--rust-bg);border:1px solid color-mix(in srgb, var(--rust) 30%, transparent);
+  border-left:3px solid var(--rust);border-radius:var(--r-lg);
+  padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:24px;
+  box-shadow:0 8px 20px -10px rgba(0,0,0,.5);
+  animation:slideUp .3s ease both;
 }
-.service-banner .sb-left{font-size:22px}
-.service-banner h4{color:var(--rust);font-size:13px;font-weight:700;font-family:'Inter',sans-serif}
+.service-banner .sb-left{
+  font-size:18px;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb, var(--rust) 18%, transparent);
+  color:var(--rust);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.service-banner h4{color:var(--rust);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:-.01em}
 .service-banner p{font-size:12px;color:var(--ink-soft);margin-top:2px}
 
 /* ════════════════════════════════════════════════════════
@@ -650,7 +660,7 @@ tbody tr:hover{background:var(--paper3)}
         </div>
       </div>
       <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
-        <div style="display:flex;gap:8px" id="best-tabs">
+        <div class="tab-group" id="best-tabs">
           <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
         </div>
@@ -817,7 +827,7 @@ tbody tr:hover{background:var(--paper3)}
     <div class="modal-body">
       <div id="nb-modus-wrap" style="display:none;margin-bottom:16px">
         <label class="fl" style="margin-bottom:6px">Bestellung für</label>
-        <div style="display:flex;gap:8px">
+        <div class="tab-group" style="width:100%">
           <button type="button" class="tab-btn tab-kunde active" id="nb-modus-kunde" onclick="setBestellModus('kunde')" style="flex:1;justify-content:center">Eigener Kunde</button>
           <button type="button" class="tab-btn tab-lieferant" id="nb-modus-lieferant" onclick="setBestellModus('lieferant')" style="flex:1;justify-content:center">Bei Lieferant bestellen</button>
         </div>
@@ -1841,6 +1851,11 @@ function printLieferschein(id){
 // ══════════════════════════════════════════════
 // SERVICE
 // ══════════════════════════════════════════════
+// ⚠ TEMPORÄRER TEST: erzwingt "Service heute fällig" im Dashboard, OHNE die
+// Datenbank zu verändern. Einfach die Zeile wieder auf false setzen bzw.
+// entfernen, um zum normalen Verhalten zurückzukehren.
+const DEBUG_FORCE_SERVICE_DUE = true;
+
 async function checkServiceDue(){
   const svc=M.service;
   if(!svc.nextDue){
@@ -1848,13 +1863,17 @@ async function checkServiceDue(){
     const nextDue=d.toISOString().slice(0,10);
     await sb.from('service_status').upsert({ user_id:currentUserId, next_due:nextDue, due:false });
     svc.nextDue=nextDue; svc.due=false;
-    return;
+  }else{
+    const due = today() >= svc.nextDue;
+    if(due !== svc.due){
+      await sb.from('service_status').upsert({ user_id:currentUserId, due, next_due:svc.nextDue });
+    }
+    svc.due=due;
   }
-  const due = today() >= svc.nextDue;
-  if(due !== svc.due){
-    await sb.from('service_status').upsert({ user_id:currentUserId, due, next_due:svc.nextDue });
+  if(DEBUG_FORCE_SERVICE_DUE){
+    svc.nextDue = today();
+    svc.due = true;
   }
-  svc.due=due;
 }
 async function doService(){
   if(currentRole()!=='service'){showToast('Nur Service-Accounts können den Service durchführen.','⚠');return;}

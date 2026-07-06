@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.4.0'; // Farbauswahl in den Einstellungen von 4 auf 12 Akzentfarben erweitert
+const APP_VERSION = '2.5.2'; // TEST: Service-fällig-Banner wird erzwungen angezeigt (DEBUG_FORCE_SERVICE_DUE)
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
