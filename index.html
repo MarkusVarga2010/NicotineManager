@@ -447,9 +447,10 @@ tbody tr:hover{background:var(--paper3)}
 /* ════════════════════════════════════════════════════════
    MODALS
    ════════════════════════════════════════════════════════ */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;align-items:center;justify-content:center;padding:20px}
-.modal-bg.show{display:flex}
-.modal{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px -12px rgba(0,0,0,.6)}
+.modal-bg{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:60;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease,background .2s ease}
+.modal-bg.show{opacity:1;pointer-events:auto;background:rgba(0,0,0,.7)}
+.modal{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px -12px rgba(0,0,0,.6);transform:scale(.94) translateY(8px);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.modal-bg.show .modal{transform:scale(1) translateY(0)}
 .modal.wide{max-width:600px}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line2)}
 .modal-head h3{font-size:16px;font-family:'Fraunces',serif;font-weight:600}
@@ -773,7 +774,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">–</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">2.6.1</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -2207,10 +2208,17 @@ applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-
 let waitingWorker=null;
 let swReg=null;
 let swRegError=null;
+// WICHTIG: Die Versionsnummer im "Über die App"-Bereich steht direkt als Text im HTML
+// (Zeile mit id="app-version") — das ist Absicht, damit IMMER etwas Sinnvolles angezeigt
+// wird, selbst wenn Fetch/Service-Worker aus irgendeinem Grund nicht funktionieren sollten.
+// Beim Release einfach BEIDE Stellen zusammen hochzählen: hier im HTML UND APP_VERSION in sw.js.
+// Der Code unten versucht zusätzlich, die Zahl automatisch zu bestätigen/aktualisieren —
+// das ist aber nur ein Bonus und überschreibt den Text nie mit einem leeren/falschen Wert.
+refreshVersionDisplay();
 
 // Fragt einen bestimmten Service-Worker (installing/waiting/active) nach seiner
-// echten APP_VERSION. Wird nur noch als Fallback benutzt (siehe unten), z.B. wenn
-// sw.js aus irgendeinem Grund nicht per fetch() erreichbar ist.
+// echten APP_VERSION. Wird für das Update-Banner benutzt (dort ist die Ziel-Version
+// wirklich nur so herauszufinden, weil es die eines noch nicht aktiven Workers ist).
 function askWorkerVersion(worker){
   return new Promise((resolve)=>{
     if(!worker){ resolve(null); return; }
@@ -2226,30 +2234,20 @@ function askWorkerVersion(worker){
   });
 }
 
-// Liest die Versionsnummer direkt aus sw.js aus (per Netzwerk-Request, ganz ohne
-// Service-Worker-Umweg). Das ist der zuverlässige Weg: er hängt NICHT davon ab, ob
-// der gerade aktive Service Worker schon weiß, wie er auf eine Versionsabfrage
-// antworten soll (genau daran ist die vorherige Version gescheitert — der zuvor
-// bereits installierte, ältere Worker kannte diese Nachricht schlicht noch nicht
-// und hat nie geantwortet, wodurch immer nur "—" erschien).
+// Best-effort: liest die Versionsnummer live aus sw.js aus, um den statischen HTML-Text
+// zu bestätigen/aktualisieren. Schlägt das fehl (offline, CORS, o.ä.), bleibt einfach der
+// im HTML hinterlegte Wert stehen — die Anzeige ist also nie leer.
 async function refreshVersionDisplay(){
   const el=document.getElementById('app-version');
   if(!el) return;
   try{
-    const res = await fetch('sw.js', { cache:'no-store' });
+    const res = await fetch('sw.js?v=' + Date.now(), { cache:'no-store' });
     if(res.ok){
       const text = await res.text();
       const m = text.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
-      if(m && m[1]){ el.textContent = m[1]; return; }
+      if(m && m[1]) el.textContent = m[1];
     }
-  }catch(e){ /* z.B. offline — dann unten auf Service-Worker-Antwort ausweichen */ }
-  if('serviceWorker' in navigator){
-    const reg = swReg || await navigator.serviceWorker.getRegistration();
-    const v = await askWorkerVersion(reg?.active || navigator.serviceWorker.controller || reg?.waiting || reg?.installing);
-    el.textContent = v || '—';
-  } else {
-    el.textContent = '—';
-  }
+  }catch(e){ /* kein Problem — der statische HTML-Wert bleibt sichtbar */ }
 }
 
 function watchInstalling(reg){
