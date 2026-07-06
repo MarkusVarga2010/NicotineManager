@@ -315,7 +315,7 @@ button{font-family:inherit;cursor:pointer}
 .status-btn.active-offen{background:var(--rust-bg);border-color:color-mix(in srgb, var(--rust) 35%, transparent);color:var(--rust)}
 .status-btn.active-bezahlt{background:var(--success-bg);border-color:color-mix(in srgb, var(--success) 35%, transparent);color:var(--success-deep)}
 .tab-group{
-  display:inline-flex;gap:3px;background:var(--paper2);border:1px solid var(--line2);
+  display:inline-flex;flex-wrap:wrap;gap:3px;background:var(--paper2);border:1px solid var(--line2);
   border-radius:999px;padding:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
 }
 .tab-btn{
@@ -631,6 +631,7 @@ tbody tr:hover{background:var(--paper3)}
   input,select,textarea{font-size:16px}
   #update-banner{flex-direction:column;align-items:stretch;gap:12px}
   #update-banner .btn{width:100%;justify-content:center}
+  .tab-btn{padding:8px 12px;font-size:11px;gap:5px}
 }
 </style>
 </head>
@@ -759,6 +760,8 @@ tbody tr:hover{background:var(--paper3)}
         <div class="tab-group" id="best-tabs">
           <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
+          <button class="tab-btn tab-lieferant" id="tab-btn-lieferant" onclick="switchBestellungenTab('lieferant')">◆ Beim Lieferanten <span class="badge b-offen" id="tab-count-lieferant">0</span></button>
+          <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')">🕘 Historie</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="renderBestellungen()" style="width:auto;min-width:200px"/>
@@ -975,7 +978,8 @@ tbody tr:hover{background:var(--paper3)}
     <div class="modal-body">
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
-      <div class="about-row"><span>Datum</span><span id="od-datum"></span></div>
+      <div class="about-row"><span>Bestellt am</span><span id="od-datum"></span></div>
+      <div class="about-row" id="od-bezahlt-row" style="display:none"><span>Bezahlt am</span><span id="od-bezahlt-am" style="color:var(--success-deep);font-weight:600"></span></div>
       <div class="about-row"><span>Status</span><span id="od-status"></span></div>
       <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
       <div class="order-total-row" id="od-subtotal-row">
@@ -1084,6 +1088,22 @@ const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
 const fmtDate = d => d ? new Date(d).toLocaleDateString('de-DE') : '—';
+const fmtDateTime = d => d ? new Date(d).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+// Live-Gesamtbetrag: bei noch nicht bezahlten Lieferanten-Bestellungen wird der Betrag
+// immer mit der AKTUELLEN Preisliste des Lieferanten neu berechnet (statt dem eingefrorenen
+// Wert von damals) — ändert der Lieferant seine Preise, wirkt sich das sofort auf offene
+// Nachbestellungen aus. Nach Bezahlung wird der Betrag final eingefroren.
+function displayTotal(b){
+  if(!b.fuerLieferant || b.paid) return b.total;
+  const subtotal=(b.items||[]).reduce((s,it)=>{
+    const preis = S.lieferantPreise[it.prod]!=null ? S.lieferantPreise[it.prod] : (it.preis||0);
+    return s + preis*(it.stueck||1);
+  },0);
+  let discAmt=0;
+  if(b.discountType==='percent') discAmt = subtotal * Math.min(Math.max(b.discountValue,0),100) / 100;
+  else if(b.discountType==='fixed') discAmt = Math.min(Math.max(b.discountValue,0), subtotal);
+  return Math.max(0, subtotal-discAmt);
+}
 
 // ══════════════════════════════════════════════
 // ROLLEN-RECHTE
@@ -1175,7 +1195,7 @@ async function loadAllData(){
   S.bestellungen = (bestRes.data||[]).map(b=>({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, userId:b.user_id
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, userId:b.user_id
   }));
   S.preise = {};
   S.lieferantPreise = {};
@@ -1564,7 +1584,7 @@ async function addBestellung(){
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, userId:data.user_id
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, paidAt:data.bezahlt_am||null, userId:data.user_id
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
   showToast(fuerLieferant?'Bestellung beim Lieferanten aufgegeben. ✓':'Bestellung angelegt.');
@@ -1575,14 +1595,20 @@ async function setDelivered(id, newVal){
   const { error } = await sb.from('bestellungen').update({ delivered:newVal }).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
   b.delivered=newVal;renderBestellungen();
-  showToast('Als bestellt markiert. ✓');
+  showToast(newVal?'Als erhalten/bestellt markiert. ✓':'Als unterwegs markiert.');
 }
 async function setPaid(id, newPaid){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b || b.paid===newPaid)return;
-  const { error } = await sb.from('bestellungen').update({ paid:newPaid }).eq('id', id);
+  const patch = { paid:newPaid, bezahlt_am: newPaid ? new Date().toISOString() : null };
+  // Bei Lieferanten-Bestellungen: den zuletzt live berechneten Betrag (aktuelle Preisliste
+  // des Lieferanten) beim Bezahlen final einfrieren, damit die Historie den tatsächlich
+  // gezahlten Betrag zeigt.
+  if(b.fuerLieferant && newPaid) patch.total = displayTotal(b);
+  const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
-  b.paid=newPaid;renderBestellungen();renderKunden();renderDashboard();
+  b.paid=newPaid; b.paidAt=patch.bezahlt_am; if(patch.total!=null) b.total=patch.total;
+  renderBestellungen();renderKunden();renderDashboard();
   if(newPaid){
     showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓');
     printInvoice(id);
@@ -1602,6 +1628,10 @@ function switchBestellungenTab(tab){
   bestellungenTab = tab;
   document.getElementById('tab-btn-bestellt').classList.toggle('active', tab==='bestellt');
   document.getElementById('tab-btn-bezahlt').classList.toggle('active', tab==='bezahlt');
+  document.getElementById('tab-btn-lieferant').classList.toggle('active', tab==='lieferant');
+  document.getElementById('tab-btn-historie').classList.toggle('active', tab==='historie');
+  const fk=document.getElementById('filter-kunde');
+  if(fk) fk.style.display = (tab==='lieferant') ? 'none' : '';
   renderBestellungen();
 }
 function renderBestellungen(){
@@ -1610,11 +1640,14 @@ function renderBestellungen(){
   const fk=document.getElementById('filter-kunde')?.value||'';
   const searchTerm=(document.getElementById('best-search')?.value||'').trim().toLowerCase();
 
-  // Zähler für beide Register (unabhängig vom Kundenfilter)
-  const countBestellt = S.bestellungen.filter(b=>!b.delivered).length;
-  const countBezahlt = S.bestellungen.filter(b=>!b.paid).length;
+  // Zähler für alle Register (unabhängig vom Kundenfilter). Lieferanten-Bestellungen
+  // laufen komplett getrennt von den Kunden-Registern "Bestellt"/"Bezahlt".
+  const countBestellt = S.bestellungen.filter(b=>!b.fuerLieferant && !b.delivered).length;
+  const countBezahlt = S.bestellungen.filter(b=>!b.fuerLieferant && !b.paid).length;
+  const countLieferant = S.bestellungen.filter(b=>b.fuerLieferant && !(b.delivered && b.paid)).length;
   document.getElementById('tab-count-bestellt').textContent = countBestellt;
   document.getElementById('tab-count-bezahlt').textContent = countBezahlt;
+  document.getElementById('tab-count-lieferant').textContent = countLieferant;
 
   let list=[...S.bestellungen];
   if(fk) list=list.filter(b=>String(b.kId)===fk);
@@ -1626,54 +1659,112 @@ function renderBestellungen(){
       return kName.includes(searchTerm) || prodNames.includes(searchTerm);
     });
   }
-  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.delivered);
-  else list=list.filter(b=>!b.paid);
+  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.fuerLieferant && !b.delivered);
+  else if(bestellungenTab==='bezahlt') list=list.filter(b=>!b.fuerLieferant && !b.paid);
+  else if(bestellungenTab==='lieferant') list=list.filter(b=>b.fuerLieferant && !(b.delivered && b.paid));
+  else if(bestellungenTab==='historie') list=list.filter(b=>b.delivered && b.paid);
   list.sort((a,b)=>b.id-a.id);
 
   const hint=document.getElementById('best-tab-hint');
   hint.textContent = bestellungenTab==='bestellt'
     ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Bestellt“, sobald erledigt.'
-    : 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald der Kunde bezahlt hat — die Rechnung wird dann automatisch erstellt.';
+    : bestellungenTab==='bezahlt'
+    ? 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald der Kunde bezahlt hat — die Rechnung wird dann automatisch erstellt.'
+    : bestellungenTab==='lieferant'
+    ? 'Deine eigenen Nachbestellungen beim Lieferanten. Sie zählen nicht zu deinem Gewinn und die Beträge folgen automatisch der aktuellen Preisliste deines Lieferanten, solange sie noch nicht bezahlt sind.'
+    : 'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.';
 
   const showVon = currentRole()==='special';
   const theadRow=document.getElementById('b-thead-row');
   if(theadRow){
-    theadRow.innerHTML = showVon
-      ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
-      : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>';
+    if(bestellungenTab==='lieferant'){
+      theadRow.innerHTML = (showVon?'<th>Von</th>':'') + '<th>Produkte</th><th>Bestellt am</th><th>Gesamt</th><th>Status</th><th></th>';
+    } else if(bestellungenTab==='historie'){
+      theadRow.innerHTML = '<th>Typ</th>' + (showVon?'<th>Von</th>':'') + '<th>Kunde / Lieferant</th><th>Produkte</th><th>Bestellt am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>';
+    } else {
+      theadRow.innerHTML = showVon
+        ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
+        : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>';
+    }
   }
 
   if(!list.length){
     tbody.innerHTML='';empty.style.display='block';
     document.getElementById('b-empty-text').textContent = (searchTerm||fk)
       ? 'Keine Treffer für diese Suche/Filter.'
-      : (bestellungenTab==='bestellt'
-        ? 'Keine offenen Bestellungen zum Abholen.'
-        : 'Keine offenen Zahlungen.');
+      : (bestellungenTab==='bestellt' ? 'Keine offenen Bestellungen zum Abholen.'
+        : bestellungenTab==='bezahlt' ? 'Keine offenen Zahlungen.'
+        : bestellungenTab==='lieferant' ? 'Keine offenen Bestellungen beim Lieferanten.'
+        : 'Noch keine abgeschlossenen Bestellungen.');
     return;
   }
   empty.style.display='none';
+
   tbody.innerHTML=list.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const foreign = b.userId!==currentUserId;
     const lockedForOwner = !foreign && b.fuerLieferant;
-    const nameCell = b.fuerLieferant
-      ? `<span style="color:var(--lieferant-deep)">◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
-      : (k?k.vorname+' '+k.nachname:'—');
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
-    const actionBtn = lockedForOwner
-      ? `<span class="badge b-lieferant" title="Nur der Lieferant kann den Status ändern">Vom Lieferanten verwaltet</span>`
-      : (bestellungenTab==='bestellt'
-          ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
-          : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
     const vonCell = showVon ? `<td style="font-weight:600">${foreign?`<span style="color:var(--lieferant-deep)">${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>'}</td>` : '';
+    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}</td>`;
+
+    if(bestellungenTab==='lieferant'){
+      const statusCell = `<td style="white-space:nowrap">
+        <span class="badge ${b.delivered?'b-bezahlt':'b-offen'}" style="margin-right:4px">${b.delivered?'✓ Erhalten':'Unterwegs'}</span>
+        <span class="badge ${b.paid?'b-bezahlt':'b-offen'}">${b.paid?'✓ Bezahlt':'Offen'}</span>
+      </td>`;
+      const actionCell = lockedForOwner
+        ? `<span class="badge b-lieferant" title="Nur der Lieferant kann den Status ändern">Vom Lieferanten verwaltet</span>`
+        : `<button class="status-btn ${b.delivered?'active-bezahlt':'active-offen'}" onclick="setDelivered(${b.id},${!b.delivered})" style="margin-right:4px">${b.delivered?'↺ Unterwegs':'✓ Erhalten'}</button>
+           <button class="status-btn ${b.paid?'active-bezahlt':'active-offen'}" onclick="setPaid(${b.id},${!b.paid})">${b.paid?'↺ Offen':'✓ Bezahlt'}</button>`;
+      return `<tr>
+        ${vonCell}
+        <td style="font-size:12px">${prods}</td>
+        <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
+        ${gesamt}
+        ${statusCell}
+        <td style="text-align:right;white-space:nowrap">
+          ${actionCell}
+          <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
+          ${foreign?'':`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`}
+        </td>
+      </tr>`;
+    }
+
+    if(bestellungenTab==='historie'){
+      const typCell = b.fuerLieferant
+        ? `<td><span class="badge b-lieferant">◆ Lieferant</span></td>`
+        : `<td><span class="badge b-kunde">◐ Kunde</span></td>`;
+      const nameCell = b.fuerLieferant
+        ? `<span style="color:var(--lieferant-deep)">◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+        : (k?k.vorname+' '+k.nachname:'—');
+      return `<tr>
+        ${typCell}
+        ${vonCell}
+        <td style="font-weight:600">${nameCell}</td>
+        <td style="font-size:12px">${prods}</td>
+        <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
+        <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDateTime(b.paidAt)}</td>
+        ${gesamt}
+        <td style="text-align:right;white-space:nowrap">
+          <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
+          ${foreign?'':`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`}
+        </td>
+      </tr>`;
+    }
+
+    // Standard: Bestellt / Bezahlt (nur eigene Kunden-Bestellungen)
+    const nameCell = k?k.vorname+' '+k.nachname:'—';
+    const actionBtn = bestellungenTab==='bestellt'
+      ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
+      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
-      <td class="mono" style="font-weight:700">${fmt(b.total)}${discBadge}</td>
+      ${gesamt}
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
       <td style="text-align:right;white-space:nowrap">
         ${actionBtn}
@@ -1688,7 +1779,7 @@ function renderBestellungen(){
 // DASHBOARD
 // ══════════════════════════════════════════════
 function renderDashboard(){
-  const open=S.bestellungen.filter(b=>!b.paid);
+  const open=S.bestellungen.filter(b=>!b.paid && !b.fuerLieferant);
   const debt=open.reduce((s,b)=>s+b.total,0);
 
   // Schulden pro Kunde ermitteln
@@ -1766,7 +1857,7 @@ function renderDashboard(){
 // PDF-EXPORT: Offene Bestellungen
 // ══════════════════════════════════════════════
 function downloadOpenOrdersPDF(){
-  const open=[...S.bestellungen].filter(b=>!b.paid).sort((a,b)=>b.id-a.id);
+  const open=[...S.bestellungen].filter(b=>!b.paid && !b.fuerLieferant).sort((a,b)=>b.id-a.id);
   if(!open.length){showToast('Keine offenen Bestellungen vorhanden.','⚠');return;}
   if(typeof window.jspdf==='undefined'){showToast('PDF-Modul konnte nicht geladen werden.','⚠');return;}
 
@@ -1855,27 +1946,41 @@ function openOrderDetail(id){
     ? `<span style="color:var(--lieferant-deep)">${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
     : (k?`${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
+  const bezahltRow=document.getElementById('od-bezahlt-row');
+  if(b.paid && b.paidAt){
+    bezahltRow.style.display='flex';
+    document.getElementById('od-bezahlt-am').textContent = fmtDateTime(b.paidAt);
+  } else {
+    bezahltRow.style.display='none';
+  }
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
   document.getElementById('od-lieferschein-btn').style.display = b.fuerLieferant ? '' : 'none';
   document.getElementById('od-rechnung-btn').style.display = b.fuerLieferant ? 'none' : '';
 
+  const liveUnpaidLieferant = b.fuerLieferant && !b.paid;
   document.getElementById('od-items').innerHTML = b.items.map(it=>{
     const p=PROD_MAP[it.prod];
-    const preis=(it.preis!=null?it.preis:(S.preise[it.prod]||0));
+    const preis = liveUnpaidLieferant
+      ? (S.lieferantPreise[it.prod]!=null ? S.lieferantPreise[it.prod] : (it.preis||0))
+      : (it.preis!=null?it.preis:(S.preise[it.prod]||0));
     return `<tr><td>${p?p.icon+' '+p.name:it.prod}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
   }).join('');
 
-  document.getElementById('od-subtotal').textContent = fmt(b.subtotal);
+  const odSubtotal = liveUnpaidLieferant
+    ? b.items.reduce((s,it)=>s+(S.lieferantPreise[it.prod]!=null?S.lieferantPreise[it.prod]:(it.preis||0))*(it.stueck||1),0)
+    : b.subtotal;
+  const odTotal = displayTotal(b);
+  document.getElementById('od-subtotal').textContent = fmt(odSubtotal);
   const discRow=document.getElementById('od-discount-row');
   if(b.discountType){
     discRow.style.display='flex';
-    const discAmt = b.subtotal - b.total;
+    const discAmt = odSubtotal - odTotal;
     document.getElementById('od-discount-label').textContent = b.discountType==='percent' ? `Rabatt (-${b.discountValue}%)` : 'Rabatt';
     document.getElementById('od-discount').textContent = '−'+fmt(discAmt);
   } else {
     discRow.style.display='none';
   }
-  document.getElementById('od-total').textContent = fmt(b.total);
+  document.getElementById('od-total').textContent = fmt(odTotal);
 
   openModal('orderdetail');
 }

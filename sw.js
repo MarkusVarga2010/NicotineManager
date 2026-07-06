@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '3.0.0'; // Neue native iOS-Tabbar unten (Übersicht/Bestellungen/Kunden/Preise/Mehr), Hamburger-Menü ersetzt durch Konto-Sheet über den Avatar
+const APP_VERSION = '3.1.0'; // Bestellungen: eigener Tab "Beim Lieferanten" (live Preise, getrennt vom Kunden-Register) + neuer Tab "Historie" mit Zeitstempel (bestellt/bezahlt)
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
