@@ -59,6 +59,36 @@
   --nav-h:64px;
   --scale-h:46px;
 }
+html[data-mode="light"]{
+  --paper:#F7F5F1;
+  --paper2:#FFFFFF;
+  --paper3:#EFEBE4;
+  --line:#E4DFD5;
+  --line2:#D3CCBE;
+  --ink:#20241F;
+  --ink-soft:#5C6660;
+  --ink-faint:#8B958E;
+  --sage:#3E7A3A;
+  --sage-deep:#2E5E2B;
+  --sage-bg:#E3EEDF;
+  --accent2:#9A7A2E;
+  --accent3:#2E8478;
+  --accent4:#8B5FA8;
+  --rust:#B04B2B;
+  --rust-bg:#F5E3DA;
+  --gold:#9A7A2E;
+  --gold-bg:#F2E9D4;
+  --success:#2E7D4F;
+  --success-deep:#215C3A;
+  --success-bg:#DFF0E5;
+  --lieferant:#8B5FA8;
+  --lieferant-deep:#6E4787;
+  --lieferant-bg:#F0E5F7;
+  --kunde:#2C7C8C;
+  --kunde-deep:#215F6C;
+  --kunde-bg:#DFF0F3;
+}
+html[data-mode="light"] body{-webkit-font-smoothing:auto}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
@@ -92,6 +122,8 @@ input,select,textarea{
   transition:border-color .15s, box-shadow .15s;
 }
 input:focus,select:focus,textarea:focus{border-color:var(--sage);box-shadow:0 0 0 3px color-mix(in srgb, var(--sage) 22%, transparent)}
+input.input-error,select.input-error,textarea.input-error{border-color:var(--rust);box-shadow:0 0 0 3px color-mix(in srgb, var(--rust) 18%, transparent)}
+.field-err{font-size:11px;color:var(--rust);margin-top:5px;min-height:14px}
 input::placeholder,textarea::placeholder{color:var(--ink-faint)}
 select{
   cursor:pointer;appearance:none;
@@ -156,8 +188,8 @@ button{font-family:inherit;cursor:pointer}
 /* Mobile top header (hamburger + brand + avatar) — nur < 900px sichtbar */
 .mobile-topbar{
   display:none;
-  height:calc(var(--nav-h) + env(safe-area-inset-top));
-  padding-top:env(safe-area-inset-top);
+  height:calc(var(--nav-h) + env(safe-area-inset-top) + 10px);
+  padding-top:calc(env(safe-area-inset-top) + 10px);
   border-bottom:1px solid var(--line2);
   background:var(--paper);
   align-items:center;justify-content:space-between;
@@ -650,6 +682,13 @@ tbody tr:hover{background:var(--paper3)}
         <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
       </div>
 
+      <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
+        <div class="dose-row">
+          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus aktueller Einkaufspreis, über alle Bestellungen</span></div>
+        </div>
+        <div class="sc-v mono" id="d-gewinn" style="font-size:26px;color:var(--success-deep);margin-top:4px">0,00 €</div>
+      </div>
+
       <div class="dose-card">
         <div class="dose-row">
           <div class="dose-label">Größte Schuldner · Anteil an Gesamtschuld</div>
@@ -679,7 +718,10 @@ tbody tr:hover{background:var(--paper3)}
           <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
         </div>
-        <select id="filter-kunde" onchange="renderBestellungen()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="renderBestellungen()" style="width:auto;min-width:200px"/>
+          <select id="filter-kunde" onchange="renderBestellungen()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
+        </div>
       </div>
       <div class="ps" id="best-tab-hint" style="margin:-8px 0 16px;color:var(--ink-faint)"></div>
       <div class="card">
@@ -698,20 +740,21 @@ tbody tr:hover{background:var(--paper3)}
         <div><div class="ph-eyebrow">Register</div><div class="pt">Kunden</div><div class="ps">Kundenstamm verwalten</div></div>
         <div class="pa"><button class="btn btn-primary" onclick="openModal('kunde')">＋ Neuer Kunde</button></div>
       </div>
+      <div style="margin-bottom:16px"><input type="search" id="kunden-search" placeholder="🔍 Kunde suchen…" oninput="renderKunden()" style="max-width:280px"/></div>
       <div class="kg" id="kunden-grid"></div>
       <div class="ec" id="kunden-empty" style="display:none">
         <div class="ec-ic">◐</div>
-        <div class="ec-t">Noch keine Kunden</div>
-        <div class="ec-s">Lege deinen ersten Kunden an.</div>
+        <div class="ec-t" id="kunden-empty-text">Noch keine Kunden</div>
+        <div class="ec-s" id="kunden-empty-sub">Lege deinen ersten Kunden an.</div>
       </div>
     </div>
 
     <!-- PREISE -->
     <div class="page" id="page-preise">
-      <div class="ph"><div><div class="ph-eyebrow">Beipackzettel</div><div class="pt">Preise</div><div class="ps">Stückpreise für alle Produkte</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow">Beipackzettel</div><div class="pt">Preise</div><div class="ps">Einkaufs- und Verkaufspreise für alle Produkte</div></div></div>
       <div class="pg" id="price-grid"></div>
       <div class="card"><div class="card-head"><h3>Preisübersicht</h3></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Stückpreis</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Einkauf/Stk</th><th>Verkauf/Stk</th><th>Gewinn/Stk</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
       </div>
     </div>
 
@@ -736,6 +779,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="set-card" id="set-card-anzeige">
           <div class="sch"><div class="sch-ic">◑</div><div><h3>Anzeige</h3><p>Design anpassen</p></div></div>
           <div class="scb">
+            <div class="sr"><div><div class="sr-label">Helles Design</div><div class="sr-sub">Statt des dunklen Standard-Designs</div></div><label class="toggle"><input type="checkbox" id="set-lightmode" onchange="applyMode(this.checked?'light':'dark')"><div class="tt"></div></label></div>
             <div class="sr"><div><div class="sr-label">Animationen</div><div class="sr-sub">Seitenübergänge</div></div><label class="toggle"><input type="checkbox" id="set-anim" checked onchange="applyViz()"><div class="tt"></div></label></div>
             <div class="sr"><div><div class="sr-label">Kompakte Ansicht</div><div class="sr-sub">Weniger Abstände</div></div><label class="toggle"><input type="checkbox" id="set-compact" onchange="applyViz()"><div class="tt"></div></label></div>
             <div style="padding-top:12px"><div class="sr-label" style="margin-bottom:9px">Akzentfarbe</div><div class="theme-grid" id="theme-grid"></div></div>
@@ -774,7 +818,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">2.6.1</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">2.7.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -825,8 +869,8 @@ tbody tr:hover{background:var(--paper3)}
   <div class="modal">
     <div class="modal-head"><h3>Neuer Kunde</h3><button class="modal-close" onclick="closeModal('kunde')">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:14px"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max"/></div>
-      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann"/></div>
+      <div style="margin-bottom:14px"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max"/><div class="field-err" id="nk-vorname-err"></div></div>
+      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann"/><div class="field-err" id="nk-nachname-err"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('kunde')">Abbrechen</button>
@@ -987,9 +1031,9 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
-let S = { kunden:[], bestellungen:[], preise:{} };
+let S = { kunden:[], bestellungen:[], preise:{}, einkauf:{} };
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
-let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false};
+let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
 let currentUser = null;   // Anzeigename (z.B. "admin")
 let currentUserId = null; // Supabase auth.users UUID
 
@@ -1052,6 +1096,7 @@ async function onLoggedIn(authUser, displayName){
 
   await loadAllData();
   applyTheme(VS.themeIdx);
+  applyMode(VS.mode||'dark');
   applyRoleUI();
   checkServiceDue();
   nav(homePage());
@@ -1092,8 +1137,12 @@ async function loadAllData(){
   }));
   S.preise = {};
   S.lieferantPreise = {};
+  S.einkauf = {};
   (preiseRes.data||[]).forEach(p=>{
-    if(p.user_id===currentUserId) S.preise[p.produkt_id]=Number(p.preis);
+    if(p.user_id===currentUserId){
+      S.preise[p.produkt_id]=Number(p.preis);
+      S.einkauf[p.produkt_id]=Number(p.einkaufspreis||0);
+    }
     else if(M.profile && p.user_id===M.profile.linked_to) S.lieferantPreise[p.produkt_id]=Number(p.preis);
   });
   M.users = usersRes.data||[];
@@ -1214,52 +1263,93 @@ function applyTheme(i){
   root.setProperty('--accent4', t.sec[2]);
   saveVis();
 }
+function applyMode(mode){
+  VS.mode = mode==='light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-mode', VS.mode);
+  const cb=document.getElementById('set-lightmode');
+  if(cb) cb.checked = VS.mode==='light';
+  saveVis();
+}
 
 // ══════════════════════════════════════════════
 // PREISE
 // ══════════════════════════════════════════════
 function renderPrices(){
   const grid=document.getElementById('price-grid');
-  if(grid) grid.innerHTML=PRODUCTS.map(p=>`
+  if(grid) grid.innerHTML=PRODUCTS.map(p=>{
+    const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0, gewinn=verkauf-einkauf;
+    return `
     <div class="pc">
       <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
       <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
-      <div class="pc-val mono" id="pp-${p.id}">${fmt(S.preise[p.id]||0)}</div>
-      <div class="pc-edit">
-        <input type="number" id="pi-${p.id}" value="${(S.preise[p.id]||0).toFixed(2)}" step="0.01" min="0" placeholder="Preis"/>
+      <div class="pc-val mono" id="pp-${p.id}">${fmt(verkauf)}</div>
+      <div class="ps" style="margin:-6px 0 10px;color:${gewinn>=0?'var(--success)':'var(--rust)'}">Gewinn/Stk: ${fmt(gewinn)}</div>
+      <div class="pc-edit" style="flex-direction:column;align-items:stretch;gap:8px">
+        <div><label class="fl" style="margin-bottom:4px">Einkaufspreis</label><input type="number" id="pei-${p.id}" value="${einkauf.toFixed(2)}" step="0.01" min="0" placeholder="Einkauf"/></div>
+        <div><label class="fl" style="margin-bottom:4px">Verkaufspreis</label><input type="number" id="pi-${p.id}" value="${verkauf.toFixed(2)}" step="0.01" min="0" placeholder="Verkauf"/></div>
         <button class="btn btn-ghost btn-sm" onclick="savePrice('${p.id}')">Speichern</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   const tbl=document.getElementById('price-table');
-  if(tbl) tbl.innerHTML=PRODUCTS.map(p=>`
+  if(tbl) tbl.innerHTML=PRODUCTS.map(p=>{
+    const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0, gewinn=verkauf-einkauf;
+    return `
     <tr><td style="font-weight:600">${p.icon} ${p.name}</td>
-    <td class="mono" style="font-weight:700">${fmt(S.preise[p.id]||0)}</td>
-    <td class="mono">${fmt((S.preise[p.id]||0)*10)}</td>
-    <td class="mono">${fmt((S.preise[p.id]||0)*25)}</td>
-    <td class="mono">${fmt((S.preise[p.id]||0)*50)}</td>
-    <td class="mono">${fmt((S.preise[p.id]||0)*100)}</td></tr>`).join('');
+    <td class="mono">${fmt(einkauf)}</td>
+    <td class="mono" style="font-weight:700">${fmt(verkauf)}</td>
+    <td class="mono" style="color:${gewinn>=0?'var(--success)':'var(--rust)'}">${fmt(gewinn)}</td>
+    <td class="mono">${fmt(verkauf*10)}</td>
+    <td class="mono">${fmt(verkauf*25)}</td>
+    <td class="mono">${fmt(verkauf*50)}</td>
+    <td class="mono">${fmt(verkauf*100)}</td></tr>`;
+  }).join('');
 }
 async function savePrice(id){
   const v=parseFloat(document.getElementById('pi-'+id).value);
-  if(isNaN(v)||v<0){showToast('Ungültiger Preis.','⚠');return;}
+  const ek=parseFloat(document.getElementById('pei-'+id).value);
+  if(isNaN(v)||v<0){showToast('Ungültiger Verkaufspreis.','⚠');return;}
+  if(isNaN(ek)||ek<0){showToast('Ungültiger Einkaufspreis.','⚠');return;}
   // upsert auf (user_id, produkt_id) — user_id kommt automatisch von RLS/auth.uid()
   const { error } = await sb.from('preise').upsert(
-    { user_id:currentUserId, produkt_id:id, preis:v },
+    { user_id:currentUserId, produkt_id:id, preis:v, einkaufspreis:ek },
     { onConflict:'user_id,produkt_id' }
   );
-  if(error){ showToast('Preis konnte nicht gespeichert werden.','⚠'); return; }
-  S.preise[id]=v;renderPrices();showToast('Preis gespeichert.');
+  if(error){ showToast(dbErrorMsg(error,'Preis konnte nicht gespeichert werden. Wurde die Spalte "einkaufspreis" in der Tabelle "preise" schon angelegt?'),'⚠'); return; }
+  S.preise[id]=v; S.einkauf[id]=ek; renderPrices(); renderDashboard(); showToast('Preise gespeichert.');
 }
 
 // ══════════════════════════════════════════════
 // KUNDEN
 // ══════════════════════════════════════════════
+// Übersetzt technische Supabase/Netzwerk-Fehler in verständlichere deutsche Hinweise,
+// statt überall nur "fehlgeschlagen" anzuzeigen.
+function dbErrorMsg(error, fallback){
+  if(!error) return fallback;
+  const msg=(error.message||'').toLowerCase();
+  if(msg.includes('failed to fetch') || msg.includes('network')) return 'Keine Verbindung zum Server. Internetverbindung prüfen.';
+  if(msg.includes('jwt') || msg.includes('permission') || msg.includes('rls') || error.code==='42501') return 'Keine Berechtigung für diese Aktion.';
+  if(error.code==='23505') return 'Eintrag existiert bereits.';
+  return error.message ? `${fallback} (${error.message})` : fallback;
+}
+function clearFieldError(id){
+  document.getElementById(id)?.classList.remove('input-error');
+  const err=document.getElementById(id+'-err'); if(err) err.textContent='';
+}
+function setFieldError(id, text){
+  document.getElementById(id)?.classList.add('input-error');
+  const err=document.getElementById(id+'-err'); if(err) err.textContent=text;
+}
 async function addKunde(){
   const v=document.getElementById('nk-vorname').value.trim();
   const n=document.getElementById('nk-nachname').value.trim();
-  if(!v||!n){showToast('Vor- und Nachname eingeben.','⚠');return;}
+  clearFieldError('nk-vorname'); clearFieldError('nk-nachname');
+  let hasError=false;
+  if(!v){ setFieldError('nk-vorname','Bitte Vorname eingeben.'); hasError=true; }
+  if(!n){ setFieldError('nk-nachname','Bitte Nachname eingeben.'); hasError=true; }
+  if(hasError) return;
   const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
-  if(error){ showToast('Kunde konnte nicht angelegt werden.','⚠'); return; }
+  if(error){ showToast(dbErrorMsg(error,'Kunde konnte nicht angelegt werden.'),'⚠'); return; }
   S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
   document.getElementById('nk-vorname').value='';document.getElementById('nk-nachname').value='';
   closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
@@ -1275,9 +1365,24 @@ async function delKunde(id){
 function renderKunden(){
   const g=document.getElementById('kunden-grid'),em=document.getElementById('kunden-empty');
   if(!g)return;
-  if(!S.kunden.length){g.innerHTML='';em.style.display='block';return;}
+  const searchTerm=(document.getElementById('kunden-search')?.value||'').trim().toLowerCase();
+  const list = searchTerm
+    ? S.kunden.filter(k=>`${k.vorname} ${k.nachname}`.toLowerCase().includes(searchTerm))
+    : S.kunden;
+  if(!S.kunden.length){
+    g.innerHTML='';em.style.display='block';
+    document.getElementById('kunden-empty-text').textContent='Noch keine Kunden';
+    document.getElementById('kunden-empty-sub').textContent='Lege deinen ersten Kunden an.';
+    return;
+  }
+  if(!list.length){
+    g.innerHTML='';em.style.display='block';
+    document.getElementById('kunden-empty-text').textContent='Keine Treffer';
+    document.getElementById('kunden-empty-sub').textContent='Kein Kunde passt zu dieser Suche.';
+    return;
+  }
   em.style.display='none';
-  g.innerHTML=S.kunden.map(k=>{
+  g.innerHTML=list.map(k=>{
     const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
@@ -1442,6 +1547,7 @@ function renderBestellungen(){
   const tbody=document.getElementById('b-tbody'),empty=document.getElementById('b-empty');
   if(!tbody)return;
   const fk=document.getElementById('filter-kunde')?.value||'';
+  const searchTerm=(document.getElementById('best-search')?.value||'').trim().toLowerCase();
 
   // Zähler für beide Register (unabhängig vom Kundenfilter)
   const countBestellt = S.bestellungen.filter(b=>!b.delivered).length;
@@ -1451,6 +1557,14 @@ function renderBestellungen(){
 
   let list=[...S.bestellungen];
   if(fk) list=list.filter(b=>String(b.kId)===fk);
+  if(searchTerm){
+    list=list.filter(b=>{
+      const k=S.kunden.find(x=>x.id===b.kId);
+      const kName=k?`${k.vorname} ${k.nachname}`.toLowerCase():'';
+      const prodNames=b.items.map(it=>PROD_MAP[it.prod]?.name||'').join(' ').toLowerCase();
+      return kName.includes(searchTerm) || prodNames.includes(searchTerm);
+    });
+  }
   if(bestellungenTab==='bestellt') list=list.filter(b=>!b.delivered);
   else list=list.filter(b=>!b.paid);
   list.sort((a,b)=>b.id-a.id);
@@ -1470,9 +1584,11 @@ function renderBestellungen(){
 
   if(!list.length){
     tbody.innerHTML='';empty.style.display='block';
-    document.getElementById('b-empty-text').textContent = bestellungenTab==='bestellt'
-      ? 'Keine offenen Bestellungen zum Abholen.'
-      : 'Keine offenen Zahlungen.';
+    document.getElementById('b-empty-text').textContent = (searchTerm||fk)
+      ? 'Keine Treffer für diese Suche/Filter.'
+      : (bestellungenTab==='bestellt'
+        ? 'Keine offenen Bestellungen zum Abholen.'
+        : 'Keine offenen Zahlungen.');
     return;
   }
   empty.style.display='none';
@@ -1525,6 +1641,22 @@ function renderDashboard(){
   document.getElementById('d-schuldner').textContent=schuldnerIds.length;
   document.getElementById('d-kunden').textContent=S.kunden.length;
   document.getElementById('d-count').textContent=open.length;
+
+  // Gesamtgewinn: pro Bestellposition der tatsächlich verrechnete Verkaufspreis (it.preis,
+  // so wie er bei Bestellung galt) minus dem AKTUELLEN Einkaufspreis des Produkts, mal Stückzahl.
+  // Hinweis: der Einkaufspreis wird nicht rückwirkend pro Bestellung gespeichert — bei einer
+  // nachträglichen Preisänderung verschiebt sich der ausgewiesene Gewinn für alte Bestellungen
+  // entsprechend dem aktuell hinterlegten Einkaufspreis.
+  let gewinn=0;
+  S.bestellungen.forEach(b=>{
+    (b.items||[]).forEach(it=>{
+      const verkaufStk = it.preis!=null ? it.preis : (S.preise[it.prod]||0);
+      const einkaufStk = S.einkauf?.[it.prod]||0;
+      gewinn += (verkaufStk-einkaufStk) * (it.stueck||0);
+    });
+  });
+  const gEl=document.getElementById('d-gewinn');
+  if(gEl){ gEl.textContent=fmt(gewinn); gEl.style.color = gewinn>=0 ? 'var(--success-deep)' : 'var(--rust)'; }
 
   // Top-Schuldner-Skala: gestapelte Anteile der größten Schuldner an der Gesamtschuld
   const ranked=schuldnerIds
@@ -1971,6 +2103,7 @@ function renderSettings(){
   document.getElementById('set-user').value=currentUser||'';
   const an=document.getElementById('set-anim');if(an)an.checked=VS.anim;
   const co=document.getElementById('set-compact');if(co)co.checked=VS.compact;
+  const lm=document.getElementById('set-lightmode');if(lm)lm.checked=(VS.mode==='light');
   const tg=document.getElementById('theme-grid');
   if(tg) tg.innerHTML=THEMES.map((t,i)=>`<div class="t-d ${i===VS.themeIdx?'on':''}" style="background:${t.accent}" onclick="applyTheme(${i})" title="${t.name}"></div>`).join('');
   renderUserList();
@@ -2187,6 +2320,7 @@ function refresh(){
 }
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)
+applyMode(VS.mode||'dark'); // Hell/Dunkel ebenfalls schon vor Login anwenden
 
 // ══════════════════════════════════════════════
 // SESSION-CHECK BEIM START

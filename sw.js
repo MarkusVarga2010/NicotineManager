@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.6.1'; // Fix: Versionsanzeige liest jetzt sw.js direkt per fetch aus statt sich auf den aktiven (evtl. veralteten) Worker zu verlassen
+const APP_VERSION = '2.7.0'; // Einkaufs-/Verkaufspreis getrennt, Gesamtgewinn-Karte im Dashboard, Topbar-Abstand für Dynamic Island
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
