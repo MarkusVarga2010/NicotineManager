@@ -2209,9 +2209,8 @@ let swReg=null;
 let swRegError=null;
 
 // Fragt einen bestimmten Service-Worker (installing/waiting/active) nach seiner
-// echten APP_VERSION und liefert sie per Promise. So zeigt die Seite IMMER die
-// tatsächlich installierte sw.js-Version an, statt einer hartkodierten Zahl,
-// die man sonst leicht vergisst zu aktualisieren.
+// echten APP_VERSION. Wird nur noch als Fallback benutzt (siehe unten), z.B. wenn
+// sw.js aus irgendeinem Grund nicht per fetch() erreichbar ist.
 function askWorkerVersion(worker){
   return new Promise((resolve)=>{
     if(!worker){ resolve(null); return; }
@@ -2227,12 +2226,30 @@ function askWorkerVersion(worker){
   });
 }
 
+// Liest die Versionsnummer direkt aus sw.js aus (per Netzwerk-Request, ganz ohne
+// Service-Worker-Umweg). Das ist der zuverlässige Weg: er hängt NICHT davon ab, ob
+// der gerade aktive Service Worker schon weiß, wie er auf eine Versionsabfrage
+// antworten soll (genau daran ist die vorherige Version gescheitert — der zuvor
+// bereits installierte, ältere Worker kannte diese Nachricht schlicht noch nicht
+// und hat nie geantwortet, wodurch immer nur "—" erschien).
 async function refreshVersionDisplay(){
   const el=document.getElementById('app-version');
   if(!el) return;
-  const reg = swReg || (('serviceWorker' in navigator) ? await navigator.serviceWorker.getRegistration() : null);
-  const v = await askWorkerVersion(reg?.active || navigator.serviceWorker?.controller);
-  el.textContent = v || '—';
+  try{
+    const res = await fetch('sw.js', { cache:'no-store' });
+    if(res.ok){
+      const text = await res.text();
+      const m = text.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+      if(m && m[1]){ el.textContent = m[1]; return; }
+    }
+  }catch(e){ /* z.B. offline — dann unten auf Service-Worker-Antwort ausweichen */ }
+  if('serviceWorker' in navigator){
+    const reg = swReg || await navigator.serviceWorker.getRegistration();
+    const v = await askWorkerVersion(reg?.active || navigator.serviceWorker.controller || reg?.waiting || reg?.installing);
+    el.textContent = v || '—';
+  } else {
+    el.textContent = '—';
+  }
 }
 
 function watchInstalling(reg){
@@ -2267,8 +2284,7 @@ if('serviceWorker' in navigator){
       refreshVersionDisplay();
     }).catch(err=>{
       swRegError=err; /* z.B. sw.js nicht erreichbar (404) oder unsicherer Kontext */
-      const el=document.getElementById('app-version');
-      if(el) el.textContent='—';
+      refreshVersionDisplay();
     });
   });
   let reloaded=false;
@@ -2277,10 +2293,7 @@ if('serviceWorker' in navigator){
     window.location.reload();
   });
 }else{
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const el=document.getElementById('app-version');
-    if(el) el.textContent='—';
-  });
+  document.addEventListener('DOMContentLoaded', refreshVersionDisplay);
 }
 function showUpdateBanner(worker){
   waitingWorker=worker;

@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '2.6.0'; // Nicer buttons, größere Touch-Ziele mobil, Offline-Banner, eigener Bestätigungs-Dialog statt confirm()
+const APP_VERSION = '2.6.1'; // Fix: Versionsanzeige liest jetzt sw.js direkt per fetch aus statt sich auf den aktiven (evtl. veralteten) Worker zu verlassen
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
