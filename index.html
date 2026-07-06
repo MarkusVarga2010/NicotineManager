@@ -240,19 +240,22 @@ button{font-family:inherit;cursor:pointer}
    ════════════════════════════════════════════════════════ */
 .btn{
   display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:var(--r);
-  font-size:12px;font-weight:600;border:none;transition:all .15s;white-space:nowrap;
-  font-family:'Inter',sans-serif;letter-spacing:.01em;
+  font-size:12px;font-weight:600;border:none;transition:all .18s cubic-bezier(.4,0,.2,1);white-space:nowrap;
+  font-family:'Inter',sans-serif;letter-spacing:.01em;position:relative;
 }
-.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--ink-soft)}
-.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+.btn-ghost{background:var(--paper2);border:1px solid var(--line2);color:var(--ink-soft);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.btn-ghost:hover{border-color:var(--sage);color:var(--ink);background:var(--paper3);transform:translateY(-1px);box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
 .btn-primary{background:var(--sage-deep);color:var(--paper);box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);border-radius:99px;padding:10px 20px}
-.btn-primary:hover{filter:brightness(1.1)}
+.btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 6px 16px -4px color-mix(in srgb, var(--sage) 55%, transparent)}
 .btn-danger{background:var(--rust-bg);border:1px solid #4A3528;color:var(--rust);border-radius:var(--r-lg)}
-.btn-danger:hover{background:var(--rust);color:var(--paper)}
+.btn-danger:hover{background:var(--rust);color:var(--paper);transform:translateY(-1px);box-shadow:0 6px 16px -4px rgba(0,0,0,.4)}
 .btn-sm{padding:7px 12px;font-size:11px}
 .btn-sm.btn-primary{padding:7px 16px}
-.ic-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;color:var(--ink-faint);transition:all .12s;font-size:13px;min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
-.ic-btn:hover{background:var(--rust-bg);color:var(--rust)}
+.ic-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;color:var(--ink-faint);transition:all .15s cubic-bezier(.4,0,.2,1);font-size:13px;min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
+.ic-btn:hover{background:var(--rust-bg);color:var(--rust);transform:scale(1.08)}
+.ic-btn:active{transform:scale(.92)}
 .status-btn{
   background:none;border:1px solid var(--line2);color:var(--ink-faint);padding:5px 11px;
   border-radius:99px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
@@ -499,6 +502,14 @@ tbody tr:hover{background:var(--paper3)}
 .tour-pop p{font-size:12px;color:var(--ink-soft);line-height:1.55;margin-bottom:16px}
 .tour-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
 
+#offline-banner{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--rust-bg);color:var(--rust);border-bottom:1px solid #4A3528;
+  text-align:center;font-size:12px;font-weight:600;padding:9px 16px;
+  padding-top:calc(9px + env(safe-area-inset-top));
+}
+#offline-banner.show{display:block}
+
 /* ════════════════════════════════════════════════════════
    UPDATE-BANNER (PWA)
    ════════════════════════════════════════════════════════ */
@@ -539,6 +550,8 @@ tbody tr:hover{background:var(--paper3)}
   }
   .sidebar.show{transform:translateX(0)}
   .sb-brand{display:none}
+  .ic-btn{min-width:40px;min-height:40px;font-size:15px}
+  .card-head{flex-wrap:wrap;gap:10px}
 }
 @media(max-width:600px){
   .main{padding:24px 16px 50px}
@@ -574,6 +587,7 @@ tbody tr:hover{background:var(--paper3)}
 </div>
 
 <!-- APP -->
+<div id="offline-banner">📡 Keine Internetverbindung — Daten können veraltet sein</div>
 <div id="app-screen">
 
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -645,7 +659,7 @@ tbody tr:hover{background:var(--paper3)}
       </div>
 
       <div class="card">
-        <div class="card-head"><h3>Offene Bestellungen</h3><div style="display:flex;align-items:center;gap:10px"><span class="badge b-offen" id="d-count">0</span><button class="btn btn-ghost btn-sm" onclick="downloadOpenOrdersPDF()">⭳ PDF herunterladen</button></div></div>
+        <div class="card-head"><h3>Offene Bestellungen</h3><div style="display:flex;align-items:center;gap:12px"><span class="badge b-offen" id="d-count">0</span><button class="btn btn-ghost btn-sm" onclick="downloadOpenOrdersPDF()"><span style="font-size:13px">⭳</span> PDF herunterladen</button></div></div>
         <div class="tbl-wrap"><table><thead><tr><th>Kunde</th><th>Produkte</th><th>Gesamt</th><th>Status</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
       </div>
     </div>
@@ -759,7 +773,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span>1.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">–</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -895,6 +909,18 @@ tbody tr:hover{background:var(--paper3)}
 
 <!-- MODAL: Passwort ändern (erstes Login) -->
 
+<!-- BESTÄTIGUNGS-DIALOG (ersetzt natives confirm() bei kritischen Aktionen) -->
+<div class="modal-bg" id="modal-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><h3 id="cf-title">Bist du sicher?</h3><button class="modal-close" onclick="_confirmResolve(false)">✕</button></div>
+    <div class="modal-body"><p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="cf-cancel-btn" onclick="_confirmResolve(false)">Abbrechen</button>
+      <button class="btn btn-danger" id="cf-ok-btn" onclick="_confirmResolve(true)">Löschen</button>
+    </div>
+  </div>
+</div>
+
 <!-- EINFÜHRUNGSTOUR -->
 <div id="tour-spot" class="tour-spot"></div>
 <div id="tour" class="tour-pop">
@@ -915,7 +941,7 @@ tbody tr:hover{background:var(--paper3)}
 <div id="update-banner">
   <div class="ub-text">
     <span class="ub-ic">⟲</span>
-    <div><div>Update verfügbar</div><div class="ub-sub">Neue Version von NicotineManager</div></div>
+    <div><div>Update verfügbar</div><div class="ub-sub" id="ub-version">Neue Version von NicotineManager</div></div>
   </div>
   <button class="btn btn-primary btn-sm" onclick="applyUpdate()">Jetzt aktualisieren</button>
 </div>
@@ -1107,6 +1133,16 @@ function nav(id){
 }
 
 // ══════════════════════════════════════════════
+// OFFLINE-ERKENNUNG
+// ══════════════════════════════════════════════
+function updateOfflineBanner(){
+  document.getElementById('offline-banner')?.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOfflineBanner);
+window.addEventListener('offline', updateOfflineBanner);
+updateOfflineBanner();
+
+// ══════════════════════════════════════════════
 // ROLLEN-UI
 // ══════════════════════════════════════════════
 function applyRoleUI(){
@@ -1141,6 +1177,26 @@ function openModal(id){
   }
 }
 function closeModal(id){ document.getElementById('modal-'+id).classList.remove('show'); }
+
+// Schöner, konsistenter Bestätigungs-Dialog statt des nativen (und auf Handys oft
+// hässlichen/inkonsistenten) confirm(). Wird per await genutzt: 
+// if(!(await confirmDialog('Text'))) return;
+let _confirmPending=null;
+function confirmDialog(text, opts={}){
+  const { title='Bist du sicher?', confirmText='Löschen', cancelText='Abbrechen', danger=true } = opts;
+  document.getElementById('cf-title').textContent=title;
+  document.getElementById('cf-text').textContent=text;
+  const okBtn=document.getElementById('cf-ok-btn');
+  okBtn.textContent=confirmText;
+  okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+  document.getElementById('cf-cancel-btn').textContent=cancelText;
+  openModal('confirm');
+  return new Promise((resolve)=>{ _confirmPending=resolve; });
+}
+function _confirmResolve(val){
+  closeModal('confirm');
+  if(_confirmPending){ _confirmPending(val); _confirmPending=null; }
+}
 
 // ══════════════════════════════════════════════
 // THEME
@@ -1208,7 +1264,7 @@ async function addKunde(){
   closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
 }
 async function delKunde(id){
-  if(!confirm('Kunden wirklich löschen? Alle zugehörigen Bestellungen werden ebenfalls entfernt.'))return;
+  if(!(await confirmDialog('Alle zugehörigen Bestellungen werden ebenfalls entfernt.', {title:'Kunden wirklich löschen?'})))return;
   const { error } = await sb.from('kunden').delete().eq('id', id);
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
   S.kunden=S.kunden.filter(k=>k.id!==id);
@@ -1368,7 +1424,7 @@ async function setPaid(id, newPaid){
   }
 }
 async function delBestellung(id){
-  if(!confirm('Bestellung wirklich löschen?'))return;
+  if(!(await confirmDialog('Diese Bestellung wird endgültig entfernt.', {title:'Bestellung wirklich löschen?'})))return;
   const { error } = await sb.from('bestellungen').delete().eq('id', id);
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
   S.bestellungen=S.bestellungen.filter(x=>x.id!==id);
@@ -1998,7 +2054,7 @@ async function addUser(){
   renderUserList();showToast('Benutzer angelegt.');
 }
 async function delUser(id, name){
-  if(!confirm(`Benutzer "${name}" löschen?`))return;
+  if(!(await confirmDialog(`Benutzer "${name}" wird endgültig entfernt.`, {title:`Benutzer "${name}" löschen?`})))return;
   const { error } = await sb.rpc('delete_app_user', { p_user_id:id });
   if(error){ showToast(error.message || 'Löschen fehlgeschlagen.', '⚠'); return; }
   M.users=M.users.filter(u=>u.id!==id);renderUserList();showToast('Benutzer gelöscht.','🗑');
@@ -2021,13 +2077,13 @@ function importData(e){
   e.target.value='';
 }
 async function clearOrders(){
-  if(!confirm('Wirklich ALLE Bestellungen aus der Datenbank löschen? Das betrifft alle Geräte/Benutzer.'))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen'})))return;
   const { error } = await sb.from('bestellungen').delete().neq('id', -1); // alle Zeilen
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
   S.bestellungen=[];refresh();showToast('Bestellungen gelöscht.','🗑');
 }
 async function clearAll(){
-  if(!confirm('Wirklich ALLES zurücksetzen (Bestellungen + Kunden)? Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.'))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann NICHT rückgängig gemacht werden.', {title:'Wirklich ALLES zurücksetzen?', confirmText:'Alles zurücksetzen'})))return;
   const [r1, r2] = await Promise.all([
     sb.from('bestellungen').delete().neq('id', -1),
     sb.from('kunden').delete().neq('id', -1),
@@ -2151,6 +2207,34 @@ applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-
 let waitingWorker=null;
 let swReg=null;
 let swRegError=null;
+
+// Fragt einen bestimmten Service-Worker (installing/waiting/active) nach seiner
+// echten APP_VERSION und liefert sie per Promise. So zeigt die Seite IMMER die
+// tatsächlich installierte sw.js-Version an, statt einer hartkodierten Zahl,
+// die man sonst leicht vergisst zu aktualisieren.
+function askWorkerVersion(worker){
+  return new Promise((resolve)=>{
+    if(!worker){ resolve(null); return; }
+    const onMsg=(event)=>{
+      if(event.data && event.data.type==='VERSION'){
+        navigator.serviceWorker.removeEventListener('message', onMsg);
+        resolve(event.data.version);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', onMsg);
+    worker.postMessage({ type:'GET_VERSION' });
+    setTimeout(()=>{ navigator.serviceWorker.removeEventListener('message', onMsg); resolve(null); }, 2000);
+  });
+}
+
+async function refreshVersionDisplay(){
+  const el=document.getElementById('app-version');
+  if(!el) return;
+  const reg = swReg || (('serviceWorker' in navigator) ? await navigator.serviceWorker.getRegistration() : null);
+  const v = await askWorkerVersion(reg?.active || navigator.serviceWorker?.controller);
+  el.textContent = v || '—';
+}
+
 function watchInstalling(reg){
   const nw=reg.installing;
   if(!nw) return;
@@ -2162,6 +2246,7 @@ function watchInstalling(reg){
       }else{
         // Allererste Installation (noch keine Seite unter Kontrolle) -> kein Update-Hinweis nötig
         showToast('App ist jetzt offline verfügbar. ✓','⬇');
+        refreshVersionDisplay();
       }
     }
   });
@@ -2179,17 +2264,31 @@ if('serviceWorker' in navigator){
       document.addEventListener('visibilitychange', ()=>{
         if(document.visibilityState==='visible') reg.update();
       });
-    }).catch(err=>{ swRegError=err; /* z.B. sw.js nicht erreichbar (404) oder unsicherer Kontext */ });
+      refreshVersionDisplay();
+    }).catch(err=>{
+      swRegError=err; /* z.B. sw.js nicht erreichbar (404) oder unsicherer Kontext */
+      const el=document.getElementById('app-version');
+      if(el) el.textContent='—';
+    });
   });
   let reloaded=false;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{
     if(reloaded)return; reloaded=true;
     window.location.reload();
   });
+}else{
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const el=document.getElementById('app-version');
+    if(el) el.textContent='—';
+  });
 }
 function showUpdateBanner(worker){
   waitingWorker=worker;
   document.getElementById('update-banner').classList.add('show');
+  askWorkerVersion(worker).then(v=>{
+    const sub=document.getElementById('ub-version');
+    if(sub) sub.textContent = v ? `Version ${v} verfügbar` : 'Neue Version von NicotineManager';
+  });
 }
 async function checkForUpdates(){
   if(!('serviceWorker' in navigator)){ showToast('Dieser Browser unterstützt keine Service Worker.','⚠'); return; }
