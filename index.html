@@ -356,6 +356,7 @@ button{font-family:inherit;cursor:pointer}
   display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:28px;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;
   box-shadow:0 8px 20px -10px rgba(0,0,0,.5);
 }
+.stat-strip.has-lieferant{grid-template-columns:repeat(5,1fr)}
 .stat-cell{padding:18px 20px;border-right:1px solid var(--line2);background:var(--paper2);transition:background .15s,transform .15s;position:relative}
 .stat-cell:hover{background:var(--paper3);transform:translateY(-1px)}
 .stat-cell:last-child{border-right:none}
@@ -723,6 +724,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="stat-cell"><div class="sc-lab">▤ Bestellungen</div><div class="sc-v mono" id="d-best">0</div><div class="sc-sub">gesamt</div></div>
         <div class="stat-cell"><div class="sc-lab">◐ Schuldner</div><div class="sc-v mono" id="d-schuldner">0</div><div class="sc-sub">Kunden mit offenem Betrag</div></div>
         <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
+        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Bei Lieferant offen</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen</div></div>
       </div>
 
       <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
@@ -752,7 +754,7 @@ tbody tr:hover{background:var(--paper3)}
       <div class="ph">
         <div><div class="ph-eyebrow">Protokoll</div><div class="pt">Bestellungen</div><div class="ps">Bestellungen anlegen und verwalten</div></div>
         <div class="pa">
-          <button class="btn btn-ghost" onclick="downloadOpenOrdersPDF()">⭳ Offene als PDF</button>
+          <button class="btn btn-ghost" id="best-pdf-btn" onclick="downloadOpenOrdersPDF()">⭳ Offene als PDF</button>
           <button class="btn btn-primary" onclick="openModal('bestellung')">＋ Neue Bestellung</button>
         </div>
       </div>
@@ -764,13 +766,16 @@ tbody tr:hover{background:var(--paper3)}
           <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')">🕘 Historie</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="renderBestellungen()" style="width:auto;min-width:200px"/>
-          <select id="filter-kunde" onchange="renderBestellungen()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
+          <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="resetBestellPage()" style="width:auto;min-width:200px"/>
+          <select id="filter-kunde" onchange="resetBestellPage()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
         </div>
       </div>
       <div class="ps" id="best-tab-hint" style="margin:-8px 0 16px;color:var(--ink-faint)"></div>
       <div class="card">
         <div class="tbl-wrap"><table><thead><tr id="b-thead-row"><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th></tr></thead><tbody id="b-tbody"></tbody></table></div>
+      </div>
+      <div style="text-align:center;margin-top:14px;display:none" id="b-loadmore-wrap">
+        <button class="btn btn-ghost btn-sm" id="b-loadmore-btn" onclick="bestellungenPageSize+=50;renderBestellungen()">Mehr laden</button>
       </div>
       <div class="ec" id="b-empty" style="display:none">
         <div class="ec-ic">▤</div>
@@ -867,6 +872,16 @@ tbody tr:hover{background:var(--paper3)}
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
+        </div>
+      </div>
+      <div class="set-card sg full" style="margin-bottom:16px" id="set-card-trash">
+        <div class="sch"><div class="sch-ic">🗑</div><div><h3>Papierkorb</h3><p>Gelöschte Bestellungen — werden nach 30 Tagen automatisch endgültig entfernt</p></div></div>
+        <div class="scb">
+          <div class="tbl-wrap"><table><thead><tr><th>Kunde/Lieferant</th><th>Produkte</th><th>Gelöscht am</th><th>Betrag</th><th></th></tr></thead><tbody id="trash-tbody"></tbody></table></div>
+          <div class="ec" id="trash-empty" style="display:none;padding:20px 0">
+            <div class="ec-ic">✓</div>
+            <div class="ec-t">Papierkorb ist leer</div>
+          </div>
         </div>
       </div>
       <div class="danger-zone" id="set-card-danger">
@@ -998,6 +1013,24 @@ tbody tr:hover{background:var(--paper3)}
   </div>
 </div>
 
+<!-- MODAL: Preis-Verlauf -->
+<div class="modal-bg" id="modal-pricehistory">
+  <div class="modal">
+    <div class="modal-head"><h3>Preis-Verlauf <span class="mono" id="ph-prod-name" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('pricehistory')">✕</button></div>
+    <div class="modal-body">
+      <div class="tbl-wrap"><table><thead><tr><th>Geändert am</th><th>Einkauf</th><th>Verkauf</th></tr></thead><tbody id="ph-tbody"></tbody></table></div>
+      <div class="ec" id="ph-empty" style="display:none">
+        <div class="ec-ic">🕘</div>
+        <div class="ec-t">Noch keine Änderungen protokolliert</div>
+        <div class="ec-s">Preisänderungen werden ab jetzt automatisch mitgeschrieben.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('pricehistory')">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Passwort ändern (erstes Login) -->
 
 <!-- BESTÄTIGUNGS-DIALOG (ersetzt natives confirm() bei kritischen Aktionen) -->
@@ -1077,7 +1110,7 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
-let S = { kunden:[], bestellungen:[], preise:{}, einkauf:{} };
+let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{} };
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
 let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
 let currentUser = null;   // Anzeigename (z.B. "admin")
@@ -1192,11 +1225,22 @@ async function loadAllData(){
     sb.from('service_log').select('*').order('service_date', {ascending:false}),
   ]);
   S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id}));
-  S.bestellungen = (bestRes.data||[]).map(b=>({
+  const mapBestellung = b => ({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, userId:b.user_id
-  }));
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, userId:b.user_id, deletedAt:b.deleted_at||null
+  });
+  const allBest = (bestRes.data||[]);
+  S.bestellungen = allBest.filter(b=>!b.deleted_at).map(mapBestellung);
+  S.trash = allBest.filter(b=>!!b.deleted_at).map(mapBestellung);
+  // Papierkorb: Einträge, die seit über 30 Tagen gelöscht sind, werden beim nächsten
+  // Laden automatisch endgültig entfernt (kein separater Cronjob nötig).
+  const THIRTY_DAYS = 30*24*60*60*1000;
+  const expired = S.trash.filter(b=>b.deletedAt && (Date.now()-new Date(b.deletedAt).getTime())>THIRTY_DAYS);
+  if(expired.length){
+    sb.from('bestellungen').delete().in('id', expired.map(b=>b.id)).then(()=>{});
+    S.trash = S.trash.filter(b=>!expired.some(e=>e.id===b.id));
+  }
   S.preise = {};
   S.lieferantPreise = {};
   S.einkauf = {};
@@ -1357,6 +1401,7 @@ function renderPrices(){
         <div style="flex:1"><label class="fl" style="margin-bottom:4px">Verkauf €</label><input type="number" id="pi-${p.id}" value="${verkauf.toFixed(2)}" step="0.01" min="0" inputmode="decimal" oninput="previewProfit('${p.id}')" onchange="savePrice('${p.id}')"/></div>
       </div>
       <div class="ps" id="pg-${p.id}" style="margin-top:8px;font-weight:600;color:${(verkauf-einkauf)>=0?'var(--success)':'var(--rust)'}">Gewinn/Stk: ${fmt(verkauf-einkauf)}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="openPriceHistory('${p.id}')">🕘 Verlauf</button>
     </div>`;
   }).join('');
   const tbl=document.getElementById('price-table');
@@ -1390,7 +1435,8 @@ async function savePrice(id){
   const v=parseFloat(document.getElementById('pi-'+id).value);
   const ek=parseFloat(document.getElementById('pei-'+id).value);
   if(isNaN(v)||v<0||isNaN(ek)||ek<0){showToast('Bitte gültige Preise eingeben.','⚠');return;}
-  if(v===(S.preise[id]||0) && ek===(S.einkauf[id]||0)) return; // nichts geändert — kein unnötiges Speichern/Toast
+  const oldV=S.preise[id]||0, oldEk=S.einkauf[id]||0;
+  if(v===oldV && ek===oldEk) return; // nichts geändert — kein unnötiges Speichern/Toast
   // upsert auf (user_id, produkt_id) — user_id kommt automatisch von RLS/auth.uid()
   const { error } = await sb.from('preise').upsert(
     { user_id:currentUserId, produkt_id:id, preis:v, einkaufspreis:ek },
@@ -1398,6 +1444,36 @@ async function savePrice(id){
   );
   if(error){ showToast(dbErrorMsg(error,'Preis konnte nicht gespeichert werden. Wurde die Spalte "einkaufspreis" in der Tabelle "preise" schon angelegt?'),'⚠'); return; }
   S.preise[id]=v; S.einkauf[id]=ek; renderPrices(); renderDashboard(); showToast('Gespeichert ✓');
+  // Preisänderung protokollieren (falls die Tabelle "preis_log" existiert). Schlägt das
+  // fehl — z.B. weil die Tabelle noch nicht angelegt wurde — wird das bewusst nur still
+  // geloggt und der Nutzer nicht mit einer Fehlermeldung gestört, da das Speichern des
+  // eigentlichen Preises oben ja bereits erfolgreich war.
+  try{
+    await sb.from('preis_log').insert({
+      user_id:currentUserId, produkt_id:id,
+      alter_verkauf:oldV, neuer_verkauf:v, alter_einkauf:oldEk, neuer_einkauf:ek
+    });
+  }catch(e){ console.warn('Preis-Verlauf konnte nicht protokolliert werden:', e); }
+}
+async function openPriceHistory(prodId){
+  const p=PROD_MAP[prodId];
+  document.getElementById('ph-prod-name').textContent = p ? `${p.icon} ${p.name}` : prodId;
+  const tbody=document.getElementById('ph-tbody'), empty=document.getElementById('ph-empty');
+  tbody.innerHTML=''; empty.style.display='none';
+  openModal('pricehistory');
+  const { data, error } = await sb.from('preis_log')
+    .select('*').eq('user_id', currentUserId).eq('produkt_id', prodId)
+    .order('geaendert_am', {ascending:false});
+  if(error || !data || !data.length){
+    empty.style.display='block';
+    if(error) console.warn('Preis-Verlauf konnte nicht geladen werden (Tabelle "preis_log" evtl. noch nicht angelegt):', error);
+    return;
+  }
+  tbody.innerHTML = data.map(h=>`<tr>
+    <td class="mono" style="font-size:12px;color:var(--ink-faint)">${fmtDateTime(h.geaendert_am)}</td>
+    <td class="mono">${fmt(h.alter_einkauf)} → ${fmt(h.neuer_einkauf)}</td>
+    <td class="mono" style="font-weight:700">${fmt(h.alter_verkauf)} → ${fmt(h.neuer_verkauf)}</td>
+  </tr>`).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -1450,20 +1526,42 @@ function renderKunden(){
   const list = searchTerm
     ? S.kunden.filter(k=>`${k.vorname} ${k.nachname}`.toLowerCase().includes(searchTerm))
     : S.kunden;
-  if(!S.kunden.length){
+
+  // Spezial-Konto (Lieferant): die eigenen Nutzer, die bei mir bestellen, sollen hier
+  // ebenfalls als "Kunde" auftauchen — mit ihren offenen Lieferanten-Bestellungen.
+  const isSpecial = currentRole()==='special';
+  let lieferantKunden=[];
+  if(isSpecial){
+    lieferantKunden = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
+    if(searchTerm) lieferantKunden = lieferantKunden.filter(u=>u.username.toLowerCase().includes(searchTerm));
+  }
+
+  if(!S.kunden.length && !lieferantKunden.length){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Noch keine Kunden';
     document.getElementById('kunden-empty-sub').textContent='Lege deinen ersten Kunden an.';
     return;
   }
-  if(!list.length){
+  if(!list.length && !lieferantKunden.length){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Keine Treffer';
     document.getElementById('kunden-empty-sub').textContent='Kein Kunde passt zu dieser Suche.';
     return;
   }
   em.style.display='none';
-  g.innerHTML=list.map(k=>{
+
+  const lieferantCards = lieferantKunden.map(u=>{
+    const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
+    const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
+    return `<div class="kcard" style="border-color:var(--lieferant-deep);cursor:pointer" onclick="nav('bestellungen');switchBestellungenTab('lieferant')">      <div class="kc-top"><div class="kc-name">◆ ${u.username} <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">Lieferanten-Kunde</span></div></div>
+      <div class="kc-stats">
+        <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
+        <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const kundenCards = list.map(k=>{
     const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
@@ -1476,6 +1574,8 @@ function renderKunden(){
       </div>
     </div>`;
   }).join('');
+
+  g.innerHTML = lieferantCards + kundenCards;
 }
 function usernameOf(userId){
   const u=M.users.find(x=>x.id===userId);
@@ -1617,21 +1717,71 @@ async function setPaid(id, newPaid){
   }
 }
 async function delBestellung(id){
-  if(!(await confirmDialog('Diese Bestellung wird endgültig entfernt.', {title:'Bestellung wirklich löschen?'})))return;
+  if(!(await confirmDialog('Die Bestellung wandert in den Papierkorb und kann dort 30 Tage lang wiederhergestellt werden.', {title:'In den Papierkorb verschieben?', confirmText:'In Papierkorb', danger:false})))return;
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b) return;
+  const nowIso=new Date().toISOString();
+  const { error } = await sb.from('bestellungen').update({ deleted_at: nowIso }).eq('id', id);
+  if(error){ showToast(dbErrorMsg(error,'Löschen fehlgeschlagen. Wurde die Spalte "deleted_at" in der Tabelle "bestellungen" schon angelegt?'),'⚠'); return; }
+  S.bestellungen=S.bestellungen.filter(x=>x.id!==id);
+  b.deletedAt=nowIso; S.trash.unshift(b);
+  renderBestellungen();renderKunden();renderDashboard();renderTrash();showToast('In den Papierkorb verschoben. 🗑');
+}
+async function restoreBestellung(id){
+  const b=S.trash.find(x=>x.id===id);
+  if(!b) return;
+  const { error } = await sb.from('bestellungen').update({ deleted_at: null }).eq('id', id);
+  if(error){ showToast(dbErrorMsg(error,'Wiederherstellen fehlgeschlagen.'),'⚠'); return; }
+  S.trash=S.trash.filter(x=>x.id!==id);
+  b.deletedAt=null; S.bestellungen.unshift(b);
+  renderBestellungen();renderKunden();renderDashboard();renderTrash();showToast('Bestellung wiederhergestellt. ↺');
+}
+async function purgeBestellung(id){
+  if(!(await confirmDialog('Diese Bestellung wird unwiderruflich entfernt.', {title:'Endgültig löschen?'})))return;
   const { error } = await sb.from('bestellungen').delete().eq('id', id);
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
-  S.bestellungen=S.bestellungen.filter(x=>x.id!==id);
-  renderBestellungen();renderKunden();renderDashboard();showToast('Bestellung gelöscht.','🗑');
+  S.trash=S.trash.filter(x=>x.id!==id);
+  renderTrash();showToast('Endgültig gelöscht.','🗑');
 }
-let bestellungenTab = 'bestellt'; // 'bestellt' | 'bezahlt'
+function renderTrash(){
+  const tbody=document.getElementById('trash-tbody'), empty=document.getElementById('trash-empty');
+  if(!tbody) return;
+  if(!S.trash.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML=S.trash.map(b=>{
+    const k=S.kunden.find(x=>x.id===b.kId);
+    const name = b.fuerLieferant ? `◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}` : (k?k.vorname+' '+k.nachname:'—');
+    const prods=(b.items||[]).map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    return `<tr>
+      <td style="font-weight:600">${name}</td>
+      <td style="font-size:12px">${prods}</td>
+      <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDateTime(b.deletedAt)}</td>
+      <td class="mono" style="font-weight:700">${fmt(b.total)}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="restoreBestellung(${b.id})">↺ Wiederherstellen</button>
+        <button class="ic-btn" onclick="purgeBestellung(${b.id})" title="Endgültig löschen">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+let bestellungenTab = 'bestellt'; // 'bestellt' | 'bezahlt' | 'lieferant' | 'historie'
+let bestellungenPageSize = 50;
+function resetBestellPage(){ bestellungenPageSize=50; renderBestellungen(); }
 function switchBestellungenTab(tab){
   bestellungenTab = tab;
+  bestellungenPageSize = 50;
   document.getElementById('tab-btn-bestellt').classList.toggle('active', tab==='bestellt');
   document.getElementById('tab-btn-bezahlt').classList.toggle('active', tab==='bezahlt');
   document.getElementById('tab-btn-lieferant').classList.toggle('active', tab==='lieferant');
   document.getElementById('tab-btn-historie').classList.toggle('active', tab==='historie');
   const fk=document.getElementById('filter-kunde');
   if(fk) fk.style.display = (tab==='lieferant') ? 'none' : '';
+  const pdfBtn=document.getElementById('best-pdf-btn');
+  if(pdfBtn){
+    if(tab==='lieferant'){ pdfBtn.textContent='⭳ Lieferanten-Bestellungen als PDF'; pdfBtn.onclick=downloadOpenLieferantPDF; }
+    else if(tab==='historie'){ pdfBtn.textContent='⭳ Historie als PDF'; pdfBtn.onclick=downloadHistoriePDF; }
+    else { pdfBtn.textContent='⭳ Offene als PDF'; pdfBtn.onclick=downloadOpenOrdersPDF; }
+  }
   renderBestellungen();
 }
 function renderBestellungen(){
@@ -1690,6 +1840,7 @@ function renderBestellungen(){
 
   if(!list.length){
     tbody.innerHTML='';empty.style.display='block';
+    document.getElementById('b-loadmore-wrap').style.display='none';
     document.getElementById('b-empty-text').textContent = (searchTerm||fk)
       ? 'Keine Treffer für diese Suche/Filter.'
       : (bestellungenTab==='bestellt' ? 'Keine offenen Bestellungen zum Abholen.'
@@ -1699,6 +1850,15 @@ function renderBestellungen(){
     return;
   }
   empty.style.display='none';
+  const totalCount=list.length;
+  list=list.slice(0, bestellungenPageSize);
+  const loadmoreWrap=document.getElementById('b-loadmore-wrap');
+  if(totalCount>list.length){
+    loadmoreWrap.style.display='block';
+    document.getElementById('b-loadmore-btn').textContent=`Mehr laden (${list.length} von ${totalCount})`;
+  } else {
+    loadmoreWrap.style.display='none';
+  }
 
   tbody.innerHTML=list.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
@@ -1710,6 +1870,11 @@ function renderBestellungen(){
     const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}</td>`;
 
     if(bestellungenTab==='lieferant'){
+      const priceChanged = !b.paid && (b.items||[]).some(it=>{
+        const live=S.lieferantPreise[it.prod];
+        return live!=null && Math.abs(live-(it.preis||0))>0.001;
+      });
+      const priceBadge = priceChanged ? `<span class="badge b-lieferant" title="Der Lieferant hat seine Preise seit dieser Bestellung geändert — der Betrag wurde bereits automatisch angepasst" style="margin-left:6px">Preis aktualisiert</span>` : '';
       const statusCell = `<td style="white-space:nowrap">
         <span class="badge ${b.delivered?'b-bezahlt':'b-offen'}" style="margin-right:4px">${b.delivered?'✓ Erhalten':'Unterwegs'}</span>
         <span class="badge ${b.paid?'b-bezahlt':'b-offen'}">${b.paid?'✓ Bezahlt':'Offen'}</span>
@@ -1722,7 +1887,7 @@ function renderBestellungen(){
         ${vonCell}
         <td style="font-size:12px">${prods}</td>
         <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
-        ${gesamt}
+        <td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>
         ${statusCell}
         <td style="text-align:right;white-space:nowrap">
           ${actionCell}
@@ -1791,6 +1956,22 @@ function renderDashboard(){
   document.getElementById('d-s-sub').textContent=`${open.length} offen`;
   document.getElementById('d-best').textContent=S.bestellungen.length;
   document.getElementById('d-schuldner').textContent=schuldnerIds.length;
+
+  // Eigene offene Bestellungen beim Lieferanten (getrennt von der Kundenschuld oben) —
+  // die Kachel wird nur angezeigt, wenn es sowas überhaupt gibt.
+  const ownOpenLieferant = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId && !b.paid);
+  const lieferantCell=document.getElementById('d-lieferant-cell');
+  const statStrip=document.querySelector('.stat-strip');
+  if(ownOpenLieferant.length){
+    const lSum=ownOpenLieferant.reduce((s,b)=>s+displayTotal(b),0);
+    document.getElementById('d-lieferant-schulden').textContent=fmt(lSum);
+    document.getElementById('d-lieferant-sub').textContent=`${ownOpenLieferant.length} offen`;
+    lieferantCell.style.display='';
+    statStrip?.classList.add('has-lieferant');
+  } else {
+    lieferantCell.style.display='none';
+    statStrip?.classList.remove('has-lieferant');
+  }
   document.getElementById('d-kunden').textContent=S.kunden.length;
   document.getElementById('d-count').textContent=open.length;
 
@@ -1920,6 +2101,141 @@ function downloadOpenOrdersPDF(){
   doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
 
   doc.save(`offene-bestellungen-${today()}.pdf`);
+  showToast('PDF wird heruntergeladen. ⭳');
+}
+
+// ══════════════════════════════════════════════
+// PDF-EXPORT: Offene Bestellungen beim Lieferanten
+// ══════════════════════════════════════════════
+function downloadOpenLieferantPDF(){
+  const open=S.bestellungen.filter(b=>b.fuerLieferant && !(b.delivered && b.paid)).sort((a,b)=>b.id-a.id);
+  if(!open.length){showToast('Keine offenen Bestellungen beim Lieferanten vorhanden.','⚠');return;}
+  if(typeof window.jspdf==='undefined'){showToast('PDF-Modul konnte nicht geladen werden.','⚠');return;}
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 16;
+
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.6);
+  doc.circle(margin+4, 16, 4.2, 'S');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('N', margin+4, 17.3, {align:'center'});
+  doc.setFontSize(15);
+  doc.text('NicotineManager', margin+12, 15.5);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(110,110,110);
+  doc.text(`Offene Bestellungen beim Lieferanten · Stand ${fmtDate(today())}`, margin+12, 20.5);
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.5);
+  doc.line(margin, 26, pageW-margin, 26);
+
+  const showVon = currentRole()==='special';
+  const rows = open.map(b=>{
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.name} ×${it.stueck}`:''}).join(', ');
+    const status = `${b.delivered?'Erhalten':'Unterwegs'} · ${b.paid?'Bezahlt':'Offen'}`;
+    const row=[prods, fmtDate(b.date), status, fmt(displayTotal(b))];
+    if(showVon) row.unshift(usernameOf(b.userId));
+    return row;
+  });
+  doc.autoTable({
+    head:[showVon ? ['Von','Produkte','Bestellt am','Status','Betrag'] : ['Produkte','Bestellt am','Status','Betrag']],
+    body:rows,
+    startY:32,
+    margin:{left:margin, right:margin},
+    styles:{font:'helvetica', fontSize:9, textColor:[20,20,20], cellPadding:3},
+    headStyles:{fillColor:[235,235,235], textColor:[60,60,60], fontStyle:'bold', fontSize:8},
+    columnStyles: showVon ? {4:{halign:'right', fontStyle:'bold'}} : {3:{halign:'right', fontStyle:'bold'}},
+    alternateRowStyles:{fillColor:[248,248,248]},
+  });
+
+  const total=open.reduce((s,b)=>s+displayTotal(b),0);
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.5);
+  doc.line(margin, finalY-6, pageW-margin, finalY-6);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text('Gesamt offen beim Lieferanten', margin, finalY);
+  doc.text(fmt(total), pageW-margin, finalY, {align:'right'});
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(140,140,140);
+  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')} · Beträge folgen der aktuellen Preisliste des Lieferanten`, margin, doc.internal.pageSize.getHeight()-10);
+
+  doc.save(`offene-lieferanten-bestellungen-${today()}.pdf`);
+  showToast('PDF wird heruntergeladen. ⭳');
+}
+
+// ══════════════════════════════════════════════
+// PDF-EXPORT: Historie (abgeschlossene Bestellungen, mit Zeitstempeln)
+// ══════════════════════════════════════════════
+function downloadHistoriePDF(){
+  const done=S.bestellungen.filter(b=>b.delivered && b.paid).sort((a,b)=>b.id-a.id);
+  if(!done.length){showToast('Noch keine abgeschlossenen Bestellungen vorhanden.','⚠');return;}
+  if(typeof window.jspdf==='undefined'){showToast('PDF-Modul konnte nicht geladen werden.','⚠');return;}
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 16;
+
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.6);
+  doc.circle(margin+4, 16, 4.2, 'S');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('N', margin+4, 17.3, {align:'center'});
+  doc.setFontSize(15);
+  doc.text('NicotineManager', margin+12, 15.5);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(110,110,110);
+  doc.text(`Historie · Abgeschlossene Bestellungen · Stand ${fmtDate(today())}`, margin+12, 20.5);
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.5);
+  doc.line(margin, 26, pageW-margin, 26);
+
+  const rows = done.map(b=>{
+    const k=S.kunden.find(x=>x.id===b.kId);
+    const typ = b.fuerLieferant ? 'Lieferant' : 'Kunde';
+    const partner = b.fuerLieferant ? (M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant') : (k?`${k.vorname} ${k.nachname}`:'—');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.name} ×${it.stueck}`:''}).join(', ');
+    return [typ, partner, prods, fmtDate(b.date), fmtDateTime(b.paidAt), fmt(b.total)];
+  });
+  doc.autoTable({
+    head:[['Typ','Kunde/Lieferant','Produkte','Bestellt am','Bezahlt am','Betrag']],
+    body:rows,
+    startY:32,
+    margin:{left:margin, right:margin},
+    styles:{font:'helvetica', fontSize:8, textColor:[20,20,20], cellPadding:2.5},
+    headStyles:{fillColor:[235,235,235], textColor:[60,60,60], fontStyle:'bold', fontSize:8},
+    columnStyles:{5:{halign:'right', fontStyle:'bold'}},
+    alternateRowStyles:{fillColor:[248,248,248]},
+  });
+
+  const total=done.reduce((s,b)=>s+b.total,0);
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.5);
+  doc.line(margin, finalY-6, pageW-margin, finalY-6);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text(`Gesamt (${done.length} Bestellungen)`, margin, finalY);
+  doc.text(fmt(total), pageW-margin, finalY, {align:'right'});
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(140,140,140);
+  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
+
+  doc.save(`historie-${today()}.pdf`);
   showToast('PDF wird heruntergeladen. ⭳');
 }
 
@@ -2484,7 +2800,7 @@ function showToast(msg,icon='✓'){
 // REFRESH
 // ══════════════════════════════════════════════
 function refresh(){
-  fillSelects();renderPrices();renderKunden();renderBestellungen();renderDashboard();
+  fillSelects();renderPrices();renderKunden();renderBestellungen();renderDashboard();renderTrash();
 }
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)

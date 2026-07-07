@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '3.1.0'; // Bestellungen: eigener Tab "Beim Lieferanten" (live Preise, getrennt vom Kunden-Register) + neuer Tab "Historie" mit Zeitstempel (bestellt/bezahlt)
+const APP_VERSION = '3.2.0'; // Lieferanten-Kunden erscheinen jetzt auch auf der "Kunden"-Seite des Spezial-Kontos; Preis-Verlauf, Papierkorb, Pagination, neue PDF-Exporte, Dashboard-Kachel "Bei Lieferant offen"
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
