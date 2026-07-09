@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '3.2.0'; // Lieferanten-Kunden erscheinen jetzt auch auf der "Kunden"-Seite des Spezial-Kontos; Preis-Verlauf, Papierkorb, Pagination, neue PDF-Exporte, Dashboard-Kachel "Bei Lieferant offen"
+const APP_VERSION = '4.0.0'; // Großes Update: neues Design (Farben, Logo, Login), Lieferanten-Bestellungen wieder unter Bestellt/Bezahlt, Lieferanten-Kunden normal in Kunden-Liste, Historie, Preis-Verlauf, Papierkorb
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

@@ -27,19 +27,19 @@
    TOKENS
    ════════════════════════════════════════════════════════ */
 :root{
-  --paper:#0B0F14;
-  --paper2:#121821;
-  --paper3:#19212C;
-  --line:#232E3A;
-  --line2:#34455A;
-  --ink:#EAF0F5;
-  --ink-soft:#8FA0AF;
-  --ink-faint:#566778;
-  --sage:#4C8DFF;
-  --sage-deep:#8FB6FF;
-  --sage-bg:#162338;
+  --paper:#0A0D10;
+  --paper2:#12171A;
+  --paper3:#1A2124;
+  --line:#212A2C;
+  --line2:#33403F;
+  --ink:#ECF3F0;
+  --ink-soft:#8FA6A0;
+  --ink-faint:#546863;
+  --sage:#22C99E;
+  --sage-deep:#7CEFCB;
+  --sage-bg:#0F2A24;
   --accent2:#D4AC5C;
-  --accent3:#7DD3C8;
+  --accent3:#63C4D4;
   --accent4:#C792EA;
   --rust:#E08A6B;
   --rust-bg:#2E2019;
@@ -60,17 +60,17 @@
   --scale-h:46px;
 }
 html[data-mode="light"]{
-  --paper:#F7F5F1;
+  --paper:#F6F5F0;
   --paper2:#FFFFFF;
-  --paper3:#EFEBE4;
-  --line:#E4DFD5;
-  --line2:#D3CCBE;
-  --ink:#20241F;
-  --ink-soft:#5C6660;
-  --ink-faint:#8B958E;
-  --sage:#3E7A3A;
-  --sage-deep:#2E5E2B;
-  --sage-bg:#E3EEDF;
+  --paper3:#ECEFE9;
+  --line:#DFE3D9;
+  --line2:#CBD2C4;
+  --ink:#1B231F;
+  --ink-soft:#546056;
+  --ink-faint:#8A968C;
+  --sage:#0E8F6B;
+  --sage-deep:#0B6B50;
+  --sage-bg:#DFF3EA;
   --accent2:#9A7A2E;
   --accent3:#2E8478;
   --accent4:#8B5FA8;
@@ -141,11 +141,16 @@ button{font-family:inherit;cursor:pointer}
   display:flex;align-items:center;justify-content:center;min-height:100vh;
   background:var(--paper);
   background-image:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--sage) 16%, transparent), transparent 55%),
     repeating-linear-gradient(to bottom, transparent, transparent 39px, var(--line) 39px, var(--line) 40px);
-  background-size:100% 200px;
+  background-size:100% 100%, 100% 200px;
   padding:20px;
 }
 .login-wrap{width:100%;max-width:380px}
+.login-logo{
+  width:64px;height:64px;margin:0 auto 18px;filter:drop-shadow(0 8px 20px color-mix(in srgb, var(--sage) 40%, transparent));
+}
+.login-logo svg{width:100%;height:100%;display:block}
 .login-label{
   font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--sage);
   text-transform:uppercase;letter-spacing:.14em;text-align:center;margin-bottom:10px;
@@ -157,21 +162,23 @@ button{font-family:inherit;cursor:pointer}
   background:var(--paper2);
   border:1px solid var(--line2);
   border-radius:var(--r-lg);
-  padding:26px;
+  padding:28px;
   position:relative;
+  box-shadow:0 24px 60px -24px color-mix(in srgb, var(--sage) 30%, transparent), 0 10px 24px -12px rgba(0,0,0,.55);
 }
 .login-card::before{
-  content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:var(--line2);
+  content:'';position:absolute;top:0;left:24px;right:24px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg, transparent, var(--sage), transparent);
 }
 .fw{margin-bottom:16px}
 .primary-btn{
-  width:100%;background:var(--sage-deep);color:var(--paper);border:none;border-radius:99px;
-  padding:13px;font-size:13px;font-weight:600;letter-spacing:.02em;margin-top:6px;
-  transition:filter .15s;font-family:'Inter',sans-serif;
+  width:100%;background:linear-gradient(135deg, var(--sage), var(--sage-deep));color:var(--paper);border:none;border-radius:99px;
+  padding:13px;font-size:13px;font-weight:700;letter-spacing:.02em;margin-top:6px;
+  transition:filter .15s, transform .15s;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);
+  box-shadow:0 8px 20px -6px color-mix(in srgb, var(--sage) 55%, transparent);
 }
-.primary-btn:hover{filter:brightness(1.1)}
+.primary-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .login-err{
   color:var(--rust);font-size:12px;margin-top:12px;text-align:center;display:none;
   background:var(--rust-bg);border-radius:var(--r);padding:9px 12px;font-family:'JetBrains Mono',monospace;
@@ -211,10 +218,9 @@ button{font-family:inherit;cursor:pointer}
   display:flex;align-items:center;gap:12px;padding:22px 22px 20px;border-bottom:1px solid var(--line2);
 }
 .tb-mark{
-  width:36px;height:36px;border-radius:10px;background:var(--sage-deep);color:var(--paper);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;font-weight:700;font-size:16px;flex-shrink:0;
+  width:36px;height:36px;flex-shrink:0;filter:drop-shadow(0 3px 8px color-mix(in srgb, var(--sage) 35%, transparent));
 }
+.tb-mark svg{width:100%;height:100%;display:block}
 .tb-name{font-family:'Fraunces',serif;font-weight:600;font-size:17px;letter-spacing:-.01em;line-height:1.2}
 .tb-name span{color:var(--sage-deep)}
 .sb-brand .sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;margin-top:2px}
@@ -643,6 +649,7 @@ tbody tr:hover{background:var(--paper3)}
   <div class="login-wrap">
     <div class="login-label">⟢ Verwaltungssystem</div>
     <div class="login-brand">
+      <div class="login-logo"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="11" fill="var(--sage)"/><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="var(--paper)"/><circle cx="30.5" cy="9.5" r="3" fill="var(--paper)" opacity=".85"/></svg></div>
       <h1>Nicotine<span style="color:var(--sage)">Manager</span></h1>
       <div class="sub">Bestand · Bestellungen · Dosierung</div>
     </div>
@@ -665,7 +672,7 @@ tbody tr:hover{background:var(--paper3)}
   <div class="shell">
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
-        <div class="tb-mark">N</div>
+        <div class="tb-mark"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="11" fill="var(--sage)"/><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="var(--paper)"/><circle cx="30.5" cy="9.5" r="3" fill="var(--paper)" opacity=".85"/></svg></div>
         <div>
           <div class="tb-name">Nicotine<span>Manager</span></div>
           <div class="sub">Verwaltungssystem</div>
@@ -695,7 +702,10 @@ tbody tr:hover{background:var(--paper3)}
 
     <div class="content-area">
       <div class="mobile-topbar">
-        <div class="tb-name" style="font-size:15px">Nicotine<span style="color:var(--sage-deep)">Manager</span></div>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="11" fill="var(--sage)"/><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="var(--paper)"/><circle cx="30.5" cy="9.5" r="3" fill="var(--paper)" opacity=".85"/></svg></div>
+          <div class="tb-name" style="font-size:15px">Nicotine<span style="color:var(--sage-deep)">Manager</span></div>
+        </div>
         <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer">A</button>
       </div>
 
@@ -724,7 +734,7 @@ tbody tr:hover{background:var(--paper3)}
         <div class="stat-cell"><div class="sc-lab">▤ Bestellungen</div><div class="sc-v mono" id="d-best">0</div><div class="sc-sub">gesamt</div></div>
         <div class="stat-cell"><div class="sc-lab">◐ Schuldner</div><div class="sc-v mono" id="d-schuldner">0</div><div class="sc-sub">Kunden mit offenem Betrag</div></div>
         <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
-        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Bei Lieferant offen</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen</div></div>
+        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ davon Lieferant</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen</div></div>
       </div>
 
       <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
@@ -762,7 +772,6 @@ tbody tr:hover{background:var(--paper3)}
         <div class="tab-group" id="best-tabs">
           <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
-          <button class="tab-btn tab-lieferant" id="tab-btn-lieferant" onclick="switchBestellungenTab('lieferant')">◆ Beim Lieferanten <span class="badge b-offen" id="tab-count-lieferant">0</span></button>
           <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')">🕘 Historie</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1013,7 +1022,18 @@ tbody tr:hover{background:var(--paper3)}
   </div>
 </div>
 
-<!-- MODAL: Preis-Verlauf -->
+<!-- MODAL: Was ist neu -->
+<div class="modal-bg" id="modal-whatsnew">
+  <div class="modal">
+    <div class="modal-head"><h3>✨ Was ist neu</h3><button class="modal-close" onclick="closeModal('whatsnew')">✕</button></div>
+    <div class="modal-body">
+      <ul id="wn-list" style="margin:0;padding-left:20px;line-height:1.7"></ul>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeModal('whatsnew')" style="width:100%;justify-content:center">Verstanden</button>
+    </div>
+  </div>
+</div>
 <div class="modal-bg" id="modal-pricehistory">
   <div class="modal">
     <div class="modal-head"><h3>Preis-Verlauf <span class="mono" id="ph-prod-name" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('pricehistory')">✕</button></div>
@@ -1120,6 +1140,30 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
+const CURRENT_UI_VERSION = '4.0.0';
+const WHATS_NEW = {
+  '4.0.0': [
+    'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
+    'Lieferanten-Bestellungen stehen jetzt direkt unter "Bestellt" und "Bezahlt" — genau wie alle anderen Bestellungen.',
+    'Nutzer, die bei dir bestellen, erscheinen jetzt ganz normal auf der Kunden-Seite (nur ohne Bearbeiten/Löschen).',
+    'Neu: "Historie" mit Zeitstempel (bestellt/bezahlt am), Preis-Verlauf pro Produkt, Papierkorb (30 Tage), zusätzliche PDF-Exporte.'
+  ]
+};
+function checkWhatsNew(){
+  try{
+    const seen = localStorage.getItem('nm_seen_version');
+    if(seen===CURRENT_UI_VERSION) return;
+    if(seen) showWhatsNewModal();
+    localStorage.setItem('nm_seen_version', CURRENT_UI_VERSION);
+  }catch(e){ /* localStorage evtl. nicht verfügbar — einfach überspringen */ }
+}
+function showWhatsNewModal(){
+  const list = WHATS_NEW[CURRENT_UI_VERSION] || [];
+  const el=document.getElementById('wn-list');
+  if(!el) return;
+  el.innerHTML = list.map(t=>`<li style="margin-bottom:6px">${t}</li>`).join('');
+  openModal('whatsnew');
+}
 const fmtDate = d => d ? new Date(d).toLocaleDateString('de-DE') : '—';
 const fmtDateTime = d => d ? new Date(d).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
 // Live-Gesamtbetrag: bei noch nicht bezahlten Lieferanten-Bestellungen wird der Betrag
@@ -1202,6 +1246,8 @@ async function onLoggedIn(authUser, displayName){
     M.profile.first_login=false;
     await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
     startTour();
+  } else {
+    checkWhatsNew();
   }
 }
 async function doLogout(){
@@ -1523,26 +1569,24 @@ function renderKunden(){
   const g=document.getElementById('kunden-grid'),em=document.getElementById('kunden-empty');
   if(!g)return;
   const searchTerm=(document.getElementById('kunden-search')?.value||'').trim().toLowerCase();
-  const list = searchTerm
-    ? S.kunden.filter(k=>`${k.vorname} ${k.nachname}`.toLowerCase().includes(searchTerm))
-    : S.kunden;
-
-  // Spezial-Konto (Lieferant): die eigenen Nutzer, die bei mir bestellen, sollen hier
-  // ebenfalls als "Kunde" auftauchen — mit ihren offenen Lieferanten-Bestellungen.
   const isSpecial = currentRole()==='special';
-  let lieferantKunden=[];
-  if(isSpecial){
-    lieferantKunden = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
-    if(searchTerm) lieferantKunden = lieferantKunden.filter(u=>u.username.toLowerCase().includes(searchTerm));
-  }
 
-  if(!S.kunden.length && !lieferantKunden.length){
+  let items = S.kunden.map(k=>({type:'kunde', name:`${k.vorname} ${k.nachname}`, k}));
+  if(isSpecial){
+    const lieferantUsers = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
+    items = items.concat(lieferantUsers.map(u=>({type:'lieferant', name:u.username, u})));
+  }
+  if(searchTerm) items = items.filter(it=>it.name.toLowerCase().includes(searchTerm));
+  items.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+
+  const totalCount = S.kunden.length + (isSpecial ? M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId).length : 0);
+  if(!totalCount){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Noch keine Kunden';
     document.getElementById('kunden-empty-sub').textContent='Lege deinen ersten Kunden an.';
     return;
   }
-  if(!list.length && !lieferantKunden.length){
+  if(!items.length){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Keine Treffer';
     document.getElementById('kunden-empty-sub').textContent='Kein Kunde passt zu dieser Suche.';
@@ -1550,18 +1594,20 @@ function renderKunden(){
   }
   em.style.display='none';
 
-  const lieferantCards = lieferantKunden.map(u=>{
-    const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
-    const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
-    return `<div class="kcard" style="border-color:var(--lieferant-deep);cursor:pointer" onclick="nav('bestellungen');switchBestellungenTab('lieferant')">      <div class="kc-top"><div class="kc-name">◆ ${u.username} <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">Lieferanten-Kunde</span></div></div>
-      <div class="kc-stats">
-        <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
-        <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
-      </div>
-    </div>`;
-  }).join('');
-
-  const kundenCards = list.map(k=>{
+  g.innerHTML = items.map(it=>{
+    if(it.type==='lieferant'){
+      const u=it.u;
+      const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
+      const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
+      return `<div class="kcard">
+        <div class="kc-top"><div class="kc-name">${u.username}</div></div>
+        <div class="kc-stats">
+          <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
+          <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
+        </div>
+      </div>`;
+    }
+    const k=it.k;
     const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
@@ -1574,8 +1620,6 @@ function renderKunden(){
       </div>
     </div>`;
   }).join('');
-
-  g.innerHTML = lieferantCards + kundenCards;
 }
 function usernameOf(userId){
   const u=M.users.find(x=>x.id===userId);
@@ -1764,7 +1808,7 @@ function renderTrash(){
     </tr>`;
   }).join('');
 }
-let bestellungenTab = 'bestellt'; // 'bestellt' | 'bezahlt' | 'lieferant' | 'historie'
+let bestellungenTab = 'bestellt'; // 'bestellt' | 'bezahlt' | 'historie'
 let bestellungenPageSize = 50;
 function resetBestellPage(){ bestellungenPageSize=50; renderBestellungen(); }
 function switchBestellungenTab(tab){
@@ -1772,14 +1816,10 @@ function switchBestellungenTab(tab){
   bestellungenPageSize = 50;
   document.getElementById('tab-btn-bestellt').classList.toggle('active', tab==='bestellt');
   document.getElementById('tab-btn-bezahlt').classList.toggle('active', tab==='bezahlt');
-  document.getElementById('tab-btn-lieferant').classList.toggle('active', tab==='lieferant');
   document.getElementById('tab-btn-historie').classList.toggle('active', tab==='historie');
-  const fk=document.getElementById('filter-kunde');
-  if(fk) fk.style.display = (tab==='lieferant') ? 'none' : '';
   const pdfBtn=document.getElementById('best-pdf-btn');
   if(pdfBtn){
-    if(tab==='lieferant'){ pdfBtn.textContent='⭳ Lieferanten-Bestellungen als PDF'; pdfBtn.onclick=downloadOpenLieferantPDF; }
-    else if(tab==='historie'){ pdfBtn.textContent='⭳ Historie als PDF'; pdfBtn.onclick=downloadHistoriePDF; }
+    if(tab==='historie'){ pdfBtn.textContent='⭳ Historie als PDF'; pdfBtn.onclick=downloadHistoriePDF; }
     else { pdfBtn.textContent='⭳ Offene als PDF'; pdfBtn.onclick=downloadOpenOrdersPDF; }
   }
   renderBestellungen();
@@ -1790,14 +1830,12 @@ function renderBestellungen(){
   const fk=document.getElementById('filter-kunde')?.value||'';
   const searchTerm=(document.getElementById('best-search')?.value||'').trim().toLowerCase();
 
-  // Zähler für alle Register (unabhängig vom Kundenfilter). Lieferanten-Bestellungen
-  // laufen komplett getrennt von den Kunden-Registern "Bestellt"/"Bezahlt".
-  const countBestellt = S.bestellungen.filter(b=>!b.fuerLieferant && !b.delivered).length;
-  const countBezahlt = S.bestellungen.filter(b=>!b.fuerLieferant && !b.paid).length;
-  const countLieferant = S.bestellungen.filter(b=>b.fuerLieferant && !(b.delivered && b.paid)).length;
+  // Zähler für beide Register (unabhängig vom Kundenfilter) — Lieferanten-Bestellungen
+  // zählen hier ganz normal mit, genau wie Kundenbestellungen.
+  const countBestellt = S.bestellungen.filter(b=>!b.delivered).length;
+  const countBezahlt = S.bestellungen.filter(b=>!b.paid).length;
   document.getElementById('tab-count-bestellt').textContent = countBestellt;
   document.getElementById('tab-count-bezahlt').textContent = countBezahlt;
-  document.getElementById('tab-count-lieferant').textContent = countLieferant;
 
   let list=[...S.bestellungen];
   if(fk) list=list.filter(b=>String(b.kId)===fk);
@@ -1809,33 +1847,26 @@ function renderBestellungen(){
       return kName.includes(searchTerm) || prodNames.includes(searchTerm);
     });
   }
-  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.fuerLieferant && !b.delivered);
-  else if(bestellungenTab==='bezahlt') list=list.filter(b=>!b.fuerLieferant && !b.paid);
-  else if(bestellungenTab==='lieferant') list=list.filter(b=>b.fuerLieferant && !(b.delivered && b.paid));
+  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.delivered);
+  else if(bestellungenTab==='bezahlt') list=list.filter(b=>!b.paid);
   else if(bestellungenTab==='historie') list=list.filter(b=>b.delivered && b.paid);
   list.sort((a,b)=>b.id-a.id);
 
   const hint=document.getElementById('best-tab-hint');
   hint.textContent = bestellungenTab==='bestellt'
-    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Bestellt“, sobald erledigt.'
+    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen — auch deine eigenen Nachbestellungen beim Lieferanten. Klick auf „Bestellt“, sobald erledigt.'
     : bestellungenTab==='bezahlt'
-    ? 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald der Kunde bezahlt hat — die Rechnung wird dann automatisch erstellt.'
-    : bestellungenTab==='lieferant'
-    ? 'Deine eigenen Nachbestellungen beim Lieferanten. Sie zählen nicht zu deinem Gewinn und die Beträge folgen automatisch der aktuellen Preisliste deines Lieferanten, solange sie noch nicht bezahlt sind.'
+    ? 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald bezahlt wurde — bei Kundenbestellungen wird dabei automatisch eine Rechnung erstellt. Beträge bei Lieferanten-Bestellungen folgen bis dahin automatisch der aktuellen Preisliste.'
     : 'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.';
 
   const showVon = currentRole()==='special';
   const theadRow=document.getElementById('b-thead-row');
   if(theadRow){
-    if(bestellungenTab==='lieferant'){
-      theadRow.innerHTML = (showVon?'<th>Von</th>':'') + '<th>Produkte</th><th>Bestellt am</th><th>Gesamt</th><th>Status</th><th></th>';
-    } else if(bestellungenTab==='historie'){
-      theadRow.innerHTML = '<th>Typ</th>' + (showVon?'<th>Von</th>':'') + '<th>Kunde / Lieferant</th><th>Produkte</th><th>Bestellt am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>';
-    } else {
-      theadRow.innerHTML = showVon
+    theadRow.innerHTML = bestellungenTab==='historie'
+      ? '<th>Typ</th>' + (showVon?'<th>Von</th>':'') + '<th>Kunde / Lieferant</th><th>Produkte</th><th>Bestellt am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>'
+      : (showVon
         ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
-        : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>';
-    }
+        : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>');
   }
 
   if(!list.length){
@@ -1845,7 +1876,6 @@ function renderBestellungen(){
       ? 'Keine Treffer für diese Suche/Filter.'
       : (bestellungenTab==='bestellt' ? 'Keine offenen Bestellungen zum Abholen.'
         : bestellungenTab==='bezahlt' ? 'Keine offenen Zahlungen.'
-        : bestellungenTab==='lieferant' ? 'Keine offenen Bestellungen beim Lieferanten.'
         : 'Noch keine abgeschlossenen Bestellungen.');
     return;
   }
@@ -1866,36 +1896,13 @@ function renderBestellungen(){
     const lockedForOwner = !foreign && b.fuerLieferant;
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
+    const priceChanged = b.fuerLieferant && !b.paid && (b.items||[]).some(it=>{
+      const live=S.lieferantPreise[it.prod];
+      return live!=null && Math.abs(live-(it.preis||0))>0.001;
+    });
+    const priceBadge = priceChanged ? `<span class="badge b-lieferant" title="Der Lieferant hat seine Preise seit dieser Bestellung geändert — der Betrag wurde bereits automatisch angepasst" style="margin-left:6px">Preis aktualisiert</span>` : '';
     const vonCell = showVon ? `<td style="font-weight:600">${foreign?`<span style="color:var(--lieferant-deep)">${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>'}</td>` : '';
-    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}</td>`;
-
-    if(bestellungenTab==='lieferant'){
-      const priceChanged = !b.paid && (b.items||[]).some(it=>{
-        const live=S.lieferantPreise[it.prod];
-        return live!=null && Math.abs(live-(it.preis||0))>0.001;
-      });
-      const priceBadge = priceChanged ? `<span class="badge b-lieferant" title="Der Lieferant hat seine Preise seit dieser Bestellung geändert — der Betrag wurde bereits automatisch angepasst" style="margin-left:6px">Preis aktualisiert</span>` : '';
-      const statusCell = `<td style="white-space:nowrap">
-        <span class="badge ${b.delivered?'b-bezahlt':'b-offen'}" style="margin-right:4px">${b.delivered?'✓ Erhalten':'Unterwegs'}</span>
-        <span class="badge ${b.paid?'b-bezahlt':'b-offen'}">${b.paid?'✓ Bezahlt':'Offen'}</span>
-      </td>`;
-      const actionCell = lockedForOwner
-        ? `<span class="badge b-lieferant" title="Nur der Lieferant kann den Status ändern">Vom Lieferanten verwaltet</span>`
-        : `<button class="status-btn ${b.delivered?'active-bezahlt':'active-offen'}" onclick="setDelivered(${b.id},${!b.delivered})" style="margin-right:4px">${b.delivered?'↺ Unterwegs':'✓ Erhalten'}</button>
-           <button class="status-btn ${b.paid?'active-bezahlt':'active-offen'}" onclick="setPaid(${b.id},${!b.paid})">${b.paid?'↺ Offen':'✓ Bezahlt'}</button>`;
-      return `<tr>
-        ${vonCell}
-        <td style="font-size:12px">${prods}</td>
-        <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
-        <td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>
-        ${statusCell}
-        <td style="text-align:right;white-space:nowrap">
-          ${actionCell}
-          <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
-          ${foreign?'':`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`}
-        </td>
-      </tr>`;
-    }
+    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>`;
 
     if(bestellungenTab==='historie'){
       const typCell = b.fuerLieferant
@@ -1919,11 +1926,15 @@ function renderBestellungen(){
       </tr>`;
     }
 
-    // Standard: Bestellt / Bezahlt (nur eigene Kunden-Bestellungen)
-    const nameCell = k?k.vorname+' '+k.nachname:'—';
-    const actionBtn = bestellungenTab==='bestellt'
-      ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
-      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
+    // Standard: Bestellt / Bezahlt — Kunden- UND Lieferanten-Bestellungen gemeinsam
+    const nameCell = b.fuerLieferant
+      ? `<span style="color:var(--lieferant-deep)">◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
+      : (k?k.vorname+' '+k.nachname:'—');
+    const actionBtn = lockedForOwner
+      ? `<span class="badge b-lieferant" title="Nur der Lieferant kann den Status ändern">Vom Lieferanten verwaltet</span>`
+      : (bestellungenTab==='bestellt'
+          ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
+          : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}</td>
@@ -1944,8 +1955,8 @@ function renderBestellungen(){
 // DASHBOARD
 // ══════════════════════════════════════════════
 function renderDashboard(){
-  const open=S.bestellungen.filter(b=>!b.paid && !b.fuerLieferant);
-  const debt=open.reduce((s,b)=>s+b.total,0);
+  const open=S.bestellungen.filter(b=>!b.paid);
+  const debt=open.reduce((s,b)=>s+displayTotal(b),0);
 
   // Schulden pro Kunde ermitteln
   const debtByKunde={};
@@ -2038,7 +2049,7 @@ function renderDashboard(){
 // PDF-EXPORT: Offene Bestellungen
 // ══════════════════════════════════════════════
 function downloadOpenOrdersPDF(){
-  const open=[...S.bestellungen].filter(b=>!b.paid && !b.fuerLieferant).sort((a,b)=>b.id-a.id);
+  const open=[...S.bestellungen].filter(b=>!b.paid).sort((a,b)=>b.id-a.id);
   if(!open.length){showToast('Keine offenen Bestellungen vorhanden.','⚠');return;}
   if(typeof window.jspdf==='undefined'){showToast('PDF-Modul konnte nicht geladen werden.','⚠');return;}
 
