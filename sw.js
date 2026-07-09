@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.0.0'; // Neue eigene Seite "Beim Lieferanten bestellen" (getrennter Warenkorb-Ablauf statt Umschalter im Kunden-Formular) + Kunden-Detailansicht mit Tabs (Infos/Bestellungen/Statistik)
+const APP_VERSION = '5.1.0'; // Klare Trennung Kunden- vs. Lieferanten-Bestellungen: eigener Einkauf wirkt sich nicht mehr auf Schulden/Gewinn aus, Lieferantenkunden haben eigene Sektion + eigene Auswirkung auf Schulden/Gewinn, Skala zeigt Benutzername statt "Unbekannt"
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

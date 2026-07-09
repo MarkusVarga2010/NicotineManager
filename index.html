@@ -743,12 +743,12 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="stat-cell"><div class="sc-lab">▤ Bestellungen</div><div class="sc-v mono" id="d-best">0</div><div class="sc-sub">gesamt</div></div>
         <div class="stat-cell"><div class="sc-lab">◐ Schuldner</div><div class="sc-v mono" id="d-schuldner">0</div><div class="sc-sub">Kunden mit offenem Betrag</div></div>
         <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
-        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ davon Lieferant</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen</div></div>
+        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Offen beim Lieferanten</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden</div></div>
       </div>
 
       <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
         <div class="dose-row">
-          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Kundenbestellungen</span></div>
+          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Verkäufe an Kunden und Lieferantenkunden</span></div>
         </div>
         <div class="sc-v mono" id="d-gewinn" style="font-size:26px;color:var(--success-deep);margin-top:4px">0,00 €</div>
       </div>
@@ -844,6 +844,19 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="ec-ic">◐</div>
         <div class="ec-t" id="kunden-empty-text">Noch keine Kunden</div>
         <div class="ec-s" id="kunden-empty-sub">Lege deinen ersten Kunden an.</div>
+      </div>
+
+      <!-- Lieferantenkunden: eigene, klar getrennte Sektion — nur für Lieferanten-Konten sichtbar,
+           da es sich um andere Benutzer handelt, die bei MIR bestellen, nicht um eigene Kunden. -->
+      <div id="lieferantenkunden-section" style="display:none;margin-top:32px">
+        <div class="card-head" style="border:none;padding:0;margin:0 0 4px"><h3>◆ Lieferantenkunden</h3></div>
+        <div class="ps" style="margin-bottom:16px">Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen.</div>
+        <div class="kg" id="lieferantenkunden-grid"></div>
+        <div class="ec" id="lieferantenkunden-empty" style="display:none">
+          <div class="ec-ic">◆</div>
+          <div class="ec-t">Noch keine Lieferantenkunden</div>
+          <div class="ec-s">Sobald ein Benutzer dich als Lieferanten auswählt, erscheint er hier.</div>
+        </div>
       </div>
     </div>
 
@@ -1712,55 +1725,66 @@ function renderKunden(){
   const searchTerm=(document.getElementById('kunden-search')?.value||'').trim().toLowerCase();
   const isSpecial = currentRole()==='special';
 
+  // Eigene/echte Kunden (Kunden-Register) — komplett getrennt von Lieferantenkunden unten.
   let items = S.kunden.map(k=>({type:'kunde', name:`${k.vorname} ${k.nachname}`, k}));
-  if(isSpecial){
-    const lieferantUsers = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
-    items = items.concat(lieferantUsers.map(u=>({type:'lieferant', name:u.username, u})));
-  }
   if(searchTerm) items = items.filter(it=>it.name.toLowerCase().includes(searchTerm));
   items.sort((a,b)=>a.name.localeCompare(b.name,'de'));
 
-  const totalCount = S.kunden.length + (isSpecial ? M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId).length : 0);
-  if(!totalCount){
+  if(!S.kunden.length){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Noch keine Kunden';
     document.getElementById('kunden-empty-sub').textContent='Lege deinen ersten Kunden an.';
-    return;
-  }
-  if(!items.length){
+  } else if(!items.length){
     g.innerHTML='';em.style.display='block';
     document.getElementById('kunden-empty-text').textContent='Keine Treffer';
     document.getElementById('kunden-empty-sub').textContent='Kein Kunde passt zu dieser Suche.';
-    return;
-  }
-  em.style.display='none';
-
-  g.innerHTML = items.map(it=>{
-    if(it.type==='lieferant'){
-      const u=it.u;
-      const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
-      const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
-      return `<div class="kcard">
-        <div class="kc-top"><div class="kc-name">${u.username}</div></div>
+  } else {
+    em.style.display='none';
+    g.innerHTML = items.map(it=>{
+      const k=it.k;
+      const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
+      const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
+      const foreign = k.userId!==currentUserId;
+      const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${usernameOf(k.userId)}</span>` : '';
+      return `<div class="kcard" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
+        <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
         <div class="kc-stats">
-          <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
+          <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
           <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
         </div>
       </div>`;
+    }).join('');
+  }
+
+  // Lieferantenkunden: eigene, getrennte Sektion — nur für Lieferanten-Konten. Zählt als
+  // "Kunde" im gleichen Sinn (Bestellungen, Umsatz/Offen), aber niemals gemischt mit S.kunden,
+  // und wirkt sich (siehe renderDashboard) auf die eigenen Schulden & den eigenen Gewinn aus.
+  const lkSection=document.getElementById('lieferantenkunden-section');
+  if(!isSpecial){
+    if(lkSection) lkSection.style.display='none';
+  } else {
+    const lg=document.getElementById('lieferantenkunden-grid'), lem=document.getElementById('lieferantenkunden-empty');
+    lkSection.style.display='';
+    let lkUsers = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
+    if(searchTerm) lkUsers = lkUsers.filter(u=>u.username.toLowerCase().includes(searchTerm));
+    lkUsers.sort((a,b)=>a.username.localeCompare(b.username,'de'));
+    if(!lkUsers.length){
+      lg.innerHTML=''; lem.style.display='block';
+    } else {
+      lem.style.display='none';
+      lg.innerHTML = lkUsers.map(u=>{
+        const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
+        const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
+        return `<div class="kcard">
+          <div class="kc-top"><div class="kc-name">◆ ${u.username}</div></div>
+          <div class="kc-stats">
+            <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
+            <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
+          </div>
+        </div>`;
+      }).join('');
     }
-    const k=it.k;
-    const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
-    const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
-    const foreign = k.userId!==currentUserId;
-    const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${usernameOf(k.userId)}</span>` : '';
-    return `<div class="kcard" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
-      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
-      <div class="kc-stats">
-        <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
-        <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
-      </div>
-    </div>`;
-  }).join('');
+  }
 }
 function usernameOf(userId){
   const u=M.users.find(x=>x.id===userId);
@@ -2175,18 +2199,29 @@ function renderBestellungen(){
 // DASHBOARD
 // ══════════════════════════════════════════════
 function renderDashboard(){
-  const open=S.bestellungen.filter(b=>!b.paid);
-  const debt=open.reduce((s,b)=>s+displayTotal(b),0);
+  // "Offene Schulden" = was mir andere schulden: eigene Kundenbestellungen PLUS Bestellungen,
+  // die meine Lieferantenkunden (andere Benutzer, die mich als Lieferanten eingetragen haben)
+  // bei MIR aufgegeben haben. Meine eigenen Nachbestellungen bei MEINEM Lieferanten
+  // (b.fuerLieferant && b.userId===currentUserId) zählen hier NICHT mit — die sind eigener
+  // Einkauf und stehen komplett getrennt in der Kachel/Seite "Beim Lieferanten".
+  const owedToMe=S.bestellungen.filter(b=>!b.paid && !(b.fuerLieferant && b.userId===currentUserId));
+  const debt=owedToMe.reduce((s,b)=>s+displayTotal(b),0);
 
-  // Schulden pro Kunde ermitteln
-  const debtByKunde={};
-  open.forEach(b=>{ debtByKunde[b.kId]=(debtByKunde[b.kId]||0)+b.total; });
-  const schuldnerIds=Object.keys(debtByKunde).filter(id=>debtByKunde[id]>0);
+  // Schulden pro Entität ermitteln — eigene Kunden und Lieferantenkunden getrennt geschlüsselt,
+  // damit ein Lieferantenkunde (kein kId, da kein Kunden-Datensatz) nicht mit anderen kollidiert
+  // oder als "Unbekannt" auftaucht.
+  const debtByEntity={};
+  owedToMe.forEach(b=>{
+    const key = b.fuerLieferant ? ('u:'+b.userId) : ('k:'+b.kId);
+    if(!debtByEntity[key]) debtByEntity[key]={sum:0, fuerLieferant:!!b.fuerLieferant, kId:b.kId, userId:b.userId};
+    debtByEntity[key].sum += displayTotal(b);
+  });
+  const schuldnerKeys=Object.keys(debtByEntity).filter(key=>debtByEntity[key].sum>0);
 
   document.getElementById('d-schulden').textContent=fmt(debt);
-  document.getElementById('d-s-sub').textContent=`${open.length} offen`;
+  document.getElementById('d-s-sub').textContent=`${owedToMe.length} offen`;
   document.getElementById('d-best').textContent=S.bestellungen.length;
-  document.getElementById('d-schuldner').textContent=schuldnerIds.length;
+  document.getElementById('d-schuldner').textContent=schuldnerKeys.length;
 
   // Eigene offene Bestellungen beim Lieferanten (getrennt von der Kundenschuld oben) —
   // die Kachel wird nur angezeigt, wenn es sowas überhaupt gibt.
@@ -2204,29 +2239,44 @@ function renderDashboard(){
     statStrip?.classList.remove('has-lieferant');
   }
   document.getElementById('d-kunden').textContent=S.kunden.length;
-  document.getElementById('d-count').textContent=open.length;
+  document.getElementById('d-count').textContent=owedToMe.length;
 
   // Gesamtgewinn: pro Bestellposition der tatsächlich verrechnete Verkaufspreis (it.preis,
-  // so wie er bei Bestellung galt) minus dem zu diesem Zeitpunkt eingefrorenen Einkaufspreis
-  // (it.ek). Bestellungen, die VOR Einführung dieses Features angelegt wurden, haben noch
-  // kein it.ek gespeichert — dafür wird ersatzweise der aktuell hinterlegte Einkaufspreis
-  // verwendet. Bestellungen beim eigenen Lieferanten (Nachbestellungen) zählen nicht mit,
-  // da das keine Verkäufe an Kunden sind.
+  // so wie er bei Bestellung galt) minus Einkaufspreis. Zwei Fälle zählen als Verkauf und
+  // fließen in den Gewinn ein: normale Kundenbestellungen, UND Bestellungen, die ein
+  // Lieferantenkunde (anderer Benutzer) bei MIR aufgegeben hat. Bei Kundenbestellungen wird
+  // der zum Bestellzeitpunkt eingefrorene Einkaufspreis (it.ek) verwendet, mit Fallback auf
+  // den aktuellen Einkaufspreis für ältere Bestellungen ohne it.ek. Bei Bestellungen von
+  // Lieferantenkunden ist it.ek NICHT mein eigener Einkaufspreis (das Feld wurde beim Käufer
+  // mit dessen eigenem Einkaufspreis befüllt), daher zählt hier immer mein aktuell
+  // hinterlegter Einkaufspreis. Meine eigenen Nachbestellungen bei meinem Lieferanten
+  // (b.fuerLieferant && b.userId===currentUserId) sind Wareneinkauf, kein Verkauf, und
+  // zählen daher gar nicht mit.
   let gewinn=0;
   S.bestellungen.forEach(b=>{
-    if(b.fuerLieferant) return;
+    if(b.fuerLieferant && b.userId===currentUserId) return;
     (b.items||[]).forEach(it=>{
       const verkaufStk = it.preis!=null ? it.preis : (S.preise[it.prod]||0);
-      const einkaufStk = it.ek!=null ? it.ek : (S.einkauf?.[it.prod]||0);
+      const einkaufStk = b.fuerLieferant
+        ? (S.einkauf?.[it.prod]||0)
+        : (it.ek!=null ? it.ek : (S.einkauf?.[it.prod]||0));
       gewinn += (verkaufStk-einkaufStk) * (it.stueck||0);
     });
   });
   const gEl=document.getElementById('d-gewinn');
   if(gEl){ gEl.textContent=fmt(gewinn); gEl.style.color = gewinn>=0 ? 'var(--success-deep)' : 'var(--rust)'; }
 
-  // Top-Schuldner-Skala: gestapelte Anteile der größten Schuldner an der Gesamtschuld
-  const ranked=schuldnerIds
-    .map(id=>({kId:id, sum:debtByKunde[id], k:S.kunden.find(k=>String(k.id)===String(id))}))
+  // Top-Schuldner-Skala: gestapelte Anteile der größten Schuldner an der Gesamtschuld.
+  // Lieferantenkunden bekommen hier den Benutzernamen des Bestellenden statt "Unbekannt"
+  // (sie haben keinen Kunden-Datensatz, kId ist null).
+  const ranked=schuldnerKeys
+    .map(key=>{
+      const e=debtByEntity[key];
+      const name = e.fuerLieferant
+        ? (usernameOf(e.userId) || 'Unbekannt')
+        : (S.kunden.find(k=>String(k.id)===String(e.kId)) ? `${S.kunden.find(k=>String(k.id)===String(e.kId)).vorname} ${S.kunden.find(k=>String(k.id)===String(e.kId)).nachname}` : 'Unbekannt');
+      return {sum:e.sum, name};
+    })
     .sort((a,b)=>b.sum-a.sum);
   const top=ranked.slice(0,4);
   const restSum=ranked.slice(4).reduce((s,r)=>s+r.sum,0);
@@ -2238,8 +2288,7 @@ function renderDashboard(){
     trackWrap.innerHTML='';
   } else {
     valsWrap.innerHTML=top.map((r,i)=>{
-      const name=r.k?`${r.k.vorname} ${r.k.nachname}`:'Unbekannt';
-      return `<span style="color:${segColors[i]}">${name} ${fmt(r.sum)}</span>`;
+      return `<span style="color:${segColors[i]}">${r.name} ${fmt(r.sum)}</span>`;
     }).join('') + (restSum>0?`<span style="color:var(--ink-faint)">Übrige ${fmt(restSum)}</span>`:'');
     let segs='', leftAcc=0;
     top.forEach((r,i)=>{
@@ -2254,13 +2303,14 @@ function renderDashboard(){
     trackWrap.innerHTML=segs;
   }
 
-  const recent=[...open].sort((a,b)=>b.id-a.id).slice(0,10);
+  const recent=[...owedToMe].sort((a,b)=>b.id-a.id).slice(0,10);
   const tbody=document.getElementById('d-tbody');
   if(!recent.length){tbody.innerHTML=`<tr><td colspan="4" class="ec"><div class="ec-ic">✓</div><div class="ec-t">Keine offenen Bestellungen</div></td></tr>`;}
   else tbody.innerHTML=recent.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
+    const name = b.fuerLieferant ? `◆ ${usernameOf(b.userId)}` : (k?k.vorname+' '+k.nachname:'—');
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
-    return `<tr><td style="font-weight:600">${k?k.vorname+' '+k.nachname:'—'}</td><td style="font-size:12px">${prods}</td><td class="mono" style="font-weight:700">${fmt(b.total)}</td><td><span class="badge b-offen">Offen</span></td></tr>`;
+    return `<tr><td style="font-weight:600">${name}</td><td style="font-size:12px">${prods}</td><td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td><td><span class="badge b-offen">Offen</span></td></tr>`;
   }).join('');
   document.getElementById('service-banner').style.display=M.service.due?'flex':'none';
 }
