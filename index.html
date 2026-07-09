@@ -689,10 +689,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <nav class="scalebar" id="scalebar">
         <div class="scale-tick active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic">◎</span>Übersicht</div>
         <div class="scale-tick" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen</div>
-        <div class="scale-tick" onclick="nav('kunden');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◐</span>Kunden</div>
-        <div class="scale-tick" onclick="nav('preise');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">⚖</span>Preise</div>
-        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic">⚙</span>Einstellungen</div>
-        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">✚</span>Service</div>
+        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◆</span>Beim Lieferanten</div>
+        <div class="scale-tick" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">◐</span>Kunden</div>
+        <div class="scale-tick" onclick="nav('preise');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic">⚖</span>Preise</div>
+        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">⚙</span>Einstellungen</div>
+        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic">✚</span>Service</div>
       </nav>
 
       <div class="sb-footer">
@@ -719,6 +720,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <nav class="ios-tabbar" id="ios-tabbar">
         <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic">◎</span><span class="itb-lab">Übersicht</span></button>
         <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤</span><span class="itb-lab">Bestellungen</span></button>
+        <button class="itb-btn" id="itb-lieferant" style="display:none" data-page="lieferant" onclick="nav('lieferant')"><span class="itb-ic">◆</span><span class="itb-lab">Lieferant</span></button>
         <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic">◐</span><span class="itb-lab">Kunden</span></button>
         <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic">⚖</span><span class="itb-lab">Preise</span></button>
         <button class="itb-btn" data-page="einstellungen" onclick="nav('einstellungen')"><span class="itb-ic">⚙</span><span class="itb-lab">Mehr</span></button>
@@ -797,6 +799,36 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="ec-ic">▤</div>
         <div class="ec-t" id="b-empty-text">Keine Bestellungen</div>
         <div class="ec-s">Lege eine neue Bestellung an, um zu starten.</div>
+      </div>
+    </div>
+
+    <!-- BEIM LIEFERANTEN BESTELLEN -->
+    <div class="page" id="page-lieferant">
+      <div class="ph">
+        <div><div class="ph-eyebrow">Einkauf</div><div class="pt">Beim Lieferanten bestellen</div><div class="ps" id="lb-supplier-sub">Bestellung wird direkt an deinen Lieferanten übermittelt.</div></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <label class="fl" style="margin-bottom:8px">Produkte</label>
+        <div id="lb-order-items"></div>
+        <button class="add-item-btn" onclick="addLbItem()">＋ Produkt hinzufügen</button>
+        <div style="margin:16px 0 4px">
+          <label class="fl" style="margin-bottom:6px">Bestellhinweis (optional)</label>
+          <textarea id="lb-notiz" rows="2" placeholder="z.B. Lieferadresse, Wunschtermin, Bemerkung…" style="width:100%;resize:vertical"></textarea>
+        </div>
+        <div class="order-total-row" style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="lb-order-total">0,00 €</span></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px">
+          <button class="btn btn-primary" onclick="submitLbBestellung()">📦 Bestellung aufgeben</button>
+        </div>
+      </div>
+
+      <div class="card-head" style="border:none;padding:0;margin:28px 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
+      <div class="card">
+        <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Bezahlt</th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
+      </div>
+      <div class="ec" id="lb-empty" style="display:none">
+        <div class="ec-ic">◆</div>
+        <div class="ec-t">Noch keine Bestellungen beim Lieferanten</div>
+        <div class="ec-s">Stelle oben deine erste Bestellung zusammen.</div>
       </div>
     </div>
 
@@ -955,22 +987,49 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   </div>
 </div>
 
+<!-- MODAL: Kunde Detail -->
+<div class="modal-bg" id="modal-kundendetail">
+  <div class="modal wide">
+    <div class="modal-head"><h3 id="kd-name">Kunde</h3><button class="modal-close" onclick="closeModal('kundendetail')">✕</button></div>
+    <div class="modal-body">
+      <div class="tab-group" style="width:100%;margin-bottom:16px">
+        <button type="button" class="tab-btn active" id="kd-tab-infos" onclick="switchKdTab('infos')" style="flex:1;justify-content:center">Infos</button>
+        <button type="button" class="tab-btn" id="kd-tab-bestellungen" onclick="switchKdTab('bestellungen')" style="flex:1;justify-content:center">Bestellungen</button>
+        <button type="button" class="tab-btn" id="kd-tab-statistik" onclick="switchKdTab('statistik')" style="flex:1;justify-content:center">Statistik</button>
+      </div>
+      <div id="kd-panel-infos">
+        <div class="about-row"><span>Vorname</span><span id="kd-vorname"></span></div>
+        <div class="about-row"><span>Nachname</span><span id="kd-nachname"></span></div>
+        <div class="about-row"><span>Bestellungen</span><span id="kd-info-count"></span></div>
+        <div class="about-row" style="border-bottom:none"><span>Offener Betrag</span><span id="kd-info-debt" class="mono"></span></div>
+      </div>
+      <div id="kd-panel-bestellungen" style="display:none">
+        <div class="tbl-wrap"><table><thead><tr><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th></tr></thead><tbody id="kd-best-tbody"></tbody></table></div>
+        <div class="ec" id="kd-best-empty" style="display:none;padding:24px 0"><div class="ec-t">Keine Bestellungen</div></div>
+      </div>
+      <div id="kd-panel-statistik" style="display:none">
+        <div class="stat-strip" style="grid-template-columns:repeat(2,1fr)">
+          <div class="stat-cell"><div class="sc-lab">Bestellungen</div><div class="sc-v mono" id="kd-stat-count">0</div></div>
+          <div class="stat-cell"><div class="sc-lab">Gesamtumsatz</div><div class="sc-v mono" id="kd-stat-umsatz">0,00 €</div></div>
+          <div class="stat-cell"><div class="sc-lab">Offener Betrag</div><div class="sc-v mono" id="kd-stat-offen">0,00 €</div></div>
+          <div class="stat-cell"><div class="sc-lab">Ø Bestellwert</div><div class="sc-v mono" id="kd-stat-avg">0,00 €</div></div>
+        </div>
+        <div class="ps" style="margin-top:14px" id="kd-stat-top"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:space-between">
+      <button class="btn btn-danger btn-sm" onclick="delKundeFromDetail()">🗑 Kunde löschen</button>
+      <button class="btn btn-ghost" onclick="closeModal('kundendetail')">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Neue Bestellung -->
 <div class="modal-bg" id="modal-bestellung">
   <div class="modal wide">
     <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
     <div class="modal-body">
-      <div id="nb-modus-wrap" style="display:none;margin-bottom:16px">
-        <label class="fl" style="margin-bottom:6px">Bestellung für</label>
-        <div class="tab-group" style="width:100%">
-          <button type="button" class="tab-btn tab-kunde active" id="nb-modus-kunde" onclick="setBestellModus('kunde')" style="flex:1;justify-content:center">Eigener Kunde</button>
-          <button type="button" class="tab-btn tab-lieferant" id="nb-modus-lieferant" onclick="setBestellModus('lieferant')" style="flex:1;justify-content:center">Bei Lieferant bestellen</button>
-        </div>
-      </div>
       <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
-      <div id="nb-lieferant-info" style="display:none;margin-bottom:16px;background:var(--lieferant-bg);border:1px solid color-mix(in srgb, var(--lieferant) 30%, transparent);border-radius:var(--r-lg);padding:12px 14px">
-        <div style="font-size:12px;color:var(--lieferant-deep);line-height:1.5">Diese Bestellung wird direkt bei <strong id="nb-lieferant-name2">deinem Lieferanten</strong> aufgegeben — er sieht sie unter deinem Namen in seinem Konto, berechnet wird mit seiner Preisliste. Der Lieferant erfährt nichts von deinen eigenen Kunden.</div>
-      </div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="order-items"></div>
       <button class="add-item-btn" onclick="addOrderItem()">＋ Produkt hinzufügen</button>
@@ -1013,6 +1072,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
       <div class="about-row" id="od-angekommen-row" style="display:none"><span>Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
       <div class="about-row" id="od-bezahlt-row" style="display:none"><span>Bezahlt am</span><span id="od-bezahlt-am" style="color:var(--success-deep);font-weight:600"></span></div>
+      <div class="about-row" id="od-notiz-row" style="display:none;align-items:flex-start"><span>Notiz</span><span id="od-notiz" style="text-align:right;max-width:70%"></span></div>
       <div class="about-row"><span>Status</span><span id="od-status"></span></div>
       <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
       <div class="order-total-row" id="od-subtotal-row">
@@ -1205,7 +1265,7 @@ function currentRole(){ return M.profile ? M.profile.role : 'user'; }
 function allowedPages(role){
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  return ['dashboard','bestellungen','kunden','preise','einstellungen']; // 'user'
+  return ['dashboard','bestellungen','lieferant','kunden','preise','einstellungen']; // 'user'
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -1288,7 +1348,7 @@ async function loadAllData(){
   const mapBestellung = b => ({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, userId:b.user_id, deletedAt:b.deleted_at||null
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null
   });
   const allBest = (bestRes.data||[]);
   S.bestellungen = allBest.filter(b=>!b.deleted_at).map(mapBestellung);
@@ -1335,9 +1395,10 @@ function closeSidebar(){
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
-const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',kunden:'Kunden',preise:'Preise',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['dashboard','bestellungen','kunden','preise','einstellungen','service'];
+const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',preise:'Preise',einstellungen:'Einstellungen',service:'Service'};
+const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','preise','einstellungen','service'];
 function nav(id){
+  if(id==='lieferant' && !M.profile?.linked_to) id=homePage();
   if(!canSeePage(id)) id=homePage();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.scale-tick').forEach(n=>n.classList.remove('active'));
@@ -1346,6 +1407,7 @@ function nav(id){
   document.querySelectorAll('.itb-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
   if(id==='einstellungen') renderSettings();
   if(id==='service') renderService();
+  if(id==='lieferant') renderLieferantSeite();
   refresh();
 }
 
@@ -1372,6 +1434,11 @@ function applyRoleUI(){
   document.querySelectorAll('.itb-btn').forEach(b=>{
     b.style.display = allowed.includes(b.dataset.page) ? '' : 'none';
   });
+  const hasSupplier = !!M.profile?.linked_to;
+  const lTick=document.getElementById('nav-lieferant-tick');
+  if(lTick) lTick.style.display = (allowed.includes('lieferant') && hasSupplier) ? 'flex' : 'none';
+  const lTab=document.getElementById('itb-lieferant');
+  if(lTab) lTab.style.display = (allowed.includes('lieferant') && hasSupplier) ? '' : 'none';
   const tabbar=document.getElementById('ios-tabbar');
   const showTabbar = allowed.length>1;
   if(tabbar) tabbar.style.display = showTabbar ? '' : 'none';
@@ -1388,16 +1455,6 @@ function openModal(id){
     document.getElementById('discount-type').value='';
     document.getElementById('discount-value').value='';
     document.getElementById('discount-value').disabled=true;
-    const modusWrap=document.getElementById('nb-modus-wrap');
-    const supplierId = M.profile?.linked_to || null;
-    if(supplierId){
-      const supplier=M.users.find(u=>u.id===supplierId);
-      modusWrap.style.display='';
-      document.getElementById('nb-lieferant-name2').textContent = supplier ? supplier.username : 'deinem Lieferanten';
-    } else {
-      modusWrap.style.display='none';
-    }
-    setBestellModus('kunde');
   }
 }
 function closeModal(id){ document.getElementById('modal-'+id).classList.remove('show'); }
@@ -1572,12 +1629,82 @@ async function addKunde(){
   closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
 }
 async function delKunde(id){
-  if(!(await confirmDialog('Alle zugehörigen Bestellungen werden ebenfalls entfernt.', {title:'Kunden wirklich löschen?'})))return;
+  if(!(await confirmDialog('Alle zugehörigen Bestellungen werden ebenfalls entfernt.', {title:'Kunden wirklich löschen?'})))return false;
   const { error } = await sb.from('kunden').delete().eq('id', id);
-  if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
+  if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return false; }
   S.kunden=S.kunden.filter(k=>k.id!==id);
   S.bestellungen=S.bestellungen.filter(b=>b.kId!==id); // löscht Supabase per on-delete-cascade mit, hier nur lokaler Stand
   renderKunden();renderBestellungen();fillSelects();showToast('Kunde gelöscht.','🗑');
+  return true;
+}
+
+// ══════════════════════════════════════════════
+// KUNDE DETAIL (Modal mit Tabs: Infos · Bestellungen · Statistik)
+// ══════════════════════════════════════════════
+let currentKdId=null;
+function openKundeDetail(id){
+  const k=S.kunden.find(x=>x.id===id);
+  if(!k)return;
+  currentKdId=id;
+  document.getElementById('kd-name').textContent = `${k.vorname} ${k.nachname}`;
+  switchKdTab('infos');
+  openModal('kundendetail');
+}
+function switchKdTab(tab){
+  ['infos','bestellungen','statistik'].forEach(t=>{
+    document.getElementById('kd-tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('kd-panel-'+t).style.display = t===tab ? '' : 'none';
+  });
+  if(tab==='infos') renderKdInfos();
+  if(tab==='bestellungen') renderKdBestellungen();
+  if(tab==='statistik') renderKdStatistik();
+}
+function renderKdInfos(){
+  const k=S.kunden.find(x=>x.id===currentKdId);
+  if(!k)return;
+  const orders=S.bestellungen.filter(b=>b.kId===currentKdId);
+  const debt=orders.filter(b=>!b.paid).reduce((s,b)=>s+b.total,0);
+  document.getElementById('kd-vorname').textContent=k.vorname;
+  document.getElementById('kd-nachname').textContent=k.nachname;
+  document.getElementById('kd-info-count').textContent=orders.length;
+  document.getElementById('kd-info-debt').textContent=fmt(debt);
+}
+function renderKdBestellungen(){
+  const tbody=document.getElementById('kd-best-tbody');
+  const orders=S.bestellungen.filter(b=>b.kId===currentKdId).sort((a,b)=>b.id-a.id);
+  document.getElementById('kd-best-empty').style.display = orders.length ? 'none' : 'block';
+  tbody.innerHTML = orders.map(b=>{
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    return `<tr>
+      <td style="font-size:12px">${prods}</td>
+      <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
+      <td class="mono" style="font-weight:700">${fmt(b.total)}</td>
+      <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
+      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
+    </tr>`;
+  }).join('');
+}
+function renderKdStatistik(){
+  const orders=S.bestellungen.filter(b=>b.kId===currentKdId);
+  const count=orders.length;
+  const umsatz=orders.filter(b=>b.paid).reduce((s,b)=>s+b.total,0);
+  const offen=orders.filter(b=>!b.paid).reduce((s,b)=>s+b.total,0);
+  const avg = count ? (orders.reduce((s,b)=>s+b.total,0)/count) : 0;
+  document.getElementById('kd-stat-count').textContent=count;
+  document.getElementById('kd-stat-umsatz').textContent=fmt(umsatz);
+  document.getElementById('kd-stat-offen').textContent=fmt(offen);
+  document.getElementById('kd-stat-avg').textContent=fmt(avg);
+  const prodCount={};
+  orders.forEach(b=>b.items.forEach(it=>{prodCount[it.prod]=(prodCount[it.prod]||0)+(it.stueck||1);}));
+  const top=Object.entries(prodCount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kd-stat-top').textContent = top
+    ? `Meistbestelltes Produkt: ${PROD_MAP[top[0]]?.icon||''} ${PROD_MAP[top[0]]?.name||top[0]} (${top[1]}×)`
+    : 'Noch keine Bestellungen.';
+}
+async function delKundeFromDetail(){
+  if(!currentKdId)return;
+  const ok = await delKunde(currentKdId);
+  if(ok) closeModal('kundendetail');
 }
 function renderKunden(){
   const g=document.getElementById('kunden-grid'),em=document.getElementById('kunden-empty');
@@ -1626,8 +1753,8 @@ function renderKunden(){
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
     const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${usernameOf(k.userId)}</span>` : '';
-    return `<div class="kcard">
-      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="delKunde(${k.id})">🗑</button>`}</div>
+    return `<div class="kcard" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
+      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -1652,16 +1779,6 @@ function fillSelects(){
 // BESTELLUNGEN (Order-Builder im Modal)
 // ══════════════════════════════════════════════
 let orderItems=[];
-let bestellModus='kunde'; // 'kunde' | 'lieferant'
-function activePreise(){ return bestellModus==='lieferant' ? S.lieferantPreise : S.preise; }
-function setBestellModus(mode){
-  bestellModus=mode;
-  document.getElementById('nb-modus-kunde').classList.toggle('active', mode==='kunde');
-  document.getElementById('nb-modus-lieferant').classList.toggle('active', mode==='lieferant');
-  document.getElementById('nb-kunde-wrap').style.display = mode==='kunde' ? '' : 'none';
-  document.getElementById('nb-lieferant-info').style.display = mode==='lieferant' ? '' : 'none';
-  renderOrderItems();
-}
 function addOrderItem(){
   orderItems.push({uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1});
   renderOrderItems();
@@ -1686,7 +1803,7 @@ function onDiscountTypeChange(){
   renderOrderItems();
 }
 function calcOrderTotals(){
-  const preise=activePreise();
+  const preise=S.preise;
   const subtotal=orderItems.reduce((s,it)=>s+(preise[it.prod]||0)*(it.stueck||1),0);
   const dType=document.getElementById('discount-type')?.value||'';
   const dValRaw=parseFloat(document.getElementById('discount-value')?.value)||0;
@@ -1699,7 +1816,7 @@ function calcOrderTotals(){
 function renderOrderItems(){
   const wrap=document.getElementById('order-items');
   if(!wrap)return;
-  const preise=activePreise();
+  const preise=S.preise;
   wrap.innerHTML=orderItems.map(it=>{
     const sub=fmt((preise[it.prod]||0)*(it.stueck||1));
     return `<div class="oi">
@@ -1723,29 +1840,116 @@ function renderOrderItems(){
   document.getElementById('order-total').textContent=fmt(total);
 }
 async function addBestellung(){
-  const fuerLieferant = bestellModus==='lieferant';
-  let kId=null;
-  if(!fuerLieferant){
-    kId=parseInt(document.getElementById('nb-kunde').value);
-    if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
-  }
+  const kId=parseInt(document.getElementById('nb-kunde').value);
+  if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
-  const preise=activePreise();
+  const preise=S.preise;
   const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:preise[it.prod]||0,sub:(preise[it.prod]||0)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, delivered:false, fuer_lieferant:fuerLieferant, bestelldatum: today()
+    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today()
   }).select().single();
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
-  showToast(fuerLieferant?'Bestellung beim Lieferanten aufgegeben. ✓':'Bestellung angelegt.');
+  showToast('Bestellung angelegt.');
+}
+
+// ══════════════════════════════════════════════
+// BEIM LIEFERANTEN BESTELLEN (eigene Seite, eigener Warenkorb)
+// Läuft komplett getrennt vom Kunden-Bestellformular — genau wie eine
+// echte Firma Wareneinkauf und Kundenverkauf getrennt abwickelt.
+// ══════════════════════════════════════════════
+let lbItems=[];
+function addLbItem(){
+  lbItems.push({uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1});
+  renderLbItems();
+}
+function removeLbItem(uid){
+  lbItems=lbItems.filter(it=>it.uid!==uid);
+  renderLbItems();
+}
+function updateLbItem(uid,field,val){
+  const it=lbItems.find(x=>x.uid===uid);
+  if(!it)return;
+  it[field]=field==='stueck'?Math.max(1,parseInt(val)||1):val;
+  renderLbItems();
+}
+function calcLbTotal(){
+  return lbItems.reduce((s,it)=>s+(S.lieferantPreise[it.prod]||0)*(it.stueck||1),0);
+}
+function renderLbItems(){
+  const wrap=document.getElementById('lb-order-items');
+  if(!wrap)return;
+  wrap.innerHTML=lbItems.map(it=>{
+    const sub=fmt((S.lieferantPreise[it.prod]||0)*(it.stueck||1));
+    return `<div class="oi">
+      <select onchange="updateLbItem(${it.uid},'prod',this.value)">
+        ${PRODUCTS.map(p=>`<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(S.lieferantPreise[p.id]||0)}</option>`).join('')}
+      </select>
+      <input type="number" min="1" value="${it.stueck}" onchange="updateLbItem(${it.uid},'stueck',this.value)"/>
+      <div class="oi-total mono">${sub}</div>
+      <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})">✕</button>
+    </div>`;
+  }).join('');
+  document.getElementById('lb-order-total').textContent=fmt(calcLbTotal());
+}
+function renderLieferantSeite(){
+  const supplierId = M.profile?.linked_to || null;
+  const supplier = supplierId ? M.users.find(u=>u.id===supplierId) : null;
+  document.getElementById('lb-supplier-sub').textContent = supplier
+    ? `Bestellung wird direkt bei ${supplier.username} aufgegeben — berechnet mit seiner aktuellen Preisliste.`
+    : 'Kein Lieferant verknüpft — bitte zuerst unter Einstellungen einen Lieferanten auswählen.';
+  if(!lbItems.length){ lbItems=[{uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1}]; }
+  renderLbItems();
+  renderLbHistory();
+}
+function renderLbHistory(){
+  const tbody=document.getElementById('lb-tbody');
+  if(!tbody)return;
+  const list=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId).sort((a,b)=>b.id-a.id);
+  document.getElementById('lb-empty').style.display = list.length ? 'none' : 'block';
+  tbody.innerHTML = list.map(b=>{
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const lieferBadge = b.delivered ? '<span class="badge b-bezahlt">✓ Angekommen</span>' : '<span class="badge b-offen">🚚 Unterwegs</span>';
+    const bezahltBadge = b.paid ? '<span class="badge b-bezahlt">✓ Bezahlt</span>' : '<span class="badge b-offen">Offen</span>';
+    return `<tr>
+      <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
+      <td style="font-size:12px">${prods}</td>
+      <td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td>
+      <td>${lieferBadge}</td>
+      <td>${bezahltBadge}</td>
+      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
+    </tr>`;
+  }).join('');
+}
+async function submitLbBestellung(){
+  const supplierId = M.profile?.linked_to || null;
+  if(!supplierId){ showToast('Bitte zuerst unter Einstellungen einen Lieferanten auswählen.','⚠'); return; }
+  if(!lbItems.length){ showToast('Mindestens ein Produkt hinzufügen.','⚠'); return; }
+  const items=lbItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:S.lieferantPreise[it.prod]||0,sub:(S.lieferantPreise[it.prod]||0)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
+  const subtotal=calcLbTotal();
+  const notiz=document.getElementById('lb-notiz').value.trim()||null;
+  const { data, error } = await sb.from('bestellungen').insert({
+    user_id:currentUserId, kunde_id:null, items, subtotal, total:subtotal,
+    discount_type:null, discount_value:0, paid:false, delivered:false,
+    fuer_lieferant:true, bestelldatum: today(), notiz
+  }).select().single();
+  if(error){ showToast(dbErrorMsg(error,'Bestellung konnte nicht angelegt werden.'),'⚠'); return; }
+  S.bestellungen.unshift({
+    id:data.id, kId:null, items:data.items, subtotal:Number(data.subtotal),
+    discountType:null, discountValue:0,
+    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null
+  });
+  lbItems=[]; document.getElementById('lb-notiz').value='';
+  renderLieferantSeite(); renderBestellungen(); renderDashboard();
+  showToast('Bestellung beim Lieferanten aufgegeben. ✓');
 }
 async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -2317,6 +2521,13 @@ function openOrderDetail(id){
     bezahltRow.style.display='none';
   }
   document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
+  const notizRow=document.getElementById('od-notiz-row');
+  if(b.notiz){
+    notizRow.style.display='flex';
+    document.getElementById('od-notiz').textContent = b.notiz;
+  } else {
+    notizRow.style.display='none';
+  }
   document.getElementById('od-lieferschein-btn').style.display = b.fuerLieferant ? '' : 'none';
   document.getElementById('od-rechnung-btn').style.display = b.fuerLieferant ? 'none' : '';
 
@@ -2732,6 +2943,7 @@ async function saveOwnLink(){
   const { error } = await sb.rpc('set_own_link', { p_linked_to: val || null });
   if(error){ showToast(error.message || 'Lieferant konnte nicht gespeichert werden.', '⚠'); return; }
   if(M.profile) M.profile.linked_to = val || null;
+  applyRoleUI();
   showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
 }
 function exportData(){

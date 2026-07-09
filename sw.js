@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '4.2.0'; // Lieferanten-Bestellungen: Zeitstempel "Angekommen am" für Lieferstatus, sichtbar in Bestelldetails & Historie
+const APP_VERSION = '5.0.0'; // Neue eigene Seite "Beim Lieferanten bestellen" (getrennter Warenkorb-Ablauf statt Umschalter im Kunden-Formular) + Kunden-Detailansicht mit Tabs (Infos/Bestellungen/Statistik)
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
