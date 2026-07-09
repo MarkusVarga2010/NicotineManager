@@ -14,6 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="NicotineMgr">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/favicon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2322C99E'/%3E%3Cpath d='M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z' fill='%230A0D10'/%3E%3Ccircle cx='30.5' cy='9.5' r='3' fill='%230A0D10' opacity='.85'/%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,6 +92,8 @@ html[data-mode="light"]{
 html[data-mode="light"] body{-webkit-font-smoothing:auto}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
+html{color-scheme:dark}
+html[data-mode="light"]{color-scheme:light}
 body{
   background:var(--paper);
   color:var(--ink);
@@ -100,9 +103,14 @@ body{
   -webkit-font-smoothing:antialiased;
   overscroll-behavior-y:none;
 }
+body,.card,.kcard,.stat-cell,.modal,.sidebar,.mobile-topbar,.ios-tabbar,.tab-group,input,select,textarea{
+  transition:background-color .25s ease, border-color .25s ease, color .25s ease;
+}
 button,.scale-tick,.ic-btn,input[type="checkbox"]+.tt{touch-action:manipulation}
 ::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
 ::selection{background:var(--sage-bg);color:var(--sage-deep)}
 
 h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-.01em}
@@ -407,8 +415,7 @@ th{
 td{padding:14px 20px;font-size:13px;border-bottom:1px solid var(--line)}
 tbody tr:last-child td{border-bottom:none}
 tbody tr{transition:background .12s}
-tbody tr:hover{background:color-mix(in srgb, var(--paper3) 45%, transparent)}
-tbody tr:hover{background:var(--paper3)}
+tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .ec{text-align:center;padding:48px 20px;color:var(--ink-faint)}
 .ec-ic{font-size:30px;margin-bottom:10px;opacity:.5}
 .ec-t{font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:3px}
@@ -1140,13 +1147,18 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.0.0';
+const CURRENT_UI_VERSION = '4.1.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
     'Lieferanten-Bestellungen stehen jetzt direkt unter "Bestellt" und "Bezahlt" — genau wie alle anderen Bestellungen.',
     'Nutzer, die bei dir bestellen, erscheinen jetzt ganz normal auf der Kunden-Seite (nur ohne Bearbeiten/Löschen).',
     'Neu: "Historie" mit Zeitstempel (bestellt/bezahlt am), Preis-Verlauf pro Produkt, Papierkorb (30 Tage), zusätzliche PDF-Exporte.'
+  ],
+  '4.1.0': [
+    'Feinschliff fürs neue Design: sanftere Übergänge beim Hell/Dunkel-Wechsel, eigene Scrollbar-Optik.',
+    'Das neue Logo erscheint jetzt auch auf allen PDF-Exporten (Rechnung, Lieferschein, offene Bestellungen, Historie).',
+    'Browser-Tab zeigt jetzt ebenfalls das neue Logo als Favicon.'
   ]
 };
 function checkWhatsNew(){
@@ -2058,14 +2070,15 @@ function downloadOpenOrdersPDF(){
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 16;
 
-  // Kopfzeile: Logo-Kreis + Titel
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.circle(margin+4, 16, 4.2, 'S');
+  // Kopfzeile: Logo-Kreis (Markenfarbe) + Titel
+  doc.setFillColor(34,201,158);
+  doc.circle(margin+4, 16, 4.2, 'F');
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
+  doc.setTextColor(20,20,20);
   doc.text('NicotineManager', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
@@ -2128,13 +2141,14 @@ function downloadOpenLieferantPDF(){
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 16;
 
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.circle(margin+4, 16, 4.2, 'S');
+  doc.setFillColor(34,201,158);
+  doc.circle(margin+4, 16, 4.2, 'F');
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
+  doc.setTextColor(20,20,20);
   doc.text('NicotineManager', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
@@ -2196,13 +2210,14 @@ function downloadHistoriePDF(){
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 16;
 
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.circle(margin+4, 16, 4.2, 'S');
+  doc.setFillColor(34,201,158);
+  doc.circle(margin+4, 16, 4.2, 'F');
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
+  doc.setTextColor(20,20,20);
   doc.text('NicotineManager', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
@@ -2329,14 +2344,15 @@ function printInvoice(id){
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 16;
 
-  // Kopfzeile: Logo-Kreis + Titel
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.circle(margin+4, 16, 4.2, 'S');
+  // Kopfzeile: Logo-Kreis (Markenfarbe) + Titel
+  doc.setFillColor(34,201,158);
+  doc.circle(margin+4, 16, 4.2, 'F');
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
+  doc.setTextColor(20,20,20);
   doc.text('NicotineManager', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
@@ -2442,13 +2458,14 @@ function printLieferschein(id){
   const margin = 16;
 
   // Kopfzeile
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.circle(margin+4, 16, 4.2, 'S');
+  doc.setFillColor(34,201,158);
+  doc.circle(margin+4, 16, 4.2, 'F');
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
+  doc.setTextColor(20,20,20);
   doc.text('NicotineManager', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
