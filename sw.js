@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '4.1.0'; // Professioneller Feinschliff: Custom-Scrollbar, sanfte Theme-Übergänge, SVG-Favicon, Marken-Logo jetzt auch in allen PDF-Exporten
+const APP_VERSION = '4.2.0'; // Lieferanten-Bestellungen: Zeitstempel "Angekommen am" für Lieferstatus, sichtbar in Bestelldetails & Historie
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

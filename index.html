@@ -1010,6 +1010,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row"><span>Bestellt am</span><span id="od-datum"></span></div>
+      <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
+      <div class="about-row" id="od-angekommen-row" style="display:none"><span>Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
       <div class="about-row" id="od-bezahlt-row" style="display:none"><span>Bezahlt am</span><span id="od-bezahlt-am" style="color:var(--success-deep);font-weight:600"></span></div>
       <div class="about-row"><span>Status</span><span id="od-status"></span></div>
       <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
@@ -1286,7 +1288,7 @@ async function loadAllData(){
   const mapBestellung = b => ({
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, userId:b.user_id, deletedAt:b.deleted_at||null
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, userId:b.user_id, deletedAt:b.deleted_at||null
   });
   const allBest = (bestRes.data||[]);
   S.bestellungen = allBest.filter(b=>!b.deleted_at).map(mapBestellung);
@@ -1740,7 +1742,7 @@ async function addBestellung(){
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, paidAt:data.bezahlt_am||null, userId:data.user_id
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:!!data.fuer_lieferant, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
   showToast(fuerLieferant?'Bestellung beim Lieferanten aufgegeben. ✓':'Bestellung angelegt.');
@@ -1748,9 +1750,10 @@ async function addBestellung(){
 async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b || b.delivered===newVal)return;
-  const { error } = await sb.from('bestellungen').update({ delivered:newVal }).eq('id', id);
+  const patch = { delivered:newVal, angekommen_am: newVal ? new Date().toISOString() : null };
+  const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
-  b.delivered=newVal;renderBestellungen();
+  b.delivered=newVal; b.deliveredAt=patch.angekommen_am; renderBestellungen();
   showToast(newVal?'Als erhalten/bestellt markiert. ✓':'Als unterwegs markiert.');
 }
 async function setPaid(id, newPaid){
@@ -1875,7 +1878,7 @@ function renderBestellungen(){
   const theadRow=document.getElementById('b-thead-row');
   if(theadRow){
     theadRow.innerHTML = bestellungenTab==='historie'
-      ? '<th>Typ</th>' + (showVon?'<th>Von</th>':'') + '<th>Kunde / Lieferant</th><th>Produkte</th><th>Bestellt am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>'
+      ? '<th>Typ</th>' + (showVon?'<th>Von</th>':'') + '<th>Kunde / Lieferant</th><th>Produkte</th><th>Bestellt am</th><th>Angekommen am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>'
       : (showVon
         ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
         : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>');
@@ -1929,6 +1932,7 @@ function renderBestellungen(){
         <td style="font-weight:600">${nameCell}</td>
         <td style="font-size:12px">${prods}</td>
         <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
+        <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDateTime(b.deliveredAt)}</td>
         <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDateTime(b.paidAt)}</td>
         ${gesamt}
         <td style="text-align:right;white-space:nowrap">
@@ -2288,6 +2292,23 @@ function openOrderDetail(id){
     ? `<span style="color:var(--lieferant-deep)">${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
     : (k?`${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
+  const lieferstatusRow=document.getElementById('od-lieferstatus-row');
+  const angekommenRow=document.getElementById('od-angekommen-row');
+  if(b.fuerLieferant){
+    lieferstatusRow.style.display='flex';
+    document.getElementById('od-lieferstatus').innerHTML = b.delivered
+      ? '<span class="badge b-bezahlt">✓ Angekommen</span>'
+      : '<span class="badge b-offen">🚚 Unterwegs</span>';
+    if(b.delivered && b.deliveredAt){
+      angekommenRow.style.display='flex';
+      document.getElementById('od-angekommen-am').textContent = fmtDateTime(b.deliveredAt);
+    } else {
+      angekommenRow.style.display='none';
+    }
+  } else {
+    lieferstatusRow.style.display='none';
+    angekommenRow.style.display='none';
+  }
   const bezahltRow=document.getElementById('od-bezahlt-row');
   if(b.paid && b.paidAt){
     bezahltRow.style.display='flex';
