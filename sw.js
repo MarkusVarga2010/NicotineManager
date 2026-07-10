@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.1.0'; // Klare Trennung Kunden- vs. Lieferanten-Bestellungen: eigener Einkauf wirkt sich nicht mehr auf Schulden/Gewinn aus, Lieferantenkunden haben eigene Sektion + eigene Auswirkung auf Schulden/Gewinn, Skala zeigt Benutzername statt "Unbekannt"
+const APP_VERSION = '5.2.1'; // Gewinn aus Verkäufen an Lieferantenkunden nutzt jetzt den zum Bestellzeitpunkt eingefrorenen eigenen Einkaufspreis (statt live), Schulden-Kachel zeigt Aufschlüsselung "davon X € von Lieferantenkunden"
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
