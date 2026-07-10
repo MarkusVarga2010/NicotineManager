@@ -271,6 +271,8 @@ button{font-family:inherit;cursor:pointer}
 .scale-tick .tk-n{display:none}
 .scale-tick.active{color:var(--sage-deep);background:var(--sage-bg)}
 .scale-tick.active .tk-ic{opacity:1}
+.tk-dot{margin-left:auto;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1}
+.tk-dot.show{display:flex}
 
 .ios-tabbar{
   display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
@@ -285,10 +287,12 @@ button{font-family:inherit;cursor:pointer}
   font-family:'Inter',sans-serif;transition:color .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
 }
 .itb-btn:active{transform:scale(.9)}
-.itb-ic{font-size:21px;line-height:1;transition:transform .15s ease}
+.itb-ic{font-size:21px;line-height:1;transition:transform .15s ease;position:relative;display:inline-block}
 .itb-lab{font-size:10px;font-weight:600;letter-spacing:.01em}
 .itb-btn.active{color:var(--sage-deep)}
 .itb-btn.active .itb-ic{transform:translateY(-1px) scale(1.08)}
+.itb-dot{position:absolute;top:-4px;right:-8px;min-width:14px;height:14px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1}
+.itb-dot.show{display:flex}
 
 /* Sidebar footer: Benutzer + Abmelden */
 .sb-footer{border-top:1px solid var(--line2);padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
@@ -733,8 +737,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 
       <nav class="scalebar" id="scalebar">
         <div class="scale-tick active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic">◎</span>Übersicht</div>
-        <div class="scale-tick" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen</div>
-        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◆</span>Beim Lieferanten</div>
+        <div class="scale-tick" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◆</span>Lieferant &amp; Schulden</div>
         <div class="scale-tick" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">◐</span>Kunden</div>
         <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic">◆</span>Lieferantenkunden</div>
         <div class="scale-tick" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">⚖</span>Preise</div>
@@ -765,7 +769,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 
       <nav class="ios-tabbar" id="ios-tabbar">
         <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic">◎</span><span class="itb-lab">Übersicht</span></button>
-        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤</span><span class="itb-lab">Bestellungen</span></button>
+        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤<span class="itb-dot" id="itb-dot-bestellungen"></span></span><span class="itb-lab">Bestellungen</span></button>
         <button class="itb-btn" id="itb-lieferant" style="display:none" data-page="lieferant" onclick="nav('lieferant')"><span class="itb-ic">◆</span><span class="itb-lab">Lieferant</span></button>
         <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic">◐</span><span class="itb-lab">Kunden</span></button>
         <button class="itb-btn" id="itb-lieferantenkunden" style="display:none" data-page="lieferantenkunden" onclick="nav('lieferantenkunden')"><span class="itb-ic">◆</span><span class="itb-lab">L.-Kunden</span></button>
@@ -790,7 +794,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="stat-cell"><div class="sc-lab">▤ Bestellungen</div><div class="sc-v mono" id="d-best">0</div><div class="sc-sub">gesamt</div></div>
         <div class="stat-cell"><div class="sc-lab">◐ Schuldner</div><div class="sc-v mono" id="d-schuldner">0</div><div class="sc-sub">Kunden mit offenem Betrag</div></div>
         <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
-        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Offen beim Lieferanten</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden</div></div>
+        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Eigene Schulden</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden anderer bei dir</div></div>
       </div>
 
       <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
@@ -876,6 +880,44 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="ec-ic">◆</div>
         <div class="ec-t">Noch keine Bestellungen beim Lieferanten</div>
         <div class="ec-s">Stelle oben deine erste Bestellung zusammen.</div>
+      </div>
+
+      <!-- EIGENE SCHULDEN: freie Schulden bei anderen Personen (nicht der eigene Lieferant),
+           bewusst auf derselben Seite wie die Lieferanten-Bestellungen, weil beides deine
+           eigenen offenen Verbindlichkeiten sind — siehe kombinierte Dashboard-Kachel. -->
+      <div class="card-head" style="border:none;padding:0;margin:28px 0 12px"><h3>◈ Sonstige Schulden</h3></div>
+      <div class="ps" style="margin:-6px 0 14px">Geld, das du jemand anderem schuldest — unabhängig von deinem Lieferanten. Zählt zusammen mit „Offen beim Lieferanten" in einer gemeinsamen Kachel auf der Übersicht.</div>
+      <div class="card" id="es-setup-hint" style="display:none">
+        <div class="ec" style="padding:8px 0">
+          <div class="ec-ic">⚙</div>
+          <div class="ec-t">Noch nicht eingerichtet</div>
+          <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
+          <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table eigene_schulden (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  glaeubiger text not null,
+  betrag numeric not null,
+  notiz text,
+  bezahlt boolean not null default false,
+  created_at timestamptz not null default now(),
+  bezahlt_am timestamptz
+);
+alter table eigene_schulden enable row level security;
+create policy "eigene schulden eigener user"
+  on eigene_schulden for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);</pre>
+        </div>
+      </div>
+      <div class="card" id="es-card" style="padding:20px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <input id="es-glaeubiger" placeholder="Wem schuldest du Geld?" style="flex:2;min-width:160px"/>
+          <input id="es-betrag" type="number" min="0" step="0.01" placeholder="Betrag €" style="flex:1;min-width:100px"/>
+          <input id="es-notiz" placeholder="Notiz (optional)" style="flex:2;min-width:140px"/>
+          <button class="btn btn-primary btn-sm" onclick="addEigeneSchuld()">＋ Hinzufügen</button>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Wem</th><th>Notiz</th><th>Betrag</th><th>Status</th><th></th></tr></thead><tbody id="es-tbody"></tbody></table></div>
+        <div class="ec" id="es-empty" style="display:none;padding:20px 0"><div class="ec-t">Noch keine sonstigen Schulden erfasst</div></div>
       </div>
     </div>
 
@@ -968,8 +1010,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="set-card" id="set-card-backup">
           <div class="sch"><div class="sch-ic">◓</div><div><h3>Daten & Backup</h3><p>Export und Import</p></div></div>
           <div class="scb">
-            <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei mit Kunden, Bestellungen &amp; eigenen Preisen herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
-            <div class="sr"><div><div class="sr-label">Wiederherstellen</div><div class="sr-sub">Deine Daten liegen live in der Cloud-Datenbank — ein Import ist daher nicht nötig. Bei Datenverlust bitte an den Admin wenden.</div></div></div>
+            <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
+            <div class="sr"><div><div class="sr-label">Importieren</div><div class="sr-sub">Backup wiederherstellen</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">↑ Import</button><input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)"></div>
             <div class="sr" style="border-bottom:none"><div><div class="sr-label">Statistik</div><div class="sr-sub" id="set-stat">Wird geladen…</div></div></div>
           </div>
         </div>
@@ -978,8 +1020,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">5.3.0</span></div>
-          <div class="about-row"><span>Speicher</span><span>Supabase (Cloud-Datenbank)</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">3.0.0</span></div>
+          <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
         </div>
@@ -1058,6 +1100,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <button type="button" class="tab-btn active" id="kd-tab-infos" onclick="switchKdTab('infos')" style="flex:1;justify-content:center">Infos</button>
         <button type="button" class="tab-btn" id="kd-tab-bestellungen" onclick="switchKdTab('bestellungen')" style="flex:1;justify-content:center">Bestellungen</button>
         <button type="button" class="tab-btn" id="kd-tab-statistik" onclick="switchKdTab('statistik')" style="flex:1;justify-content:center">Statistik</button>
+        <button type="button" class="tab-btn" id="kd-tab-preise" onclick="switchKdTab('preise')" style="flex:1;justify-content:center">Preise</button>
       </div>
       <div id="kd-panel-infos">
         <div class="about-row"><span>Vorname</span><span id="kd-vorname"></span></div>
@@ -1077,6 +1120,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
           <div class="stat-cell"><div class="sc-lab">Ø Bestellwert</div><div class="sc-v mono" id="kd-stat-avg">0,00 €</div></div>
         </div>
         <div class="ps" style="margin-top:14px" id="kd-stat-top"></div>
+      </div>
+      <div id="kd-panel-preise" style="display:none">
+        <div class="ps" style="margin-bottom:14px">Individuelle Preise für diesen Kunden. Leer lassen = normaler Preis aus der Preisliste gilt.</div>
+        <div id="kd-preise-list"></div>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="saveKdPreise()">Preise speichern</button>
       </div>
     </div>
     <div class="modal-foot" style="justify-content:space-between">
@@ -1121,7 +1169,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   <div class="modal wide">
     <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
     <div class="modal-body">
-      <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde"></select></div>
+      <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde" onchange="renderOrderItems()"></select></div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="order-items"></div>
       <button class="add-item-btn" onclick="addOrderItem()">＋ Produkt hinzufügen</button>
@@ -1218,13 +1266,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 <div class="modal-bg" id="modal-confirm">
   <div class="modal" style="max-width:400px">
     <div class="modal-head"><h3 id="cf-title">Bist du sicher?</h3><button class="modal-close" onclick="_confirmResolve(false)">✕</button></div>
-    <div class="modal-body">
-      <p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p>
-      <div id="cf-type-wrap" style="display:none;margin-top:14px">
-        <label class="fl" id="cf-type-label"></label>
-        <input type="text" id="cf-type-input" autocomplete="off" oninput="_confirmCheckTyped()">
-      </div>
-    </div>
+    <div class="modal-body"><p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="cf-cancel-btn" onclick="_confirmResolve(false)">Abbrechen</button>
       <button class="btn btn-danger" id="cf-ok-btn" onclick="_confirmResolve(true)">Löschen</button>
@@ -1297,7 +1339,8 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
-let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{} };
+let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[] };
+let schuldenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
 let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
 let currentUser = null;   // Anzeigename (z.B. "admin")
@@ -1307,14 +1350,8 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '5.3.0';
+const CURRENT_UI_VERSION = '4.1.0';
 const WHATS_NEW = {
-  '5.3.0': [
-    'Export in den Einstellungen enthält jetzt auch die eigenen Verkaufs- & Einkaufspreise, nicht nur Kunden/Bestellungen.',
-    'Die nicht mehr funktionierende Import-Funktion wurde entfernt (Daten liegen ohnehin live in der Cloud-Datenbank).',
-    '"Alle Bestellungen löschen" und "Alles zurücksetzen" verlangen jetzt zusätzlich eine Texteingabe zur Bestätigung, da diese Aktionen alle Benutzer betreffen und unwiderruflich sind.',
-    'Kleinere Korrektur: "Über die App" zeigte fälschlich eine veraltete Version und "localStorage" als Speicherort an.'
-  ],
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
     'Lieferanten-Bestellungen stehen jetzt direkt unter "Bestellt" und "Bezahlt" — genau wie alle anderen Bestellungen.',
@@ -1348,6 +1385,13 @@ const fmtDateTime = d => d ? new Date(d).toLocaleString('de-DE', {day:'2-digit',
 // immer mit der AKTUELLEN Preisliste des Lieferanten neu berechnet (statt dem eingefrorenen
 // Wert von damals) — ändert der Lieferant seine Preise, wirkt sich das sofort auf offene
 // Nachbestellungen aus. Nach Bezahlung wird der Betrag final eingefroren.
+// Individuelle Kundenpreise: falls für einen Kunden ein eigener Preis für ein Produkt
+// hinterlegt ist, gilt der statt des allgemeinen Preises aus der Preisliste.
+function priceForKunde(kId, prod){
+  const k = S.kunden.find(x=>x.id===kId);
+  const custom = k?.customPreise?.[prod];
+  return custom!=null ? custom : (S.preise[prod]||0);
+}
 function displayTotal(b){
   if(!b.fuerLieferant || b.paid || b.userId!==currentUserId) return b.total;
   const subtotal=(b.items||[]).reduce((s,it)=>{
@@ -1447,25 +1491,20 @@ function mapBestellung(b){
   };
 }
 let trashLoaded = false;
-// SICHERHEITSHINWEIS: Die Rollenprüfung in dieser Datei (allowedPages/canSeePage) blendet
-// nur UI-Elemente ein/aus — sie verhindert NICHT, dass jemand über die Browser-Konsole direkt
-// z.B. sb.from('bestellungen').select('*') oder .delete() aufruft. Der eigentliche Schutz muss
-// über Row-Level-Security-Policies in Supabase für kunden/bestellungen/preise/profiles kommen
-// (z.B. "user" darf nur eigene/verknüpfte Zeilen sehen). Bitte in Supabase (Dashboard →
-// Authentication/Database → Policies) verifizieren, dass das für jede Tabelle aktiv ist.
 async function loadAllData(){
   // Performance: der Papierkorb (gelöschte Bestellungen) wird NICHT mehr beim normalen
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
   // Historie unnötige Datenmenge beim täglichen Start der App.
-  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes] = await Promise.all([
+  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false}),
     sb.from('preise').select('*'),
     sb.from('profiles').select('*').order('created_at'),
     sb.from('service_status').select('*').eq('user_id', currentUserId).maybeSingle(),
     sb.from('service_log').select('*').order('service_date', {ascending:false}),
+    sb.from('eigene_schulden').select('*').eq('user_id', currentUserId).order('id', {ascending:false}),
   ]);
-  S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id}));
+  S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id, customPreise:k.custom_preise||{}}));
   S.bestellungen = (bestRes.data||[]).map(mapBestellung);
   S.trash = [];
   trashLoaded = false;
@@ -1492,6 +1531,15 @@ async function loadAllData(){
     M.service.due = svcStatusRes.data.due;
   }
   M.service.history = (svcLogRes.data||[]).map(h=>({date:h.service_date, by:h.done_by, note:h.note}));
+  // "Eigene Schulden": frei erfasste Schulden bei anderen Personen (nicht der eigene
+  // Lieferant, sondern z.B. eine Privatperson) — läuft über eine eigene Tabelle, die evtl.
+  // noch nicht angelegt ist. In dem Fall einfach leer lassen und Hinweis in der UI anzeigen,
+  // statt die ganze App-Ladung fehlschlagen zu lassen.
+  schuldenTableMissing = !!schuldenRes.error;
+  S.schulden = schuldenRes.error ? [] : (schuldenRes.data||[]).map(s=>({
+    id:s.id, glaeubiger:s.glaeubiger, betrag:Number(s.betrag), notiz:s.notiz||null,
+    bezahlt:!!s.bezahlt, createdAt:s.created_at, bezahltAm:s.bezahlt_am||null
+  }));
 }
 // Papierkorb wird erst geladen, wenn die Einstellungen-Seite (wo er angezeigt wird)
 // tatsächlich besucht wird. Einträge, die seit über 30 Tagen gelöscht sind, werden dabei
@@ -1527,7 +1575,6 @@ function closeSidebar(){
 const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',einstellungen:'Einstellungen',service:'Service'};
 const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','einstellungen','service'];
 function nav(id){
-  if(id==='lieferant' && !M.profile?.linked_to) id=homePage();
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1539,6 +1586,7 @@ function nav(id){
   if(id==='service') renderService();
   if(id==='lieferant') renderLieferantSeite();
   if(id==='lieferantenkunden') renderLieferantenkundenSeite();
+  if(id==='bestellungen' || id==='lieferantenkunden') markLkSeen();
   refresh();
 }
 
@@ -1565,11 +1613,12 @@ function applyRoleUI(){
   document.querySelectorAll('.itb-btn').forEach(b=>{
     b.style.display = allowed.includes(b.dataset.page) ? '' : 'none';
   });
-  const hasSupplier = !!M.profile?.linked_to;
+  // "Beim Lieferanten" bleibt auch ohne verknüpften Lieferanten sichtbar, weil die Seite
+  // jetzt zusätzlich die von Lieferant-unabhängigen "Sonstigen Schulden" enthält.
   const lTick=document.getElementById('nav-lieferant-tick');
-  if(lTick) lTick.style.display = (allowed.includes('lieferant') && hasSupplier) ? 'flex' : 'none';
+  if(lTick) lTick.style.display = allowed.includes('lieferant') ? 'flex' : 'none';
   const lTab=document.getElementById('itb-lieferant');
-  if(lTab) lTab.style.display = (allowed.includes('lieferant') && hasSupplier) ? '' : 'none';
+  if(lTab) lTab.style.display = allowed.includes('lieferant') ? '' : 'none';
   const isSpecial = role==='special';
   const lkTick=document.getElementById('nav-lieferantenkunden-tick');
   if(lkTick) lkTick.style.display = (allowed.includes('lieferantenkunden') && isSpecial) ? 'flex' : 'none';
@@ -1599,40 +1648,18 @@ function closeModal(id){ document.getElementById('modal-'+id).classList.remove('
 // hässlichen/inkonsistenten) confirm(). Wird per await genutzt: 
 // if(!(await confirmDialog('Text'))) return;
 let _confirmPending=null;
-let _confirmRequireText=null;
 function confirmDialog(text, opts={}){
-  const { title='Bist du sicher?', confirmText='Löschen', cancelText='Abbrechen', danger=true, requireText=null } = opts;
+  const { title='Bist du sicher?', confirmText='Löschen', cancelText='Abbrechen', danger=true } = opts;
   document.getElementById('cf-title').textContent=title;
   document.getElementById('cf-text').textContent=text;
   const okBtn=document.getElementById('cf-ok-btn');
   okBtn.textContent=confirmText;
   okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
   document.getElementById('cf-cancel-btn').textContent=cancelText;
-  // Bei besonders folgenschweren Aktionen (betrifft alle Geräte/Benutzer, unwiderruflich)
-  // reicht ein einfacher Klick als Bestätigung nicht — der Nutzer muss zusätzlich ein
-  // Bestätigungswort eintippen, um versehentliches Klicken/Antippen abzufangen.
-  _confirmRequireText = requireText;
-  const wrap=document.getElementById('cf-type-wrap');
-  const input=document.getElementById('cf-type-input');
-  input.value='';
-  if(requireText){
-    document.getElementById('cf-type-label').textContent = `Zum Bestätigen "${requireText}" eingeben`;
-    wrap.style.display='block';
-    okBtn.disabled=true; okBtn.style.opacity=.5;
-  } else {
-    wrap.style.display='none';
-    okBtn.disabled=false; okBtn.style.opacity=1;
-  }
   openModal('confirm');
   return new Promise((resolve)=>{ _confirmPending=resolve; });
 }
-function _confirmCheckTyped(){
-  const okBtn=document.getElementById('cf-ok-btn');
-  const match = document.getElementById('cf-type-input').value === _confirmRequireText;
-  okBtn.disabled=!match; okBtn.style.opacity = match?1:.5;
-}
 function _confirmResolve(val){
-  if(val && _confirmRequireText && document.getElementById('cf-type-input').value !== _confirmRequireText) return; // Sicherheitsnetz
   closeModal('confirm');
   if(_confirmPending){ _confirmPending(val); _confirmPending=null; }
 }
@@ -1809,13 +1836,14 @@ function openKundeDetail(id){
   openModal('kundendetail');
 }
 function switchKdTab(tab){
-  ['infos','bestellungen','statistik'].forEach(t=>{
+  ['infos','bestellungen','statistik','preise'].forEach(t=>{
     document.getElementById('kd-tab-'+t).classList.toggle('active', t===tab);
     document.getElementById('kd-panel-'+t).style.display = t===tab ? '' : 'none';
   });
   if(tab==='infos') renderKdInfos();
   if(tab==='bestellungen') renderKdBestellungen();
   if(tab==='statistik') renderKdStatistik();
+  if(tab==='preise') renderKdPreise();
 }
 function renderKdInfos(){
   const k=S.kunden.find(x=>x.id===currentKdId);
@@ -1858,6 +1886,35 @@ function renderKdStatistik(){
   document.getElementById('kd-stat-top').textContent = top
     ? `Meistbestelltes Produkt: ${PROD_MAP[top[0]]?.icon||''} ${PROD_MAP[top[0]]?.name||top[0]} (${top[1]}×)`
     : 'Noch keine Bestellungen.';
+}
+function renderKdPreise(){
+  const k=S.kunden.find(x=>x.id===currentKdId);
+  if(!k)return;
+  const wrap=document.getElementById('kd-preise-list');
+  wrap.innerHTML = PRODUCTS.map(p=>{
+    const custom = k.customPreise?.[p.id];
+    return `<div class="fw" style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="flex:1;font-size:13px">${p.icon} ${p.name} <span style="color:var(--ink-faint);font-size:11px">(normal ${fmt(S.preise[p.id]||0)})</span></span>
+      <input type="number" min="0" step="0.01" placeholder="—" value="${custom!=null?custom:''}" data-kd-preis="${p.id}" style="width:100px"/>
+    </div>`;
+  }).join('');
+}
+async function saveKdPreise(){
+  const k=S.kunden.find(x=>x.id===currentKdId);
+  if(!k)return;
+  const inputs=document.querySelectorAll('[data-kd-preis]');
+  const customPreise={};
+  inputs.forEach(inp=>{
+    const v=parseFloat(inp.value);
+    if(!isNaN(v) && v>=0) customPreise[inp.dataset.kdPreis]=v;
+  });
+  const { error } = await sb.from('kunden').update({ custom_preise: customPreise }).eq('id', k.id);
+  if(error){
+    showToast(dbErrorMsg(error,'Individuelle Preise konnten nicht gespeichert werden. Wurde die Spalte "custom_preise" (jsonb) in der Tabelle "kunden" schon angelegt? SQL: alter table kunden add column custom_preise jsonb default \'{}\'::jsonb;'),'⚠');
+    return;
+  }
+  k.customPreise=customPreise;
+  showToast('Individuelle Preise gespeichert. ✓');
 }
 async function delKundeFromDetail(){
   if(!currentKdId)return;
@@ -2024,8 +2081,8 @@ function onDiscountTypeChange(){
   renderOrderItems();
 }
 function calcOrderTotals(){
-  const preise=S.preise;
-  const subtotal=orderItems.reduce((s,it)=>s+(preise[it.prod]||0)*(it.stueck||1),0);
+  const kId=parseInt(document.getElementById('nb-kunde')?.value)||null;
+  const subtotal=orderItems.reduce((s,it)=>s+priceForKunde(kId,it.prod)*(it.stueck||1),0);
   const dType=document.getElementById('discount-type')?.value||'';
   const dValRaw=parseFloat(document.getElementById('discount-value')?.value)||0;
   let discountAmount=0;
@@ -2037,15 +2094,20 @@ function calcOrderTotals(){
 function renderOrderItems(){
   const wrap=document.getElementById('order-items');
   if(!wrap)return;
-  const preise=S.preise;
+  const kId=parseInt(document.getElementById('nb-kunde')?.value)||null;
   wrap.innerHTML=orderItems.map(it=>{
-    const sub=fmt((preise[it.prod]||0)*(it.stueck||1));
+    const preisStk=priceForKunde(kId,it.prod);
+    const custom = kId ? S.kunden.find(x=>x.id===kId)?.customPreise?.[it.prod] : null;
+    const sub=fmt(preisStk*(it.stueck||1));
     return `<div class="oi">
       <select onchange="updateOrderItem(${it.uid},'prod',this.value)">
-        ${PRODUCTS.map(p=>`<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(preise[p.id]||0)}</option>`).join('')}
+        ${PRODUCTS.map(p=>{
+          const pp=priceForKunde(kId,p.id);
+          return `<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(pp)}${(kId && S.kunden.find(x=>x.id===kId)?.customPreise?.[p.id]!=null)?' ★':''}</option>`;
+        }).join('')}
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
-      <div class="oi-total mono">${sub}</div>
+      <div class="oi-total mono" title="${custom!=null?'Individueller Preis für diesen Kunden':''}">${sub}${custom!=null?' ★':''}</div>
       <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})">✕</button>
     </div>`;
   }).join('');
@@ -2064,8 +2126,7 @@ async function addBestellung(){
   const kId=parseInt(document.getElementById('nb-kunde').value);
   if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
-  const preise=S.preise;
-  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:preise[it.prod]||0,sub:(preise[it.prod]||0)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
+  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:priceForKunde(kId,it.prod),sub:priceForKunde(kId,it.prod)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
@@ -2130,6 +2191,7 @@ function renderLieferantSeite(){
   if(!lbItems.length){ lbItems=[{uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1}]; }
   renderLbItems();
   renderLbHistory();
+  renderEigeneSchulden();
 }
 function renderLbHistory(){
   const tbody=document.getElementById('lb-tbody');
@@ -2150,6 +2212,68 @@ function renderLbHistory(){
       <td style="text-align:right"><button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben">🗑</button></td>
     </tr>`;
   }).join('');
+}
+// ══════════════════════════════════════════════
+// EIGENE SCHULDEN: frei erfasste Schulden bei anderen Personen — unabhängig vom eigenen
+// Lieferanten. Zählt zusammen mit "Offen beim Lieferanten" in eine gemeinsame Dashboard-
+// Kachel, damit alle eigenen offenen Verbindlichkeiten an einem Ort sichtbar sind.
+// ══════════════════════════════════════════════
+function renderEigeneSchulden(){
+  const card=document.getElementById('es-card'), hint=document.getElementById('es-setup-hint');
+  if(!card)return;
+  if(schuldenTableMissing){ card.style.display='none'; hint.style.display='block'; return; }
+  card.style.display=''; hint.style.display='none';
+  const tbody=document.getElementById('es-tbody');
+  const list=[...S.schulden].sort((a,b)=>(a.bezahlt-b.bezahlt)||(b.id-a.id));
+  document.getElementById('es-empty').style.display = list.length ? 'none' : 'block';
+  tbody.innerHTML = list.map(x=>`<tr>
+    <td style="font-weight:600">${escapeHtml(x.glaeubiger)}</td>
+    <td style="font-size:12px;color:var(--ink-soft)">${x.notiz?escapeHtml(x.notiz):'—'}</td>
+    <td class="mono" style="font-weight:700">${fmt(x.betrag)}</td>
+    <td>${x.bezahlt?'<span class="badge b-bezahlt">✓ Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="ic-btn" onclick="toggleEigeneSchuld(${x.id})" title="${x.bezahlt?'Als offen markieren':'Als bezahlt markieren'}">${x.bezahlt?'↺':'✓'}</button>
+      <button class="ic-btn" onclick="delEigeneSchuld(${x.id})" title="Löschen">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+async function addEigeneSchuld(){
+  const glaeubiger=document.getElementById('es-glaeubiger').value.trim();
+  const betrag=parseFloat(document.getElementById('es-betrag').value);
+  const notiz=document.getElementById('es-notiz').value.trim()||null;
+  if(!glaeubiger){ showToast('Bitte angeben, wem du das Geld schuldest.','⚠'); return; }
+  if(!betrag || betrag<=0){ showToast('Bitte einen gültigen Betrag angeben.','⚠'); return; }
+  const { data, error } = await sb.from('eigene_schulden').insert({
+    user_id:currentUserId, glaeubiger, betrag, notiz, bezahlt:false
+  }).select().single();
+  if(error){ showToast(dbErrorMsg(error,'Konnte nicht gespeichert werden. Siehe Einrichtungshinweis unten.'),'⚠'); return; }
+  S.schulden.unshift({ id:data.id, glaeubiger:data.glaeubiger, betrag:Number(data.betrag), notiz:data.notiz||null, bezahlt:false, createdAt:data.created_at, bezahltAm:null });
+  document.getElementById('es-glaeubiger').value='';
+  document.getElementById('es-betrag').value='';
+  document.getElementById('es-notiz').value='';
+  renderEigeneSchulden();renderDashboard();
+  showToast('Schuld erfasst.');
+}
+async function toggleEigeneSchuld(id){
+  const x=S.schulden.find(s=>s.id===id);
+  if(!x)return;
+  const newVal=!x.bezahlt;
+  const patch={ bezahlt:newVal, bezahlt_am: newVal ? new Date().toISOString() : null };
+  const { error } = await sb.from('eigene_schulden').update(patch).eq('id', id);
+  if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
+  x.bezahlt=newVal; x.bezahltAm=patch.bezahlt_am;
+  renderEigeneSchulden();renderDashboard();
+}
+async function delEigeneSchuld(id){
+  if(!(await confirmDialog('Diesen Eintrag endgültig löschen?', {title:'Schuld löschen?', confirmText:'Löschen', danger:true})))return;
+  const { error } = await sb.from('eigene_schulden').delete().eq('id', id);
+  if(error){ showToast('Konnte nicht gelöscht werden.','⚠'); return; }
+  S.schulden=S.schulden.filter(s=>s.id!==id);
+  renderEigeneSchulden();renderDashboard();
+  showToast('Gelöscht. 🗑');
+}
+function escapeHtml(str){
+  const d=document.createElement('div'); d.textContent=str; return d.innerHTML;
 }
 async function submitLbBestellung(){
   const supplierId = M.profile?.linked_to || null;
@@ -2184,7 +2308,7 @@ async function setDelivered(id, newVal){
   const patch = { delivered:newVal, angekommen_am: newVal ? new Date().toISOString() : null };
   const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
-  b.delivered=newVal; b.deliveredAt=patch.angekommen_am; renderBestellungen();
+  b.delivered=newVal; b.deliveredAt=patch.angekommen_am; renderBestellungen();renderLbHistory();renderLieferantenkundenSeite();
   showToast(newVal?'Als erhalten/bestellt markiert. ✓':'Als unterwegs markiert.');
 }
 async function setPaid(id, newPaid){
@@ -2198,7 +2322,7 @@ async function setPaid(id, newPaid){
   const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
   b.paid=newPaid; b.paidAt=patch.bezahlt_am; if(patch.total!=null) b.total=patch.total;
-  renderBestellungen();renderKunden();renderDashboard();
+  renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();
   if(newPaid){
     showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓');
     printInvoice(id);
@@ -2348,11 +2472,19 @@ function renderBestellungen(){
     const foreign = b.userId!==currentUserId;
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
+    // Rein informativ: der Betrag einer Lieferantenkunden-Bestellung bleibt zum Bestellzeitpunkt
+    // eingefroren (siehe displayTotal), aber falls sich mein Preis seither geändert hat, weise
+    // ich hier trotzdem kurz darauf hin, damit das nicht unbemerkt bleibt.
+    const priceChanged = b.fuerLieferant && !b.paid && (b.items||[]).some(it=>{
+      const live=S.preise[it.prod];
+      return live!=null && Math.abs(live-(it.preis||0))>0.001;
+    });
+    const priceBadge = priceChanged ? `<span class="badge b-lieferant" title="Dein Preis für mind. ein Produkt hat sich seit dieser Bestellung geändert — der berechnete Betrag bleibt trotzdem der zum Bestellzeitpunkt vereinbarte" style="margin-left:6px">Preis seither geändert</span>` : '';
     // "Von" ist nur für echte Kunden interessant, die einem anderen (verlinkten) Konto
     // gehören. Bei Lieferantenkunden steht der Name schon eindeutig in der Kunde-Spalte,
     // daher hier ein Strich statt einer redundanten Wiederholung.
     const vonCell = showVon ? `<td style="font-weight:600">${b.fuerLieferant?'<span style="color:var(--ink-faint)">—</span>':(foreign?`<span style="color:var(--lieferant-deep)">${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>')}</td>` : '';
-    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}</td>`;
+    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>`;
     const nameCell = b.fuerLieferant
       ? `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`
       : (k?k.vorname+' '+k.nachname:'—');
@@ -2430,15 +2562,22 @@ function renderDashboard(){
   document.getElementById('d-best').textContent=S.bestellungen.length;
   document.getElementById('d-schuldner').textContent=schuldnerKeys.length;
 
-  // Eigene offene Bestellungen beim Lieferanten (getrennt von der Kundenschuld oben) —
-  // die Kachel wird nur angezeigt, wenn es sowas überhaupt gibt.
+  // Eigene Schulden gesamt: eigene offene Bestellungen beim Lieferanten PLUS frei erfasste
+  // sonstige Schulden bei anderen Personen — beides sind Dinge, die ICH schulde, deshalb in
+  // einer gemeinsamen Kachel, komplett getrennt von der Kundenschuld oben (was ANDERE mir
+  // schulden). Die Kachel wird nur angezeigt, wenn es sowas überhaupt gibt.
   const ownOpenLieferant = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId && !b.paid);
+  const openSonstigeSchulden = S.schulden.filter(x=>!x.bezahlt);
   const lieferantCell=document.getElementById('d-lieferant-cell');
   const statStrip=document.querySelector('.stat-strip');
-  if(ownOpenLieferant.length){
+  if(ownOpenLieferant.length || openSonstigeSchulden.length){
     const lSum=ownOpenLieferant.reduce((s,b)=>s+displayTotal(b),0);
-    document.getElementById('d-lieferant-schulden').textContent=fmt(lSum);
-    document.getElementById('d-lieferant-sub').textContent=`${ownOpenLieferant.length} offen`;
+    const sSum=openSonstigeSchulden.reduce((s,x)=>s+x.betrag,0);
+    document.getElementById('d-lieferant-schulden').textContent=fmt(lSum+sSum);
+    const parts=[];
+    if(ownOpenLieferant.length) parts.push(`${ownOpenLieferant.length} beim Lieferanten`);
+    if(openSonstigeSchulden.length) parts.push(`${fmt(sSum)} sonstige`);
+    document.getElementById('d-lieferant-sub').textContent=parts.join(' · ');
     lieferantCell.style.display='';
     statStrip?.classList.add('has-lieferant');
   } else {
@@ -2859,7 +2998,7 @@ function printInvoice(id){
   doc.text('Rechnung an', margin, 34);
   doc.setFont('helvetica','normal');
   doc.setFontSize(11);
-  doc.text(k?`${k.vorname} ${k.nachname}`:'—', margin, 40);
+  doc.text(b.fuerLieferant ? `◆ ${usernameOf(b.userId)}` : (k?`${k.vorname} ${k.nachname}`:'—'), margin, 40);
 
   doc.setFont('helvetica','bold');
   doc.setFontSize(9);
@@ -3205,28 +3344,22 @@ async function saveOwnLink(){
   showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
 }
 function exportData(){
-  // Enthält jetzt auch die eigenen Verkaufspreise & Einkaufspreise (S.preise/S.einkauf) —
-  // vorher fehlten diese im Export, wodurch er kein vollständiges Abbild der eigenen
-  // Daten war. Das ist bewusst eine reine Ansichts-/Prüfkopie: ein Wiedereinspielen
-  // ist nicht vorgesehen, da die Datenbank (Supabase) immer die alleinige Quelle ist.
-  const blob=new Blob([JSON.stringify({
-    exportVersion:2,
-    exported:new Date().toISOString(),
-    kunden:S.kunden, bestellungen:S.bestellungen,
-    preise:S.preise, einkauf:S.einkauf,
-    service:M.service
-  },null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicotinemanager-backup-'+today()+'.json';a.click();
   showToast('Export heruntergeladen. ↓');
 }
+function importData(e){
+  showToast('Import ist mit der Online-Datenbank derzeit nicht verfügbar. Daten direkt in Supabase einspielen.', '⚠');
+  e.target.value='';
+}
 async function clearOrders(){
-  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen', requireText:'LÖSCHEN'})))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen'})))return;
   const { error } = await sb.from('bestellungen').delete().neq('id', -1); // alle Zeilen
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
   S.bestellungen=[];refresh();showToast('Bestellungen gelöscht.','🗑');
 }
 async function clearAll(){
-  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann NICHT rückgängig gemacht werden.', {title:'Wirklich ALLES zurücksetzen?', confirmText:'Alles zurücksetzen', requireText:'ZURÜCKSETZEN'})))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann NICHT rückgängig gemacht werden.', {title:'Wirklich ALLES zurücksetzen?', confirmText:'Alles zurücksetzen'})))return;
   const [r1, r2] = await Promise.all([
     sb.from('bestellungen').delete().neq('id', -1),
     sb.from('kunden').delete().neq('id', -1),
@@ -3324,8 +3457,34 @@ function showToast(msg,icon='✓'){
 // ══════════════════════════════════════════════
 // REFRESH
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// BENACHRICHTIGUNG: neue, noch nicht gesichtete Bestellungen von Lieferantenkunden.
+// Rein lokal (localStorage) pro Benutzer gemerkt — kein Server-Roundtrip nötig, und beim
+// Öffnen der Bestellungen-Seite gelten alle aktuell bekannten als gesehen.
+// ══════════════════════════════════════════════
+function lkSeenKey(){ return 'nm_lk_seen_'+currentUserId; }
+function getLkSeenId(){
+  try{ return parseInt(localStorage.getItem(lkSeenKey()))||0; }catch(e){ return 0; }
+}
+function setLkSeenId(id){
+  try{ localStorage.setItem(lkSeenKey(), String(id)); }catch(e){ /* localStorage evtl. nicht verfügbar */ }
+}
+function updateLkBadge(){
+  const seenId=getLkSeenId();
+  const unseen=S.bestellungen.filter(b=>b.fuerLieferant && b.userId!==currentUserId && b.id>seenId).length;
+  document.querySelectorAll('#tk-dot-bestellungen, #itb-dot-bestellungen').forEach(el=>{
+    if(!el)return;
+    el.textContent = unseen>9 ? '9+' : String(unseen);
+    el.classList.toggle('show', unseen>0);
+  });
+}
+function markLkSeen(){
+  const maxId=S.bestellungen.filter(b=>b.fuerLieferant && b.userId!==currentUserId).reduce((m,b)=>Math.max(m,b.id),0);
+  if(maxId>getLkSeenId()) setLkSeenId(maxId);
+  updateLkBadge();
+}
 function refresh(){
-  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();
+  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();
 }
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)

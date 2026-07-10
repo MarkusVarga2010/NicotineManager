@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.3.0'; // Export enthält jetzt Preise/Einkaufspreise, kaputte Import-Funktion entfernt, "Alles löschen/zurücksetzen" verlangt Texteingabe zur Bestätigung, About-Seite zeigte fälschlich alte Version/"localStorage" an
+const APP_VERSION = '5.3.0'; // Neu: "Sonstige Schulden" — frei erfassbare Schulden bei anderen Personen, kombiniert mit "Offen beim Lieferanten" in einer gemeinsamen Dashboard-Kachel "Eigene Schulden"; individuelle Kundenpreise, Rechnung/Preis-Badge/Sync-Fixes für Lieferantenkunden, Benachrichtigungs-Punkt für neue Lieferantenkunden-Bestellungen
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
