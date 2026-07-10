@@ -968,8 +968,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="set-card" id="set-card-backup">
           <div class="sch"><div class="sch-ic">◓</div><div><h3>Daten & Backup</h3><p>Export und Import</p></div></div>
           <div class="scb">
-            <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
-            <div class="sr"><div><div class="sr-label">Importieren</div><div class="sr-sub">Backup wiederherstellen</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">↑ Import</button><input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)"></div>
+            <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei mit Kunden, Bestellungen &amp; eigenen Preisen herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
+            <div class="sr"><div><div class="sr-label">Wiederherstellen</div><div class="sr-sub">Deine Daten liegen live in der Cloud-Datenbank — ein Import ist daher nicht nötig. Bei Datenverlust bitte an den Admin wenden.</div></div></div>
             <div class="sr" style="border-bottom:none"><div><div class="sr-label">Statistik</div><div class="sr-sub" id="set-stat">Wird geladen…</div></div></div>
           </div>
         </div>
@@ -978,8 +978,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">3.0.0</span></div>
-          <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">5.3.0</span></div>
+          <div class="about-row"><span>Speicher</span><span>Supabase (Cloud-Datenbank)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
         </div>
@@ -1218,7 +1218,13 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 <div class="modal-bg" id="modal-confirm">
   <div class="modal" style="max-width:400px">
     <div class="modal-head"><h3 id="cf-title">Bist du sicher?</h3><button class="modal-close" onclick="_confirmResolve(false)">✕</button></div>
-    <div class="modal-body"><p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p></div>
+    <div class="modal-body">
+      <p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p>
+      <div id="cf-type-wrap" style="display:none;margin-top:14px">
+        <label class="fl" id="cf-type-label"></label>
+        <input type="text" id="cf-type-input" autocomplete="off" oninput="_confirmCheckTyped()">
+      </div>
+    </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="cf-cancel-btn" onclick="_confirmResolve(false)">Abbrechen</button>
       <button class="btn btn-danger" id="cf-ok-btn" onclick="_confirmResolve(true)">Löschen</button>
@@ -1301,8 +1307,14 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.1.0';
+const CURRENT_UI_VERSION = '5.3.0';
 const WHATS_NEW = {
+  '5.3.0': [
+    'Export in den Einstellungen enthält jetzt auch die eigenen Verkaufs- & Einkaufspreise, nicht nur Kunden/Bestellungen.',
+    'Die nicht mehr funktionierende Import-Funktion wurde entfernt (Daten liegen ohnehin live in der Cloud-Datenbank).',
+    '"Alle Bestellungen löschen" und "Alles zurücksetzen" verlangen jetzt zusätzlich eine Texteingabe zur Bestätigung, da diese Aktionen alle Benutzer betreffen und unwiderruflich sind.',
+    'Kleinere Korrektur: "Über die App" zeigte fälschlich eine veraltete Version und "localStorage" als Speicherort an.'
+  ],
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
     'Lieferanten-Bestellungen stehen jetzt direkt unter "Bestellt" und "Bezahlt" — genau wie alle anderen Bestellungen.',
@@ -1435,6 +1447,12 @@ function mapBestellung(b){
   };
 }
 let trashLoaded = false;
+// SICHERHEITSHINWEIS: Die Rollenprüfung in dieser Datei (allowedPages/canSeePage) blendet
+// nur UI-Elemente ein/aus — sie verhindert NICHT, dass jemand über die Browser-Konsole direkt
+// z.B. sb.from('bestellungen').select('*') oder .delete() aufruft. Der eigentliche Schutz muss
+// über Row-Level-Security-Policies in Supabase für kunden/bestellungen/preise/profiles kommen
+// (z.B. "user" darf nur eigene/verknüpfte Zeilen sehen). Bitte in Supabase (Dashboard →
+// Authentication/Database → Policies) verifizieren, dass das für jede Tabelle aktiv ist.
 async function loadAllData(){
   // Performance: der Papierkorb (gelöschte Bestellungen) wird NICHT mehr beim normalen
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
@@ -1581,18 +1599,40 @@ function closeModal(id){ document.getElementById('modal-'+id).classList.remove('
 // hässlichen/inkonsistenten) confirm(). Wird per await genutzt: 
 // if(!(await confirmDialog('Text'))) return;
 let _confirmPending=null;
+let _confirmRequireText=null;
 function confirmDialog(text, opts={}){
-  const { title='Bist du sicher?', confirmText='Löschen', cancelText='Abbrechen', danger=true } = opts;
+  const { title='Bist du sicher?', confirmText='Löschen', cancelText='Abbrechen', danger=true, requireText=null } = opts;
   document.getElementById('cf-title').textContent=title;
   document.getElementById('cf-text').textContent=text;
   const okBtn=document.getElementById('cf-ok-btn');
   okBtn.textContent=confirmText;
   okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
   document.getElementById('cf-cancel-btn').textContent=cancelText;
+  // Bei besonders folgenschweren Aktionen (betrifft alle Geräte/Benutzer, unwiderruflich)
+  // reicht ein einfacher Klick als Bestätigung nicht — der Nutzer muss zusätzlich ein
+  // Bestätigungswort eintippen, um versehentliches Klicken/Antippen abzufangen.
+  _confirmRequireText = requireText;
+  const wrap=document.getElementById('cf-type-wrap');
+  const input=document.getElementById('cf-type-input');
+  input.value='';
+  if(requireText){
+    document.getElementById('cf-type-label').textContent = `Zum Bestätigen "${requireText}" eingeben`;
+    wrap.style.display='block';
+    okBtn.disabled=true; okBtn.style.opacity=.5;
+  } else {
+    wrap.style.display='none';
+    okBtn.disabled=false; okBtn.style.opacity=1;
+  }
   openModal('confirm');
   return new Promise((resolve)=>{ _confirmPending=resolve; });
 }
+function _confirmCheckTyped(){
+  const okBtn=document.getElementById('cf-ok-btn');
+  const match = document.getElementById('cf-type-input').value === _confirmRequireText;
+  okBtn.disabled=!match; okBtn.style.opacity = match?1:.5;
+}
 function _confirmResolve(val){
+  if(val && _confirmRequireText && document.getElementById('cf-type-input').value !== _confirmRequireText) return; // Sicherheitsnetz
   closeModal('confirm');
   if(_confirmPending){ _confirmPending(val); _confirmPending=null; }
 }
@@ -3165,22 +3205,28 @@ async function saveOwnLink(){
   showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
 }
 function exportData(){
-  const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  // Enthält jetzt auch die eigenen Verkaufspreise & Einkaufspreise (S.preise/S.einkauf) —
+  // vorher fehlten diese im Export, wodurch er kein vollständiges Abbild der eigenen
+  // Daten war. Das ist bewusst eine reine Ansichts-/Prüfkopie: ein Wiedereinspielen
+  // ist nicht vorgesehen, da die Datenbank (Supabase) immer die alleinige Quelle ist.
+  const blob=new Blob([JSON.stringify({
+    exportVersion:2,
+    exported:new Date().toISOString(),
+    kunden:S.kunden, bestellungen:S.bestellungen,
+    preise:S.preise, einkauf:S.einkauf,
+    service:M.service
+  },null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicotinemanager-backup-'+today()+'.json';a.click();
   showToast('Export heruntergeladen. ↓');
 }
-function importData(e){
-  showToast('Import ist mit der Online-Datenbank derzeit nicht verfügbar. Daten direkt in Supabase einspielen.', '⚠');
-  e.target.value='';
-}
 async function clearOrders(){
-  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen'})))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen', requireText:'LÖSCHEN'})))return;
   const { error } = await sb.from('bestellungen').delete().neq('id', -1); // alle Zeilen
   if(error){ showToast('Löschen fehlgeschlagen.','⚠'); return; }
   S.bestellungen=[];refresh();showToast('Bestellungen gelöscht.','🗑');
 }
 async function clearAll(){
-  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann NICHT rückgängig gemacht werden.', {title:'Wirklich ALLES zurücksetzen?', confirmText:'Alles zurücksetzen'})))return;
+  if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann NICHT rückgängig gemacht werden.', {title:'Wirklich ALLES zurücksetzen?', confirmText:'Alles zurücksetzen', requireText:'ZURÜCKSETZEN'})))return;
   const [r1, r2] = await Promise.all([
     sb.from('bestellungen').delete().neq('id', -1),
     sb.from('kunden').delete().neq('id', -1),
