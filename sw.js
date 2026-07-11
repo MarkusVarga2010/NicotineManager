@@ -1,8 +1,7 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '6.3.0'; // Verbesserungen am Abholcode: Bestätigung jetzt konsistent für ALLE Bestellarten (Kunden + Lieferant) beim Bezahlen; Teilen-Button (WhatsApp); "Neu erzeugen"-Button falls Kunde den Code verloren hat; Kollisionsschutz gegen doppelt vergebene Codes; Hinweis nach mehreren falschen Versuchen; Undo-Button im Toast nach "Alle löschen".
+const APP_VERSION = '7.0.0'; // Neu: Bilder für Geschmäcker/Marken/Farben — Upload pro Variante (Supabase Storage Bucket "variant-bilder"), Thumbnail in der Preise-Liste und beim Bestellen, Klick öffnet Vollbild-Lightbox.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
-
 const ASSETS = [
   './',
   './index.html',
@@ -14,14 +13,12 @@ const ASSETS = [
   './icons/icon-512-maskable.png',
   './icons/favicon.png',
 ];
-
 // Installation: neue Version cachen, aber noch nicht aktivieren (wartet auf Bestätigung der Seite)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
-
 // Aktivierung: alte Caches (vorherige Versionen) aufräumen
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -32,11 +29,11 @@ self.addEventListener('activate', (event) => {
     ).then(() => self.clients.claim())
   );
 });
-
 // Fetch-Strategie: Netzwerk zuerst (für aktuelle Daten/Updates), Cache als Fallback (offline).
 // WICHTIG: Anfragen an Supabase werden NIE gecacht — die Geschäftsdaten müssen
-// immer live sein. Nur die eigenen App-Dateien (HTML/CSS/JS/Icons) profitieren
-// vom Offline-Cache.
+// immer live sein (das schließt auch die Storage-API mit ein, über die Varianten-Bilder
+// hoch- und heruntergeladen werden). Nur die eigenen App-Dateien (HTML/CSS/JS/Icons)
+// profitieren vom Offline-Cache.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('.supabase.co')) return; // an Supabase: immer direkt ans Netzwerk, nie cachen
@@ -50,7 +47,6 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
   );
 });
-
 // Erlaubt der Seite, den Service Worker sofort zu aktivieren (nach Update-Bestätigung durch Nutzer)
 // UND stellt der Seite die aktuelle APP_VERSION zur Verfügung, damit index.html
 // (z.B. im "Über die App"-Bereich und im Update-Banner) nie eine veraltete/hartkodierte

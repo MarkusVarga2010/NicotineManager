@@ -662,6 +662,20 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 #update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:2px}
 
 /* ════════════════════════════════════════════════════════
+   VARIANTEN-BILDER + LIGHTBOX
+   ════════════════════════════════════════════════════════ */
+.vimg-thumb{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0;cursor:pointer;border:1px solid var(--line2);transition:transform .15s}
+.vimg-thumb:hover{transform:scale(1.08)}
+.vimg-placeholder{width:38px;height:38px;border-radius:6px;flex-shrink:0;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink-faint)}
+.vimg-upload-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.vimg-upload-row label{font-size:11px;color:var(--ink-soft);cursor:pointer;border:1px dashed var(--line2);border-radius:var(--r);padding:8px 12px;flex:1;text-align:center}
+.vimg-upload-row input[type=file]{display:none}
+#lightbox-bg{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:70;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s ease,background .2s ease}
+#lightbox-bg.show{opacity:1;pointer-events:auto;background:rgba(0,0,0,.85)}
+#lightbox-bg img{max-width:90vw;max-height:85vh;border-radius:var(--r-lg);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#lightbox-close{position:absolute;top:20px;right:24px;background:var(--paper2);border:1px solid var(--line2);color:var(--ink);width:38px;height:38px;border-radius:50%;font-size:16px;cursor:pointer}
+
+/* ════════════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════════════ */
 @media(max-width:860px){
@@ -1003,6 +1017,7 @@ create policy "eigene schulden eigener user"
   name text not null,
   preis numeric not null default 0,
   einkaufspreis numeric not null default 0,
+  bild_url text,
   created_at timestamptz not null default now()
 );
 alter table produkt_varianten enable row level security;
@@ -1361,7 +1376,11 @@ create policy "varianten eigene loeschen"
   </div>
 </div>
 
-<!-- MODAL: Passwort ändern (erstes Login) -->
+<!-- LIGHTBOX: Varianten-Bild in groß -->
+<div id="lightbox-bg" onclick="closeLightbox(event)">
+  <button id="lightbox-close" onclick="closeLightbox(event)">✕</button>
+  <img id="lightbox-img" src="" alt="Produktbild">
+</div>
 
 <!-- BESTÄTIGUNGS-DIALOG (ersetzt natives confirm() bei kritischen Aktionen) -->
 <div class="modal-bg" id="modal-confirm">
@@ -1525,6 +1544,11 @@ const WHATS_NEW = {
     'Neu: Abholcode direkt per WhatsApp teilen, und "Neu erzeugen"-Button falls der Kunde den Code verloren hat.',
     'Nach mehreren falschen Code-Eingaben gibt es jetzt einen Hinweis, ob es wirklich die richtige Bestellung ist.',
     '"Alle löschen" zeigt jetzt einen "Rückgängig"-Button direkt im Toast, um versehentlich gelöschte Bestellungen sofort wiederherzustellen.'
+  ],
+  '5.0.0': [
+    'Neu: Bilder für Geschmäcker, Marken und Farben — beim Anlegen einer Variante unter "Preise" kannst du jetzt ein Foto hochladen.',
+    'Varianten zeigen ihr Bild als kleines Vorschaubild in der Liste — ein Klick öffnet es in groß.',
+    'Beim Bestellen wird das Bild der gewählten Variante direkt neben der Auswahl angezeigt.'
   ]
 };
 function checkWhatsNew(){
@@ -1728,13 +1752,14 @@ async function loadAllData(){
   }));
   // Geschmäcker/Marken: eigene Varianten (S.varianten) sowie — falls ein Lieferant verknüpft
   // ist — dessen Varianten mit seiner aktuellen Preisliste (S.lieferantVarianten), analog zu
-  // S.preise/S.lieferantPreise weiter oben.
+  // S.preise/S.lieferantPreise weiter oben. bildUrl wird mit übernommen, damit Thumbnails
+  // sowohl bei eigenen als auch bei Lieferanten-Varianten angezeigt werden können.
   variantenTableMissing = !!variantenRes.error;
   S.varianten = {};
   S.lieferantVarianten = {};
   if(!variantenRes.error){
     (variantenRes.data||[]).forEach(v=>{
-      const rec = {id:v.id, name:v.name, preis:Number(v.preis), einkauf:Number(v.einkaufspreis||0)};
+      const rec = {id:v.id, name:v.name, preis:Number(v.preis), einkauf:Number(v.einkaufspreis||0), bildUrl:v.bild_url||null};
       if(v.user_id===currentUserId){
         (S.varianten[v.produkt_id] = S.varianten[v.produkt_id]||[]).push(rec);
       } else if(M.profile && v.user_id===M.profile.linked_to){
@@ -1873,6 +1898,19 @@ function _confirmResolve(val){
 }
 
 // ══════════════════════════════════════════════
+// LIGHTBOX (Varianten-Bild in groß anzeigen)
+// ══════════════════════════════════════════════
+function openLightbox(url){
+  if(!url) return;
+  document.getElementById('lightbox-img').src=url;
+  document.getElementById('lightbox-bg').classList.add('show');
+}
+function closeLightbox(e){
+  if(e && e.target && e.target.id!=='lightbox-bg' && e.target.id!=='lightbox-close') return;
+  document.getElementById('lightbox-bg').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
 // THEME
 // ══════════════════════════════════════════════
 function applyTheme(i){
@@ -1949,13 +1987,13 @@ function renderPrices(){
 }
 // Produkt-Karte für Produkte mit Varianten (Geschmack bei Pods/Einweg Vape, Marke bei
 // Schupftabak/Snus/Zigaretten) — statt eines einzelnen Preises verwaltet man hier eine Liste
-// von Varianten, jede mit eigenem Ein-/Verkaufspreis.
+// von Varianten, jede mit eigenem Ein-/Verkaufspreis und optional einem Foto.
 function variantCardHtml(p){
   return `
   <div class="pc">
     <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
     <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
-    <div class="ps" style="margin:4px 0 10px">${p.variantLabelPlural} mit jeweils eigenem Preis.</div>
+    <div class="ps" style="margin:4px 0 10px">${p.variantLabelPlural} mit jeweils eigenem Preis${variantenTableMissing?'':' und Bild'}.</div>
     ${variantenTableMissing ? `<div class="ps" style="color:var(--rust)">Dafür fehlt in Supabase noch die Tabelle "produkt_varianten" — SQL zum Anlegen siehe Hinweis oben auf dieser Seite.</div>` : `
     <div id="variant-list-${p.id}"></div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -1963,18 +2001,51 @@ function variantCardHtml(p){
       <input id="vnew-ek-${p.id}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Einkauf €" style="flex:1;min-width:90px"/>
       <input id="vnew-vk-${p.id}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Verkauf €" style="flex:1;min-width:90px"/>
     </div>
+    <div class="vimg-upload-row">
+      <label id="vnew-imglabel-${p.id}" for="vnew-img-${p.id}">📷 Bild auswählen (optional)</label>
+      <input type="file" id="vnew-img-${p.id}" accept="image/*" onchange="onVariantImgPicked('${p.id}')"/>
+    </div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="addVariant('${p.id}')">＋ ${p.variantLabel} hinzufügen</button>
     `}
   </div>`;
 }
+// Merkt sich die ausgewählte Bild-Datei kurz vor dem Anlegen der Variante (noch nicht
+// hochgeladen — passiert erst beim Klick auf "hinzufügen", weil der Speicherpfad im
+// Storage-Bucket die künftige Varianten-ID enthält).
+let _pendingVariantImg = {};
+function onVariantImgPicked(prodId){
+  const inp=document.getElementById('vnew-img-'+prodId);
+  const label=document.getElementById('vnew-imglabel-'+prodId);
+  const file=inp.files[0];
+  if(!file){ _pendingVariantImg[prodId]=null; if(label) label.textContent='📷 Bild auswählen (optional)'; return; }
+  if(!file.type.startsWith('image/')){ showToast('Bitte eine Bilddatei auswählen.','⚠'); inp.value=''; return; }
+  if(file.size > 5*1024*1024){ showToast('Bild darf max. 5 MB groß sein.','⚠'); inp.value=''; return; }
+  _pendingVariantImg[prodId]=file;
+  if(label) label.textContent='✓ '+file.name;
+}
+// Lädt das gewählte Bild in den Supabase-Storage-Bucket "variant-bilder" hoch und gibt
+// die öffentliche URL zurück (oder null, falls kein Bild gewählt wurde / Upload fehlschlägt).
+async function uploadVariantImage(prodId, variantId){
+  const file=_pendingVariantImg[prodId];
+  if(!file) return null;
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  const path=`${currentUserId}/${prodId}/${variantId}-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from('variant-bilder').upload(path, file, { upsert:true });
+  if(error){ showToast(dbErrorMsg(error,'Bild konnte nicht hochgeladen werden. Wurde der Bucket "variant-bilder" schon angelegt?'),'⚠'); return null; }
+  const { data } = sb.storage.from('variant-bilder').getPublicUrl(path);
+  return data?.publicUrl || null;
+}
 function renderVariantList(prodId){
   const el=document.getElementById('variant-list-'+prodId);
   if(!el) return;
-  const p=PROD_MAP[prodId];
   const list=S.varianten[prodId]||[];
   el.innerHTML = list.length ? list.map(v=>{
     const gewinn=v.preis-v.einkauf;
+    const img = v.bildUrl
+      ? `<img class="vimg-thumb" src="${v.bildUrl}" onclick="openLightbox('${v.bildUrl}')" alt="${v.name}">`
+      : `<div class="vimg-placeholder">–</div>`;
     return `<div class="oi" style="padding:8px 10px">
+      ${img}
       <div style="flex:2;font-weight:600">${v.name}</div>
       <div class="mono" style="flex:1;text-align:right;color:${gewinn>=0?'var(--success)':'var(--rust)'}" title="Gewinn/Stk">${fmt(gewinn)}</div>
       <div class="oi-total mono" style="flex:1" title="Verkaufspreis">${fmt(v.preis)}</div>
@@ -1993,8 +2064,19 @@ async function addVariant(prodId){
     user_id:currentUserId, produkt_id:prodId, name, preis:vk, einkaufspreis:isNaN(ek)?0:ek
   }).select().single();
   if(error){ showToast(dbErrorMsg(error,`${p.variantLabel} konnte nicht gespeichert werden. Wurde die Tabelle "produkt_varianten" schon angelegt?`),'⚠'); return; }
-  (S.varianten[prodId]=S.varianten[prodId]||[]).push({id:data.id, name:data.name, preis:Number(data.preis), einkauf:Number(data.einkaufspreis||0)});
+
+  // Bild erst NACH dem Anlegen hochladen, weil der Dateipfad die Varianten-ID enthält.
+  const bildUrl = await uploadVariantImage(prodId, data.id);
+  if(bildUrl){
+    const { error: imgErr } = await sb.from('produkt_varianten').update({ bild_url: bildUrl }).eq('id', data.id);
+    if(imgErr) showToast(dbErrorMsg(imgErr,'Bild-URL konnte nicht gespeichert werden. Wurde die Spalte "bild_url" schon angelegt?'),'⚠');
+  }
+
+  (S.varianten[prodId]=S.varianten[prodId]||[]).push({id:data.id, name:data.name, preis:Number(data.preis), einkauf:Number(data.einkaufspreis||0), bildUrl:bildUrl||null});
   nameEl.value=''; ekEl.value=''; vkEl.value='';
+  const imgInp=document.getElementById('vnew-img-'+prodId); if(imgInp) imgInp.value='';
+  const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Bild auswählen (optional)';
+  _pendingVariantImg[prodId]=null;
   renderVariantList(prodId); renderPrices(); renderDashboard();
   showToast('Gespeichert ✓');
 }
@@ -2393,6 +2475,7 @@ function renderOrderItems(){
     const sub=fmt(preisStk*(it.stueck||1));
     const variants = variantList(it.prod, false);
     const vl = PROD_MAP[it.prod]?.variantLabel;
+    const currentVariant = vl ? findVariant(it.prod, it.variant, false) : null;
     return `<div class="oi">
       <select onchange="updateOrderItem(${it.uid},'prod',this.value)">
         ${PRODUCTS.map(p=>{
@@ -2404,9 +2487,12 @@ function renderOrderItems(){
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono" title="${custom!=null?'Individueller Preis für diesen Kunden':''}">${sub}${custom!=null?' ★':''}</div>
       <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})">✕</button>
-      ${vl ? `<select class="oi-variant" onchange="updateOrderItem(${it.uid},'variant',this.value)">
-        ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— noch kein ${vl} hinterlegt (unter Preise anlegen) —</option>`}
-      </select>` : ''}
+      ${vl ? `<div style="flex-basis:100%;display:flex;gap:8px;align-items:center;margin-top:2px">
+        <select class="oi-variant" style="flex:1" onchange="updateOrderItem(${it.uid},'variant',this.value)">
+          ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— noch kein ${vl} hinterlegt (unter Preise anlegen) —</option>`}
+        </select>
+        ${currentVariant?.bildUrl ? `<img class="vimg-thumb" src="${currentVariant.bildUrl}" onclick="openLightbox('${currentVariant.bildUrl}')" alt="${currentVariant.name}">` : ''}
+      </div>` : ''}
     </div>`;
   }).join('');
   const { subtotal, discountAmount, total } = calcOrderTotals();
@@ -2539,6 +2625,7 @@ function renderLbItems(){
     const sub=fmt(lbItemPrice(it)*(it.stueck||1));
     const variants=variantList(it.prod, true);
     const vl=PROD_MAP[it.prod]?.variantLabel;
+    const currentVariant = vl ? findVariant(it.prod, it.variant, true) : null;
     return `<div class="oi">
       <select onchange="updateLbItem(${it.uid},'prod',this.value)">
         ${PRODUCTS.map(p=>{
@@ -2549,9 +2636,12 @@ function renderLbItems(){
       <input type="number" min="1" value="${it.stueck}" onchange="updateLbItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono">${sub}</div>
       <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})">✕</button>
-      ${vl ? `<select class="oi-variant" onchange="updateLbItem(${it.uid},'variant',this.value)">
-        ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— Lieferant hat noch kein ${vl} hinterlegt —</option>`}
-      </select>` : ''}
+      ${vl ? `<div style="flex-basis:100%;display:flex;gap:8px;align-items:center;margin-top:2px">
+        <select class="oi-variant" style="flex:1" onchange="updateLbItem(${it.uid},'variant',this.value)">
+          ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— Lieferant hat noch kein ${vl} hinterlegt —</option>`}
+        </select>
+        ${currentVariant?.bildUrl ? `<img class="vimg-thumb" src="${currentVariant.bildUrl}" onclick="openLightbox('${currentVariant.bildUrl}')" alt="${currentVariant.name}">` : ''}
+      </div>` : ''}
     </div>`;
   }).join('');
   document.getElementById('lb-order-total').textContent=fmt(calcLbTotal());
@@ -3903,7 +3993,7 @@ const TOUR_STEPS_USER=[
   {page:'dashboard', target:'.dose-card',  title:'Größte Schuldner', text:'Dieser Balken zeigt, welche Kunden den größten Anteil an der Gesamtschuld haben.'},
   {page:'bestellungen', target:'.pa',      title:'Neue Bestellung', text:'Über diesen Button legst du eine neue Bestellung an: Kunde wählen, Produkte hinzufügen, fertig. Hast du einen Lieferanten hinterlegt, kannst du hier auch direkt bei ihm bestellen.'},
   {page:'kunden', target:'.pa',            title:'Kundenverwaltung', text:'Hier legst du Kunden an und siehst direkt, wer noch offene Beträge hat.'},
-  {page:'preise', target:'.pg',            title:'Preise pflegen', text:'Stückpreise für jedes Produkt lassen sich hier jederzeit anpassen.'},
+  {page:'preise', target:'.pg',            title:'Preise pflegen', text:'Stückpreise für jedes Produkt lassen sich hier jederzeit anpassen — inklusive Foto für jede Marke/jeden Geschmack.'},
   {page:'einstellungen', target:'#set-card-konto', title:'Dein Konto', text:'Hier siehst du deinen Benutzernamen und kannst deinen Lieferanten anpassen. Viel Erfolg!'},
 ];
 const TOUR_STEPS_SPECIAL=[
