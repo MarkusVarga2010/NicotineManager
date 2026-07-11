@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '8.2.0'; // Bildvorschlag verbessert: Suchbegriff ist jetzt editierbar/eingrenzbar (Name + automatischer Produktkontext), plus Filter "Nur Fotos" (blendet Zeichnungen/Logos aus) für zielgerichtetere Treffer.
+const APP_VERSION = '9.0.0'; // Komplett neues Design: neue Farbpalette (dunkler „Ledger/Manifest"-Look statt warmem Onlineshop-Grün), neue Schriften (Space Grotesk / Work Sans / IBM Plex Mono), Status-Badges jetzt im Stempel-Stil, eckigere/flachere Karten & Buttons statt runder Pillen. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
