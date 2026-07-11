@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.7.0'; // Neu: "Alle löschen"-Button auch auf der Seite "Beim Lieferanten" — löscht alle eigenen Lieferanten-Bestellungen auf einmal (verschwinden dabei auch beim Lieferanten selbst, da gemeinsame Datenzeile)
+const APP_VERSION = '6.1.0'; // Neu: Abholcode — bei jeder neuen Bestellung wird automatisch ein 4-stelliger Abholcode erzeugt, im Bestell-Detail prominent angezeigt (mit Kopieren-Button) und als Chip in der Liste "Bestellt/Bezahlt". Erfordert neue Supabase-Spalte "abholcode" in der Tabelle "bestellungen".
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

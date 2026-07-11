@@ -7,18 +7,18 @@
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0B0F14">
+<meta name="theme-color" content="#0F1417">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NicotineMgr">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/favicon.png">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2322C99E'/%3E%3Cpath d='M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z' fill='%230A0D10'/%3E%3Ccircle cx='30.5' cy='9.5' r='3' fill='%230A0D10' opacity='.85'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23D99A2B'/%3E%3Cpath d='M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z' fill='%230F1417'/%3E%3Ccircle cx='30.5' cy='9.5' r='3' fill='%230F1417' opacity='.85'/%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -28,66 +28,67 @@
    TOKENS
    ════════════════════════════════════════════════════════ */
 :root{
-  --paper:#0A0D10;
-  --paper2:#12171A;
-  --paper3:#1A2124;
-  --line:#212A2C;
-  --line2:#33403F;
-  --ink:#ECF3F0;
-  --ink-soft:#8FA6A0;
-  --ink-faint:#546863;
-  --sage:#22C99E;
-  --sage-deep:#7CEFCB;
-  --sage-bg:#0F2A24;
-  --accent2:#D4AC5C;
-  --accent3:#63C4D4;
-  --accent4:#C792EA;
-  --rust:#E08A6B;
-  --rust-bg:#2E2019;
-  --gold:#D4AC5C;
-  --gold-bg:#2B2418;
-  --success:#5FBF8A;
-  --success-deep:#8DDDB0;
+  --paper:#0F1417;
+  --paper2:#161C20;
+  --paper3:#1F262B;
+  --line:#262E33;
+  --line2:#3A444A;
+  --ink:#EDEFEA;
+  --ink-soft:#93A2A8;
+  --ink-faint:#57646A;
+  --sage:#D99A2B;
+  --sage-deep:#F0C05C;
+  --sage-bg:#2A2110;
+  --accent2:#5B8FA8;
+  --accent3:#7B93C9;
+  --accent4:#B98FD1;
+  --rust:#D9694A;
+  --rust-bg:#2E1B12;
+  --gold:#5B8FA8;
+  --gold-bg:#15252E;
+  --success:#4FA37C;
+  --success-deep:#7FCBA3;
   --success-bg:#12291F;
-  --lieferant:#C792EA;
-  --lieferant-deep:#DAB4F2;
-  --lieferant-bg:#241934;
-  --kunde:#63C4D4;
-  --kunde-deep:#8FDCE8;
-  --kunde-bg:#122B31;
-  --r:5px;
-  --r-lg:10px;
+  --lieferant:#B98FD1;
+  --lieferant-deep:#D3B3E6;
+  --lieferant-bg:#241C30;
+  --kunde:#5AA9D6;
+  --kunde-deep:#8CC7E8;
+  --kunde-bg:#122530;
+  --r:4px;
+  --r-lg:8px;
+  --tag-cut:14px;
   --nav-h:64px;
   --scale-h:46px;
 }
 html[data-mode="light"]{
-  --paper:#F6F5F0;
-  --paper2:#FFFFFF;
-  --paper3:#ECEFE9;
-  --line:#DFE3D9;
-  --line2:#CBD2C4;
-  --ink:#1B231F;
-  --ink-soft:#546056;
-  --ink-faint:#8A968C;
-  --sage:#0E8F6B;
-  --sage-deep:#0B6B50;
-  --sage-bg:#DFF3EA;
-  --accent2:#9A7A2E;
-  --accent3:#2E8478;
-  --accent4:#8B5FA8;
-  --rust:#B04B2B;
-  --rust-bg:#F5E3DA;
-  --gold:#9A7A2E;
-  --gold-bg:#F2E9D4;
-  --success:#2E7D4F;
-  --success-deep:#215C3A;
-  --success-bg:#DFF0E5;
-  --lieferant:#8B5FA8;
-  --lieferant-deep:#6E4787;
-  --lieferant-bg:#F0E5F7;
-  --kunde:#2C7C8C;
-  --kunde-deep:#215F6C;
-  --kunde-bg:#DFF0F3;
+  --paper:#EAEBE3;
+  --paper2:#F8F8F3;
+  --paper3:#DEE0D3;
+  --line:#D2D5C4;
+  --line2:#B9BDA6;
+  --ink:#1C201B;
+  --ink-soft:#565E52;
+  --ink-faint:#878C79;
+  --sage:#A66A16;
+  --sage-deep:#7C4F0F;
+  --sage-bg:#F3E3C4;
+  --accent2:#3D6E80;
+  --accent3:#4E62A0;
+  --accent4:#8A5CA6;
+  --rust:#B14A2E;
+  --rust-bg:#F3DED2;
+  --gold:#3D6E80;
+  --gold-bg:#DCEAEE;
+  --success:#2E8A63;
+  --success-deep:#1F6247;
+  --success-bg:#DCEEE2;
+  --lieferant:#8A5CA6;
+  --lieferant-deep:#6B4381;
+  --lieferant-bg:#EEE0F2;
+  --kunde:#2E6F94;
+  --kunde-deep:#204F6B;
+  --kunde-bg:#DCE9F0;
 }
 html[data-mode="light"] body{-webkit-font-smoothing:auto}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -97,7 +98,7 @@ html[data-mode="light"]{color-scheme:light}
 body{
   background:var(--paper);
   color:var(--ink);
-  font-family:'Inter',system-ui,sans-serif;
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
   font-size:14px;
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
@@ -113,7 +114,7 @@ button,.scale-tick,.ic-btn,input[type="checkbox"]+.tt{touch-action:manipulation}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
 ::selection{background:var(--sage-bg);color:var(--sage-deep)}
 
-h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-.01em}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;letter-spacing:-.01em}
 
 .mono{font-family:'JetBrains Mono',monospace}
 
@@ -123,7 +124,7 @@ input,select,textarea{
   border-radius:var(--r);
   padding:10px 12px;
   color:var(--ink);
-  font-family:'Inter',sans-serif;
+  font-family:'IBM Plex Sans',sans-serif;
   font-size:13px;
   outline:none;
   width:100%;
@@ -149,10 +150,10 @@ button{font-family:inherit;cursor:pointer}
   display:flex;align-items:center;justify-content:center;min-height:100vh;
   background:var(--paper);
   background-image:
-    radial-gradient(circle at 50% -4%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 42%),
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--sage) 18%, transparent), transparent 55%),
-    repeating-linear-gradient(to bottom, transparent, transparent 39px, var(--line) 39px, var(--line) 40px);
-  background-size:100% 100%, 100% 100%, 100% 200px;
+    radial-gradient(circle at 50% -4%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 42%),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--sage) 16%, transparent), transparent 55%),
+    radial-gradient(circle, var(--line) 1px, transparent 1.4px);
+  background-size:100% 100%, 100% 100%, 22px 22px;
   padding:20px;
 }
 .login-wrap{width:100%;max-width:400px}
@@ -161,7 +162,7 @@ button{font-family:inherit;cursor:pointer}
 }
 .login-logo::before{
   content:'';position:absolute;inset:-16px;border-radius:50%;
-  background:radial-gradient(circle, color-mix(in srgb, var(--gold) 38%, transparent), transparent 70%);
+  background:radial-gradient(circle, color-mix(in srgb, var(--gold) 32%, transparent), transparent 70%);
   filter:blur(7px);animation:crestPulse 3.8s ease-in-out infinite;
 }
 @keyframes crestPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.95;transform:scale(1.1)}}
@@ -171,44 +172,46 @@ button{font-family:inherit;cursor:pointer}
   text-transform:uppercase;letter-spacing:.14em;text-align:center;margin-bottom:10px;
   display:flex;align-items:center;justify-content:center;gap:9px;
 }
-.login-label::before,.login-label::after{content:'◆';font-size:8px;opacity:.65}
+.login-label::before,.login-label::after{content:'';width:16px;height:1px;background:var(--line2);align-self:center}
 .login-brand{text-align:center;margin-bottom:26px}
 .login-brand h1{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
   font-size:36px;line-height:1;letter-spacing:-.01em;
   background:linear-gradient(115deg, var(--ink) 35%, var(--sage-deep) 85%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
 .login-brand .sub{color:var(--ink-soft);font-size:13px;margin-top:9px;font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
-.login-divider{display:flex;align-items:center;gap:12px;margin:0 0 22px;color:var(--gold);font-size:10px}
+.login-divider{display:flex;align-items:center;gap:12px;margin:0 0 22px;color:var(--gold);font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
 .login-divider span{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line2))}
 .login-divider span:last-child{background:linear-gradient(90deg,var(--line2),transparent)}
 .login-card{
   background:var(--paper2);
   border:1px solid var(--line2);
   border-radius:var(--r-lg);
-  padding:30px 28px;
+  clip-path:polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%);
+  padding:34px 28px 30px;
   position:relative;
-  box-shadow:0 28px 64px -24px color-mix(in srgb, var(--sage) 32%, transparent), 0 10px 24px -12px rgba(0,0,0,.55);
+  filter:drop-shadow(0 26px 40px color-mix(in srgb, var(--sage) 16%, transparent)) drop-shadow(0 10px 20px rgba(0,0,0,.4));
 }
 .login-card::before{
-  content:'';position:absolute;top:0;left:24px;right:24px;height:2px;border-radius:2px;
-  background:linear-gradient(90deg, transparent, var(--gold), var(--sage), var(--gold), transparent);
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, var(--sage), var(--gold) 45%, var(--sage) 100%);
   background-size:200% 100%;animation:shimmerLine 5.5s linear infinite;
 }
 @keyframes shimmerLine{0%{background-position:0% 0}100%{background-position:-200% 0}}
 .login-card::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
-  background:linear-gradient(160deg, color-mix(in srgb, var(--gold) 40%, transparent), transparent 32%, transparent 68%, color-mix(in srgb, var(--sage) 32%, transparent));
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
+  content:'№ NM-01';position:absolute;top:11px;right:18px;
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.04em;
+  color:var(--gold);opacity:.6;transform:rotate(-6deg);
 }
 .fw{margin-bottom:16px}
 .primary-btn{
-  width:100%;background:linear-gradient(135deg, var(--sage), var(--sage-deep));color:var(--paper);border:none;border-radius:99px;
-  padding:13px;font-size:13px;font-weight:700;letter-spacing:.02em;margin-top:6px;
-  transition:filter .15s, transform .15s;font-family:'Inter',sans-serif;
+  width:100%;background:linear-gradient(135deg, var(--sage), var(--sage-deep));color:var(--paper);border:none;
+  border-radius:var(--r);clip-path:polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  padding:14px 13px 14px 20px;font-size:13px;font-weight:700;letter-spacing:.02em;margin-top:6px;
+  transition:filter .15s, transform .15s;font-family:'IBM Plex Sans',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 8px 20px -6px color-mix(in srgb, var(--sage) 55%, transparent), 0 0 0 1px color-mix(in srgb, var(--gold) 25%, transparent) inset;
+  box-shadow:0 8px 20px -6px color-mix(in srgb, var(--sage) 55%, transparent);
 }
 .primary-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .login-err{
@@ -253,7 +256,7 @@ button{font-family:inherit;cursor:pointer}
   width:36px;height:36px;flex-shrink:0;filter:drop-shadow(0 3px 8px color-mix(in srgb, var(--sage) 35%, transparent));
 }
 .tb-mark svg{width:100%;height:100%;display:block}
-.tb-name{font-family:'Fraunces',serif;font-weight:600;font-size:17px;letter-spacing:-.01em;line-height:1.2}
+.tb-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em;line-height:1.2}
 .tb-name span{color:var(--sage-deep)}
 .sb-brand .sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;margin-top:2px}
 
@@ -286,7 +289,7 @@ button{font-family:inherit;cursor:pointer}
 .itb-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   background:none;border:none;color:var(--ink-faint);padding:7px 2px;border-radius:14px;
-  font-family:'Inter',sans-serif;transition:color .15s ease,background .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
+  font-family:'IBM Plex Sans',sans-serif;transition:color .15s ease,background .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
 }
 .itb-btn:active{transform:scale(.92)}
 .itb-ic{font-size:23px;line-height:1;transition:transform .15s ease;position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px}
@@ -323,9 +326,17 @@ button{font-family:inherit;cursor:pointer}
 /* ════════════════════════════════════════════════════════
    PAGE HEADER — label-style, like a pharmacy datasheet header
    ════════════════════════════════════════════════════════ */
-.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--line2)}
+.ph{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px;padding-bottom:18px;
+  border-bottom:1px dashed var(--line2);position:relative;
+}
+.ph::after{
+  content:'';position:absolute;left:0;right:0;bottom:-3.5px;height:5px;
+  background-image:radial-gradient(circle, var(--paper) 2px, transparent 2.2px);
+  background-size:12px 100%;background-position:0 center;
+}
 .ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
-.pt{font-family:'Fraunces',serif;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.pt{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .ps{color:var(--ink-soft);font-size:13px;margin-top:4px}
 .pa{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
@@ -335,24 +346,29 @@ button{font-family:inherit;cursor:pointer}
 .btn{
   display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:var(--r);
   font-size:12px;font-weight:600;border:none;transition:all .18s cubic-bezier(.4,0,.2,1);white-space:nowrap;
-  font-family:'Inter',sans-serif;letter-spacing:.01em;position:relative;
+  font-family:'IBM Plex Sans',sans-serif;letter-spacing:.01em;position:relative;
 }
 .btn:active{transform:scale(.97)}
 .btn:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
 .btn-ghost{background:var(--paper2);border:1px solid var(--line2);color:var(--ink-soft);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .btn-ghost:hover{border-color:var(--sage);color:var(--ink);background:var(--paper3);transform:translateY(-1px);box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
-.btn-primary{background:var(--sage-deep);color:var(--paper);box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);border-radius:99px;padding:10px 20px}
+.btn-primary{
+  background:linear-gradient(135deg, var(--sage), var(--sage-deep));color:var(--paper);
+  box-shadow:0 2px 8px -2px color-mix(in srgb, var(--sage) 50%, transparent);
+  border-radius:var(--r);clip-path:polygon(0 0, 100% 0, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  padding:10px 18px 10px 22px;
+}
 .btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 6px 16px -4px color-mix(in srgb, var(--sage) 55%, transparent)}
-.btn-danger{background:var(--rust-bg);border:1px solid #4A3528;color:var(--rust);border-radius:var(--r-lg)}
+.btn-danger{background:var(--rust-bg);border:1px solid color-mix(in srgb, var(--rust) 45%, var(--paper));color:var(--rust);border-radius:var(--r-lg)}
 .btn-danger:hover{background:var(--rust);color:var(--paper);transform:translateY(-1px);box-shadow:0 6px 16px -4px rgba(0,0,0,.4)}
 .btn-sm{padding:7px 12px;font-size:11px}
-.btn-sm.btn-primary{padding:7px 16px}
+.btn-sm.btn-primary{padding:7px 14px 7px 18px}
 .ic-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;color:var(--ink-faint);transition:all .15s cubic-bezier(.4,0,.2,1);font-size:13px;min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
 .ic-btn:hover{background:var(--rust-bg);color:var(--rust);transform:scale(1.08)}
 .ic-btn:active{transform:scale(.92)}
 .status-btn{
   background:none;border:1px solid var(--line2);color:var(--ink-faint);padding:5px 11px;
-  border-radius:99px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  border-radius:var(--r);font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
   letter-spacing:.03em;transition:all .15s;white-space:nowrap;margin-right:5px;
 }
 .status-btn:hover{color:var(--ink)}
@@ -360,11 +376,11 @@ button{font-family:inherit;cursor:pointer}
 .status-btn.active-bezahlt{background:var(--success-bg);border-color:color-mix(in srgb, var(--success) 35%, transparent);color:var(--success-deep)}
 .tab-group{
   display:inline-flex;flex-wrap:wrap;gap:3px;background:var(--paper2);border:1px solid var(--line2);
-  border-radius:999px;padding:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
+  border-radius:var(--r-lg);padding:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
 }
 .tab-btn{
   background:transparent;border:none;color:var(--ink-soft);
-  padding:9px 18px;border-radius:999px;font-size:12px;font-weight:600;
+  padding:9px 18px;border-radius:var(--r);font-size:12px;font-weight:600;
   display:inline-flex;align-items:center;gap:8px;transition:all .2s cubic-bezier(.4,0,.2,1);
 }
 .tab-btn:hover{color:var(--ink)}
@@ -397,13 +413,16 @@ button{font-family:inherit;cursor:pointer}
    STAT LABELS — pharmacy datasheet style, replaces stat cards
    ════════════════════════════════════════════════════════ */
 .stat-strip{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:28px;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:28px;border:1px solid var(--line2);border-radius:var(--r-lg);
+  clip-path:polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
   box-shadow:0 8px 20px -10px rgba(0,0,0,.5);
 }
 .stat-strip.has-lieferant{grid-template-columns:repeat(5,1fr)}
 .stat-cell{padding:18px 20px;border-right:1px solid var(--line2);background:var(--paper2);transition:background .15s,transform .15s;position:relative}
 .stat-cell:hover{background:var(--paper3);transform:translateY(-1px)}
 .stat-cell:last-child{border-right:none}
+.stat-cell::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:2px;background:var(--sage);opacity:0;transition:opacity .15s}
+.stat-cell:hover::before{opacity:.6}
 .stat-cell .sc-lab{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
 .stat-cell .sc-v{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:-.02em}
 .stat-cell.s-debt .sc-v{color:var(--rust)}
@@ -421,13 +440,27 @@ button{font-family:inherit;cursor:pointer}
   display:flex;align-items:center;justify-content:space-between;padding:15px 20px;
   border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--paper3) 55%, transparent);
 }
-.card-head h3{font-size:14px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:0}
+.card-head h3{font-size:14px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;letter-spacing:0}
 .badge{
-  font-size:9px;font-weight:700;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace;
-  text-transform:uppercase;letter-spacing:.05em;
+  font-size:9px;font-weight:700;padding:3px 9px 3px 7px;border-radius:2px;font-family:'JetBrains Mono',monospace;
+  text-transform:uppercase;letter-spacing:.05em;border-left:2px solid currentColor;
 }
 .b-offen{background:var(--rust-bg);color:var(--rust)}
 .b-bezahlt{background:var(--success-bg);color:var(--success-deep)}
+
+/* Abholcode — Ticket-Box im Detailfenster + kleiner Chip in der Bestellliste */
+.abholcode-box{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--sage-bg);border:1px dashed color-mix(in srgb, var(--sage) 55%, transparent);
+  border-radius:var(--r);clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  padding:12px 16px;margin-bottom:18px;
+}
+.abholcode-lab{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.abholcode-val{font-size:22px;font-weight:700;letter-spacing:.12em;color:var(--ink)}
+.abholcode-chip{
+  display:inline-block;margin-left:8px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:.06em;
+  background:var(--sage-bg);color:var(--sage);border-radius:2px;border-left:2px solid var(--sage);vertical-align:middle;
+}
 .b-lieferant{background:var(--lieferant-bg);color:var(--lieferant-deep)}
 .b-kunde{background:var(--kunde-bg);color:var(--kunde-deep)}
 .b-admin{background:var(--gold-bg);color:var(--gold)}
@@ -484,7 +517,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .set-card{background:var(--paper);border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden}
 .sch{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .sch-ic{width:30px;height:30px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.sch h3{font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
+.sch h3{font-size:13px;font-weight:600;font-family:'IBM Plex Sans',sans-serif}
 .sch p{font-size:11px;color:var(--ink-faint);margin-top:1px}
 .scb{padding:18px 20px}
 .sr{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -511,7 +544,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .ul-role{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
 
 .danger-zone{border:1px solid #4A3528;background:var(--rust-bg);border-radius:var(--r-lg);padding:20px}
-.danger-zone h3{color:var(--rust);font-size:13px;font-weight:700;margin-bottom:5px;font-family:'Inter',sans-serif}
+.danger-zone h3{color:var(--rust);font-size:13px;font-weight:700;margin-bottom:5px;font-family:'IBM Plex Sans',sans-serif}
 .danger-zone p{font-size:12px;color:var(--ink-soft);margin-bottom:14px}
 .danger-actions{display:flex;gap:10px;flex-wrap:wrap}
 
@@ -535,7 +568,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   font-size:18px;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb, var(--rust) 18%, transparent);
   color:var(--rust);display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.service-banner h4{color:var(--rust);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:-.01em}
+.service-banner h4{color:var(--rust);font-size:13px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;letter-spacing:-.01em}
 .service-banner p{font-size:12px;color:var(--ink-soft);margin-top:2px}
 
 /* ════════════════════════════════════════════════════════
@@ -547,7 +580,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .modal-bg.show .modal{transform:scale(1) translateY(0)}
 .modal.wide{max-width:600px}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line2)}
-.modal-head h3{font-size:16px;font-family:'Fraunces',serif;font-weight:600}
+.modal-head h3{font-size:16px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600}
 .modal-close{background:none;border:none;font-size:18px;color:var(--ink-faint);cursor:pointer;padding:4px;border-radius:var(--r);transition:all .12s}
 .modal-close:hover{color:var(--ink);background:var(--paper3)}
 .modal-body{padding:22px}
@@ -572,7 +605,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--paper3);border:1px solid var(--line2);color:var(--ink);padding:12px 18px;border-radius:var(--r);
   font-size:12px;font-weight:600;display:flex;align-items:center;gap:9px;z-index:80;
-  opacity:0;pointer-events:none;transition:all .25s ease;font-family:'Inter',sans-serif;
+  opacity:0;pointer-events:none;transition:all .25s ease;font-family:'IBM Plex Sans',sans-serif;
   box-shadow:0 8px 24px rgba(0,0,0,.4);
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -669,6 +702,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
     top:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
     padding-top:9px;
   }
+  .logout-btn{
+    background:var(--rust-bg);border:1.5px solid var(--rust);color:var(--rust);
+    padding:13px 12px;font-size:12.5px;font-weight:700;
+  }
+  .logout-btn:active{background:var(--rust);color:#fff;transform:scale(.98)}
 }
 @media(max-width:600px){
   .main{padding:24px 16px 50px}
@@ -703,8 +741,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         </defs>
         <circle cx="32" cy="32" r="30.5" fill="none" stroke="url(#lg-ring)" stroke-width="1.3" opacity=".6"/>
         <circle cx="32" cy="32" r="27" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".35" stroke-dasharray="1.2 3.4"/>
-        <rect x="9" y="9" width="46" height="46" rx="14" fill="url(#lg-badge)"/>
-        <rect x="9.5" y="9.5" width="45" height="45" rx="13.5" fill="none" stroke="var(--gold)" stroke-width="1" opacity=".5"/>
+        <rect x="9" y="9" width="46" height="46" rx="6" fill="url(#lg-badge)"/>
+        <rect x="9.5" y="9.5" width="45" height="45" rx="5.5" fill="none" stroke="var(--gold)" stroke-width="1" opacity=".5"/>
         <ellipse cx="23" cy="17" rx="15" ry="6" fill="var(--paper)" opacity=".1"/>
         <path d="M20 43V21h5.2l13 15.4V21H43v22h-5.2l-13-15.4V43H20z" fill="var(--paper)"/>
         <circle cx="46.5" cy="17.5" r="3.4" fill="var(--gold)"/>
@@ -715,7 +753,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <h1>Nicotine<span style="color:var(--sage-deep);-webkit-text-fill-color:var(--sage-deep)">Manager</span></h1>
       <div class="sub">Bestand · Bestellungen · Dosierung</div>
     </div>
-    <div class="login-divider"><span></span><i>◆</i><span></span></div>
+    <div class="login-divider"><span></span><i style="font-style:normal">▤ ZUGANG</i><span></span></div>
     <div class="login-card">
       <div class="fw"><label class="fl">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username"/></div>
       <div class="fw"><label class="fl">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
@@ -1256,6 +1294,13 @@ create policy "varianten eigene loeschen"
   <div class="modal wide">
     <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')">✕</button></div>
     <div class="modal-body">
+      <div class="abholcode-box" id="od-abholcode-box" style="display:none">
+        <div>
+          <div class="abholcode-lab">Abholcode</div>
+          <div class="abholcode-val mono" id="od-abholcode-val"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
+      </div>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row"><span>Bestellt am</span><span id="od-datum"></span></div>
@@ -1593,7 +1638,7 @@ function mapBestellung(b){
   return {
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null
   };
 }
 let trashLoaded = false;
@@ -2354,19 +2399,35 @@ async function addBestellung(){
     return {prod:it.prod, stueck:it.stueck||1, variante:v?v.id:null, varianteName:v?v.name:null, preis, sub:preis*(it.stueck||1), ek:v?v.einkauf:(S.einkauf[it.prod]||0)};
   });
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
+  const abholcode = genAbholcode();
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today()
+    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today(), abholcode
   }).select().single();
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
-  showToast('Bestellung angelegt.');
+  showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
+}
+
+// Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Kunde nennt/zeigt ihn bei Abholung zur
+// Bestätigung. Verwechslungsanfällige Zeichen (0/O, 1/I) bewusst ausgeschlossen.
+function genAbholcode(){
+  const chars='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let code='';
+  for(let i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+function copyAbholcode(){
+  const val=document.getElementById('od-abholcode-val')?.textContent;
+  if(!val) return;
+  navigator.clipboard?.writeText(val).then(()=>showToast('Abholcode kopiert.'))
+    .catch(()=>showToast('Kopieren nicht möglich.','⚠'));
 }
 
 // ══════════════════════════════════════════════
@@ -2800,6 +2861,7 @@ function renderBestellungen(){
     const nameCell = b.fuerLieferant
       ? `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`
       : (k?k.vorname+' '+k.nachname:'—');
+    const abholcodeChip = (b.abholcode && !b.delivered) ? `<span class="mono abholcode-chip" title="Abholcode">${b.abholcode}</span>` : '';
     // Lieferantenkunden-Bestellungen sind fremde Bestellungen (von einem anderen Benutzer
     // aufgegeben) — wie bei fremden Kundenbestellungen kann ich sie nicht löschen, nur
     // ansehen und den Status (bestellt/bezahlt) pflegen.
@@ -2827,7 +2889,7 @@ function renderBestellungen(){
       : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
     return `<tr>
       ${vonCell}
-      <td style="font-weight:600">${nameCell}</td>
+      <td style="font-weight:600">${nameCell}${abholcodeChip}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       ${gesamt}
@@ -3189,6 +3251,13 @@ function openOrderDetail(id){
   const k=S.kunden.find(x=>x.id===b.kId);
 
   document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
+  const abBox=document.getElementById('od-abholcode-box');
+  if(b.abholcode){
+    abBox.style.display='flex';
+    document.getElementById('od-abholcode-val').textContent = b.abholcode;
+  } else {
+    abBox.style.display='none';
+  }
   const vonRow=document.getElementById('od-von-row');
   if(b.userId!==currentUserId){
     vonRow.style.display='flex';
