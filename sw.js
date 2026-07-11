@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '10.2.0'; // Runde 3 der "Aurora"-Politur: Glass-Effekt auch für mobile Topbar & Update-Banner, Verlaufs-Ring-Avatar, Icon-Chips in der Sidebar-Navigation, Shine-Sweep-Animation auf dem Login-Button, sanft schwebendes Login-Logo mit Leucht-Schatten, Verlaufstext bei allen Seitentitel-Überschriften, aufgewertete Empty-State-Icons mit rundem Farb-Badge. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
+const APP_VERSION = '11.0.0'; // Strukturelles Update: eigenes SVG-Icon-Set ersetzt die Unicode-Symbole (◎ ▤ ◐ ⚖ ◆ ⚙ ✚ u.a.) in Sidebar, mobiler Tabbar, Empty-States, Tabs, Einstellungen und Login — currentColor-basiert, fügt sich in alle bestehenden Gradient-/Active-Farben ein. Dashboard-Stat-Leiste wurde zu einem Bento-Grid umgebaut (Offene Schulden & Gesamtgewinn als große Kacheln, Bestellungen/Schuldner/Kunden/Eigene-Schulden als kleinere Kacheln, responsive bis 1-spaltig). Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',

@@ -827,9 +827,109 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   #update-banner .btn{width:100%;justify-content:center}
   .tab-btn{padding:8px 12px;font-size:11px;gap:5px}
 }
+
+/* ════════════════════════════════════════════════════════
+   ICON-SET — SVG-Icons via <use>, ersetzen die Unicode-Symbole.
+   currentColor greift automatisch in Nav-Gradients/Active-States.
+   ════════════════════════════════════════════════════════ */
+.svg-ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.scale-tick .tk-ic .svg-ic{width:15px;height:15px}
+.itb-ic .svg-ic{width:19px;height:19px}
+.ec-ic .svg-ic{width:24px;height:24px;stroke-width:1.6}
+.sch-ic .svg-ic{width:15px;height:15px}
+.lab-ic{display:inline-flex;width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1.5px;margin-right:5px;opacity:.85}
+.h-ic{display:inline-flex;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2.5px;margin-right:6px;opacity:.9}
+.login-divider .svg-ic{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1.5px;margin-right:5px}
+.sb-left .svg-ic{width:20px;height:20px}
+
+/* ════════════════════════════════════════════════════════
+   DASHBOARD BENTO-GRID — löst die schlichte Stat-Leiste ab.
+   Läuft unter derselben Klasse ".stat-strip" (JS hängt daran:
+   querySelector, classList 'has-lieferant', Tour-Target), nur
+   mit zusätzlicher Klasse ".bento-dash" für den neuen Look.
+   Alle IDs/Werte unverändert — reine Layout-/Optik-Änderung.
+   ════════════════════════════════════════════════════════ */
+.stat-strip.bento-dash{
+  display:grid;gap:14px;margin-bottom:24px;
+  border:none;border-radius:0;overflow:visible;box-shadow:none;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-areas:
+    "debt debt profit profit"
+    "best schuldner kunden kunden";
+}
+.stat-strip.bento-dash.has-lieferant{
+  grid-template-columns:repeat(6,1fr);
+  grid-template-areas:
+    "debt debt profit profit profit profit"
+    "best schuldner kunden kunden lief lief";
+}
+.bento-dash .stat-cell{
+  border:1px solid var(--line2);border-right:1px solid var(--line2);border-radius:var(--r-lg);
+  background:var(--paper2);padding:20px 22px;position:relative;overflow:hidden;
+  box-shadow:0 12px 26px -18px rgba(0,0,0,.55);
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.bento-dash .stat-cell::before{display:none}
+.bento-dash .stat-cell:hover{transform:translateY(-2px);box-shadow:0 16px 32px -16px rgba(0,0,0,.6)}
+.bento-dash .stat-cell .bento-ic-bg{position:absolute;top:12px;right:12px;width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1.4;opacity:.1;pointer-events:none}
+.bento-dash .stat-cell .sc-lab{display:flex;align-items:center;position:relative;z-index:1}
+.bento-dash .stat-cell .sc-v,.bento-dash .stat-cell .sc-sub{position:relative;z-index:1}
+.bento-dash [data-bento="debt"]{grid-area:debt;background:linear-gradient(135deg,var(--rust-bg),var(--paper2) 65%);border-color:color-mix(in srgb, var(--rust) 32%, var(--line2));color:var(--rust)}
+.bento-dash [data-bento="debt"] .sc-v{font-size:30px;color:var(--rust)}
+.bento-dash [data-bento="profit"]{grid-area:profit;background:linear-gradient(135deg,var(--success-bg),var(--paper2) 65%);border-color:color-mix(in srgb, var(--success) 32%, var(--line2));color:var(--success-deep);cursor:help}
+.bento-dash [data-bento="profit"] .sc-v{font-size:30px}
+.bento-dash [data-bento="best"]{grid-area:best}
+.bento-dash [data-bento="schuldner"]{grid-area:schuldner}
+.bento-dash [data-bento="kunden"]{grid-area:kunden}
+.bento-dash [data-bento="lief"]{grid-area:lief;background:linear-gradient(135deg,var(--lieferant-bg),var(--paper2) 65%);border-color:color-mix(in srgb, var(--lieferant) 32%, var(--line2))}
+@media(max-width:900px){
+  .stat-strip.bento-dash,.stat-strip.bento-dash.has-lieferant{
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "debt debt"
+      "profit profit"
+      "best schuldner"
+      "kunden lief";
+  }
+}
+@media(max-width:460px){
+  .stat-strip.bento-dash,.stat-strip.bento-dash.has-lieferant{
+    grid-template-columns:1fr;
+    grid-template-areas:"debt" "profit" "best" "schuldner" "kunden" "lief";
+  }
+  .bento-dash [data-bento="debt"] .sc-v,.bento-dash [data-bento="profit"] .sc-v{font-size:26px}
+}
 </style>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════════════════
+     ICON-SPRITE — ersetzt die früheren Unicode-Symbole (◎ ▤ ◐ ⚖ …)
+     durch ein konsistentes Strich-Icon-Set. currentColor-basiert,
+     damit Gradient/Active-States der Nav & Kacheln automatisch greifen.
+     Rein optisch — keine Tabellen/IDs/Logik betroffen.
+     ════════════════════════════════════════════════════════ -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+  <defs>
+    <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></symbol>
+    <symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M6 2.5h12v18.7l-2.2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4V2.5z"/><line x1="8.3" y1="7.3" x2="15.7" y2="7.3"/><line x1="8.3" y1="11.2" x2="15.7" y2="11.2"/><line x1="8.3" y1="15.1" x2="13" y2="15.1"/></symbol>
+    <symbol id="ic-truck" viewBox="0 0 24 24"><rect x="2" y="6.5" width="12" height="10" rx="1.3"/><path d="M14 10h4.2l3.3 3.3v3.2H14z"/><circle cx="7" cy="18.3" r="1.9"/><circle cx="17.5" cy="18.3" r="1.9"/></symbol>
+    <symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9.3" cy="8" r="3.4"/><path d="M3 20c0-3.8 2.8-6.4 6.3-6.4S15.6 16.2 15.6 20"/><circle cx="17.4" cy="8.8" r="2.7"/><path d="M15.6 13.9c2.9.5 4.7 2.9 4.7 6.1"/></symbol>
+    <symbol id="ic-user-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><circle cx="12" cy="10" r="3.2"/><path d="M6.2 19.1c1-3.2 3.1-4.8 5.8-4.8s4.8 1.6 5.8 4.8"/></symbol>
+    <symbol id="ic-store" viewBox="0 0 24 24"><path d="M3.3 9.2 4.6 3h14.8l1.3 6.2"/><path d="M4 9.2v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-10"/><path d="M3.3 9.2a2.9 2.9 0 0 0 5.8.3 2.9 2.9 0 0 0 5.8 0 2.9 2.9 0 0 0 5.8-.3"/><line x1="9.5" y1="20.2" x2="9.5" y2="14.5"/><line x1="14.5" y1="20.2" x2="14.5" y2="14.5"/></symbol>
+    <symbol id="ic-tag" viewBox="0 0 24 24"><path d="M12.7 3H20a1 1 0 0 1 1 1v7.3a1 1 0 0 1-.3.7l-8.6 8.6a1 1 0 0 1-1.4 0l-7.4-7.4a1 1 0 0 1 0-1.4l8.6-8.6a1 1 0 0 1 .8-.2z"/><circle cx="16.3" cy="7.6" r="1.6"/></symbol>
+    <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 13.4a1.8 1.8 0 0 0 .3 2l.1.1a2.1 2.1 0 1 1-3 3l-.1-.1a1.8 1.8 0 0 0-2-.3 1.8 1.8 0 0 0-1 1.6V20a2.1 2.1 0 1 1-4.2 0v-.1a1.8 1.8 0 0 0-1.1-1.7 1.8 1.8 0 0 0-2 .3l-.1.1a2.1 2.1 0 1 1-3-3l.1-.1a1.8 1.8 0 0 0 .3-2 1.8 1.8 0 0 0-1.6-1H4a2.1 2.1 0 1 1 0-4.2h.1a1.8 1.8 0 0 0 1.7-1.1 1.8 1.8 0 0 0-.3-2l-.1-.1a2.1 2.1 0 1 1 3-3l.1.1a1.8 1.8 0 0 0 2 .3H10a1.8 1.8 0 0 0 1-1.6V4a2.1 2.1 0 1 1 4.2 0v.1a1.8 1.8 0 0 0 1.1 1.6 1.8 1.8 0 0 0 2-.3l.1-.1a2.1 2.1 0 1 1 3 3l-.1.1a1.8 1.8 0 0 0-.3 2v.1a1.8 1.8 0 0 0 1.6 1H20a2.1 2.1 0 1 1 0 4.2h-.1a1.8 1.8 0 0 0-1.5 1.5z"/></symbol>
+    <symbol id="ic-lifebuoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><circle cx="12" cy="12" r="3.6"/><line x1="5.1" y1="5.1" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.9" y2="18.9"/><line x1="18.9" y1="5.1" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.1" y2="18.9"/></symbol>
+    <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="4" y="10.2" width="16" height="10.3" rx="2"/><path d="M7.5 10.2V7.3a4.5 4.5 0 0 1 9 0v2.9"/></symbol>
+    <symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M3 7.2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16.3 12h3.2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-3.2a2 2 0 0 1 0-4z"/></symbol>
+    <symbol id="ic-trend" viewBox="0 0 24 24"><polyline points="3 17 9.5 10.5 13.3 14.3 21 6.6"/><polyline points="14.8 6.6 21 6.6 21 12.8"/></symbol>
+    <symbol id="ic-card" viewBox="0 0 24 24"><rect x="2.3" y="5.3" width="19.4" height="13.4" rx="2"/><line x1="2.3" y1="9.8" x2="21.7" y2="9.8"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><polyline points="12 6.8 12 12 15.7 14.2"/></symbol>
+    <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3.5" y1="6.5" x2="20.5" y2="6.5"/><line x1="3.5" y1="12" x2="20.5" y2="12"/><line x1="3.5" y1="17.5" x2="20.5" y2="17.5"/></symbol>
+    <symbol id="ic-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 3.2 17.4c.7-.3 1-1 .7-1.7-.3-.6-.2-1.3.3-1.8.4-.4 1-.5 1.6-.5H19a4 4 0 0 0 4-4C23 6.6 18 3 12 3z"/><circle cx="7.3" cy="10.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="6.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="6.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="17" cy="10.3" r="1.1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ic-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12.2c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+  </defs>
+</svg>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -862,7 +962,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <h1>Nicotine<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Manager</span></h1>
       <div class="sub">Bestand · Bestellungen · Dosierung</div>
     </div>
-    <div class="login-divider"><span></span><i style="font-style:normal">▤ ZUGANG</i><span></span></div>
+    <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg>ZUGANG</i><span></span></div>
     <div class="login-card">
       <div class="fw"><label class="fl">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username"/></div>
       <div class="fw"><label class="fl">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
@@ -890,14 +990,14 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <nav class="scalebar" id="scalebar">
-        <div class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic">◎</span>Übersicht</div>
-        <div class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
-        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◆</span>Lieferant &amp; Schulden</div>
-        <div class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">◐</span>Kunden</div>
-        <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic">◆</span>Lieferantenkunden</div>
-        <div class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">⚖</span>Preise</div>
-        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic">⚙</span>Einstellungen</div>
-        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic">✚</span>Service</div>
+        <div class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span>Übersicht</div>
+        <div class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span>Lieferant &amp; Schulden</div>
+        <div class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span>Kunden</div>
+        <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
+        <div class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
+        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
+        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
       </nav>
       <div class="scalebar-mehr-hint" id="scalebar-mehr-hint">Mehr</div>
 
@@ -923,11 +1023,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <nav class="ios-tabbar" id="ios-tabbar">
-        <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic">◎</span><span class="itb-lab">Übersicht</span></button>
-        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤<span class="itb-dot" id="itb-dot-bestellungen"></span></span><span class="itb-lab">Bestellungen</span></button>
-        <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic">◐</span><span class="itb-lab">Kunden</span></button>
-        <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic">⚖</span><span class="itb-lab">Preise</span></button>
-        <button class="itb-btn" id="itb-mehr" onclick="openSidebar()"><span class="itb-ic">☰</span><span class="itb-lab">Mehr</span></button>
+        <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span><span class="itb-lab">Übersicht</span></button>
+        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg><span class="itb-dot" id="itb-dot-bestellungen"></span></span><span class="itb-lab">Bestellungen</span></button>
+        <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span><span class="itb-lab">Kunden</span></button>
+        <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span><span class="itb-lab">Preise</span></button>
+        <button class="itb-btn" id="itb-mehr" onclick="openSidebar()"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-menu"/></svg></span><span class="itb-lab">Mehr</span></button>
       </nav>
 
       <div class="main">
@@ -938,23 +1038,47 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div><div class="ph-eyebrow">Datenblatt · Echtzeit</div><div class="pt">Übersicht</div><div class="ps">Offene Schulden und ausstehende Bestellungen</div></div>
       </div>
       <div id="service-banner" style="display:none" class="service-banner">
-        <div class="sb-left">✚</div>
+        <div class="sb-left"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></div>
         <div><h4>Service fällig</h4><p>Der jährliche Service steht an. Bitte den Service-Account kontaktieren.</p></div>
       </div>
 
-      <div class="stat-strip">
-        <div class="stat-cell s-debt"><div class="sc-lab">◈ Offene Schulden</div><div class="sc-v mono" id="d-schulden">0,00 €</div><div class="sc-sub" id="d-s-sub">0 offen</div></div>
-        <div class="stat-cell"><div class="sc-lab">▤ Bestellungen</div><div class="sc-v mono" id="d-best">0</div><div class="sc-sub">gesamt</div></div>
-        <div class="stat-cell"><div class="sc-lab">◐ Schuldner</div><div class="sc-v mono" id="d-schuldner">0</div><div class="sc-sub">Kunden mit offenem Betrag</div></div>
-        <div class="stat-cell"><div class="sc-lab">◎ Kunden</div><div class="sc-v mono" id="d-kunden">0</div><div class="sc-sub">registriert</div></div>
-        <div class="stat-cell" id="d-lieferant-cell" style="display:none"><div class="sc-lab">◆ Eigene Schulden</div><div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div><div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden anderer bei dir</div></div>
-      </div>
-
-      <div class="dose-card" id="profit-card" style="border-color:var(--success-deep);background:var(--success-bg)">
-        <div class="dose-row">
-          <div class="dose-label">💰 Gesamtgewinn <span style="font-weight:400;color:var(--ink-faint)">· Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Verkäufe an Kunden und Lieferantenkunden</span></div>
+      <div class="stat-strip bento-dash">
+        <div class="stat-cell s-debt" data-bento="debt">
+          <svg class="bento-ic-bg"><use href="#ic-wallet"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-wallet"/></svg>Offene Schulden</div>
+          <div class="sc-v mono" id="d-schulden">0,00 €</div>
+          <div class="sc-sub" id="d-s-sub">0 offen</div>
         </div>
-        <div class="sc-v mono" id="d-gewinn" style="font-size:26px;color:var(--success-deep);margin-top:4px">0,00 €</div>
+        <div class="stat-cell" id="profit-card" data-bento="profit" title="Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Verkäufe an Kunden und Lieferantenkunden">
+          <svg class="bento-ic-bg"><use href="#ic-trend"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-trend"/></svg>Gesamtgewinn</div>
+          <div class="sc-v mono" id="d-gewinn">0,00 €</div>
+          <div class="sc-sub">Verkauf − Einkauf · alle Verkäufe</div>
+        </div>
+        <div class="stat-cell" data-bento="best">
+          <svg class="bento-ic-bg"><use href="#ic-receipt"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-receipt"/></svg>Bestellungen</div>
+          <div class="sc-v mono" id="d-best">0</div>
+          <div class="sc-sub">gesamt</div>
+        </div>
+        <div class="stat-cell" data-bento="schuldner">
+          <svg class="bento-ic-bg"><use href="#ic-user-circle"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-user-circle"/></svg>Schuldner</div>
+          <div class="sc-v mono" id="d-schuldner">0</div>
+          <div class="sc-sub">Kunden mit offenem Betrag</div>
+        </div>
+        <div class="stat-cell" data-bento="kunden">
+          <svg class="bento-ic-bg"><use href="#ic-users"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-users"/></svg>Kunden</div>
+          <div class="sc-v mono" id="d-kunden">0</div>
+          <div class="sc-sub">registriert</div>
+        </div>
+        <div class="stat-cell" id="d-lieferant-cell" data-bento="lief" style="display:none">
+          <svg class="bento-ic-bg"><use href="#ic-truck"/></svg>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-truck"/></svg>Eigene Schulden</div>
+          <div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div>
+          <div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden anderer bei dir</div>
+        </div>
       </div>
 
       <div class="dose-card">
@@ -984,9 +1108,9 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
       <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div class="tab-group" id="best-tabs">
-          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')">▤ Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
+          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-receipt"/></svg>Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
-          <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')">🕘 Historie</button>
+          <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-clock"/></svg>Historie</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="resetBestellPage()" style="width:auto;min-width:200px"/>
@@ -1001,7 +1125,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <button class="btn btn-ghost btn-sm" id="b-loadmore-btn" onclick="bestellungenPageSize+=50;renderBestellungen()">Mehr laden</button>
       </div>
       <div class="ec" id="b-empty" style="display:none">
-        <div class="ec-ic">▤</div>
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></div>
         <div class="ec-t" id="b-empty-text">Keine Bestellungen</div>
         <div class="ec-s">Lege eine neue Bestellung an, um zu starten.</div>
       </div>
@@ -1022,7 +1146,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Abholcode</th><th>Bezahlt</th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="lb-empty" style="display:none">
-        <div class="ec-ic">◆</div>
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div>
         <div class="ec-t">Noch keine Bestellungen beim Lieferanten</div>
         <div class="ec-s">Lege oben deine erste Bestellung an.</div>
       </div>
@@ -1030,11 +1154,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <!-- EIGENE SCHULDEN: freie Schulden bei anderen Personen (nicht der eigene Lieferant),
            bewusst auf derselben Seite wie die Lieferanten-Bestellungen, weil beides deine
            eigenen offenen Verbindlichkeiten sind — siehe kombinierte Dashboard-Kachel. -->
-      <div class="card-head" style="border:none;padding:0;margin:28px 0 12px"><h3>◈ Sonstige Schulden</h3></div>
+      <div class="card-head" style="border:none;padding:0;margin:28px 0 12px"><h3><svg class="h-ic"><use href="#ic-wallet"/></svg>Sonstige Schulden</h3></div>
       <div class="ps" style="margin:-6px 0 14px">Geld, das du jemand anderem schuldest — unabhängig von deinem Lieferanten. Zählt zusammen mit „Offen beim Lieferanten" in einer gemeinsamen Kachel auf der Übersicht.</div>
       <div class="card" id="es-setup-hint" style="display:none">
         <div class="ec" style="padding:8px 0">
-          <div class="ec-ic">⚙</div>
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
           <div class="ec-t">Noch nicht eingerichtet</div>
           <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
           <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table eigene_schulden (
@@ -1075,7 +1199,7 @@ create policy "eigene schulden eigener user"
       <div style="margin-bottom:16px"><input type="search" id="kunden-search" placeholder="🔍 Kunde suchen…" oninput="renderKunden()" style="max-width:280px"/></div>
       <div class="kg" id="kunden-grid"></div>
       <div class="ec" id="kunden-empty" style="display:none">
-        <div class="ec-ic">◐</div>
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></div>
         <div class="ec-t" id="kunden-empty-text">Noch keine Kunden</div>
         <div class="ec-s" id="kunden-empty-sub">Lege deinen ersten Kunden an.</div>
       </div>
@@ -1085,12 +1209,12 @@ create policy "eigene schulden eigener user"
          da es sich um andere Benutzer handelt, die bei MIR bestellen, nicht um eigene Kunden. -->
     <div class="page" id="page-lieferantenkunden">
       <div class="ph">
-        <div><div class="ph-eyebrow">Register</div><div class="pt">◆ Lieferantenkunden</div><div class="ps">Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen</div></div>
+        <div><div class="ph-eyebrow">Register</div><div class="pt"><svg class="h-ic"><use href="#ic-store"/></svg>Lieferantenkunden</div><div class="ps">Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen</div></div>
       </div>
       <div style="margin-bottom:16px"><input type="search" id="lieferantenkunden-search" placeholder="🔍 Lieferantenkunde suchen…" oninput="renderLieferantenkundenSeite()" style="max-width:280px"/></div>
       <div class="kg" id="lieferantenkunden-grid"></div>
       <div class="ec" id="lieferantenkunden-empty" style="display:none">
-        <div class="ec-ic">◆</div>
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></div>
         <div class="ec-t">Noch keine Lieferantenkunden</div>
         <div class="ec-s">Sobald ein Benutzer dich als Lieferanten auswählt, erscheint er hier.</div>
       </div>
@@ -1101,7 +1225,7 @@ create policy "eigene schulden eigener user"
       <div class="ph"><div><div class="ph-eyebrow">Beipackzettel</div><div class="pt">Preise</div><div class="ps">Einkaufs- und Verkaufspreise für alle Produkte</div></div></div>
       <div class="card" id="vt-setup-hint" style="display:none;margin-bottom:16px">
         <div class="ec" style="padding:8px 0">
-          <div class="ec-ic">⚙</div>
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
           <div class="ec-t">Geschmäcker, Farben & Marken noch nicht eingerichtet</div>
           <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
           <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table produkt_varianten (
@@ -1140,7 +1264,7 @@ create policy "varianten eigene loeschen"
       <div class="ph"><div><div class="ph-eyebrow">Konfiguration</div><div class="pt">Einstellungen</div><div class="ps">App konfigurieren und Konto verwalten</div></div></div>
       <div class="sg" style="margin-bottom:16px" id="set-row-1">
         <div class="set-card" id="set-card-konto">
-          <div class="sch"><div class="sch-ic">◐</div><div><h3>Mein Konto</h3><p>Benutzername & Passwort</p></div></div>
+          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></div><div><h3>Mein Konto</h3><p>Benutzername & Passwort</p></div></div>
           <div class="scb">
             <div style="margin-bottom:12px"><label class="fl">Benutzername</label><input id="set-user" disabled style="opacity:.6;cursor:not-allowed"/></div>
             <div style="margin-bottom:12px"><label class="fl">Passwort</label><input type="password" id="set-pw1" value="••••••••" disabled style="opacity:.6;cursor:not-allowed"/></div>
@@ -1154,7 +1278,7 @@ create policy "varianten eigene loeschen"
           </div>
         </div>
         <div class="set-card" id="set-card-anzeige">
-          <div class="sch"><div class="sch-ic">◑</div><div><h3>Anzeige</h3><p>Design anpassen</p></div></div>
+          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3>Anzeige</h3><p>Design anpassen</p></div></div>
           <div class="scb">
             <div class="sr"><div><div class="sr-label">Helles Design</div><div class="sr-sub">Statt des dunklen Standard-Designs</div></div><label class="toggle"><input type="checkbox" id="set-lightmode" onchange="applyMode(this.checked?'light':'dark')"><div class="tt"></div></label></div>
             <div class="sr"><div><div class="sr-label">Animationen</div><div class="sr-sub">Seitenübergänge</div></div><label class="toggle"><input type="checkbox" id="set-anim" checked onchange="applyViz()"><div class="tt"></div></label></div>
@@ -1165,7 +1289,7 @@ create policy "varianten eigene loeschen"
       </div>
       <div class="sg" style="margin-bottom:16px" id="set-row-2">
         <div class="set-card" id="set-card-benutzer">
-          <div class="sch"><div class="sch-ic">◒</div><div><h3>Benutzer</h3><p>Zugänge verwalten</p></div></div>
+          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></div><div><h3>Benutzer</h3><p>Zugänge verwalten</p></div></div>
           <div class="scb">
             <div id="user-list"></div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
@@ -1183,7 +1307,7 @@ create policy "varianten eigene loeschen"
           </div>
         </div>
         <div class="set-card" id="set-card-backup">
-          <div class="sch"><div class="sch-ic">◓</div><div><h3>Daten & Backup</h3><p>Export und Import</p></div></div>
+          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-database"/></svg></div><div><h3>Daten & Backup</h3><p>Export und Import</p></div></div>
           <div class="scb">
             <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
             <div class="sr"><div><div class="sr-label">Importieren</div><div class="sr-sub">Backup wiederherstellen</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">↑ Import</button><input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)"></div>
@@ -1379,7 +1503,7 @@ create policy "varianten eigene loeschen"
 <!-- MODAL: Neue Bestellung beim Lieferanten -->
 <div class="modal-bg" id="modal-lbbestellung">
   <div class="modal wide">
-    <div class="modal-head"><h3>◆ Neue Bestellung beim Lieferanten</h3><button class="modal-close" onclick="closeModal('lbbestellung')">✕</button></div>
+    <div class="modal-head"><h3><svg class="h-ic"><use href="#ic-truck"/></svg>Neue Bestellung beim Lieferanten</h3><button class="modal-close" onclick="closeModal('lbbestellung')">✕</button></div>
     <div class="modal-body">
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="lb-order-items"></div>
@@ -1459,7 +1583,7 @@ create policy "varianten eigene loeschen"
     <div class="modal-body">
       <div class="tbl-wrap"><table><thead><tr><th>Geändert am</th><th>Einkauf</th><th>Verkauf</th></tr></thead><tbody id="ph-tbody"></tbody></table></div>
       <div class="ec" id="ph-empty" style="display:none">
-        <div class="ec-ic">🕘</div>
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-clock"/></svg></div>
         <div class="ec-t">Noch keine Änderungen protokolliert</div>
         <div class="ec-s">Preisänderungen werden ab jetzt automatisch mitgeschrieben.</div>
       </div>
