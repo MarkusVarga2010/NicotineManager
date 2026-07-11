@@ -678,6 +678,10 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 }
 .vimg-suggest-btn:hover{border-color:var(--sage);color:var(--sage-deep)}
 .vimg-suggest-btn:disabled{opacity:.55;cursor:default}
+.vimg-suggest-row{display:flex;gap:8px;margin-top:8px}
+.vimg-suggest-row input{flex:1}
+.vimg-suggest-filter{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft);margin-top:8px;cursor:pointer}
+.vimg-suggest-filter input{width:auto}
 .vimg-suggest-grid{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 4px;margin-top:8px}
 .vimg-suggest-item{
   flex:0 0 60px;width:60px;height:60px;border-radius:8px;overflow:hidden;cursor:pointer;
@@ -1167,7 +1171,7 @@ create policy "varianten eigene loeschen"
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">8.1.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">8.2.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -1508,12 +1512,12 @@ create policy "varianten eigene loeschen"
 // PRODUKTE
 // ══════════════════════════════════════════════
 const PRODUCTS = [
-  {id:'pods',    name:'Pods',         icon:'💊', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice'},
-  {id:'snus',    name:'Snus',         icon:'🟢', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Velo'},
-  {id:'vapes',   name:'Vapes',        icon:'💨', variantLabel:'Farbe',     variantLabelPlural:'Farben',      variantExample:'Schwarz'},
-  {id:'einweg',  name:'Einweg Vape',  icon:'🔋', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice'},
-  {id:'schupf',  name:'Schupftabak',  icon:'🟤', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Pöschl'},
-  {id:'ziga',    name:'Zigaretten',   icon:'🚬', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Marlboro'},
+  {id:'pods',    name:'Pods',         icon:'💊', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice', imgContext:'vape pod flavor'},
+  {id:'snus',    name:'Snus',         icon:'🟢', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Velo',      imgContext:'snus tin'},
+  {id:'vapes',   name:'Vapes',        icon:'💨', variantLabel:'Farbe',     variantLabelPlural:'Farben',      variantExample:'Schwarz',   imgContext:'vape device'},
+  {id:'einweg',  name:'Einweg Vape',  icon:'🔋', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice', imgContext:'disposable vape flavor'},
+  {id:'schupf',  name:'Schupftabak',  icon:'🟤', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Pöschl',    imgContext:'snuff tobacco tin'},
+  {id:'ziga',    name:'Zigaretten',   icon:'🚬', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Marlboro',  imgContext:'cigarette pack'},
 ];
 const PROD_MAP = {};
 PRODUCTS.forEach(p => PROD_MAP[p.id] = p);
@@ -2077,7 +2081,14 @@ function variantCardHtml(p){
       <input type="file" id="vnew-img-${p.id}" accept="image/*" onchange="onVariantImgPicked('${p.id}')"/>
     </div>
     <div class="vimg-upload-preview" id="vnew-preview-${p.id}" style="display:none"></div>
-    <button type="button" class="vimg-suggest-btn" id="vnew-suggestbtn-${p.id}" onclick="suggestVariantImages('${p.id}')">🔍 Passendes Bild automatisch vorschlagen (kostenlos)</button>
+    <button type="button" class="vimg-suggest-btn" id="vnew-suggestbtn-${p.id}" onclick="openVariantImageSearch('${p.id}')">🔍 Passendes Bild automatisch vorschlagen (kostenlos)</button>
+    <div class="vimg-suggest-row" id="vnew-suggestrow-${p.id}" style="display:none">
+      <input id="vnew-suggestq-${p.id}" placeholder="Suchbegriff eingrenzen…" onkeydown="if(event.key==='Enter'){event.preventDefault();runVariantImageSearch('${p.id}');}"/>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="runVariantImageSearch('${p.id}')">Suchen</button>
+    </div>
+    <label class="vimg-suggest-filter" id="vnew-suggestfilter-${p.id}" style="display:none">
+      <input type="checkbox" id="vnew-suggestphoto-${p.id}" checked/> Nur Fotos (keine Zeichnungen/Logos)
+    </label>
     <div class="vimg-suggest-grid" id="vnew-suggest-${p.id}" style="display:none"></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="addVariant('${p.id}')">＋ ${p.variantLabel} hinzufügen</button>
     `}
@@ -2131,17 +2142,48 @@ async function uploadVariantImage(prodId, variantId){
 // müsste die Bilddatei erst heruntergeladen werden, was bei manchen Fremd-Hosts an CORS
 // scheitern kann). Das hält den Vorschlag zuverlässig kostenlos und einfach.
 let _pendingVariantImgUrl = {};
-async function suggestVariantImages(prodId){
+// Öffnet die Suchzeile und schlägt einen präziseren Suchbegriff vor (eingegebener Name +
+// Produktkategorie auf Englisch, weil Openverse überwiegend englisch verschlagwortete
+// Bilder von Wikimedia Commons/Flickr durchsucht). Der Vorschlag ist editierbar — so lässt
+// sich die Suche vor dem Absenden noch eingrenzen (z.B. Zusätze entfernen/präzisieren).
+function openVariantImageSearch(prodId){
   const p=PROD_MAP[prodId];
   const nameEl=document.getElementById('vnew-name-'+prodId);
-  const query=(nameEl?.value||'').trim();
-  if(!query){ showToast(`Bitte zuerst einen ${p?.variantLabel||'Namen'} eingeben (z.B. Mango Ice).`,'⚠'); nameEl?.focus(); return; }
+  const name=(nameEl?.value||'').trim();
+  if(!name){ showToast(`Bitte zuerst einen ${p?.variantLabel||'Namen'} eingeben (z.B. ${p?.variantExample||'Mango Ice'}).`,'⚠'); nameEl?.focus(); return; }
+  const row=document.getElementById('vnew-suggestrow-'+prodId);
+  const filter=document.getElementById('vnew-suggestfilter-'+prodId);
+  const qEl=document.getElementById('vnew-suggestq-'+prodId);
+  if(qEl) qEl.value = p?.imgContext ? `${name} ${p.imgContext}` : name;
+  if(row) row.style.display='flex';
+  if(filter) filter.style.display='flex';
+  qEl?.focus(); qEl?.select();
+  runVariantImageSearch(prodId);
+}
+// ══════════════════════════════════════════════
+// KOSTENLOSER BILDVORSCHLAG (Openverse)
+// Sucht mit dem (editierbaren, eingrenzbaren) Suchbegriff aus der Suchzeile automatisch
+// nach einem passenden, frei lizenzierten Foto — über die kostenlose Openverse-API
+// (openverse.org, durchsucht u.a. Wikimedia Commons & Flickr-CC). Kein API-Key nötig, kein
+// Limit-Ärger. Der "Nur Fotos"-Filter schränkt per category=photograph auf echte Fotos ein,
+// statt auch Zeichnungen/Logos/digitalisierte Kunst zu zeigen — das macht die Trefferliste
+// deutlich zielgerichteter.
+// Wählt der Nutzer eines der Vorschlagsbilder aus, wird direkt dessen öffentliche URL als
+// bild_url gespeichert — es wird NICHT in den eigenen Supabase-Storage hochgeladen (dafür
+// müsste die Bilddatei erst heruntergeladen werden, was bei manchen Fremd-Hosts an CORS
+// scheitern kann). Das hält den Vorschlag zuverlässig kostenlos und einfach.
+async function runVariantImageSearch(prodId){
+  const qEl=document.getElementById('vnew-suggestq-'+prodId);
+  const query=(qEl?.value||'').trim();
+  if(!query){ showToast('Bitte einen Suchbegriff eingeben.','⚠'); qEl?.focus(); return; }
+  const onlyPhotos=document.getElementById('vnew-suggestphoto-'+prodId)?.checked!==false;
   const btn=document.getElementById('vnew-suggestbtn-'+prodId);
   const grid=document.getElementById('vnew-suggest-'+prodId);
-  if(btn){ btn.disabled=true; btn.textContent='🔍 Suche läuft…'; }
+  if(btn){ btn.disabled=true; }
   if(grid){ grid.style.display='none'; grid.innerHTML=''; }
   try{
-    const url='https://api.openverse.org/v1/images/?q='+encodeURIComponent(query)+'&page_size=8&mature=false';
+    let url='https://api.openverse.org/v1/images/?q='+encodeURIComponent(query)+'&page_size=8&mature=false';
+    if(onlyPhotos) url+='&category=photograph';
     const res=await fetch(url);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
@@ -2149,7 +2191,7 @@ async function suggestVariantImages(prodId){
     if(!results.length){
       if(grid){
         grid.style.display='flex';
-        grid.innerHTML=`<div class="vimg-suggest-note">Kein passendes freies Bild gefunden. Einfach einen anderen/kürzeren Begriff eingeben oder oben manuell ein Foto hochladen.</div>`;
+        grid.innerHTML=`<div class="vimg-suggest-note">Kein passendes freies Bild gefunden. Suchbegriff oben anpassen/eingrenzen (z.B. kürzer oder allgemeiner fassen)${onlyPhotos?', oder "Nur Fotos" abhaken':''}.</div>`;
       }
       return;
     }
@@ -2167,7 +2209,7 @@ async function suggestVariantImages(prodId){
       grid.innerHTML=`<div class="vimg-suggest-note">Bildsuche gerade nicht erreichbar (offline oder Netzwerkproblem). Oben lässt sich weiterhin manuell ein eigenes Foto hochladen.</div>`;
     }
   }finally{
-    if(btn){ btn.disabled=false; btn.textContent='🔍 Passendes Bild automatisch vorschlagen (kostenlos)'; }
+    if(btn){ btn.disabled=false; }
   }
 }
 // Übernimmt ein Vorschlagsbild als künftiges Varianten-Bild. Schließt sich mit einem manuell
@@ -2233,6 +2275,9 @@ async function addVariant(prodId){
   const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Bild auswählen (optional)';
   const preview=document.getElementById('vnew-preview-'+prodId); if(preview){ preview.style.display='none'; preview.innerHTML=''; }
   const suggestGrid=document.getElementById('vnew-suggest-'+prodId); if(suggestGrid){ suggestGrid.style.display='none'; suggestGrid.innerHTML=''; }
+  const suggestRow=document.getElementById('vnew-suggestrow-'+prodId); if(suggestRow) suggestRow.style.display='none';
+  const suggestFilter=document.getElementById('vnew-suggestfilter-'+prodId); if(suggestFilter) suggestFilter.style.display='none';
+  const suggestQ=document.getElementById('vnew-suggestq-'+prodId); if(suggestQ) suggestQ.value='';
   _pendingVariantImg[prodId]=null;
   _pendingVariantImgUrl[prodId]=null;
   renderVariantList(prodId); renderPrices(); renderDashboard();
