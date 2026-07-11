@@ -831,6 +831,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
         <div><div class="ph-eyebrow">Protokoll</div><div class="pt">Bestellungen</div><div class="ps">Bestellungen anlegen und verwalten</div></div>
         <div class="pa">
           <button class="btn btn-ghost" id="best-pdf-btn" onclick="downloadOpenOrdersPDF()">⭳ Offene als PDF</button>
+          <button class="btn btn-ghost" onclick="delAllBestellungen()">🗑 Alle löschen</button>
           <button class="btn btn-primary" onclick="openModal('bestellung')">＋ Neue Bestellung</button>
         </div>
       </div>
@@ -863,7 +864,10 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
     <div class="page" id="page-lieferant">
       <div class="ph">
         <div><div class="ph-eyebrow">Einkauf</div><div class="pt">Beim Lieferanten bestellen</div><div class="ps" id="lb-supplier-sub">Bestellung wird direkt an deinen Lieferanten übermittelt.</div></div>
-        <div class="pa"><button class="btn btn-primary" onclick="openLbModal()">＋ Neue Bestellung</button></div>
+        <div class="pa">
+          <button class="btn btn-ghost" onclick="delAllLbBestellungen()">🗑 Alle löschen</button>
+          <button class="btn btn-primary" onclick="openLbModal()">＋ Neue Bestellung</button>
+        </div>
       </div>
 
       <div class="card-head" style="border:none;padding:0;margin:0 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
@@ -1416,7 +1420,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.3.0';
+const CURRENT_UI_VERSION = '4.5.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1436,6 +1440,12 @@ const WHATS_NEW = {
   '4.3.0': [
     'Menüleiste am Handy aufgeräumt: nur noch 5 klare Buttons (Übersicht, Bestellungen, Kunden, Preise, Mehr) statt bis zu 7 eng gequetschten.',
     '"Mehr" öffnet jetzt eine übersichtliche Liste mit Lieferant & Schulden, Lieferantenkunden, Einstellungen und Service.'
+  ],
+  '4.4.0': [
+    'Neu: "🗑 Alle löschen" auf der Bestellungen-Seite — löscht alle Bestellungen der aktuellen Ansicht (Tab/Filter/Suche) auf einmal in den Papierkorb.'
+  ],
+  '4.5.0': [
+    'Neu: "🗑 Alle löschen" auch auf der Seite "Beim Lieferanten" — verschwinden dabei automatisch auch aus der Bestellungen-Liste deines Lieferanten.'
   ]
 };
 function checkWhatsNew(){
@@ -2587,6 +2597,61 @@ async function delBestellung(id){
   S.bestellungen=S.bestellungen.filter(x=>x.id!==id);
   b.deletedAt=nowIso; S.trash.unshift(b);
   renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();renderTrash();showToast('In den Papierkorb verschoben. 🗑');
+}
+// Löscht alle Bestellungen der aktuell sichtbaren Ansicht (Tab + Suche/Kunden-Filter) auf
+// einmal — landen wie beim Einzel-Löschen im Papierkorb (30 Tage wiederherstellbar).
+async function delAllBestellungen(){
+  const fk=document.getElementById('filter-kunde')?.value||'';
+  const searchTerm=(document.getElementById('best-search')?.value||'').trim().toLowerCase();
+  const verkaufsBestellungen = S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId));
+  let list=[...verkaufsBestellungen];
+  if(fk) list=list.filter(b=>String(b.kId)===fk);
+  if(searchTerm){
+    list=list.filter(b=>{
+      const k=S.kunden.find(x=>x.id===b.kId);
+      const kName = b.fuerLieferant ? usernameOf(b.userId).toLowerCase() : (k?`${k.vorname} ${k.nachname}`.toLowerCase():'');
+      const prodNames=b.items.map(it=>`${PROD_MAP[it.prod]?.name||''} ${it.varianteName||''}`).join(' ').toLowerCase();
+      return kName.includes(searchTerm) || prodNames.includes(searchTerm);
+    });
+  }
+  if(bestellungenTab==='bestellt') list=list.filter(b=>!b.delivered);
+  else if(bestellungenTab==='bezahlt') list=list.filter(b=>!b.paid);
+  else if(bestellungenTab==='historie') list=list.filter(b=>b.delivered && b.paid);
+
+  if(!list.length){ showToast('Keine Bestellungen zum Löschen in dieser Ansicht.','⚠'); return; }
+
+  const scopeLabel = bestellungenTab==='bestellt' ? ' im Tab „Bestellt“' : bestellungenTab==='bezahlt' ? ' im Tab „Bezahlt“' : bestellungenTab==='historie' ? ' in der Historie' : '';
+  const filterNote = (fk||searchTerm) ? ' (mit aktivem Filter/Suche)' : '';
+  if(!(await confirmDialog(`${list.length} Bestellung${list.length===1?'':'en'}${scopeLabel}${filterNote} wandern in den Papierkorb und können dort 30 Tage lang wiederhergestellt werden. Um wirklich ALLE Bestellungen zu löschen, zuerst Suche/Filter leeren und den Tab wechseln.`, {title:'Alle in dieser Ansicht löschen?', confirmText:'Alle in Papierkorb', danger:true})))return;
+
+  const nowIso=new Date().toISOString();
+  const ids=list.map(b=>b.id);
+  const { error } = await sb.from('bestellungen').update({ deleted_at: nowIso }).in('id', ids);
+  if(error){ showToast(dbErrorMsg(error,'Löschen fehlgeschlagen. Wurde die Spalte "deleted_at" in der Tabelle "bestellungen" schon angelegt?'),'⚠'); return; }
+  const idSet=new Set(ids);
+  S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
+  S.bestellungen=S.bestellungen.filter(b=>!idSet.has(b.id));
+  renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();renderTrash();
+  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`);
+}
+// Löscht alle eigenen Bestellungen beim Lieferanten auf einmal — landen wie beim Einzel-
+// Löschen im Papierkorb. Da es sich um dieselbe Datenbank-Zeile handelt, die auch dein
+// Lieferant unter SEINEN "Bestellungen" (als Verkauf an dich) sieht, verschwinden sie dort
+// automatisch mit — es ist kein zusätzlicher Schritt beim Lieferanten nötig.
+async function delAllLbBestellungen(){
+  const list = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId);
+  if(!list.length){ showToast('Keine Bestellungen beim Lieferanten zum Löschen.','⚠'); return; }
+  if(!(await confirmDialog(`${list.length} Bestellung${list.length===1?'':'en'} beim Lieferanten wandern in den Papierkorb und können dort 30 Tage lang wiederhergestellt werden. Sie verschwinden dabei auch aus der Bestellungen-Liste deines Lieferanten.`, {title:'Alle Bestellungen beim Lieferanten löschen?', confirmText:'Alle in Papierkorb', danger:true})))return;
+
+  const nowIso=new Date().toISOString();
+  const ids=list.map(b=>b.id);
+  const { error } = await sb.from('bestellungen').update({ deleted_at: nowIso }).in('id', ids);
+  if(error){ showToast(dbErrorMsg(error,'Löschen fehlgeschlagen. Wurde die Spalte "deleted_at" in der Tabelle "bestellungen" schon angelegt?'),'⚠'); return; }
+  const idSet=new Set(ids);
+  S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
+  S.bestellungen=S.bestellungen.filter(b=>!idSet.has(b.id));
+  renderLieferantSeite();renderBestellungen();renderDashboard();renderTrash();
+  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`);
 }
 async function restoreBestellung(id){
   const b=S.trash.find(x=>x.id===id);
