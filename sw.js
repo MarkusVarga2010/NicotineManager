@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '10.1.0'; // Weitere Politur zum "Aurora"-Redesign: Glassmorphism (Sidebar, Modals, Toast, Tab-Gruppen mit Blur), Verlaufs-Text fürs Logo, sanft wandernde Farbflächen im Login-Hintergrund, Verlaufs-Akzentstreifen in Karten-Headern, Glow-Effekte auf Dosierungs-Balken, Farbverlauf-Scrollbar, Akzent-Leiste beim Hover über Tabellenzeilen, Verlaufs-Chip für aktive mobile Tabs. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
+const APP_VERSION = '10.2.0'; // Runde 3 der "Aurora"-Politur: Glass-Effekt auch für mobile Topbar & Update-Banner, Verlaufs-Ring-Avatar, Icon-Chips in der Sidebar-Navigation, Shine-Sweep-Animation auf dem Login-Button, sanft schwebendes Login-Logo mit Leucht-Schatten, Verlaufstext bei allen Seitentitel-Überschriften, aufgewertete Empty-State-Icons mit rundem Farb-Badge. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',

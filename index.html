@@ -170,8 +170,12 @@ button{font-family:inherit;cursor:pointer}
 .login-wrap{width:100%;max-width:400px}
 .login-logo{
   width:64px;height:64px;margin:0 auto 20px;position:relative;
+  animation:logoFloat 4.5s ease-in-out infinite;
+  filter:drop-shadow(0 8px 20px color-mix(in srgb, var(--sage) 45%, transparent));
 }
 .login-logo svg{width:100%;height:100%;display:block;position:relative}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){.login-logo{animation:none}}
 .login-label{
   font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--sage);
   text-transform:uppercase;letter-spacing:.16em;text-align:center;margin-bottom:10px;
@@ -207,7 +211,14 @@ button{font-family:inherit;cursor:pointer}
   transition:filter .15s, transform .15s;font-family:'Manrope',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px;
   box-shadow:0 10px 24px -8px rgba(124,111,245,.55);
+  position:relative;overflow:hidden;
 }
+.primary-btn::before{
+  content:'';position:absolute;top:0;bottom:0;left:-60%;width:40%;
+  background:linear-gradient(115deg, transparent, rgba(255,255,255,.35), transparent);
+  transform:skewX(-20deg);transition:left .55s ease;
+}
+.primary-btn:hover::before{left:130%}
 .primary-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .login-err{
   color:var(--rust);font-size:12px;margin-top:12px;text-align:center;display:none;
@@ -228,7 +239,8 @@ button{font-family:inherit;cursor:pointer}
   height:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
   padding-top:calc(max(env(safe-area-inset-top), 44px) + 14px);
   border-bottom:1px solid var(--line2);
-  background:var(--paper);
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
   align-items:center;justify-content:space-between;
   padding-left:16px;padding-right:16px;position:sticky;top:0;z-index:101;
 }
@@ -271,7 +283,8 @@ button{font-family:inherit;cursor:pointer}
   border-radius:10px;white-space:nowrap;transition:color .15s,background .15s,transform .15s;
 }
 .scale-tick:hover{color:var(--ink);background:var(--paper3);transform:translateX(1px)}
-.scale-tick .tk-ic{font-size:15px;opacity:.75;width:18px;text-align:center;flex-shrink:0}
+.scale-tick .tk-ic{font-size:14px;opacity:.85;width:26px;height:26px;text-align:center;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:var(--paper3);transition:background .15s,color .15s}
+.scale-tick.active .tk-ic{background:rgba(255,255,255,.18)}
 .scale-tick .tk-n{display:none}
 .scale-tick.active{color:#fff;background:var(--grad-brand);box-shadow:0 6px 16px -6px color-mix(in srgb, var(--sage) 65%, transparent)}
 .scale-tick.active .tk-ic{opacity:1}
@@ -307,9 +320,9 @@ button{font-family:inherit;cursor:pointer}
 .tb-user-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb-user-role{font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
 .tb-av{
-  width:32px;height:32px;border-radius:10px;background:var(--sage-bg);color:var(--sage-deep);
+  width:32px;height:32px;border-radius:10px;background:var(--grad-brand);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
-  font-family:'JetBrains Mono',monospace;border:1px solid var(--sage);
+  font-family:'JetBrains Mono',monospace;border:none;box-shadow:0 4px 12px -4px color-mix(in srgb, var(--sage) 70%, transparent);
 }
 .logout-btn{
   width:100%;background:none;border:1px solid var(--line2);color:var(--ink-soft);border-radius:var(--r);
@@ -336,7 +349,7 @@ button{font-family:inherit;cursor:pointer}
   background:var(--grad-brand);
 }
 .ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.14em;margin-bottom:7px}
-.pt{font-family:'Sora',sans-serif;font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.pt{font-family:'Sora',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;background:linear-gradient(90deg, var(--ink), var(--ink) 55%, var(--sage-deep));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .ps{color:var(--ink-soft);font-size:13px;margin-top:4px}
 .pa{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
@@ -483,7 +496,7 @@ tbody tr{transition:background .12s}
 tbody tr{box-shadow:inset 3px 0 0 transparent;transition:background .12s,box-shadow .12s}
 tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box-shadow:inset 3px 0 0 var(--sage)}
 .ec{text-align:center;padding:48px 20px;color:var(--ink-faint)}
-.ec-ic{font-size:30px;margin-bottom:10px;opacity:.5}
+.ec-ic{font-size:26px;margin-bottom:14px;width:56px;height:56px;line-height:56px;border-radius:50%;background:var(--sage-bg);display:inline-flex;align-items:center;justify-content:center;opacity:.9}
 .ec-t{font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:3px}
 .ec-s{font-size:12px}
 
@@ -651,19 +664,22 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
    ════════════════════════════════════════════════════════ */
 #update-banner{
   display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:95;
-  background:var(--paper2);border:1px solid var(--line2);border-left:3px solid var(--sage-deep);
+  background:color-mix(in srgb, var(--paper2) 90%, transparent);
+  backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
+  border:1px solid var(--line2);border-left:3px solid var(--sage-deep);
   border-radius:var(--r-lg);
   padding:14px 18px;padding-bottom:calc(14px + env(safe-area-inset-bottom));
   align-items:center;justify-content:space-between;gap:14px;max-width:640px;margin:0 auto;
-  box-shadow:0 12px 32px -8px rgba(0,0,0,.55);
+  box-shadow:0 16px 40px -10px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb, var(--sage) 15%, transparent);
   animation:slideUp .3s ease both;
 }
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #update-banner.show{display:flex}
 #update-banner .ub-text{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink)}
 #update-banner .ub-ic{
-  font-size:17px;width:36px;height:36px;border-radius:50%;background:var(--sage-bg);color:var(--sage-deep);
+  font-size:17px;width:36px;height:36px;border-radius:50%;background:var(--grad-brand);color:#fff;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 6px 16px -4px color-mix(in srgb, var(--sage) 60%, transparent);
 }
 #update-banner .ub-sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:2px}
 
