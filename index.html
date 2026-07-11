@@ -910,7 +910,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 
       <div class="card-head" style="border:none;padding:0;margin:0 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
       <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Bezahlt</th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Abholcode</th><th>Bezahlt</th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="lb-empty" style="display:none">
         <div class="ec-ic">◆</div>
@@ -1298,6 +1298,7 @@ create policy "varianten eigene loeschen"
         <div>
           <div class="abholcode-lab">Abholcode</div>
           <div class="abholcode-val mono" id="od-abholcode-val"></div>
+          <div style="font-size:11px;color:var(--ink-faint);margin-top:3px" id="od-abholcode-hint"></div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
       </div>
@@ -1365,6 +1366,24 @@ create policy "varianten eigene loeschen"
     <div class="modal-foot">
       <button class="btn btn-ghost" id="cf-cancel-btn" onclick="_confirmResolve(false)">Abbrechen</button>
       <button class="btn btn-danger" id="cf-ok-btn" onclick="_confirmResolve(true)">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ABHOLCODE-BESTÄTIGUNG (beim Bezahlen von Lieferanten-Bestellungen: Code muss vom
+     Kunden genannt und hier eingegeben werden, bevor als bezahlt markiert werden kann) -->
+<div class="modal-bg" id="modal-abholcode-confirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.</p>
+      <label class="fl">Abholcode</label>
+      <input type="text" id="ac-input" maxlength="4" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center" placeholder="XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()">
+      <p id="ac-error" style="display:none;color:var(--rust);font-size:12px;margin-top:8px">Code stimmt nicht überein. Bitte erneut versuchen.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('abholcode-confirm')">Abbrechen</button>
+      <button class="btn btn-primary" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; bezahlt markieren</button>
     </div>
   </div>
 </div>
@@ -1465,7 +1484,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.5.0';
+const CURRENT_UI_VERSION = '4.6.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1491,6 +1510,10 @@ const WHATS_NEW = {
   ],
   '4.5.0': [
     'Neu: "🗑 Alle löschen" auch auf der Seite "Beim Lieferanten" — verschwinden dabei automatisch auch aus der Bestellungen-Liste deines Lieferanten.'
+  ],
+  '4.6.0': [
+    'Neu: Abholcode bei Lieferanten-Bestellungen — sobald deine Bestellung als "angekommen" markiert wird, bekommst du automatisch einen 4-stelligen Abholcode (sichtbar unter "Beim Lieferanten" und im Bestell-Detail).',
+    'Diesen Code musst du deinem Lieferanten beim Bezahlen nennen — er wird abgefragt und bestätigt, bevor die Bestellung als bezahlt markiert werden kann.'
   ]
 };
 function checkWhatsNew(){
@@ -2513,11 +2536,17 @@ function renderLbHistory(){
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     const lieferBadge = b.delivered ? '<span class="badge b-bezahlt">✓ Angekommen</span>' : '<span class="badge b-offen">🚚 Unterwegs</span>';
     const bezahltBadge = b.paid ? '<span class="badge b-bezahlt">✓ Bezahlt</span>' : '<span class="badge b-offen">Offen</span>';
+    // Der Abholcode entsteht erst, sobald der Lieferant die Bestellung als "angekommen" markiert.
+    // Er muss dann beim Bezahlen genannt werden — danach wird er hier nicht mehr benötigt.
+    const abholcodeCell = (b.abholcode && !b.paid)
+      ? `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>`
+      : '<span style="color:var(--ink-faint)">–</span>';
     return `<tr>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td>
       <td>${lieferBadge}</td>
+      <td>${abholcodeCell}</td>
       <td>${bezahltBadge}</td>
       <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
       <td style="text-align:right"><button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben">🗑</button></td>
@@ -2624,10 +2653,47 @@ async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b || b.delivered===newVal)return;
   const patch = { delivered:newVal, angekommen_am: newVal ? new Date().toISOString() : null };
+  // Lieferanten-Bestellungen (b.fuerLieferant): sobald die Ware als angekommen markiert wird,
+  // bekommt der Kunde automatisch einen Abholcode. Er muss diesen Code beim Bezahlen nennen
+  // (siehe confirmPaidWithAbholcode) — so wird sichergestellt, dass wirklich die richtige
+  // Bestellung/Person bezahlt und abgeholt wird.
+  if(newVal && b.fuerLieferant && !b.abholcode){
+    patch.abholcode = genAbholcode();
+  }
   const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
-  b.delivered=newVal; b.deliveredAt=patch.angekommen_am; renderBestellungen();renderLbHistory();renderLieferantenkundenSeite();
-  showToast(newVal?'Als erhalten/bestellt markiert. ✓':'Als unterwegs markiert.');
+  b.delivered=newVal; b.deliveredAt=patch.angekommen_am;
+  if(patch.abholcode) b.abholcode=patch.abholcode;
+  renderBestellungen();renderLbHistory();renderLieferantenkundenSeite();
+  showToast(newVal
+    ? (patch.abholcode ? `Als angekommen markiert · Abholcode ${patch.abholcode}` : 'Als erhalten/bestellt markiert. ✓')
+    : 'Als unterwegs markiert.');
+}
+// Bezahlen einer Lieferanten-Bestellung: statt direkt setPaid aufzurufen, wird zuerst der
+// Abholcode abgefragt (den der Kunde bei Abholung nennt) und mit dem gespeicherten Code
+// verglichen. Erst bei Übereinstimmung wird die Bestellung als bezahlt markiert.
+let _abholcodeConfirmOrderId=null;
+function confirmPaidWithAbholcode(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b) return;
+  if(!b.abholcode){ setPaid(id,true); return; } // kein Code vorhanden (z.B. noch nicht angekommen) -> keine Sperre
+  _abholcodeConfirmOrderId=id;
+  const input=document.getElementById('ac-input');
+  input.value='';
+  document.getElementById('ac-error').style.display='none';
+  openModal('abholcode-confirm');
+  setTimeout(()=>input.focus(),50);
+}
+function _submitAbholcodeConfirm(){
+  const b=S.bestellungen.find(x=>x.id===_abholcodeConfirmOrderId);
+  if(!b) return;
+  const val=(document.getElementById('ac-input').value||'').trim().toUpperCase();
+  if(!val || val!==b.abholcode){
+    document.getElementById('ac-error').style.display='block';
+    return;
+  }
+  closeModal('abholcode-confirm');
+  setPaid(b.id,true);
 }
 async function setPaid(id, newPaid){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -2861,7 +2927,10 @@ function renderBestellungen(){
     const nameCell = b.fuerLieferant
       ? `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`
       : (k?k.vorname+' '+k.nachname:'—');
-    const abholcodeChip = (b.abholcode && !b.delivered) ? `<span class="mono abholcode-chip" title="Abholcode">${b.abholcode}</span>` : '';
+    // Bei Kundenbestellungen ist der Code von Anfang an da und wird bis zur Abholung (delivered)
+    // angezeigt. Bei Lieferanten-Bestellungen entsteht der Code erst bei Ankunft (delivered) und
+    // wird bis zur Bezahlung angezeigt, da er ja genau dafür gebraucht wird.
+    const abholcodeChip = (b.abholcode && (b.fuerLieferant ? !b.paid : !b.delivered)) ? `<span class="mono abholcode-chip" title="Abholcode">${b.abholcode}</span>` : '';
     // Lieferantenkunden-Bestellungen sind fremde Bestellungen (von einem anderen Benutzer
     // aufgegeben) — wie bei fremden Kundenbestellungen kann ich sie nicht löschen, nur
     // ansehen und den Status (bestellt/bezahlt) pflegen.
@@ -2886,7 +2955,9 @@ function renderBestellungen(){
     // Standard: Bestellt / Bezahlt
     const actionBtn = bestellungenTab==='bestellt'
       ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
-      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
+      : (b.fuerLieferant && b.abholcode
+        ? `<button class="status-btn active-bezahlt" onclick="confirmPaidWithAbholcode(${b.id})">✓ Bezahlt</button>`
+        : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}${abholcodeChip}</td>
@@ -3255,6 +3326,9 @@ function openOrderDetail(id){
   if(b.abholcode){
     abBox.style.display='flex';
     document.getElementById('od-abholcode-val').textContent = b.abholcode;
+    document.getElementById('od-abholcode-hint').textContent = b.fuerLieferant
+      ? 'Beim Bezahlen dem Lieferanten nennen.'
+      : 'Kunde nennt/zeigt diesen Code bei Abholung.';
   } else {
     abBox.style.display='none';
   }

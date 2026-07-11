@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '6.1.0'; // Neu: Abholcode — bei jeder neuen Bestellung wird automatisch ein 4-stelliger Abholcode erzeugt, im Bestell-Detail prominent angezeigt (mit Kopieren-Button) und als Chip in der Liste "Bestellt/Bezahlt". Erfordert neue Supabase-Spalte "abholcode" in der Tabelle "bestellungen".
+const APP_VERSION = '6.2.0'; // Neu: Abholcode bei Lieferanten-Bestellungen — sobald deine Bestellung beim Lieferanten als "angekommen" markiert wird, bekommst du automatisch einen 4-stelligen Abholcode (sichtbar unter "Beim Lieferanten" und im Bestell-Detail). Diesen Code musst du dem Lieferanten beim Bezahlen nennen — er muss ihn bestätigen, bevor die Bestellung als bezahlt markiert werden kann.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
