@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '7.0.0'; // Neu: Bilder für Geschmäcker/Marken/Farben — Upload pro Variante (Supabase Storage Bucket "variant-bilder"), Thumbnail in der Preise-Liste und beim Bestellen, Klick öffnet Vollbild-Lightbox.
+const APP_VERSION = '8.0.0'; // Varianten-Bilder im Onlineshop-Stil: Produktkarten-Raster bei "Preise" (großes Foto, Name, Preis), anklickbare Bildkarten statt Dropdown beim Bestellen, Live-Vorschau beim Foto-Upload.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',

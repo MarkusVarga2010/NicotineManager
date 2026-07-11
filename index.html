@@ -664,12 +664,61 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 /* ════════════════════════════════════════════════════════
    VARIANTEN-BILDER + LIGHTBOX
    ════════════════════════════════════════════════════════ */
-.vimg-thumb{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0;cursor:pointer;border:1px solid var(--line2);transition:transform .15s}
-.vimg-thumb:hover{transform:scale(1.08)}
-.vimg-placeholder{width:38px;height:38px;border-radius:6px;flex-shrink:0;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink-faint)}
 .vimg-upload-row{display:flex;align-items:center;gap:8px;margin-top:8px}
 .vimg-upload-row label{font-size:11px;color:var(--ink-soft);cursor:pointer;border:1px dashed var(--line2);border-radius:var(--r);padding:8px 12px;flex:1;text-align:center}
 .vimg-upload-row input[type=file]{display:none}
+.vimg-upload-preview{display:flex;align-items:center;gap:8px;margin-top:8px}
+.vimg-upload-preview img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line2);flex-shrink:0}
+
+/* Shop-Grid für Varianten unter "Preise" — Produktkarten wie im Onlineshop */
+.vshop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin-top:10px}
+.vshop-card{
+  background:var(--paper);border:1px solid var(--line2);border-radius:var(--r-lg);
+  padding:8px 8px 10px;position:relative;transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.vshop-card:hover{border-color:var(--sage);transform:translateY(-2px);box-shadow:0 8px 18px -8px rgba(0,0,0,.5)}
+.vshop-imgwrap{
+  width:100%;aspect-ratio:1;border-radius:var(--r);overflow:hidden;background:var(--paper3);
+  margin-bottom:8px;cursor:zoom-in;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);
+}
+.vshop-imgwrap img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
+.vshop-imgwrap:hover img{transform:scale(1.06)}
+.vshop-imgwrap.noimg{font-size:26px;color:var(--ink-faint)}
+.vshop-name{font-size:12px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.vshop-meta{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.vshop-price{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--sage-deep)}
+.vshop-profit{font-family:'JetBrains Mono',monospace;font-size:9px}
+.vshop-rm{
+  position:absolute;top:6px;right:6px;background:color-mix(in srgb, var(--paper2) 85%, transparent);
+  backdrop-filter:blur(4px);border:1px solid var(--line2);border-radius:50%;width:24px;height:24px;
+  font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;
+  opacity:0;transition:opacity .15s,background .15s,color .15s;
+}
+.vshop-card:hover .vshop-rm{opacity:1}
+.vshop-rm:hover{background:var(--rust-bg);color:var(--rust);border-color:var(--rust)}
+
+/* Auswahl-Picker im Bestellformular — Bildkarten statt reinem Dropdown, wie eine Produktauswahl im Shop */
+.vpick-strip{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 2px;margin-top:4px;flex-basis:100%}
+.vpick-card{
+  flex:0 0 74px;text-align:center;cursor:pointer;border:2px solid var(--line2);border-radius:var(--r-lg);
+  padding:5px 4px 6px;transition:border-color .15s,background .15s,transform .15s;background:var(--paper);
+}
+.vpick-card:hover{border-color:var(--sage-deep);transform:translateY(-1px)}
+.vpick-card.selected{border-color:var(--sage);background:var(--sage-bg)}
+.vpick-imgwrap{
+  width:60px;height:60px;border-radius:8px;background:var(--paper3);margin:0 auto 5px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:18px;color:var(--ink-faint);
+}
+.vpick-imgwrap img{width:100%;height:100%;object-fit:cover}
+.vpick-name{font-size:9.5px;font-weight:600;line-height:1.2;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 auto}
+.vpick-price{font-size:9px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.vpick-card.selected .vpick-price{color:var(--sage-deep);font-weight:700}
+.vpick-zoom{
+  position:absolute;background:color-mix(in srgb, var(--paper2) 85%, transparent);border:1px solid var(--line2);
+  border-radius:50%;width:18px;height:18px;font-size:9px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-faint);margin:-24px 0 0 42px;z-index:1;
+}
 #lightbox-bg{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:70;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s ease,background .2s ease}
 #lightbox-bg.show{opacity:1;pointer-events:auto;background:rgba(0,0,0,.85)}
 #lightbox-bg img{max-width:90vw;max-height:85vh;border-radius:var(--r-lg);box-shadow:0 20px 60px rgba(0,0,0,.6)}
@@ -1549,6 +1598,11 @@ const WHATS_NEW = {
     'Neu: Bilder für Geschmäcker, Marken und Farben — beim Anlegen einer Variante unter "Preise" kannst du jetzt ein Foto hochladen.',
     'Varianten zeigen ihr Bild als kleines Vorschaubild in der Liste — ein Klick öffnet es in groß.',
     'Beim Bestellen wird das Bild der gewählten Variante direkt neben der Auswahl angezeigt.'
+  ],
+  '6.0.0': [
+    'Varianten-Bilder komplett neu gestaltet: „Preise" zeigt Geschmäcker/Marken/Farben jetzt als Produktkarten-Raster wie in einem Onlineshop, mit großem Foto, Name und Preis.',
+    'Beim Bestellen wählst du Geschmack/Marke/Farbe jetzt über anklickbare Bildkarten statt eines Dropdowns — die ausgewählte Karte wird farblich hervorgehoben.',
+    'Beim Hochladen eines neuen Produktfotos siehst du sofort eine Vorschau, bevor gespeichert wird.'
   ]
 };
 function checkWhatsNew(){
@@ -2002,9 +2056,10 @@ function variantCardHtml(p){
       <input id="vnew-vk-${p.id}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Verkauf €" style="flex:1;min-width:90px"/>
     </div>
     <div class="vimg-upload-row">
-      <label id="vnew-imglabel-${p.id}" for="vnew-img-${p.id}">📷 Bild auswählen (optional)</label>
+      <label id="vnew-imglabel-${p.id}" for="vnew-img-${p.id}">📷 Produktfoto auswählen (optional)</label>
       <input type="file" id="vnew-img-${p.id}" accept="image/*" onchange="onVariantImgPicked('${p.id}')"/>
     </div>
+    <div class="vimg-upload-preview" id="vnew-preview-${p.id}" style="display:none"></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="addVariant('${p.id}')">＋ ${p.variantLabel} hinzufügen</button>
     `}
   </div>`;
@@ -2016,12 +2071,23 @@ let _pendingVariantImg = {};
 function onVariantImgPicked(prodId){
   const inp=document.getElementById('vnew-img-'+prodId);
   const label=document.getElementById('vnew-imglabel-'+prodId);
+  const preview=document.getElementById('vnew-preview-'+prodId);
   const file=inp.files[0];
-  if(!file){ _pendingVariantImg[prodId]=null; if(label) label.textContent='📷 Bild auswählen (optional)'; return; }
+  if(!file){
+    _pendingVariantImg[prodId]=null;
+    if(label) label.textContent='📷 Produktfoto auswählen (optional)';
+    if(preview){ preview.style.display='none'; preview.innerHTML=''; }
+    return;
+  }
   if(!file.type.startsWith('image/')){ showToast('Bitte eine Bilddatei auswählen.','⚠'); inp.value=''; return; }
   if(file.size > 5*1024*1024){ showToast('Bild darf max. 5 MB groß sein.','⚠'); inp.value=''; return; }
   _pendingVariantImg[prodId]=file;
   if(label) label.textContent='✓ '+file.name;
+  if(preview){
+    const url=URL.createObjectURL(file);
+    preview.style.display='flex';
+    preview.innerHTML=`<img src="${url}" alt="Vorschau"><span class="ps" style="margin:0">Wird beim Speichern hochgeladen.</span>`;
+  }
 }
 // Lädt das gewählte Bild in den Supabase-Storage-Bucket "variant-bilder" hoch und gibt
 // die öffentliche URL zurück (oder null, falls kein Bild gewählt wurde / Upload fehlschlägt).
@@ -2039,19 +2105,22 @@ function renderVariantList(prodId){
   const el=document.getElementById('variant-list-'+prodId);
   if(!el) return;
   const list=S.varianten[prodId]||[];
-  el.innerHTML = list.length ? list.map(v=>{
+  if(!list.length){ el.innerHTML = `<div class="ps" style="padding:4px 0">Noch keine hinterlegt.</div>`; return; }
+  el.innerHTML = `<div class="vshop-grid">` + list.map(v=>{
     const gewinn=v.preis-v.einkauf;
-    const img = v.bildUrl
-      ? `<img class="vimg-thumb" src="${v.bildUrl}" onclick="openLightbox('${v.bildUrl}')" alt="${v.name}">`
-      : `<div class="vimg-placeholder">–</div>`;
-    return `<div class="oi" style="padding:8px 10px">
-      ${img}
-      <div style="flex:2;font-weight:600">${v.name}</div>
-      <div class="mono" style="flex:1;text-align:right;color:${gewinn>=0?'var(--success)':'var(--rust)'}" title="Gewinn/Stk">${fmt(gewinn)}</div>
-      <div class="oi-total mono" style="flex:1" title="Verkaufspreis">${fmt(v.preis)}</div>
-      <button class="ic-btn oi-rm" onclick="deleteVariant('${prodId}',${v.id})">✕</button>
+    const imgBlock = v.bildUrl
+      ? `<img src="${v.bildUrl}" alt="${v.name}">`
+      : `📦`;
+    return `<div class="vshop-card">
+      <button class="ic-btn vshop-rm" onclick="deleteVariant('${prodId}',${v.id})" title="Löschen">✕</button>
+      <div class="vshop-imgwrap ${v.bildUrl?'':'noimg'}" onclick="${v.bildUrl?`openLightbox('${v.bildUrl}')`:''}" title="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}">${imgBlock}</div>
+      <div class="vshop-name" title="${v.name}">${v.name}</div>
+      <div class="vshop-meta">
+        <span class="vshop-price">${fmt(v.preis)}</span>
+        <span class="vshop-profit" style="color:${gewinn>=0?'var(--success)':'var(--rust)'}">${gewinn>=0?'+':''}${fmt(gewinn)}</span>
+      </div>
     </div>`;
-  }).join('') : `<div class="ps" style="padding:4px 0">Noch keine hinterlegt.</div>`;
+  }).join('') + `</div>`;
 }
 async function addVariant(prodId){
   const p=PROD_MAP[prodId];
@@ -2465,6 +2534,27 @@ function calcOrderTotals(){
   const total = Math.max(0, subtotal - discountAmount);
   return { subtotal, dType, dValRaw, discountAmount, total };
 }
+// Klickbare Bildkarten-Auswahl für Geschmack/Marke/Farbe — ersetzt das reine Dropdown durch
+// eine Shop-artige Produktauswahl mit Foto. updaterCall ist der JS-Funktionsaufruf (als String),
+// der beim Klick auf eine Karte ausgeführt wird, z.B. "updateOrderItem(123,'variant',".
+function variantPickerHtml(uid, prodId, currentVariantId, forLieferant, updaterFnName){
+  const variants = variantList(prodId, forLieferant);
+  const vl = PROD_MAP[prodId]?.variantLabel;
+  if(!vl) return '';
+  if(!variants.length){
+    return `<div class="ps" style="flex-basis:100%;margin-top:4px">— noch kein ${vl} hinterlegt (unter Preise anlegen) —</div>`;
+  }
+  const cards = variants.map(v=>{
+    const sel = String(v.id)===String(currentVariantId);
+    const imgBlock = v.bildUrl ? `<img src="${v.bildUrl}" alt="${v.name}">` : '📦';
+    return `<div class="vpick-card${sel?' selected':''}" onclick="${updaterFnName}(${uid},'variant','${v.id}')">
+      <div class="vpick-imgwrap">${imgBlock}</div>
+      <div class="vpick-name" title="${v.name}">${v.name}</div>
+      <div class="vpick-price">${fmt(v.preis)}</div>
+    </div>`;
+  }).join('');
+  return `<div class="vpick-strip">${cards}</div>`;
+}
 function renderOrderItems(){
   const wrap=document.getElementById('order-items');
   if(!wrap)return;
@@ -2473,9 +2563,6 @@ function renderOrderItems(){
     const preisStk=priceForKunde(kId,it.prod,it.variant);
     const custom = (kId && !hasVariant(it.prod)) ? S.kunden.find(x=>x.id===kId)?.customPreise?.[it.prod] : null;
     const sub=fmt(preisStk*(it.stueck||1));
-    const variants = variantList(it.prod, false);
-    const vl = PROD_MAP[it.prod]?.variantLabel;
-    const currentVariant = vl ? findVariant(it.prod, it.variant, false) : null;
     return `<div class="oi">
       <select onchange="updateOrderItem(${it.uid},'prod',this.value)">
         ${PRODUCTS.map(p=>{
@@ -2487,12 +2574,7 @@ function renderOrderItems(){
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono" title="${custom!=null?'Individueller Preis für diesen Kunden':''}">${sub}${custom!=null?' ★':''}</div>
       <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})">✕</button>
-      ${vl ? `<div style="flex-basis:100%;display:flex;gap:8px;align-items:center;margin-top:2px">
-        <select class="oi-variant" style="flex:1" onchange="updateOrderItem(${it.uid},'variant',this.value)">
-          ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— noch kein ${vl} hinterlegt (unter Preise anlegen) —</option>`}
-        </select>
-        ${currentVariant?.bildUrl ? `<img class="vimg-thumb" src="${currentVariant.bildUrl}" onclick="openLightbox('${currentVariant.bildUrl}')" alt="${currentVariant.name}">` : ''}
-      </div>` : ''}
+      ${variantPickerHtml(it.uid, it.prod, it.variant, false, 'updateOrderItem')}
     </div>`;
   }).join('');
   const { subtotal, discountAmount, total } = calcOrderTotals();
@@ -2623,9 +2705,6 @@ function renderLbItems(){
   if(!wrap)return;
   wrap.innerHTML=lbItems.map(it=>{
     const sub=fmt(lbItemPrice(it)*(it.stueck||1));
-    const variants=variantList(it.prod, true);
-    const vl=PROD_MAP[it.prod]?.variantLabel;
-    const currentVariant = vl ? findVariant(it.prod, it.variant, true) : null;
     return `<div class="oi">
       <select onchange="updateLbItem(${it.uid},'prod',this.value)">
         ${PRODUCTS.map(p=>{
@@ -2636,12 +2715,7 @@ function renderLbItems(){
       <input type="number" min="1" value="${it.stueck}" onchange="updateLbItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono">${sub}</div>
       <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})">✕</button>
-      ${vl ? `<div style="flex-basis:100%;display:flex;gap:8px;align-items:center;margin-top:2px">
-        <select class="oi-variant" style="flex:1" onchange="updateLbItem(${it.uid},'variant',this.value)">
-          ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— Lieferant hat noch kein ${vl} hinterlegt —</option>`}
-        </select>
-        ${currentVariant?.bildUrl ? `<img class="vimg-thumb" src="${currentVariant.bildUrl}" onclick="openLightbox('${currentVariant.bildUrl}')" alt="${currentVariant.name}">` : ''}
-      </div>` : ''}
+      ${variantPickerHtml(it.uid, it.prod, it.variant, true, 'updateLbItem')}
     </div>`;
   }).join('');
   document.getElementById('lb-order-total').textContent=fmt(calcLbTotal());
