@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.3.0'; // Neu: "Sonstige Schulden" — frei erfassbare Schulden bei anderen Personen, kombiniert mit "Offen beim Lieferanten" in einer gemeinsamen Dashboard-Kachel "Eigene Schulden"; individuelle Kundenpreise, Rechnung/Preis-Badge/Sync-Fixes für Lieferantenkunden, Benachrichtigungs-Punkt für neue Lieferantenkunden-Bestellungen
+const APP_VERSION = '5.4.0'; // Neu: Geschmäcker (Pods/Einweg Vape), Farben (Vapes) & Marken (Schupftabak/Snus/Zigaretten) mit eigenem Preis, verwaltet unter "Preise"; Bestellungen beim Lieferanten laufen jetzt über ein Bestell-Formular wie bei normalen Bestellungen
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

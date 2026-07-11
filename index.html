@@ -551,11 +551,12 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .modal-body{padding:22px}
 .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line2)}
 
-.oi{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r);padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.oi{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r);padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .oi select{flex:2}
 .oi input{flex:1;max-width:70px}
 .oi .oi-total{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;min-width:64px;text-align:right}
 .oi .oi-rm{flex-shrink:0}
+.oi .oi-variant{flex-basis:100%;margin-top:2px;color:var(--sage-deep)}
 .add-item-btn{width:100%;background:none;border:1px dashed var(--line2);border-radius:var(--r);padding:10px;color:var(--ink-soft);font-size:12px;font-weight:600;margin-bottom:14px}
 .add-item-btn:hover{border-color:var(--sage);color:var(--sage-deep)}
 .order-total-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 0;border-top:1px solid var(--line2);margin-top:6px}
@@ -857,29 +858,17 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
     <div class="page" id="page-lieferant">
       <div class="ph">
         <div><div class="ph-eyebrow">Einkauf</div><div class="pt">Beim Lieferanten bestellen</div><div class="ps" id="lb-supplier-sub">Bestellung wird direkt an deinen Lieferanten übermittelt.</div></div>
-      </div>
-      <div class="card" style="padding:20px">
-        <label class="fl" style="margin-bottom:8px">Produkte</label>
-        <div id="lb-order-items"></div>
-        <button class="add-item-btn" onclick="addLbItem()">＋ Produkt hinzufügen</button>
-        <div style="margin:16px 0 4px">
-          <label class="fl" style="margin-bottom:6px">Bestellhinweis (optional)</label>
-          <textarea id="lb-notiz" rows="2" placeholder="z.B. Lieferadresse, Wunschtermin, Bemerkung…" style="width:100%;resize:vertical"></textarea>
-        </div>
-        <div class="order-total-row" style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="lb-order-total">0,00 €</span></div>
-        <div style="display:flex;justify-content:flex-end;margin-top:14px">
-          <button class="btn btn-primary" onclick="submitLbBestellung()">📦 Bestellung aufgeben</button>
-        </div>
+        <div class="pa"><button class="btn btn-primary" onclick="openLbModal()">＋ Neue Bestellung</button></div>
       </div>
 
-      <div class="card-head" style="border:none;padding:0;margin:28px 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
+      <div class="card-head" style="border:none;padding:0;margin:0 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
       <div class="card">
         <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Bezahlt</th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="lb-empty" style="display:none">
         <div class="ec-ic">◆</div>
         <div class="ec-t">Noch keine Bestellungen beim Lieferanten</div>
-        <div class="ec-s">Stelle oben deine erste Bestellung zusammen.</div>
+        <div class="ec-s">Lege oben deine erste Bestellung an.</div>
       </div>
 
       <!-- EIGENE SCHULDEN: freie Schulden bei anderen Personen (nicht der eigene Lieferant),
@@ -954,6 +943,35 @@ create policy "eigene schulden eigener user"
     <!-- PREISE -->
     <div class="page" id="page-preise">
       <div class="ph"><div><div class="ph-eyebrow">Beipackzettel</div><div class="pt">Preise</div><div class="ps">Einkaufs- und Verkaufspreise für alle Produkte</div></div></div>
+      <div class="card" id="vt-setup-hint" style="display:none;margin-bottom:16px">
+        <div class="ec" style="padding:8px 0">
+          <div class="ec-ic">⚙</div>
+          <div class="ec-t">Geschmäcker, Farben & Marken noch nicht eingerichtet</div>
+          <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
+          <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table produkt_varianten (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  produkt_id text not null,
+  name text not null,
+  preis numeric not null default 0,
+  einkaufspreis numeric not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table produkt_varianten enable row level security;
+create policy "varianten lesen"
+  on produkt_varianten for select
+  using (true);
+create policy "varianten eigene anlegen"
+  on produkt_varianten for insert
+  with check (auth.uid() = user_id);
+create policy "varianten eigene aktualisieren"
+  on produkt_varianten for update
+  using (auth.uid() = user_id);
+create policy "varianten eigene loeschen"
+  on produkt_varianten for delete
+  using (auth.uid() = user_id);</pre>
+        </div>
+      </div>
       <div class="pg" id="price-grid"></div>
       <div class="card"><div class="card-head"><h3>Preisübersicht</h3></div>
         <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Einkauf/Stk</th><th>Verkauf/Stk</th><th>Gewinn/Stk</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
@@ -1201,6 +1219,29 @@ create policy "eigene schulden eigener user"
   </div>
 </div>
 
+<!-- MODAL: Neue Bestellung beim Lieferanten -->
+<div class="modal-bg" id="modal-lbbestellung">
+  <div class="modal wide">
+    <div class="modal-head"><h3>◆ Neue Bestellung beim Lieferanten</h3><button class="modal-close" onclick="closeModal('lbbestellung')">✕</button></div>
+    <div class="modal-body">
+      <label class="fl" style="margin-bottom:8px">Produkte</label>
+      <div id="lb-order-items"></div>
+      <button class="add-item-btn" onclick="addLbItem()">＋ Produkt hinzufügen</button>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
+        <label class="fl" style="margin-bottom:6px">Bestellhinweis (optional)</label>
+        <textarea id="lb-notiz" rows="2" placeholder="z.B. Lieferadresse, Wunschtermin, Bemerkung…" style="width:100%;resize:vertical"></textarea>
+      </div>
+
+      <div class="order-total-row" style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="lb-order-total">0,00 €</span></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('lbbestellung')">Abbrechen</button>
+      <button class="btn btn-primary" onclick="submitLbBestellung()">📦 Bestellung aufgeben</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Bestellung Details -->
 <div class="modal-bg" id="modal-orderdetail">
   <div class="modal wide">
@@ -1304,15 +1345,34 @@ create policy "eigene schulden eigener user"
 // PRODUKTE
 // ══════════════════════════════════════════════
 const PRODUCTS = [
-  {id:'pods',    name:'Pods',         icon:'💊'},
-  {id:'snus',    name:'Snus',         icon:'🟢'},
-  {id:'vapes',   name:'Vapes',        icon:'💨'},
-  {id:'einweg',  name:'Einweg Vape',  icon:'🔋'},
-  {id:'schupf',  name:'Schupftabak',  icon:'🟤'},
-  {id:'ziga',    name:'Zigaretten',   icon:'🚬'},
+  {id:'pods',    name:'Pods',         icon:'💊', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice'},
+  {id:'snus',    name:'Snus',         icon:'🟢', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Velo'},
+  {id:'vapes',   name:'Vapes',        icon:'💨', variantLabel:'Farbe',     variantLabelPlural:'Farben',      variantExample:'Schwarz'},
+  {id:'einweg',  name:'Einweg Vape',  icon:'🔋', variantLabel:'Geschmack', variantLabelPlural:'Geschmäcker', variantExample:'Mango Ice'},
+  {id:'schupf',  name:'Schupftabak',  icon:'🟤', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Pöschl'},
+  {id:'ziga',    name:'Zigaretten',   icon:'🚬', variantLabel:'Marke',     variantLabelPlural:'Marken',      variantExample:'Marlboro'},
 ];
 const PROD_MAP = {};
 PRODUCTS.forEach(p => PROD_MAP[p.id] = p);
+// Manche Produkte gibt es in mehreren Varianten (Geschmack bei Pods/Einweg Vape, Marke bei
+// Schupftabak/Snus/Zigaretten) — jede Variante hat einen eigenen Ein-/Verkaufspreis, verwaltet
+// unter "Preise" (siehe S.varianten / S.lieferantVarianten, Tabelle "produkt_varianten").
+function hasVariant(prodId){ return !!PROD_MAP[prodId]?.variantLabel; }
+function variantList(prodId, forLieferant){ return (forLieferant ? S.lieferantVarianten : S.varianten)[prodId] || []; }
+function findVariant(prodId, variantId, forLieferant){
+  return variantList(prodId, forLieferant).find(v => String(v.id)===String(variantId));
+}
+function defaultVariantId(prodId, forLieferant){
+  if(!hasVariant(prodId)) return null;
+  const list = variantList(prodId, forLieferant);
+  return list.length ? list[0].id : '';
+}
+// Für Anzeige in Tabellen/PDFs: Produktname inkl. gewählter Variante, z.B. "Pods (Mango Ice)".
+function prodLabel(it){
+  const p = PROD_MAP[it.prod];
+  if(!p) return it.prod;
+  return it.varianteName ? `${p.name} (${it.varianteName})` : p.name;
+}
 
 const THEMES = [
   {name:'Azur',      accent:'#4C8DFF', accentDeep:'#8FB6FF', accentBg:'#162338', sec:['#D4AC5C','#7DD3C8','#C792EA']},
@@ -1339,8 +1399,9 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
-let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[] };
+let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{} };
 let schuldenTableMissing = false;
+let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
 let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
 let currentUser = null;   // Anzeigename (z.B. "admin")
@@ -1350,7 +1411,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.1.0';
+const CURRENT_UI_VERSION = '4.2.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1362,6 +1423,10 @@ const WHATS_NEW = {
     'Feinschliff fürs neue Design: sanftere Übergänge beim Hell/Dunkel-Wechsel, eigene Scrollbar-Optik.',
     'Das neue Logo erscheint jetzt auch auf allen PDF-Exporten (Rechnung, Lieferschein, offene Bestellungen, Historie).',
     'Browser-Tab zeigt jetzt ebenfalls das neue Logo als Favicon.'
+  ],
+  '4.2.0': [
+    'Neu: Geschmäcker (Pods, Einweg Vape), Farben (Vapes) und Marken (Schupftabak, Snus, Zigaretten) mit eigenem Preis — verwaltbar unter "Preise", beim Bestellen einfach auswählen.',
+    'Bestellungen beim Lieferanten laufen jetzt über ein Bestell-Formular ("＋ Neue Bestellung") — genau wie bei normalen Bestellungen.'
   ]
 };
 function checkWhatsNew(){
@@ -1387,16 +1452,38 @@ const fmtDateTime = d => d ? new Date(d).toLocaleString('de-DE', {day:'2-digit',
 // Nachbestellungen aus. Nach Bezahlung wird der Betrag final eingefroren.
 // Individuelle Kundenpreise: falls für einen Kunden ein eigener Preis für ein Produkt
 // hinterlegt ist, gilt der statt des allgemeinen Preises aus der Preisliste.
-function priceForKunde(kId, prod){
+function priceForKunde(kId, prod, variantId){
+  if(hasVariant(prod)){
+    const v = findVariant(prod, variantId, false);
+    return v ? v.preis : 0;
+  }
   const k = S.kunden.find(x=>x.id===kId);
   const custom = k?.customPreise?.[prod];
   return custom!=null ? custom : (S.preise[prod]||0);
 }
+// Mein aktueller eigener Verkaufspreis für ein bereits bestelltes Item (produkt- oder
+// variantengenau) — genutzt für den "Preis seither geändert"-Hinweis bei eigenen Verkäufen.
+function currentSellPrice(it){
+  if(hasVariant(it.prod)){
+    const v = findVariant(it.prod, it.variante, false);
+    return v ? v.preis : null;
+  }
+  return S.preise[it.prod];
+}
+// Aktueller Preis meines Lieferanten für ein Item (produkt- oder variantengenau), mit
+// Rückfall auf den zum Bestellzeitpunkt eingefrorenen Preis, falls die Variante inzwischen
+// gelöscht wurde oder (noch) keine Live-Preisliste vorliegt.
+function lieferantPriceFor(it){
+  if(hasVariant(it.prod)){
+    const v = findVariant(it.prod, it.variante, true);
+    return v ? v.preis : (it.preis||0);
+  }
+  return S.lieferantPreise[it.prod]!=null ? S.lieferantPreise[it.prod] : (it.preis||0);
+}
 function displayTotal(b){
   if(!b.fuerLieferant || b.paid || b.userId!==currentUserId) return b.total;
   const subtotal=(b.items||[]).reduce((s,it)=>{
-    const preis = S.lieferantPreise[it.prod]!=null ? S.lieferantPreise[it.prod] : (it.preis||0);
-    return s + preis*(it.stueck||1);
+    return s + lieferantPriceFor(it)*(it.stueck||1);
   },0);
   let discAmt=0;
   if(b.discountType==='percent') discAmt = subtotal * Math.min(Math.max(b.discountValue,0),100) / 100;
@@ -1495,7 +1582,7 @@ async function loadAllData(){
   // Performance: der Papierkorb (gelöschte Bestellungen) wird NICHT mehr beim normalen
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
   // Historie unnötige Datenmenge beim täglichen Start der App.
-  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes] = await Promise.all([
+  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false}),
     sb.from('preise').select('*'),
@@ -1503,6 +1590,7 @@ async function loadAllData(){
     sb.from('service_status').select('*').eq('user_id', currentUserId).maybeSingle(),
     sb.from('service_log').select('*').order('service_date', {ascending:false}),
     sb.from('eigene_schulden').select('*').eq('user_id', currentUserId).order('id', {ascending:false}),
+    sb.from('produkt_varianten').select('*').order('id'),
   ]);
   S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id, customPreise:k.custom_preise||{}}));
   S.bestellungen = (bestRes.data||[]).map(mapBestellung);
@@ -1540,6 +1628,22 @@ async function loadAllData(){
     id:s.id, glaeubiger:s.glaeubiger, betrag:Number(s.betrag), notiz:s.notiz||null,
     bezahlt:!!s.bezahlt, createdAt:s.created_at, bezahltAm:s.bezahlt_am||null
   }));
+  // Geschmäcker/Marken: eigene Varianten (S.varianten) sowie — falls ein Lieferant verknüpft
+  // ist — dessen Varianten mit seiner aktuellen Preisliste (S.lieferantVarianten), analog zu
+  // S.preise/S.lieferantPreise weiter oben.
+  variantenTableMissing = !!variantenRes.error;
+  S.varianten = {};
+  S.lieferantVarianten = {};
+  if(!variantenRes.error){
+    (variantenRes.data||[]).forEach(v=>{
+      const rec = {id:v.id, name:v.name, preis:Number(v.preis), einkauf:Number(v.einkaufspreis||0)};
+      if(v.user_id===currentUserId){
+        (S.varianten[v.produkt_id] = S.varianten[v.produkt_id]||[]).push(rec);
+      } else if(M.profile && v.user_id===M.profile.linked_to){
+        (S.lieferantVarianten[v.produkt_id] = S.lieferantVarianten[v.produkt_id]||[]).push(rec);
+      }
+    });
+  }
 }
 // Papierkorb wird erst geladen, wenn die Einstellungen-Seite (wo er angezeigt wird)
 // tatsächlich besucht wird. Einträge, die seit über 30 Tagen gelöscht sind, werden dabei
@@ -1691,8 +1795,11 @@ function applyMode(mode){
 // PREISE
 // ══════════════════════════════════════════════
 function renderPrices(){
+  const hint=document.getElementById('vt-setup-hint');
+  if(hint) hint.style.display = variantenTableMissing ? 'block' : 'none';
   const grid=document.getElementById('price-grid');
   if(grid) grid.innerHTML=PRODUCTS.map(p=>{
+    if(p.variantLabel) return variantCardHtml(p);
     const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0;
     return `
     <div class="pc">
@@ -1706,8 +1813,24 @@ function renderPrices(){
       <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="openPriceHistory('${p.id}')">🕘 Verlauf</button>
     </div>`;
   }).join('');
+  if(!variantenTableMissing) PRODUCTS.filter(p=>p.variantLabel).forEach(p=>renderVariantList(p.id));
   const tbl=document.getElementById('price-table');
   if(tbl) tbl.innerHTML=PRODUCTS.map(p=>{
+    if(p.variantLabel){
+      const list=S.varianten[p.id]||[];
+      if(!list.length) return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td><td colspan="7" style="color:var(--ink-faint)">Noch keine ${p.variantLabelPlural} hinterlegt</td></tr>`;
+      return list.map(v=>{
+        const gewinn=v.preis-v.einkauf;
+        return `<tr><td style="font-weight:600">${p.icon} ${p.name} — ${v.name}</td>
+        <td class="mono">${fmt(v.einkauf)}</td>
+        <td class="mono" style="font-weight:700">${fmt(v.preis)}</td>
+        <td class="mono" style="color:${gewinn>=0?'var(--success)':'var(--rust)'}">${fmt(gewinn)}</td>
+        <td class="mono">${fmt(v.preis*10)}</td>
+        <td class="mono">${fmt(v.preis*25)}</td>
+        <td class="mono">${fmt(v.preis*50)}</td>
+        <td class="mono">${fmt(v.preis*100)}</td></tr>`;
+      }).join('');
+    }
     const verkauf=S.preise[p.id]||0, einkauf=S.einkauf[p.id]||0, gewinn=verkauf-einkauf;
     return `
     <tr><td style="font-weight:600">${p.icon} ${p.name}</td>
@@ -1719,6 +1842,66 @@ function renderPrices(){
     <td class="mono">${fmt(verkauf*50)}</td>
     <td class="mono">${fmt(verkauf*100)}</td></tr>`;
   }).join('');
+}
+// Produkt-Karte für Produkte mit Varianten (Geschmack bei Pods/Einweg Vape, Marke bei
+// Schupftabak/Snus/Zigaretten) — statt eines einzelnen Preises verwaltet man hier eine Liste
+// von Varianten, jede mit eigenem Ein-/Verkaufspreis.
+function variantCardHtml(p){
+  return `
+  <div class="pc">
+    <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
+    <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
+    <div class="ps" style="margin:4px 0 10px">${p.variantLabelPlural} mit jeweils eigenem Preis.</div>
+    ${variantenTableMissing ? `<div class="ps" style="color:var(--rust)">Dafür fehlt in Supabase noch die Tabelle "produkt_varianten" — SQL zum Anlegen siehe Hinweis oben auf dieser Seite.</div>` : `
+    <div id="variant-list-${p.id}"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <input id="vnew-name-${p.id}" placeholder="${p.variantLabel} (z.B. ${p.variantExample})" style="flex:2;min-width:140px"/>
+      <input id="vnew-ek-${p.id}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Einkauf €" style="flex:1;min-width:90px"/>
+      <input id="vnew-vk-${p.id}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Verkauf €" style="flex:1;min-width:90px"/>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="addVariant('${p.id}')">＋ ${p.variantLabel} hinzufügen</button>
+    `}
+  </div>`;
+}
+function renderVariantList(prodId){
+  const el=document.getElementById('variant-list-'+prodId);
+  if(!el) return;
+  const p=PROD_MAP[prodId];
+  const list=S.varianten[prodId]||[];
+  el.innerHTML = list.length ? list.map(v=>{
+    const gewinn=v.preis-v.einkauf;
+    return `<div class="oi" style="padding:8px 10px">
+      <div style="flex:2;font-weight:600">${v.name}</div>
+      <div class="mono" style="flex:1;text-align:right;color:${gewinn>=0?'var(--success)':'var(--rust)'}" title="Gewinn/Stk">${fmt(gewinn)}</div>
+      <div class="oi-total mono" style="flex:1" title="Verkaufspreis">${fmt(v.preis)}</div>
+      <button class="ic-btn oi-rm" onclick="deleteVariant('${prodId}',${v.id})">✕</button>
+    </div>`;
+  }).join('') : `<div class="ps" style="padding:4px 0">Noch keine hinterlegt.</div>`;
+}
+async function addVariant(prodId){
+  const p=PROD_MAP[prodId];
+  const nameEl=document.getElementById('vnew-name-'+prodId), ekEl=document.getElementById('vnew-ek-'+prodId), vkEl=document.getElementById('vnew-vk-'+prodId);
+  const name=(nameEl.value||'').trim();
+  const ek=parseFloat(ekEl.value), vk=parseFloat(vkEl.value);
+  if(!name){ showToast(`Bitte einen Namen für den ${p.variantLabel} eingeben.`,'⚠'); return; }
+  if(isNaN(vk)||vk<0){ showToast('Bitte einen gültigen Verkaufspreis eingeben.','⚠'); return; }
+  const { data, error } = await sb.from('produkt_varianten').insert({
+    user_id:currentUserId, produkt_id:prodId, name, preis:vk, einkaufspreis:isNaN(ek)?0:ek
+  }).select().single();
+  if(error){ showToast(dbErrorMsg(error,`${p.variantLabel} konnte nicht gespeichert werden. Wurde die Tabelle "produkt_varianten" schon angelegt?`),'⚠'); return; }
+  (S.varianten[prodId]=S.varianten[prodId]||[]).push({id:data.id, name:data.name, preis:Number(data.preis), einkauf:Number(data.einkaufspreis||0)});
+  nameEl.value=''; ekEl.value=''; vkEl.value='';
+  renderVariantList(prodId); renderPrices(); renderDashboard();
+  showToast('Gespeichert ✓');
+}
+async function deleteVariant(prodId, id){
+  const p=PROD_MAP[prodId];
+  if(!(await confirmDialog(`Bereits aufgegebene Bestellungen mit diesem ${p.variantLabel} bleiben unverändert erhalten.`, {title:`${p.variantLabel} wirklich löschen?`})))return;
+  const { error } = await sb.from('produkt_varianten').delete().eq('id', id);
+  if(error){ showToast(dbErrorMsg(error,'Konnte nicht gelöscht werden.'),'⚠'); return; }
+  S.varianten[prodId] = (S.varianten[prodId]||[]).filter(v=>v.id!==id);
+  renderVariantList(prodId); renderPrices(); renderDashboard();
+  showToast('Gelöscht.','🗑');
 }
 // Zeigt den Gewinn/Stk sofort beim Tippen an (ohne schon zu speichern) — fühlt sich
 // direkt und einfach an. Gespeichert wird erst automatisch, wenn man das Feld verlässt.
@@ -1860,7 +2043,7 @@ function renderKdBestellungen(){
   const orders=S.bestellungen.filter(b=>b.kId===currentKdId).sort((a,b)=>b.id-a.id);
   document.getElementById('kd-best-empty').style.display = orders.length ? 'none' : 'block';
   tbody.innerHTML = orders.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -1891,13 +2074,15 @@ function renderKdPreise(){
   const k=S.kunden.find(x=>x.id===currentKdId);
   if(!k)return;
   const wrap=document.getElementById('kd-preise-list');
-  wrap.innerHTML = PRODUCTS.map(p=>{
+  // Produkte mit Geschmack/Farbe/Marke haben ihren Preis bereits pro Variante (siehe "Preise") —
+  // ein zusätzlicher individueller Kundenpreis wäre hier mehrdeutig, daher nicht anzeigen.
+  wrap.innerHTML = PRODUCTS.filter(p=>!p.variantLabel).map(p=>{
     const custom = k.customPreise?.[p.id];
     return `<div class="fw" style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       <span style="flex:1;font-size:13px">${p.icon} ${p.name} <span style="color:var(--ink-faint);font-size:11px">(normal ${fmt(S.preise[p.id]||0)})</span></span>
       <input type="number" min="0" step="0.01" placeholder="—" value="${custom!=null?custom:''}" data-kd-preis="${p.id}" style="width:100px"/>
     </div>`;
-  }).join('');
+  }).join('') + `<div class="ps" style="margin-top:6px">Produkte mit Geschmack/Farbe/Marke (Pods, Vapes, Einweg Vape, Schupftabak, Snus, Zigaretten) haben ihren Preis bereits pro Variante unter „Preise" — dafür gibt es hier keinen zusätzlichen individuellen Preis.</div>`;
 }
 async function saveKdPreise(){
   const k=S.kunden.find(x=>x.id===currentKdId);
@@ -2013,7 +2198,7 @@ function renderLkdBestellungen(){
   const orders=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentLkdUserId).sort((a,b)=>b.id-a.id);
   document.getElementById('lkd-best-empty').style.display = orders.length ? 'none' : 'block';
   tbody.innerHTML = orders.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -2058,7 +2243,8 @@ function fillSelects(){
 // ══════════════════════════════════════════════
 let orderItems=[];
 function addOrderItem(){
-  orderItems.push({uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1});
+  const prod=PRODUCTS[0].id;
+  orderItems.push({uid:Date.now()+Math.random(),prod,stueck:1,variant:defaultVariantId(prod,false)});
   renderOrderItems();
 }
 function removeOrderItem(uid){
@@ -2068,7 +2254,9 @@ function removeOrderItem(uid){
 function updateOrderItem(uid,field,val){
   const it=orderItems.find(x=>x.uid===uid);
   if(!it)return;
-  it[field]=field==='stueck'?Math.max(1,parseInt(val)||1):val;
+  if(field==='stueck') it.stueck=Math.max(1,parseInt(val)||1);
+  else if(field==='prod'){ it.prod=val; it.variant=defaultVariantId(val,false); }
+  else it[field]=val;
   renderOrderItems();
 }
 function onDiscountTypeChange(){
@@ -2082,7 +2270,7 @@ function onDiscountTypeChange(){
 }
 function calcOrderTotals(){
   const kId=parseInt(document.getElementById('nb-kunde')?.value)||null;
-  const subtotal=orderItems.reduce((s,it)=>s+priceForKunde(kId,it.prod)*(it.stueck||1),0);
+  const subtotal=orderItems.reduce((s,it)=>s+priceForKunde(kId,it.prod,it.variant)*(it.stueck||1),0);
   const dType=document.getElementById('discount-type')?.value||'';
   const dValRaw=parseFloat(document.getElementById('discount-value')?.value)||0;
   let discountAmount=0;
@@ -2096,19 +2284,25 @@ function renderOrderItems(){
   if(!wrap)return;
   const kId=parseInt(document.getElementById('nb-kunde')?.value)||null;
   wrap.innerHTML=orderItems.map(it=>{
-    const preisStk=priceForKunde(kId,it.prod);
-    const custom = kId ? S.kunden.find(x=>x.id===kId)?.customPreise?.[it.prod] : null;
+    const preisStk=priceForKunde(kId,it.prod,it.variant);
+    const custom = (kId && !hasVariant(it.prod)) ? S.kunden.find(x=>x.id===kId)?.customPreise?.[it.prod] : null;
     const sub=fmt(preisStk*(it.stueck||1));
+    const variants = variantList(it.prod, false);
+    const vl = PROD_MAP[it.prod]?.variantLabel;
     return `<div class="oi">
       <select onchange="updateOrderItem(${it.uid},'prod',this.value)">
         ${PRODUCTS.map(p=>{
-          const pp=priceForKunde(kId,p.id);
+          if(hasVariant(p.id)) return `<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${p.variantLabel} wählen</option>`;
+          const pp=priceForKunde(kId,p.id,null);
           return `<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(pp)}${(kId && S.kunden.find(x=>x.id===kId)?.customPreise?.[p.id]!=null)?' ★':''}</option>`;
         }).join('')}
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono" title="${custom!=null?'Individueller Preis für diesen Kunden':''}">${sub}${custom!=null?' ★':''}</div>
       <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})">✕</button>
+      ${vl ? `<select class="oi-variant" onchange="updateOrderItem(${it.uid},'variant',this.value)">
+        ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— noch kein ${vl} hinterlegt (unter Preise anlegen) —</option>`}
+      </select>` : ''}
     </div>`;
   }).join('');
   const { subtotal, discountAmount, total } = calcOrderTotals();
@@ -2126,7 +2320,14 @@ async function addBestellung(){
   const kId=parseInt(document.getElementById('nb-kunde').value);
   if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
-  const items=orderItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:priceForKunde(kId,it.prod),sub:priceForKunde(kId,it.prod)*(it.stueck||1),ek:S.einkauf[it.prod]||0}));
+  if(orderItems.some(it=>hasVariant(it.prod) && !it.variant)){
+    showToast(`Bitte für jedes Produkt einen ${PROD_MAP[orderItems.find(it=>hasVariant(it.prod)&&!it.variant).prod].variantLabel} wählen.`,'⚠'); return;
+  }
+  const items=orderItems.map(it=>{
+    const v = hasVariant(it.prod) ? findVariant(it.prod, it.variant, false) : null;
+    const preis=priceForKunde(kId,it.prod,it.variant);
+    return {prod:it.prod, stueck:it.stueck||1, variante:v?v.id:null, varianteName:v?v.name:null, preis, sub:preis*(it.stueck||1), ek:v?v.einkauf:(S.einkauf[it.prod]||0)};
+  });
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
@@ -2150,7 +2351,8 @@ async function addBestellung(){
 // ══════════════════════════════════════════════
 let lbItems=[];
 function addLbItem(){
-  lbItems.push({uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1});
+  const prod=PRODUCTS[0].id;
+  lbItems.push({uid:Date.now()+Math.random(),prod,stueck:1,variant:defaultVariantId(prod,true)});
   renderLbItems();
 }
 function removeLbItem(uid){
@@ -2160,27 +2362,52 @@ function removeLbItem(uid){
 function updateLbItem(uid,field,val){
   const it=lbItems.find(x=>x.uid===uid);
   if(!it)return;
-  it[field]=field==='stueck'?Math.max(1,parseInt(val)||1):val;
+  if(field==='stueck') it.stueck=Math.max(1,parseInt(val)||1);
+  else if(field==='prod'){ it.prod=val; it.variant=defaultVariantId(val,true); }
+  else it[field]=val;
   renderLbItems();
 }
+function lbItemPrice(it){
+  if(hasVariant(it.prod)){
+    const v=findVariant(it.prod, it.variant, true);
+    return v ? v.preis : 0;
+  }
+  return S.lieferantPreise[it.prod]||0;
+}
 function calcLbTotal(){
-  return lbItems.reduce((s,it)=>s+(S.lieferantPreise[it.prod]||0)*(it.stueck||1),0);
+  return lbItems.reduce((s,it)=>s+lbItemPrice(it)*(it.stueck||1),0);
 }
 function renderLbItems(){
   const wrap=document.getElementById('lb-order-items');
   if(!wrap)return;
   wrap.innerHTML=lbItems.map(it=>{
-    const sub=fmt((S.lieferantPreise[it.prod]||0)*(it.stueck||1));
+    const sub=fmt(lbItemPrice(it)*(it.stueck||1));
+    const variants=variantList(it.prod, true);
+    const vl=PROD_MAP[it.prod]?.variantLabel;
     return `<div class="oi">
       <select onchange="updateLbItem(${it.uid},'prod',this.value)">
-        ${PRODUCTS.map(p=>`<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(S.lieferantPreise[p.id]||0)}</option>`).join('')}
+        ${PRODUCTS.map(p=>{
+          if(hasVariant(p.id)) return `<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${p.variantLabel} wählen</option>`;
+          return `<option value="${p.id}"${p.id===it.prod?' selected':''}>${p.icon} ${p.name} — ${fmt(S.lieferantPreise[p.id]||0)}</option>`;
+        }).join('')}
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateLbItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono">${sub}</div>
       <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})">✕</button>
+      ${vl ? `<select class="oi-variant" onchange="updateLbItem(${it.uid},'variant',this.value)">
+        ${variants.length ? variants.map(v=>`<option value="${v.id}"${String(v.id)===String(it.variant)?' selected':''}>${vl}: ${v.name} — ${fmt(v.preis)}</option>`).join('') : `<option value="">— Lieferant hat noch kein ${vl} hinterlegt —</option>`}
+      </select>` : ''}
     </div>`;
   }).join('');
   document.getElementById('lb-order-total').textContent=fmt(calcLbTotal());
+}
+function openLbModal(){
+  const supplierId = M.profile?.linked_to || null;
+  if(!supplierId){ showToast('Bitte zuerst unter Einstellungen einen Lieferanten auswählen.','⚠'); return; }
+  if(!lbItems.length){ const prod=PRODUCTS[0].id; lbItems=[{uid:Date.now()+Math.random(),prod,stueck:1,variant:defaultVariantId(prod,true)}]; }
+  document.getElementById('lb-notiz').value='';
+  renderLbItems();
+  openModal('lbbestellung');
 }
 function renderLieferantSeite(){
   const supplierId = M.profile?.linked_to || null;
@@ -2188,8 +2415,6 @@ function renderLieferantSeite(){
   document.getElementById('lb-supplier-sub').textContent = supplier
     ? `Bestellung wird direkt bei ${supplier.username} aufgegeben — berechnet mit seiner aktuellen Preisliste.`
     : 'Kein Lieferant verknüpft — bitte zuerst unter Einstellungen einen Lieferanten auswählen.';
-  if(!lbItems.length){ lbItems=[{uid:Date.now()+Math.random(),prod:PRODUCTS[0].id,stueck:1}]; }
-  renderLbItems();
   renderLbHistory();
   renderEigeneSchulden();
 }
@@ -2199,7 +2424,7 @@ function renderLbHistory(){
   const list=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId).sort((a,b)=>b.id-a.id);
   document.getElementById('lb-empty').style.display = list.length ? 'none' : 'block';
   tbody.innerHTML = list.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     const lieferBadge = b.delivered ? '<span class="badge b-bezahlt">✓ Angekommen</span>' : '<span class="badge b-offen">🚚 Unterwegs</span>';
     const bezahltBadge = b.paid ? '<span class="badge b-bezahlt">✓ Bezahlt</span>' : '<span class="badge b-offen">Offen</span>';
     return `<tr>
@@ -2279,12 +2504,18 @@ async function submitLbBestellung(){
   const supplierId = M.profile?.linked_to || null;
   if(!supplierId){ showToast('Bitte zuerst unter Einstellungen einen Lieferanten auswählen.','⚠'); return; }
   if(!lbItems.length){ showToast('Mindestens ein Produkt hinzufügen.','⚠'); return; }
+  const missingVariant = lbItems.find(it=>hasVariant(it.prod) && !it.variant);
+  if(missingVariant){ showToast(`Bitte für jedes Produkt einen ${PROD_MAP[missingVariant.prod].variantLabel} wählen.`,'⚠'); return; }
   // ek hier ist NICHT mein eigener Einkaufspreis (der ist für diese Bestellung irrelevant —
   // ich bin hier der Käufer, nicht der Verkäufer), sondern der zum Bestellzeitpunkt aktuelle
   // Einkaufspreis MEINES LIEFERANTEN. Der Lieferant braucht das später, um seinen eigenen
   // Gewinn aus diesem Verkauf korrekt zu berechnen, selbst wenn er seinen Einkaufspreis
   // danach ändert (siehe renderDashboard-Gewinnberechnung).
-  const items=lbItems.map(it=>({prod:it.prod,stueck:it.stueck||1,preis:S.lieferantPreise[it.prod]||0,sub:(S.lieferantPreise[it.prod]||0)*(it.stueck||1),ek:S.lieferantEinkauf[it.prod]||0}));
+  const items=lbItems.map(it=>{
+    const v = hasVariant(it.prod) ? findVariant(it.prod, it.variant, true) : null;
+    const preis = lbItemPrice(it);
+    return {prod:it.prod, stueck:it.stueck||1, variante:v?v.id:null, varianteName:v?v.name:null, preis, sub:preis*(it.stueck||1), ek:v?v.einkauf:(S.lieferantEinkauf[it.prod]||0)};
+  });
   const subtotal=calcLbTotal();
   const notiz=document.getElementById('lb-notiz').value.trim()||null;
   const { data, error } = await sb.from('bestellungen').insert({
@@ -2299,6 +2530,7 @@ async function submitLbBestellung(){
     total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null
   });
   lbItems=[]; document.getElementById('lb-notiz').value='';
+  closeModal('lbbestellung');
   renderLieferantSeite(); renderBestellungen(); renderDashboard();
   showToast('Bestellung beim Lieferanten aufgegeben. ✓');
 }
@@ -2365,7 +2597,7 @@ function renderTrash(){
   tbody.innerHTML=S.trash.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const name = b.fuerLieferant ? `◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}` : (k?k.vorname+' '+k.nachname:'—');
-    const prods=(b.items||[]).map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=(b.items||[]).map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-weight:600">${name}</td>
       <td style="font-size:12px">${prods}</td>
@@ -2420,7 +2652,7 @@ function renderBestellungen(){
     list=list.filter(b=>{
       const k=S.kunden.find(x=>x.id===b.kId);
       const kName = b.fuerLieferant ? usernameOf(b.userId).toLowerCase() : (k?`${k.vorname} ${k.nachname}`.toLowerCase():'');
-      const prodNames=b.items.map(it=>PROD_MAP[it.prod]?.name||'').join(' ').toLowerCase();
+      const prodNames=b.items.map(it=>`${PROD_MAP[it.prod]?.name||''} ${it.varianteName||''}`).join(' ').toLowerCase();
       return kName.includes(searchTerm) || prodNames.includes(searchTerm);
     });
   }
@@ -2470,13 +2702,13 @@ function renderBestellungen(){
   tbody.innerHTML=list.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const foreign = b.userId!==currentUserId;
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
     // Rein informativ: der Betrag einer Lieferantenkunden-Bestellung bleibt zum Bestellzeitpunkt
     // eingefroren (siehe displayTotal), aber falls sich mein Preis seither geändert hat, weise
     // ich hier trotzdem kurz darauf hin, damit das nicht unbemerkt bleibt.
     const priceChanged = b.fuerLieferant && !b.paid && (b.items||[]).some(it=>{
-      const live=S.preise[it.prod];
+      const live=currentSellPrice(it);
       return live!=null && Math.abs(live-(it.preis||0))>0.001;
     });
     const priceBadge = priceChanged ? `<span class="badge b-lieferant" title="Dein Preis für mind. ein Produkt hat sich seit dieser Bestellung geändert — der berechnete Betrag bleibt trotzdem der zum Bestellzeitpunkt vereinbarte" style="margin-left:6px">Preis seither geändert</span>` : '';
@@ -2651,7 +2883,7 @@ function renderDashboard(){
   else tbody.innerHTML=recent.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const name = b.fuerLieferant ? `◆ ${usernameOf(b.userId)}` : (k?k.vorname+' '+k.nachname:'—');
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr><td style="font-weight:600">${name}</td><td style="font-size:12px">${prods}</td><td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td><td><span class="badge b-offen">Offen</span></td></tr>`;
   }).join('');
   document.getElementById('service-banner').style.display=M.service.due?'flex':'none';
@@ -2692,7 +2924,7 @@ function downloadOpenOrdersPDF(){
   const rows = open.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const name = b.fuerLieferant ? `◆ ${usernameOf(b.userId)}` : (k?`${k.vorname} ${k.nachname}`:'—');
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.name} ×${it.stueck}`:''}).join(', ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${prodLabel(it)} ×${it.stueck}`:''}).join(', ');
     const rabatt = b.discountType ? (b.discountType==='percent' ? `-${b.discountValue}%` : `-${fmt(b.discountValue)}`) : '—';
     return [name, prods, fmtDate(b.date), rabatt, fmt(displayTotal(b))];
   });
@@ -2761,7 +2993,7 @@ function downloadOpenLieferantPDF(){
 
   const showVon = currentRole()==='special';
   const rows = open.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.name} ×${it.stueck}`:''}).join(', ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${prodLabel(it)} ×${it.stueck}`:''}).join(', ');
     const status = `${b.delivered?'Erhalten':'Unterwegs'} · ${b.paid?'Bezahlt':'Offen'}`;
     const row=[prods, fmtDate(b.date), status, fmt(displayTotal(b))];
     if(showVon) row.unshift(usernameOf(b.userId));
@@ -2832,7 +3064,7 @@ function downloadHistoriePDF(){
     const k=S.kunden.find(x=>x.id===b.kId);
     const typ = b.fuerLieferant ? 'Lieferant' : 'Kunde';
     const partner = b.fuerLieferant ? (M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant') : (k?`${k.vorname} ${k.nachname}`:'—');
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.name} ×${it.stueck}`:''}).join(', ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${prodLabel(it)} ×${it.stueck}`:''}).join(', ');
     return [typ, partner, prods, fmtDate(b.date), fmtDateTime(b.paidAt), fmt(b.total)];
   });
   doc.autoTable({
@@ -2932,13 +3164,13 @@ function openOrderDetail(id){
   document.getElementById('od-items').innerHTML = b.items.map(it=>{
     const p=PROD_MAP[it.prod];
     const preis = liveUnpaidLieferant
-      ? (S.lieferantPreise[it.prod]!=null ? S.lieferantPreise[it.prod] : (it.preis||0))
-      : (it.preis!=null?it.preis:(S.preise[it.prod]||0));
-    return `<tr><td>${p?p.icon+' '+p.name:it.prod}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
+      ? lieferantPriceFor(it)
+      : (it.preis!=null?it.preis:(hasVariant(it.prod)?0:(S.preise[it.prod]||0)));
+    return `<tr><td>${p?p.icon+' '+prodLabel(it):it.prod}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
   }).join('');
 
   const odSubtotal = liveUnpaidLieferant
-    ? b.items.reduce((s,it)=>s+(S.lieferantPreise[it.prod]!=null?S.lieferantPreise[it.prod]:(it.preis||0))*(it.stueck||1),0)
+    ? b.items.reduce((s,it)=>s+lieferantPriceFor(it)*(it.stueck||1),0)
     : b.subtotal;
   const odTotal = displayTotal(b);
   document.getElementById('od-subtotal').textContent = fmt(odSubtotal);
@@ -3013,8 +3245,8 @@ function printInvoice(id){
   // Positionstabelle
   const rows = b.items.map(it=>{
     const p=PROD_MAP[it.prod];
-    const preis=(it.preis!=null?it.preis:(S.preise[it.prod]||0));
-    return [p?p.name:it.prod, String(it.stueck), fmt(preis), fmt(preis*it.stueck)];
+    const preis=(it.preis!=null?it.preis:(hasVariant(it.prod)?0:(S.preise[it.prod]||0)));
+    return [p?prodLabel(it):it.prod, String(it.stueck), fmt(preis), fmt(preis*it.stueck)];
   });
   doc.autoTable({
     head:[['Produkt','Menge','Einzelpreis','Summe']],
@@ -3127,7 +3359,7 @@ function printLieferschein(id){
   const rows = b.items.map(it=>{
     const p=PROD_MAP[it.prod];
     const preis=(it.preis!=null?it.preis:0);
-    return [p?p.name:it.prod, String(it.stueck), fmt(preis), fmt(preis*it.stueck)];
+    return [p?prodLabel(it):it.prod, String(it.stueck), fmt(preis), fmt(preis*it.stueck)];
   });
   doc.autoTable({
     head:[['Produkt','Menge','Einzelpreis','Summe']],
