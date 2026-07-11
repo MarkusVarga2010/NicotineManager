@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '6.2.0'; // Neu: Abholcode bei Lieferanten-Bestellungen — sobald deine Bestellung beim Lieferanten als "angekommen" markiert wird, bekommst du automatisch einen 4-stelligen Abholcode (sichtbar unter "Beim Lieferanten" und im Bestell-Detail). Diesen Code musst du dem Lieferanten beim Bezahlen nennen — er muss ihn bestätigen, bevor die Bestellung als bezahlt markiert werden kann.
+const APP_VERSION = '6.3.0'; // Verbesserungen am Abholcode: Bestätigung jetzt konsistent für ALLE Bestellarten (Kunden + Lieferant) beim Bezahlen; Teilen-Button (WhatsApp); "Neu erzeugen"-Button falls Kunde den Code verloren hat; Kollisionsschutz gegen doppelt vergebene Codes; Hinweis nach mehreren falschen Versuchen; Undo-Button im Toast nach "Alle löschen".
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [

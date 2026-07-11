@@ -450,11 +450,12 @@ button{font-family:inherit;cursor:pointer}
 
 /* Abholcode — Ticket-Box im Detailfenster + kleiner Chip in der Bestellliste */
 .abholcode-box{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   background:var(--sage-bg);border:1px dashed color-mix(in srgb, var(--sage) 55%, transparent);
   border-radius:var(--r);clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
   padding:12px 16px;margin-bottom:18px;
 }
+.abholcode-actions{display:flex;gap:6px;flex-wrap:wrap}
 .abholcode-lab{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
 .abholcode-val{font-size:22px;font-weight:700;letter-spacing:.12em;color:var(--ink)}
 .abholcode-chip{
@@ -608,7 +609,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   opacity:0;pointer-events:none;transition:all .25s ease;font-family:'IBM Plex Sans',sans-serif;
   box-shadow:0 8px 24px rgba(0,0,0,.4);
 }
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 
 /* ════════════════════════════════════════════════════════
    EINFÜHRUNGSTOUR
@@ -1300,7 +1301,11 @@ create policy "varianten eigene loeschen"
           <div class="abholcode-val mono" id="od-abholcode-val"></div>
           <div style="font-size:11px;color:var(--ink-faint);margin-top:3px" id="od-abholcode-hint"></div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
+        <div class="abholcode-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
+          <button class="btn btn-ghost btn-sm" id="od-abholcode-regen-btn" onclick="regenerateAbholcode()">↺ Neu erzeugen</button>
+        </div>
       </div>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
@@ -1376,7 +1381,7 @@ create policy "varianten eigene loeschen"
   <div class="modal" style="max-width:380px">
     <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.</p>
+      <p id="ac-hint" style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.</p>
       <label class="fl">Abholcode</label>
       <input type="text" id="ac-input" maxlength="4" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center" placeholder="XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()">
       <p id="ac-error" style="display:none;color:var(--rust);font-size:12px;margin-top:8px">Code stimmt nicht überein. Bitte erneut versuchen.</p>
@@ -1403,7 +1408,7 @@ create policy "varianten eigene loeschen"
   </div>
 </div>
 
-<div id="toast"><span id="t-icon">✓</span><span id="t-msg"></span></div>
+<div id="toast"><span id="t-icon">✓</span><span id="t-msg"></span><button id="t-action" class="btn btn-ghost btn-sm" style="display:none;margin-left:4px;padding:4px 10px" onclick="_toastActionClick()"></button></div>
 
 <div id="update-banner">
   <div class="ub-text">
@@ -1484,7 +1489,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.6.0';
+const CURRENT_UI_VERSION = '4.7.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1514,6 +1519,12 @@ const WHATS_NEW = {
   '4.6.0': [
     'Neu: Abholcode bei Lieferanten-Bestellungen — sobald deine Bestellung als "angekommen" markiert wird, bekommst du automatisch einen 4-stelligen Abholcode (sichtbar unter "Beim Lieferanten" und im Bestell-Detail).',
     'Diesen Code musst du deinem Lieferanten beim Bezahlen nennen — er wird abgefragt und bestätigt, bevor die Bestellung als bezahlt markiert werden kann.'
+  ],
+  '4.7.0': [
+    'Abholcode-Bestätigung beim Bezahlen gilt jetzt einheitlich für ALLE Bestellungen (Kunden und Lieferantenkunden), nicht nur für Lieferanten-Bestellungen.',
+    'Neu: Abholcode direkt per WhatsApp teilen, und "Neu erzeugen"-Button falls der Kunde den Code verloren hat.',
+    'Nach mehreren falschen Code-Eingaben gibt es jetzt einen Hinweis, ob es wirklich die richtige Bestellung ist.',
+    '"Alle löschen" zeigt jetzt einen "Rückgängig"-Button direkt im Toast, um versehentlich gelöschte Bestellungen sofort wiederherzustellen.'
   ]
 };
 function checkWhatsNew(){
@@ -2422,7 +2433,7 @@ async function addBestellung(){
     return {prod:it.prod, stueck:it.stueck||1, variante:v?v.id:null, varianteName:v?v.name:null, preis, sub:preis*(it.stueck||1), ek:v?v.einkauf:(S.einkauf[it.prod]||0)};
   });
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
-  const abholcode = genAbholcode();
+  const abholcode = genAbholcode(activeAbholcodes());
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
@@ -2440,17 +2451,52 @@ async function addBestellung(){
 
 // Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Kunde nennt/zeigt ihn bei Abholung zur
 // Bestätigung. Verwechslungsanfällige Zeichen (0/O, 1/I) bewusst ausgeschlossen.
-function genAbholcode(){
+// existing: Liste aktuell bekannter Codes, gegen die auf Kollision geprüft wird (bei ~1 Mio.
+// möglichen Kombinationen extrem unwahrscheinlich, aber so ganz ausgeschlossen).
+function genAbholcode(existing=[]){
   const chars='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  let code='';
-  for(let i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  const taken=new Set(existing.filter(Boolean));
+  let code, tries=0;
+  do{
+    code='';
+    for(let i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+    tries++;
+  } while(taken.has(code) && tries<20);
   return code;
+}
+function activeAbholcodes(){
+  return S.bestellungen.map(b=>b.abholcode).filter(Boolean);
 }
 function copyAbholcode(){
   const val=document.getElementById('od-abholcode-val')?.textContent;
   if(!val) return;
   navigator.clipboard?.writeText(val).then(()=>showToast('Abholcode kopiert.'))
     .catch(()=>showToast('Kopieren nicht möglich.','⚠'));
+}
+// Öffnet WhatsApp mit vorausgefülltem Text, damit der Code schnell an den Kunden/
+// Lieferantenkunden weitergegeben werden kann. Da keine Telefonnummern gespeichert werden,
+// muss der Kontakt manuell ausgewählt werden — WhatsApp fragt danach automatisch.
+function shareAbholcode(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  const text = b.fuerLieferant
+    ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen.`
+    : `Deine Bestellung ist abholbereit! Abholcode: ${b.abholcode} — bitte bei Abholung nennen.`;
+  window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+}
+// Erzeugt einen neuen Code für die aktuell im Detail geöffnete Bestellung, z.B. falls der
+// Kunde den alten Code verloren/nicht mehr zur Hand hat. Der alte Code wird dabei ungültig.
+async function regenerateAbholcode(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b) return;
+  if(!(await confirmDialog('Der alte Code wird ungültig — gib dem Kunden anschließend den neuen Code durch.', {title:'Neuen Abholcode erzeugen?', confirmText:'Neu erzeugen', danger:false})))return;
+  const newCode = genAbholcode(activeAbholcodes());
+  const { error } = await sb.from('bestellungen').update({ abholcode:newCode }).eq('id', b.id);
+  if(error){ showToast('Code konnte nicht erneuert werden.','⚠'); return; }
+  b.abholcode=newCode;
+  document.getElementById('od-abholcode-val').textContent=newCode;
+  renderBestellungen();renderLbHistory();
+  showToast('Neuer Abholcode: '+newCode);
 }
 
 // ══════════════════════════════════════════════
@@ -2658,7 +2704,7 @@ async function setDelivered(id, newVal){
   // (siehe confirmPaidWithAbholcode) — so wird sichergestellt, dass wirklich die richtige
   // Bestellung/Person bezahlt und abgeholt wird.
   if(newVal && b.fuerLieferant && !b.abholcode){
-    patch.abholcode = genAbholcode();
+    patch.abholcode = genAbholcode(activeAbholcodes());
   }
   const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
@@ -2669,18 +2715,24 @@ async function setDelivered(id, newVal){
     ? (patch.abholcode ? `Als angekommen markiert · Abholcode ${patch.abholcode}` : 'Als erhalten/bestellt markiert. ✓')
     : 'Als unterwegs markiert.');
 }
-// Bezahlen einer Lieferanten-Bestellung: statt direkt setPaid aufzurufen, wird zuerst der
-// Abholcode abgefragt (den der Kunde bei Abholung nennt) und mit dem gespeicherten Code
-// verglichen. Erst bei Übereinstimmung wird die Bestellung als bezahlt markiert.
+// Bezahlen einer Bestellung mit Abholcode: statt direkt setPaid aufzurufen, wird zuerst der
+// Code abgefragt (den Kunde/Lieferantenkunde bei Abholung nennt) und mit dem gespeicherten
+// Code verglichen. Erst bei Übereinstimmung wird die Bestellung als bezahlt markiert — so
+// landet die Zahlung sicher auf der richtigen Bestellung/Person.
 let _abholcodeConfirmOrderId=null;
+let _abholcodeFailCount=0;
 function confirmPaidWithAbholcode(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b) return;
-  if(!b.abholcode){ setPaid(id,true); return; } // kein Code vorhanden (z.B. noch nicht angekommen) -> keine Sperre
+  if(!b.abholcode){ setPaid(id,true); return; } // kein Code vorhanden (z.B. noch nicht angekommen/abgeholt) -> keine Sperre
   _abholcodeConfirmOrderId=id;
+  _abholcodeFailCount=0;
+  const label = b.fuerLieferant ? 'deinem Lieferantenkunden' : 'deinem Kunden';
+  document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.`;
   const input=document.getElementById('ac-input');
   input.value='';
   document.getElementById('ac-error').style.display='none';
+  document.getElementById('ac-error').textContent='Code stimmt nicht überein. Bitte erneut versuchen.';
   openModal('abholcode-confirm');
   setTimeout(()=>input.focus(),50);
 }
@@ -2689,7 +2741,12 @@ function _submitAbholcodeConfirm(){
   if(!b) return;
   const val=(document.getElementById('ac-input').value||'').trim().toUpperCase();
   if(!val || val!==b.abholcode){
-    document.getElementById('ac-error').style.display='block';
+    _abholcodeFailCount++;
+    const errEl=document.getElementById('ac-error');
+    errEl.textContent = _abholcodeFailCount>=3
+      ? 'Code stimmt immer noch nicht überein. Sicher, dass es die richtige Bestellung ist?'
+      : 'Code stimmt nicht überein. Bitte erneut versuchen.';
+    errEl.style.display='block';
     return;
   }
   closeModal('abholcode-confirm');
@@ -2759,7 +2816,7 @@ async function delAllBestellungen(){
   S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
   S.bestellungen=S.bestellungen.filter(b=>!idSet.has(b.id));
   renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();renderTrash();
-  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`);
+  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`, '🗑', {label:'↺ Rückgängig', onClick:()=>restoreBestellungenBulk(ids)});
 }
 // Löscht alle eigenen Bestellungen beim Lieferanten auf einmal — landen wie beim Einzel-
 // Löschen im Papierkorb. Da es sich um dieselbe Datenbank-Zeile handelt, die auch dein
@@ -2778,7 +2835,19 @@ async function delAllLbBestellungen(){
   S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
   S.bestellungen=S.bestellungen.filter(b=>!idSet.has(b.id));
   renderLieferantSeite();renderBestellungen();renderDashboard();renderTrash();
-  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`);
+  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} in den Papierkorb verschoben. 🗑`, '🗑', {label:'↺ Rückgängig', onClick:()=>restoreBestellungenBulk(ids)});
+}
+// Stellt mehrere per "Alle löschen" in den Papierkorb verschobene Bestellungen auf einmal
+// wieder her — wird vom "↺ Rückgängig"-Button im Toast direkt nach dem Löschen genutzt.
+async function restoreBestellungenBulk(ids){
+  const { error } = await sb.from('bestellungen').update({ deleted_at: null }).in('id', ids);
+  if(error){ showToast(dbErrorMsg(error,'Wiederherstellen fehlgeschlagen.'),'⚠'); return; }
+  ids.forEach(id=>{
+    const b=S.trash.find(x=>x.id===id);
+    if(b){ S.trash=S.trash.filter(x=>x.id!==id); b.deletedAt=null; S.bestellungen.unshift(b); }
+  });
+  renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderLieferantSeite();renderDashboard();renderTrash();
+  showToast(`${ids.length} Bestellung${ids.length===1?'':'en'} wiederhergestellt. ↺`);
 }
 async function restoreBestellung(id){
   const b=S.trash.find(x=>x.id===id);
@@ -2955,7 +3024,7 @@ function renderBestellungen(){
     // Standard: Bestellt / Bezahlt
     const actionBtn = bestellungenTab==='bestellt'
       ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
-      : (b.fuerLieferant && b.abholcode
+      : (b.abholcode
         ? `<button class="status-btn active-bezahlt" onclick="confirmPaidWithAbholcode(${b.id})">✓ Bezahlt</button>`
         : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
     return `<tr>
@@ -3326,9 +3395,11 @@ function openOrderDetail(id){
   if(b.abholcode){
     abBox.style.display='flex';
     document.getElementById('od-abholcode-val').textContent = b.abholcode;
-    document.getElementById('od-abholcode-hint').textContent = b.fuerLieferant
-      ? 'Beim Bezahlen dem Lieferanten nennen.'
-      : 'Kunde nennt/zeigt diesen Code bei Abholung.';
+    document.getElementById('od-abholcode-hint').textContent = !b.fuerLieferant
+      ? 'Kunde nennt/zeigt diesen Code bei Abholung.'
+      : (b.userId===currentUserId ? 'Beim Bezahlen deinem Lieferanten nennen.' : 'Lieferantenkunde nennt diesen Code beim Bezahlen.');
+    const actionsWrap=document.querySelector('#od-abholcode-box .abholcode-actions');
+    actionsWrap.style.display = b.paid ? 'none' : 'flex';
   } else {
     abBox.style.display='none';
   }
@@ -3903,10 +3974,29 @@ window.addEventListener('resize', ()=>{
 // TOAST
 // ══════════════════════════════════════════════
 let toastT;
-function showToast(msg,icon='✓'){
+let _toastActionCb=null;
+function showToast(msg,icon='✓',action=null){
   document.getElementById('t-msg').textContent=msg;document.getElementById('t-icon').textContent=icon;
   const t=document.getElementById('toast');t.classList.add('show');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);
+  const actionBtn=document.getElementById('t-action');
+  if(action){
+    actionBtn.textContent=action.label;
+    actionBtn.style.display='inline-flex';
+    _toastActionCb=action.onClick;
+  } else {
+    actionBtn.style.display='none';
+    _toastActionCb=null;
+  }
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>{ t.classList.remove('show'); actionBtn.style.display='none'; _toastActionCb=null; }, action ? 6000 : 2800);
+}
+function _toastActionClick(){
+  const cb=_toastActionCb;
+  document.getElementById('toast').classList.remove('show');
+  document.getElementById('t-action').style.display='none';
+  _toastActionCb=null;
+  clearTimeout(toastT);
+  if(cb) cb();
 }
 
 // ══════════════════════════════════════════════
