@@ -670,6 +670,23 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 .vimg-upload-preview{display:flex;align-items:center;gap:8px;margin-top:8px}
 .vimg-upload-preview img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line2);flex-shrink:0}
 
+/* Kostenloser Bildvorschlag (Openverse-Suche nach dem eingegebenen Namen) */
+.vimg-suggest-btn{
+  margin-top:6px;width:100%;justify-content:center;font-size:11px;padding:7px 10px;
+  background:transparent;border:1px dashed var(--line2);border-radius:var(--r);color:var(--ink-soft);
+  display:flex;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.vimg-suggest-btn:hover{border-color:var(--sage);color:var(--sage-deep)}
+.vimg-suggest-btn:disabled{opacity:.55;cursor:default}
+.vimg-suggest-grid{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 4px;margin-top:8px}
+.vimg-suggest-item{
+  flex:0 0 60px;width:60px;height:60px;border-radius:8px;overflow:hidden;cursor:pointer;
+  border:2px solid var(--line2);background:var(--paper3);transition:border-color .15s,transform .15s;
+}
+.vimg-suggest-item:hover{border-color:var(--sage);transform:translateY(-1px)}
+.vimg-suggest-item img{width:100%;height:100%;object-fit:cover;display:block}
+.vimg-suggest-note{font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.4;flex-basis:100%}
+
 /* Shop-Grid für Varianten unter "Preise" — Produktkarten wie im Onlineshop */
 .vshop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin-top:10px}
 .vshop-card{
@@ -1150,7 +1167,7 @@ create policy "varianten eigene loeschen"
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">3.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">8.1.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -2060,6 +2077,8 @@ function variantCardHtml(p){
       <input type="file" id="vnew-img-${p.id}" accept="image/*" onchange="onVariantImgPicked('${p.id}')"/>
     </div>
     <div class="vimg-upload-preview" id="vnew-preview-${p.id}" style="display:none"></div>
+    <button type="button" class="vimg-suggest-btn" id="vnew-suggestbtn-${p.id}" onclick="suggestVariantImages('${p.id}')">🔍 Passendes Bild automatisch vorschlagen (kostenlos)</button>
+    <div class="vimg-suggest-grid" id="vnew-suggest-${p.id}" style="display:none"></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center" onclick="addVariant('${p.id}')">＋ ${p.variantLabel} hinzufügen</button>
     `}
   </div>`;
@@ -2081,6 +2100,7 @@ function onVariantImgPicked(prodId){
   }
   if(!file.type.startsWith('image/')){ showToast('Bitte eine Bilddatei auswählen.','⚠'); inp.value=''; return; }
   if(file.size > 5*1024*1024){ showToast('Bild darf max. 5 MB groß sein.','⚠'); inp.value=''; return; }
+  _pendingVariantImgUrl[prodId]=null; // manuelles Foto ersetzt einen evtl. gewählten kostenlosen Vorschlag
   _pendingVariantImg[prodId]=file;
   if(label) label.textContent='✓ '+file.name;
   if(preview){
@@ -2100,6 +2120,69 @@ async function uploadVariantImage(prodId, variantId){
   if(error){ showToast(dbErrorMsg(error,'Bild konnte nicht hochgeladen werden. Wurde der Bucket "variant-bilder" schon angelegt?'),'⚠'); return null; }
   const { data } = sb.storage.from('variant-bilder').getPublicUrl(path);
   return data?.publicUrl || null;
+}
+// ══════════════════════════════════════════════
+// KOSTENLOSER BILDVORSCHLAG (Openverse)
+// Sucht anhand des eingegebenen Namens (z.B. "Mango Ice") automatisch nach einem
+// passenden, frei lizenzierten Foto — über die kostenlose Openverse-API (openverse.org,
+// durchsucht u.a. Wikimedia Commons & Flickr-CC). Kein API-Key nötig, kein Limit-Ärger.
+// Wählt der Nutzer eines der Vorschlagsbilder aus, wird direkt dessen öffentliche URL als
+// bild_url gespeichert — es wird NICHT in den eigenen Supabase-Storage hochgeladen (dafür
+// müsste die Bilddatei erst heruntergeladen werden, was bei manchen Fremd-Hosts an CORS
+// scheitern kann). Das hält den Vorschlag zuverlässig kostenlos und einfach.
+let _pendingVariantImgUrl = {};
+async function suggestVariantImages(prodId){
+  const p=PROD_MAP[prodId];
+  const nameEl=document.getElementById('vnew-name-'+prodId);
+  const query=(nameEl?.value||'').trim();
+  if(!query){ showToast(`Bitte zuerst einen ${p?.variantLabel||'Namen'} eingeben (z.B. Mango Ice).`,'⚠'); nameEl?.focus(); return; }
+  const btn=document.getElementById('vnew-suggestbtn-'+prodId);
+  const grid=document.getElementById('vnew-suggest-'+prodId);
+  if(btn){ btn.disabled=true; btn.textContent='🔍 Suche läuft…'; }
+  if(grid){ grid.style.display='none'; grid.innerHTML=''; }
+  try{
+    const url='https://api.openverse.org/v1/images/?q='+encodeURIComponent(query)+'&page_size=8&mature=false';
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const results=(data.results||[]).filter(r=>r.thumbnail||r.url).slice(0,8);
+    if(!results.length){
+      if(grid){
+        grid.style.display='flex';
+        grid.innerHTML=`<div class="vimg-suggest-note">Kein passendes freies Bild gefunden. Einfach einen anderen/kürzeren Begriff eingeben oder oben manuell ein Foto hochladen.</div>`;
+      }
+      return;
+    }
+    if(grid){
+      grid.style.display='flex';
+      grid.innerHTML = results.map(r=>{
+        const thumb=(r.thumbnail||r.url).replace(/"/g,'&quot;');
+        const full=(r.url||r.thumbnail).replace(/"/g,'&quot;');
+        return `<div class="vimg-suggest-item" title="Dieses Bild verwenden" onclick="pickSuggestedImage('${prodId}','${full}','${thumb}')"><img src="${thumb}" alt="Vorschlag" loading="lazy"></div>`;
+      }).join('') + `<div class="vimg-suggest-note">Kostenlos über Openverse (frei lizenzierte Bilder). Antippen zum Übernehmen.</div>`;
+    }
+  }catch(e){
+    if(grid){
+      grid.style.display='flex';
+      grid.innerHTML=`<div class="vimg-suggest-note">Bildsuche gerade nicht erreichbar (offline oder Netzwerkproblem). Oben lässt sich weiterhin manuell ein eigenes Foto hochladen.</div>`;
+    }
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='🔍 Passendes Bild automatisch vorschlagen (kostenlos)'; }
+  }
+}
+// Übernimmt ein Vorschlagsbild als künftiges Varianten-Bild. Schließt sich mit einem manuell
+// hochgeladenen Foto gegenseitig aus — was zuletzt gewählt wurde, gilt.
+function pickSuggestedImage(prodId, fullUrl, thumbUrl){
+  _pendingVariantImgUrl[prodId]=fullUrl;
+  _pendingVariantImg[prodId]=null;
+  const fileInp=document.getElementById('vnew-img-'+prodId); if(fileInp) fileInp.value='';
+  const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Produktfoto auswählen (optional)';
+  const preview=document.getElementById('vnew-preview-'+prodId);
+  if(preview){
+    preview.style.display='flex';
+    preview.innerHTML=`<img src="${thumbUrl}" alt="Vorschau"><span class="ps" style="margin:0">Kostenloses Vorschlagsbild ausgewählt — wird beim Speichern übernommen.</span>`;
+  }
+  showToast('Bild ausgewählt ✓');
 }
 function renderVariantList(prodId){
   const el=document.getElementById('variant-list-'+prodId);
@@ -2135,7 +2218,10 @@ async function addVariant(prodId){
   if(error){ showToast(dbErrorMsg(error,`${p.variantLabel} konnte nicht gespeichert werden. Wurde die Tabelle "produkt_varianten" schon angelegt?`),'⚠'); return; }
 
   // Bild erst NACH dem Anlegen hochladen, weil der Dateipfad die Varianten-ID enthält.
-  const bildUrl = await uploadVariantImage(prodId, data.id);
+  // Wurde stattdessen ein kostenloses Vorschlagsbild gewählt, wird direkt dessen URL
+  // übernommen — dafür ist kein eigener Upload nötig.
+  const suggestedUrl=_pendingVariantImgUrl[prodId]||null;
+  const bildUrl = suggestedUrl || await uploadVariantImage(prodId, data.id);
   if(bildUrl){
     const { error: imgErr } = await sb.from('produkt_varianten').update({ bild_url: bildUrl }).eq('id', data.id);
     if(imgErr) showToast(dbErrorMsg(imgErr,'Bild-URL konnte nicht gespeichert werden. Wurde die Spalte "bild_url" schon angelegt?'),'⚠');
@@ -2145,7 +2231,10 @@ async function addVariant(prodId){
   nameEl.value=''; ekEl.value=''; vkEl.value='';
   const imgInp=document.getElementById('vnew-img-'+prodId); if(imgInp) imgInp.value='';
   const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Bild auswählen (optional)';
+  const preview=document.getElementById('vnew-preview-'+prodId); if(preview){ preview.style.display='none'; preview.innerHTML=''; }
+  const suggestGrid=document.getElementById('vnew-suggest-'+prodId); if(suggestGrid){ suggestGrid.style.display='none'; suggestGrid.innerHTML=''; }
   _pendingVariantImg[prodId]=null;
+  _pendingVariantImgUrl[prodId]=null;
   renderVariantList(prodId); renderPrices(); renderDashboard();
   showToast('Gespeichert ✓');
 }

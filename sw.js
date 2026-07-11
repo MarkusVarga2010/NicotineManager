@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '8.0.0'; // Varianten-Bilder im Onlineshop-Stil: Produktkarten-Raster bei "Preise" (großes Foto, Name, Preis), anklickbare Bildkarten statt Dropdown beim Bestellen, Live-Vorschau beim Foto-Upload.
+const APP_VERSION = '8.1.0'; // Neu: Kostenloser automatischer Bildvorschlag beim Anlegen einer Variante (Openverse-Suche nach dem eingegebenen Namen, kein API-Key nötig) — Alternative zum manuellen Foto-Upload.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
