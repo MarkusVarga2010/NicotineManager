@@ -273,25 +273,27 @@ button{font-family:inherit;cursor:pointer}
 .scale-tick.active .tk-ic{opacity:1}
 .tk-dot{margin-left:auto;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1}
 .tk-dot.show{display:flex}
+.scalebar-mehr-hint{display:none}
 
 .ios-tabbar{
   display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
-  background:color-mix(in srgb, var(--paper2) 86%, transparent);
+  background:color-mix(in srgb, var(--paper2) 92%, transparent);
   backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
   border-top:1px solid var(--line2);
-  padding:6px 4px calc(4px + env(safe-area-inset-bottom));
+  padding:8px 6px calc(6px + env(safe-area-inset-bottom));
+  gap:2px;
 }
 .itb-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  background:none;border:none;color:var(--ink-faint);padding:6px 2px;border-radius:12px;
-  font-family:'Inter',sans-serif;transition:color .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:none;border:none;color:var(--ink-faint);padding:7px 2px;border-radius:14px;
+  font-family:'Inter',sans-serif;transition:color .15s ease,background .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
 }
-.itb-btn:active{transform:scale(.9)}
-.itb-ic{font-size:21px;line-height:1;transition:transform .15s ease;position:relative;display:inline-block}
-.itb-lab{font-size:10px;font-weight:600;letter-spacing:.01em}
+.itb-btn:active{transform:scale(.92)}
+.itb-ic{font-size:23px;line-height:1;transition:transform .15s ease;position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px}
+.itb-lab{font-size:10.5px;font-weight:600;letter-spacing:.01em}
 .itb-btn.active{color:var(--sage-deep)}
-.itb-btn.active .itb-ic{transform:translateY(-1px) scale(1.08)}
-.itb-dot{position:absolute;top:-4px;right:-8px;min-width:14px;height:14px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1}
+.itb-btn.active .itb-ic{background:var(--sage-bg);transform:translateY(-1px) scale(1.04)}
+.itb-dot{position:absolute;top:-3px;right:-9px;min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:8.5px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1;border:1.5px solid var(--paper2)}
 .itb-dot.show{display:flex}
 
 /* Sidebar footer: Benutzer + Abmelden */
@@ -656,7 +658,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
   }
   .sidebar.show{transform:translateY(0)}
   .sb-brand{display:none}
-  .scalebar{display:none}
+  .scalebar-mehr-hint{
+    display:block;padding:18px 20px 4px;font-family:'JetBrains Mono',monospace;
+    font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  }
+  .scale-tick.tick-primary{display:none !important}
   .ic-btn{min-width:40px;min-height:40px;font-size:15px}
   .card-head{flex-wrap:wrap;gap:10px}
   #offline-banner{
@@ -737,15 +743,16 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       </div>
 
       <nav class="scalebar" id="scalebar">
-        <div class="scale-tick active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic">◎</span>Übersicht</div>
-        <div class="scale-tick" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic">◎</span>Übersicht</div>
+        <div class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic">▤</span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
         <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic">◆</span>Lieferant &amp; Schulden</div>
-        <div class="scale-tick" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">◐</span>Kunden</div>
+        <div class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic">◐</span>Kunden</div>
         <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic">◆</span>Lieferantenkunden</div>
-        <div class="scale-tick" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">⚖</span>Preise</div>
+        <div class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic">⚖</span>Preise</div>
         <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic">⚙</span>Einstellungen</div>
         <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic">✚</span>Service</div>
       </nav>
+      <div class="scalebar-mehr-hint" id="scalebar-mehr-hint">Mehr</div>
 
       <div class="sb-footer">
         <div class="tb-user">
@@ -771,11 +778,9 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <nav class="ios-tabbar" id="ios-tabbar">
         <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic">◎</span><span class="itb-lab">Übersicht</span></button>
         <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic">▤<span class="itb-dot" id="itb-dot-bestellungen"></span></span><span class="itb-lab">Bestellungen</span></button>
-        <button class="itb-btn" id="itb-lieferant" style="display:none" data-page="lieferant" onclick="nav('lieferant')"><span class="itb-ic">◆</span><span class="itb-lab">Lieferant</span></button>
         <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic">◐</span><span class="itb-lab">Kunden</span></button>
-        <button class="itb-btn" id="itb-lieferantenkunden" style="display:none" data-page="lieferantenkunden" onclick="nav('lieferantenkunden')"><span class="itb-ic">◆</span><span class="itb-lab">L.-Kunden</span></button>
         <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic">⚖</span><span class="itb-lab">Preise</span></button>
-        <button class="itb-btn" data-page="einstellungen" onclick="nav('einstellungen')"><span class="itb-ic">⚙</span><span class="itb-lab">Mehr</span></button>
+        <button class="itb-btn" id="itb-mehr" onclick="openSidebar()"><span class="itb-ic">☰</span><span class="itb-lab">Mehr</span></button>
       </nav>
 
       <div class="main">
@@ -1411,7 +1416,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.2.0';
+const CURRENT_UI_VERSION = '4.3.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1427,6 +1432,10 @@ const WHATS_NEW = {
   '4.2.0': [
     'Neu: Geschmäcker (Pods, Einweg Vape), Farben (Vapes) und Marken (Schupftabak, Snus, Zigaretten) mit eigenem Preis — verwaltbar unter "Preise", beim Bestellen einfach auswählen.',
     'Bestellungen beim Lieferanten laufen jetzt über ein Bestell-Formular ("＋ Neue Bestellung") — genau wie bei normalen Bestellungen.'
+  ],
+  '4.3.0': [
+    'Menüleiste am Handy aufgeräumt: nur noch 5 klare Buttons (Übersicht, Bestellungen, Kunden, Preise, Mehr) statt bis zu 7 eng gequetschten.',
+    '"Mehr" öffnet jetzt eine übersichtliche Liste mit Lieferant & Schulden, Lieferantenkunden, Einstellungen und Service.'
   ]
 };
 function checkWhatsNew(){
@@ -1685,7 +1694,12 @@ function nav(id){
   document.querySelectorAll('.scale-tick').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.scale-tick')[NAV_IDS.indexOf(id)]?.classList.add('active');
-  document.querySelectorAll('.itb-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
+  // Nur Übersicht/Bestellungen/Kunden/Preise haben ein eigenes Icon in der mobilen Menüleiste;
+  // alle anderen Seiten (Lieferant, Lieferantenkunden, Einstellungen, Service) laufen über den
+  // "Mehr"-Button, der stattdessen als aktiv markiert wird.
+  const primaryTabPages=['dashboard','bestellungen','kunden','preise'];
+  document.querySelectorAll('.itb-btn[data-page]').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
+  document.getElementById('itb-mehr')?.classList.toggle('active', !primaryTabPages.includes(id));
   if(id==='einstellungen'){ renderSettings(); loadTrash(); }
   if(id==='service') renderService();
   if(id==='lieferant') renderLieferantSeite();
@@ -1714,23 +1728,24 @@ function applyRoleUI(){
   document.querySelectorAll('.scale-tick').forEach((el,i)=>{
     el.style.display = allowed.includes(NAV_IDS[i]) ? 'flex' : 'none';
   });
-  document.querySelectorAll('.itb-btn').forEach(b=>{
+  document.querySelectorAll('.itb-btn[data-page]').forEach(b=>{
     b.style.display = allowed.includes(b.dataset.page) ? '' : 'none';
   });
   // "Beim Lieferanten" bleibt auch ohne verknüpften Lieferanten sichtbar, weil die Seite
   // jetzt zusätzlich die von Lieferant-unabhängigen "Sonstigen Schulden" enthält.
+  // Lieferant & Lieferantenkunden haben in der mobilen Menüleiste kein eigenes Icon mehr
+  // (die ist jetzt bewusst auf 5 klare Buttons reduziert) — beide sind stattdessen über den
+  // "Mehr"-Button (öffnet die Seitenleiste) erreichbar, dort per Sichtbarkeit wie gehabt.
   const lTick=document.getElementById('nav-lieferant-tick');
   if(lTick) lTick.style.display = allowed.includes('lieferant') ? 'flex' : 'none';
-  const lTab=document.getElementById('itb-lieferant');
-  if(lTab) lTab.style.display = allowed.includes('lieferant') ? '' : 'none';
   const isSpecial = role==='special';
   const lkTick=document.getElementById('nav-lieferantenkunden-tick');
   if(lkTick) lkTick.style.display = (allowed.includes('lieferantenkunden') && isSpecial) ? 'flex' : 'none';
-  const lkTab=document.getElementById('itb-lieferantenkunden');
-  if(lkTab) lkTab.style.display = (allowed.includes('lieferantenkunden') && isSpecial) ? '' : 'none';
   const tabbar=document.getElementById('ios-tabbar');
   const showTabbar = allowed.length>1;
   if(tabbar) tabbar.style.display = showTabbar ? '' : 'none';
+  const mehrTab=document.getElementById('itb-mehr');
+  if(mehrTab) mehrTab.style.display = showTabbar ? '' : 'none';
   document.querySelector('.content-area')?.classList.toggle('no-tabbar', !showTabbar);
 }
 

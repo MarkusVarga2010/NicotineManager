@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '5.4.0'; // Neu: Geschmäcker (Pods/Einweg Vape), Farben (Vapes) & Marken (Schupftabak/Snus/Zigaretten) mit eigenem Preis, verwaltet unter "Preise"; Bestellungen beim Lieferanten laufen jetzt über ein Bestell-Formular wie bei normalen Bestellungen
+const APP_VERSION = '5.5.0'; // Neu: Mobile Menüleiste aufgeräumt — nur noch 5 klare Buttons (Übersicht/Bestellungen/Kunden/Preise/Mehr), Rest (Lieferant, Lieferantenkunden, Einstellungen, Service) über "Mehr"-Liste erreichbar
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 
 const ASSETS = [
