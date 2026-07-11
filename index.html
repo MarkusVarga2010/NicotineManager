@@ -98,6 +98,10 @@ html{color-scheme:dark}
 html[data-mode="light"]{color-scheme:light}
 body{
   background:var(--paper);
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -8%, color-mix(in srgb, var(--sage) 10%, transparent), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, color-mix(in srgb, var(--accent2) 8%, transparent), transparent 60%);
+  background-attachment:fixed;
   color:var(--ink);
   font-family:'Manrope',system-ui,sans-serif;
   font-size:14px;
@@ -111,7 +115,7 @@ body,.card,.kcard,.stat-cell,.modal,.sidebar,.mobile-topbar,.ios-tabbar,.tab-gro
 button,.scale-tick,.ic-btn,input[type="checkbox"]+.tt{touch-action:manipulation}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg, var(--sage), var(--accent2));border-radius:99px;opacity:.7}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
 ::selection{background:var(--sage-bg);color:var(--sage-deep)}
 
@@ -154,9 +158,15 @@ button{font-family:inherit;cursor:pointer}
     radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--sage) 30%, transparent), transparent 42%),
     radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 45%),
     radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent3) 18%, transparent), transparent 55%);
-  background-position:center;
+  background-position:center;background-size:140% 140%;
+  animation:auroraDrift 18s ease-in-out infinite alternate;
   padding:20px;
 }
+@keyframes auroraDrift{
+  from{background-position:0% 0%, 100% 0%, 50% 100%}
+  to{background-position:8% 12%, 92% 20%, 46% 92%}
+}
+@media(prefers-reduced-motion:reduce){#login-screen{animation:none}}
 .login-wrap{width:100%;max-width:400px}
 .login-logo{
   width:64px;height:64px;margin:0 auto 20px;position:relative;
@@ -177,7 +187,8 @@ button{font-family:inherit;cursor:pointer}
 .login-divider{display:flex;align-items:center;gap:12px;margin:0 0 22px;color:var(--sage);font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
 .login-divider span{flex:1;height:1px;background:var(--line2)}
 .login-card{
-  background:var(--paper2);
+  background:color-mix(in srgb, var(--paper2) 78%, transparent);
+  backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
   border:1px solid var(--line2);
   border-radius:var(--r-lg);
   padding:34px 28px 30px;
@@ -230,8 +241,14 @@ button{font-family:inherit;cursor:pointer}
 
 /* Sidebar */
 .sidebar{
-  width:256px;flex-shrink:0;background:var(--paper2);border-right:1px solid var(--line2);
+  width:256px;flex-shrink:0;background:color-mix(in srgb, var(--paper2) 88%, transparent);
+  backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border-right:1px solid var(--line2);position:relative;
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:50;
+}
+.sidebar::after{
+  content:'';position:absolute;top:0;right:-1px;bottom:0;width:1px;
+  background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--sage) 45%, transparent) 35%, color-mix(in srgb, var(--accent2) 45%, transparent) 70%, transparent);
 }
 .sb-brand{
   display:flex;align-items:center;gap:12px;padding:22px 22px 20px;border-bottom:1px solid var(--line2);
@@ -241,7 +258,7 @@ button{font-family:inherit;cursor:pointer}
 }
 .tb-mark svg{width:100%;height:100%;display:block}
 .tb-name{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;letter-spacing:-.01em;line-height:1.2}
-.tb-name span{color:var(--sage-deep)}
+.tb-name span{background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--sage-deep)}
 .sb-brand .sub{font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;margin-top:2px;text-transform:uppercase}
 
 /* Sidebar navigation (ehem. „scalebar") — Zeilen wie ein Register, aktive Zeile mit Strich links */
@@ -279,7 +296,7 @@ button{font-family:inherit;cursor:pointer}
 .itb-ic{font-size:22px;line-height:1;transition:transform .15s ease;position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px}
 .itb-lab{font-size:10.5px;font-weight:600;letter-spacing:.01em}
 .itb-btn.active{color:var(--sage-deep)}
-.itb-btn.active .itb-ic{background:var(--sage-bg)}
+.itb-btn.active .itb-ic{background:var(--grad-brand);color:#fff}
 .itb-dot{position:absolute;top:-3px;right:-9px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--rust);color:#fff;font-size:8.5px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1;border:1.5px solid var(--paper2)}
 .itb-dot.show{display:flex}
 
@@ -357,12 +374,14 @@ button{font-family:inherit;cursor:pointer}
 .status-btn.active-offen{background:var(--rust-bg);border-color:var(--rust);color:var(--rust)}
 .status-btn.active-bezahlt{background:var(--success-bg);border-color:var(--success);color:var(--success-deep)}
 .tab-group{
-  display:inline-flex;flex-wrap:wrap;gap:3px;background:var(--paper2);border:1px solid var(--line2);
-  border-radius:var(--r-lg);padding:4px;
+  display:inline-flex;flex-wrap:wrap;gap:3px;background:color-mix(in srgb, var(--paper2) 85%, transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--line2);
+  border-radius:99px;padding:4px;
 }
 .tab-btn{
   background:transparent;border:none;color:var(--ink-soft);
-  padding:9px 18px;border-radius:var(--r);font-size:12px;font-weight:600;
+  padding:9px 18px;border-radius:99px;font-size:12px;font-weight:600;
   display:inline-flex;align-items:center;gap:8px;transition:all .15s ease;
 }
 .tab-btn:hover{color:var(--ink)}
@@ -386,8 +405,8 @@ button{font-family:inherit;cursor:pointer}
 .dose-vals{display:flex;gap:18px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px}
 .dose-vals span{font-weight:700;display:flex;align-items:center;gap:6px}
 .dose-vals span::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
-.dose-track{position:relative;height:14px;background:var(--paper3);border-radius:99px;overflow:hidden;border:1px solid var(--line2)}
-.dose-fill-seg{position:absolute;top:0;bottom:0;transition:width .5s ease,left .5s ease}
+.dose-track{position:relative;height:14px;background:var(--paper3);border-radius:99px;overflow:hidden;border:1px solid var(--line2);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.dose-fill-seg{position:absolute;top:0;bottom:0;transition:width .5s ease,left .5s ease;box-shadow:0 0 12px -1px currentColor}
 .dose-ticks{display:flex;justify-content:space-between;margin-top:6px}
 .dose-ticks span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint)}
 
@@ -417,8 +436,9 @@ button{font-family:inherit;cursor:pointer}
 }
 .card-head{
   display:flex;align-items:center;justify-content:space-between;padding:15px 20px;
-  border-bottom:1px solid var(--line);background:var(--paper3);
+  border-bottom:1px solid var(--line);background:var(--paper3);position:relative;
 }
+.card-head::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad-brand);opacity:.55}
 .card-head h3{font-size:14px;font-weight:600;font-family:'Manrope',sans-serif;letter-spacing:0}
 .badge{
   font-size:9px;font-weight:700;padding:4px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace;
@@ -460,7 +480,8 @@ th{
 td{padding:14px 20px;font-size:13px;border-bottom:1px solid var(--line)}
 tbody tr:last-child td{border-bottom:none}
 tbody tr{transition:background .12s}
-tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
+tbody tr{box-shadow:inset 3px 0 0 transparent;transition:background .12s,box-shadow .12s}
+tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box-shadow:inset 3px 0 0 var(--sage)}
 .ec{text-align:center;padding:48px 20px;color:var(--ink-faint)}
 .ec-ic{font-size:30px;margin-bottom:10px;opacity:.5}
 .ec-t{font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:3px}
@@ -557,9 +578,10 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
 /* ════════════════════════════════════════════════════════
    MODALS
    ════════════════════════════════════════════════════════ */
-.modal-bg{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:60;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease,background .2s ease}
+.modal-bg{display:flex;position:fixed;inset:0;background:rgba(6,7,14,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);z-index:60;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease,background .2s ease,backdrop-filter .2s ease}
+.modal-bg.show{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .modal-bg.show{opacity:1;pointer-events:auto;background:rgba(0,0,0,.7)}
-.modal{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px -12px rgba(0,0,0,.6);transform:scale(.94) translateY(8px);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.modal{background:color-mix(in srgb, var(--paper2) 96%, transparent);border:1px solid var(--line2);border-radius:var(--r-lg);width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:0 30px 70px -16px rgba(0,0,0,.65), 0 0 0 1px color-mix(in srgb, var(--sage) 12%, transparent);transform:scale(.94) translateY(8px);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
 .modal-bg.show .modal{transform:scale(1) translateY(0)}
 .modal.wide{max-width:600px}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line2)}
@@ -586,10 +608,12 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
    ════════════════════════════════════════════════════════ */
 #toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--paper3);border:1px solid var(--line2);color:var(--ink);padding:12px 18px;border-radius:var(--r);
+  background:color-mix(in srgb, var(--paper3) 90%, transparent);
+  backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);
+  border:1px solid var(--line2);color:var(--ink);padding:12px 18px;border-radius:99px;
   font-size:12px;font-weight:600;display:flex;align-items:center;gap:9px;z-index:80;
   opacity:0;pointer-events:none;transition:all .25s ease;font-family:'Manrope',sans-serif;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  box-shadow:0 12px 30px -8px rgba(0,0,0,.5), 0 0 0 1px color-mix(in srgb, var(--sage) 15%, transparent);
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 
@@ -819,7 +843,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
     </div>
     <div class="login-label">Verwaltungssystem</div>
     <div class="login-brand">
-      <h1>Nicotine<span style="color:var(--sage-deep);-webkit-text-fill-color:var(--sage-deep)">Manager</span></h1>
+      <h1>Nicotine<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Manager</span></h1>
       <div class="sub">Bestand · Bestellungen · Dosierung</div>
     </div>
     <div class="login-divider"><span></span><i style="font-style:normal">▤ ZUGANG</i><span></span></div>
@@ -877,7 +901,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent)}
       <div class="mobile-topbar">
         <div style="display:flex;align-items:center;gap:9px">
           <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C6FF5"/><stop offset="55%" stop-color="#5EA8FF"/><stop offset="100%" stop-color="#2DD4BF"/></linearGradient></defs><rect width="40" height="40" rx="13" fill="url(#tbg2)"/><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="#fff"/><circle cx="30.5" cy="9.5" r="3" fill="#fff"/></svg></div>
-          <div class="tb-name" style="font-size:15px">Nicotine<span style="color:var(--sage-deep)">Manager</span></div>
+          <div class="tb-name" style="font-size:15px">Nicotine<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Manager</span></div>
         </div>
         <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer">A</button>
       </div>
