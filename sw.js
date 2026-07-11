@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '9.0.0'; // Komplett neues Design: neue Farbpalette (dunkler „Ledger/Manifest"-Look statt warmem Onlineshop-Grün), neue Schriften (Space Grotesk / Work Sans / IBM Plex Mono), Status-Badges jetzt im Stempel-Stil, eckigere/flachere Karten & Buttons statt runder Pillen. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
+const APP_VERSION = '10.0.0'; // Riesiges Redesign: komplett neue "Aurora"-Farbpalette (tiefes Indigo-Schwarz statt Ledger-Braun, Violett/Blau/Türkis-Verlauf als neue Markenfarbe), neue Schriften (Sora / Manrope / JetBrains Mono), neues Logo (Verlaufs-Badge mit "N"-Monogramm, überall aktualisiert inkl. Favicon), durchgehend abgerundete Ecken & weiche Schatten statt flacher/eckiger "Ledger"-Optik, moderne Pill-Badges statt gestempelter/rotierter Marken, neuer Verlaufs-Look für Buttons & aktive Navigation, neue Standard-Akzentfarbe "Aurora" im Farbschema-Wähler. Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
