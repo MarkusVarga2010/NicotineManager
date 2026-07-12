@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '11.0.0'; // Strukturelles Update: eigenes SVG-Icon-Set ersetzt die Unicode-Symbole (◎ ▤ ◐ ⚖ ◆ ⚙ ✚ u.a.) in Sidebar, mobiler Tabbar, Empty-States, Tabs, Einstellungen und Login — currentColor-basiert, fügt sich in alle bestehenden Gradient-/Active-Farben ein. Dashboard-Stat-Leiste wurde zu einem Bento-Grid umgebaut (Offene Schulden & Gesamtgewinn als große Kacheln, Bestellungen/Schuldner/Kunden/Eigene-Schulden als kleinere Kacheln, responsive bis 1-spaltig). Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik überarbeitet.
+const APP_VERSION = '11.1.0'; // Lagerbestand pro Produkt sichtbar (Preise-Seite, berechnet aus angekommenen Lieferanten-Bestellungen minus ausgelieferten Verkäufen — rein clientseitig, keine neue Tabelle nötig) + mobiles Hamburger-Menü oben links in der Topbar (öffnet dieselbe Seitenleiste wie bisher der Avatar-Button). Alle Tabellen, Spalten, IDs und die komplette Geschäftslogik sind unverändert — es wurde ausschließlich die Optik/Anzeige erweitert.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
