@@ -1905,7 +1905,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.1.0';
+const CURRENT_UI_VERSION = '8.2.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1967,6 +1967,9 @@ const WHATS_NEW = {
   '8.1.0': [
     'Lagerbestand vereinfacht: die berechnete Zugang/Abgang-Spalte ist weg — es zählt jetzt nur noch, was du selbst als tatsächlich vorhanden einträgst.',
     '"Sonstige Schulden" (unabhängig vom Lieferanten) im neuen Look: übersichtliche Zeilen statt Tabelle, bezahlte Einträge deutlich abgesetzt — die Funktion selbst ist unverändert.'
+  ],
+  '8.2.0': [
+    'Fehler behoben: der Abholcode-QR-Scanner erkannte auf manchen Handys (v.a. iPhone) den Code nicht, obwohl das Kamerabild da war — lag an der zu hoch aufgelösten Kamera. Läuft jetzt zuverlässig.'
   ]
 };
 function checkWhatsNew(){
@@ -3654,8 +3657,16 @@ async function appendNotiz(id, text){
 // Kamera-Zugriff im Browser + jsQR: schneller, weniger Vertipper als Abtippen. Sobald ein
 // gültiger 4-stelliger Code erkannt wird, wird das Eingabefeld automatisch befüllt und
 // die Bestätigung ausgelöst.
+// Wichtig für iPhone/Safari: ohne feste Auflösung fordert die Kamera oft die volle native
+// Auflösung an (mehrere Megapixel) — das macht jedes einzelne Bild beim Scannen so groß,
+// dass die Bilderkennung auf dem Handy kaum hinterherkommt und der Code faktisch nie erkannt
+// wird, obwohl das Kamerabild ganz normal zu sehen ist. Deshalb wird hier bewusst eine
+// moderate Auflösung angefordert (reicht für einen kleinen Code locker) und der Canvas-
+// Kontext einmalig mit willReadFrequently angelegt (von Safari selbst für wiederholtes
+// Auslesen empfohlen), statt bei jedem einzelnen Bild neu.
 let _acScanStream=null;
 let _acScanRAF=null;
+let _acScanCtx=null;
 async function toggleAbholcodeScanner(){
   const wrap=document.getElementById('ac-scan-video-wrap');
   if(wrap.classList.contains('show')){ stopAbholcodeScanner(); return; }
@@ -3664,7 +3675,9 @@ async function toggleAbholcodeScanner(){
     return;
   }
   try{
-    _acScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } });
+    _acScanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:{ideal:'environment'}, width:{ideal:960}, height:{ideal:720} }
+    });
   }catch(e){
     showToast('Kamera-Zugriff nicht möglich oder verweigert.','⚠');
     return;
@@ -3674,11 +3687,14 @@ async function toggleAbholcodeScanner(){
   await video.play();
   wrap.classList.add('show');
   document.getElementById('ac-scan-toggle-btn').textContent='✕ Scanner schließen';
+  const canvas=document.getElementById('ac-scan-canvas');
+  _acScanCtx=canvas.getContext('2d', { willReadFrequently:true });
   _acScanLoop();
 }
 function stopAbholcodeScanner(){
   if(_acScanRAF) cancelAnimationFrame(_acScanRAF);
   _acScanRAF=null;
+  _acScanCtx=null;
   if(_acScanStream){ _acScanStream.getTracks().forEach(t=>t.stop()); _acScanStream=null; }
   document.getElementById('ac-scan-video-wrap')?.classList.remove('show');
   const btn=document.getElementById('ac-scan-toggle-btn');
@@ -3687,15 +3703,15 @@ function stopAbholcodeScanner(){
 function _acScanLoop(){
   const video=document.getElementById('ac-scan-video');
   const canvas=document.getElementById('ac-scan-canvas');
-  if(!video || video.readyState!==video.HAVE_ENOUGH_DATA || !window.jsQR){
+  if(!video || !canvas || !_acScanCtx || video.readyState!==video.HAVE_ENOUGH_DATA || !window.jsQR){
     _acScanRAF=requestAnimationFrame(_acScanLoop);
     return;
   }
-  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-  const ctx=canvas.getContext('2d');
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
-  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-  const result=jsQR(img.data, img.width, img.height);
+  if(canvas.width!==video.videoWidth) canvas.width=video.videoWidth;
+  if(canvas.height!==video.videoHeight) canvas.height=video.videoHeight;
+  _acScanCtx.drawImage(video,0,0,canvas.width,canvas.height);
+  const img=_acScanCtx.getImageData(0,0,canvas.width,canvas.height);
+  const result=jsQR(img.data, img.width, img.height, { inversionAttempts:'attemptBoth' });
   if(result && result.data){
     const code=result.data.trim().toUpperCase();
     if(code.length>=4){

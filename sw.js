@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.1.0'; // Lagerbestand vereinfacht: nur noch manuelle Eintragung des tatsächlichen Bestands, keine berechnete Zugang/Abgang-Spalte mehr. "Sonstige Schulden" (unabhängig vom Lieferanten) im neuen Zeilen-Look statt Tabelle — Funktion unverändert.
+const APP_VERSION = '13.2.0'; // Bugfix: QR-Scanner beim Abholcode erkannte auf manchen Handys (v.a. iPhone/Safari) den Code nicht, weil die Kamera ohne Auflösungs-Begrenzung angefordert wurde — jedes Bild war dadurch zu groß/langsam für die Erkennung. Jetzt mit moderater Auflösung, wiederverwendetem Canvas-Kontext (willReadFrequently) und robusterer Erkennung (attemptBoth).
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
