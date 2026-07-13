@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.1.0'; // Feinschliff-Update: Escape-Taste schließt jedes offene Fenster/Bild, Enter legt im "Neuer Kunde"-Formular direkt an, und Kunde/Bestellung/Lieferanten-Bestellung/Variante/Benutzer werden bei Doppelklick oder langsamer Verbindung nicht mehr versehentlich doppelt angelegt.
+const APP_VERSION = '13.1.0'; // Lagerbestand vereinfacht: nur noch manuelle Eintragung des tatsächlichen Bestands, keine berechnete Zugang/Abgang-Spalte mehr. "Sonstige Schulden" (unabhängig vom Lieferanten) im neuen Zeilen-Look statt Tabelle — Funktion unverändert.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
