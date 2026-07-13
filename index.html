@@ -21,6 +21,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <style>
@@ -290,28 +292,6 @@ button{font-family:inherit;cursor:pointer}
 .scale-tick.active .tk-ic{opacity:1}
 .tk-dot{margin-left:auto;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--rust);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1}
 .tk-dot.show{display:flex}
-.scalebar-mehr-hint{display:none}
-
-.ios-tabbar{
-  display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
-  background:color-mix(in srgb, var(--paper2) 95%, transparent);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid var(--line2);
-  padding:8px 6px calc(6px + env(safe-area-inset-bottom));
-  gap:2px;
-}
-.itb-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  background:none;border:none;color:var(--ink-faint);padding:7px 2px;border-radius:6px;
-  font-family:'Manrope',sans-serif;transition:color .15s ease,background .15s ease,transform .12s ease;-webkit-tap-highlight-color:transparent;
-}
-.itb-btn:active{transform:scale(.92)}
-.itb-ic{font-size:22px;line-height:1;transition:transform .15s ease;position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px}
-.itb-lab{font-size:10.5px;font-weight:600;letter-spacing:.01em}
-.itb-btn.active{color:var(--sage-deep)}
-.itb-btn.active .itb-ic{background:var(--grad-brand);color:#fff}
-.itb-dot{position:absolute;top:-3px;right:-9px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--rust);color:#fff;font-size:8.5px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1;border:1.5px solid var(--paper2)}
-.itb-dot.show{display:flex}
 
 /* Sidebar footer: Benutzer + Abmelden */
 .sb-footer{border-top:1px solid var(--line2);padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
@@ -476,6 +456,39 @@ button{font-family:inherit;cursor:pointer}
   background:var(--sage-bg);color:var(--sage);border-radius:99px;border:1px solid currentColor;vertical-align:middle;
   font-family:'JetBrains Mono',monospace;
 }
+.abholcode-chip.expired{background:var(--rust-bg);color:var(--rust)}
+/* Warte-Badge: "wartet seit X Tagen" bei alten unbezahlten/unabgeholten Bestellungen mit Code */
+.warte-badge{
+  display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:2px 8px 2px 7px;font-size:10px;font-weight:700;
+  border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.03em;border:none;cursor:pointer;
+  background:color-mix(in srgb, var(--rust) 16%, var(--paper2));color:var(--rust);vertical-align:middle;transition:filter .15s;
+}
+.warte-badge:hover{filter:brightness(1.15)}
+.warte-badge .wb-send{opacity:.85}
+/* Status-Timeline im Bestell-Detail */
+.od-timeline{display:flex;align-items:flex-start;gap:0;margin:4px 0 18px}
+.od-tl-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;min-width:0}
+.od-tl-dot{width:20px;height:20px;border-radius:50%;background:var(--paper3);border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-faint);flex-shrink:0;z-index:1}
+.od-tl-step.done .od-tl-dot{background:var(--grad-brand);border-color:transparent;color:#fff}
+.od-tl-step.current .od-tl-dot{border-color:var(--sage);color:var(--sage)}
+.od-tl-line{position:absolute;top:9px;left:-50%;width:100%;height:2px;background:var(--line2);z-index:0}
+.od-tl-step:first-child .od-tl-line{display:none}
+.od-tl-step.done .od-tl-line{background:var(--sage)}
+.od-tl-lab{font-size:9.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.od-tl-step.done .od-tl-lab,.od-tl-step.current .od-tl-lab{color:var(--ink-soft)}
+.od-tl-sub{font-size:10px;color:var(--ink-faint);margin-top:2px}
+/* QR-Code Anzeige/Scan */
+.abholcode-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px}
+.abholcode-qr-wrap canvas,.abholcode-qr-wrap img{border-radius:var(--r);background:#fff;padding:8px}
+.ac-scan-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.ac-scan-video-wrap{position:relative;border-radius:var(--r);overflow:hidden;background:#000;display:none}
+.ac-scan-video-wrap.show{display:block}
+.ac-scan-video-wrap video{width:100%;display:block;max-height:260px;object-fit:cover}
+.ac-scan-frame{position:absolute;inset:14%;border:2px solid var(--accent2);border-radius:var(--r);pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.ac-lockout{background:var(--rust-bg);border:1px solid var(--rust);color:var(--rust);border-radius:var(--r);padding:10px 12px;font-size:12px;margin-top:10px;text-align:center}
+/* Sammel-Abholung */
+.batch-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:var(--r);margin-bottom:8px}
+.batch-item .bi-main{font-size:12px;color:var(--ink-soft)}
 .b-lieferant{background:var(--lieferant-bg);color:var(--lieferant-deep)}
 .b-kunde{background:var(--kunde-bg);color:var(--kunde-deep)}
 .b-admin{background:var(--gold-bg);color:var(--gold)}
@@ -780,9 +793,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 /* < 900px: Sidebar wird zum kompakten Konto-Sheet (Navigation übernimmt die Tabbar unten) */
 @media(max-width:900px){
   .mobile-topbar{display:flex}
-  .ios-tabbar{display:flex}
-  .main{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
-  .content-area.no-tabbar .main{padding-bottom:24px}
+  .main{padding-bottom:24px}
   .sidebar{
     position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;height:auto;
     max-height:60vh;transform:translateY(100%);
@@ -935,6 +946,15 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   </defs>
 </svg>
 
+<!-- DIREKTLINK-ANSICHT: schreibgeschützte, große Code-Anzeige zum Selbst-Vorzeigen bei Abholung
+     (öffnet sich über ?code=XXXX, ganz ohne Login — der Code steckt direkt im Link, es wird
+     nichts aus der Datenbank nachgeladen). -->
+<div id="code-view-screen" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;flex-direction:column;padding:24px;text-align:center;background:var(--paper)">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.16em;margin-bottom:18px">Dein Abholcode</div>
+  <div id="cv-code" class="mono" style="font-size:64px;font-weight:800;letter-spacing:.16em;color:var(--ink);background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);padding:24px 36px;margin-bottom:18px"></div>
+  <div style="color:var(--ink-soft);font-size:13px;max-width:320px">Zeig diesen Code bei der Abholung vor.</div>
+</div>
+
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-wrap">
@@ -1000,11 +1020,10 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span>Kunden</div>
         <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
         <div class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
-        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
-        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
+        <div class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span>Lagerbestand</div>
+        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
+        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
       </nav>
-      <div class="scalebar-mehr-hint" id="scalebar-mehr-hint">Mehr</div>
-
       <div class="sb-footer">
         <div class="tb-user">
           <div class="tb-av" id="tb-av">A</div>
@@ -1026,14 +1045,6 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         </div>
         <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer">A</button>
       </div>
-
-      <nav class="ios-tabbar" id="ios-tabbar">
-        <button class="itb-btn active" data-page="dashboard" onclick="nav('dashboard')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span><span class="itb-lab">Übersicht</span></button>
-        <button class="itb-btn" data-page="bestellungen" onclick="nav('bestellungen')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg><span class="itb-dot" id="itb-dot-bestellungen"></span></span><span class="itb-lab">Bestellungen</span></button>
-        <button class="itb-btn" data-page="kunden" onclick="nav('kunden')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span><span class="itb-lab">Kunden</span></button>
-        <button class="itb-btn" data-page="preise" onclick="nav('preise')"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span><span class="itb-lab">Preise</span></button>
-        <button class="itb-btn" id="itb-mehr" onclick="openSidebar()"><span class="itb-ic"><svg class="svg-ic"><use href="#ic-menu"/></svg></span><span class="itb-lab">Mehr</span></button>
-      </nav>
 
       <div class="main">
 
@@ -1093,6 +1104,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         </div>
         <div class="dose-track" id="dose-track-wrap"></div>
         <div class="dose-ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></div>
+      </div>
+
+      <div class="card" id="d-pickup-stat-card" style="display:none">
+        <div class="card-head"><h3>⏱ Ø Abholzeit</h3></div>
+        <div class="ps" id="d-pickup-stat-text" style="margin:0 0 4px"></div>
       </div>
 
       <div class="card">
@@ -1261,6 +1277,14 @@ create policy "varianten eigene loeschen"
       <div class="pg" id="price-grid"></div>
       <div class="card"><div class="card-head"><h3>Preisübersicht</h3></div>
         <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Einkauf/Stk</th><th>Verkauf/Stk</th><th>Gewinn/Stk</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- LAGERBESTAND -->
+    <div class="page" id="page-lagerbestand">
+      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Lagerbestand</div><div class="ps">Berechnet aus angekommenen Lieferanten-Bestellungen minus ausgelieferten Verkäufen — pro Produkt</div></div></div>
+      <div class="card">
+        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Zugang</th><th>Abgang</th><th>Auf Lager</th></tr></thead><tbody id="lager-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -1538,15 +1562,20 @@ create policy "varianten eigene loeschen"
           <div class="abholcode-lab">Abholcode</div>
           <div class="abholcode-val mono" id="od-abholcode-val"></div>
           <div style="font-size:11px;color:var(--ink-faint);margin-top:3px" id="od-abholcode-hint"></div>
+          <div class="abholcode-qr-wrap" id="od-abholcode-qr-wrap" style="display:none"><div id="od-abholcode-qr"></div></div>
         </div>
         <div class="abholcode-actions">
           <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleAbholcodeQr()">▦ QR-Code</button>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeLink()">🔗 Link zum Vorzeigen</button>
           <button class="btn btn-ghost btn-sm" id="od-abholcode-regen-btn" onclick="regenerateAbholcode()">↺ Neu erzeugen</button>
         </div>
       </div>
+      <div class="od-timeline" id="od-timeline" style="display:none"></div>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
+      <div class="about-row" id="od-batch-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" id="od-batch-btn" onclick="openBatchPickup()">📋 Alle offenen Bestellungen dieses Kunden</button></div>
       <div class="about-row"><span>Bestellt am</span><span id="od-datum"></span></div>
       <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
       <div class="about-row" id="od-angekommen-row" style="display:none"><span>Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
@@ -1627,10 +1656,38 @@ create policy "varianten eigene loeschen"
       <label class="fl">Abholcode</label>
       <input type="text" id="ac-input" maxlength="4" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center" placeholder="XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()">
       <p id="ac-error" style="display:none;color:var(--rust);font-size:12px;margin-top:8px">Code stimmt nicht überein. Bitte erneut versuchen.</p>
+      <div id="ac-lockout" class="ac-lockout" style="display:none"></div>
+      <div class="ac-scan-wrap">
+        <button class="btn btn-ghost btn-sm" id="ac-scan-toggle-btn" onclick="toggleAbholcodeScanner()" style="width:100%;justify-content:center">📷 QR-Code stattdessen scannen</button>
+        <div class="ac-scan-video-wrap" id="ac-scan-video-wrap">
+          <video id="ac-scan-video" playsinline muted></video>
+          <div class="ac-scan-frame"></div>
+        </div>
+        <canvas id="ac-scan-canvas" style="display:none"></canvas>
+      </div>
+      <div style="margin-top:14px">
+        <label class="fl">Wer holt ab? (optional)</label>
+        <input type="text" id="ac-abholer" placeholder="z.B. Name des Abholers, falls nicht der Kunde selbst" autocomplete="off"/>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('abholcode-confirm')">Abbrechen</button>
-      <button class="btn btn-primary" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; bezahlt markieren</button>
+      <button class="btn btn-primary" id="ac-submit-btn" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; bezahlt markieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAMMEL-ABHOLUNG: alle offenen Bestellungen eines Kunden auf einmal abschließen -->
+<div class="modal-bg" id="modal-batch-pickup">
+  <div class="modal">
+    <div class="modal-head"><h3>Alle offenen Bestellungen</h3><button class="modal-close" onclick="closeModal('batch-pickup')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:12px" id="bp-hint"></p>
+      <div id="bp-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('batch-pickup')">Schließen</button>
+      <button class="btn btn-primary" id="bp-complete-btn" onclick="batchCompleteAll()">✓ Alle auf einmal bezahlt/abgeholt</button>
     </div>
   </div>
 </div>
@@ -1661,6 +1718,21 @@ create policy "varianten eigene loeschen"
 </div>
 
 <script>
+// ══════════════════════════════════════════════
+// DIREKTLINK-ANSICHT (?code=XXXX): zeigt sofort nur den großen Code an, ganz ohne Login/
+// Datenbankzugriff — der Code steckt bereits im Link selbst. Liegt als Vollbild-Overlay
+// über allem anderen; der Rest der App bootet im Hintergrund unverändert weiter (harmlos,
+// da unsichtbar), damit keine Sonderlogik zum Überspringen von Initialisierung nötig ist.
+(function(){
+  const params = new URLSearchParams(location.search);
+  const code = (params.get('code')||'').trim().toUpperCase();
+  if(code){
+    const el=document.getElementById('code-view-screen');
+    el.style.display='flex';
+    document.getElementById('cv-code').textContent = code;
+    document.title = 'Abholcode ' + code;
+  }
+})();
 // ══════════════════════════════════════════════
 // PRODUKTE
 // ══════════════════════════════════════════════
@@ -1731,7 +1803,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '4.7.0';
+const CURRENT_UI_VERSION = '7.0.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1777,6 +1849,12 @@ const WHATS_NEW = {
     'Varianten-Bilder komplett neu gestaltet: „Preise" zeigt Geschmäcker/Marken/Farben jetzt als Produktkarten-Raster wie in einem Onlineshop, mit großem Foto, Name und Preis.',
     'Beim Bestellen wählst du Geschmack/Marke/Farbe jetzt über anklickbare Bildkarten statt eines Dropdowns — die ausgewählte Karte wird farblich hervorgehoben.',
     'Beim Hochladen eines neuen Produktfotos siehst du sofort eine Vorschau, bevor gespeichert wird.'
+  ],
+  '7.0.0': [
+    'Menü läuft jetzt ausschließlich über den Hamburger/die Seitenleiste — keine separate mobile Tableiste mehr. Lagerbestand hat dafür einen eigenen Menüpunkt mit eigener Seite bekommen.',
+    'Neu bei Abholcodes: QR-Code zum Anzeigen und per Kamera Scannen, Teilen über die native Teilen-Funktion deines Geräts, Direktlink zum Selbst-Vorzeigen ohne Login, und eine Status-Timeline im Bestell-Detail.',
+    '"Wartet seit X Tagen"-Hinweis mit direktem Erinnerungs-Button, Sammel-Abholung für mehrere offene Bestellungen eines Kunden auf einmal, optionales "Wer holt ab?"-Feld, sowie eine Abholstatistik im Dashboard.',
+    'Codes werden nach 60 Tagen ohne Abholung automatisch ungültig, und nach 5 falschen Eingaben gibt es jetzt eine echte 30-Sekunden-Sperre statt nur einer Warnung.'
   ]
 };
 function checkWhatsNew(){
@@ -1850,7 +1928,7 @@ function currentRole(){ return M.profile ? M.profile.role : 'user'; }
 function allowedPages(role){
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','einstellungen']; // 'user'/'special'
+  return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','einstellungen']; // 'user'/'special'
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -2027,8 +2105,8 @@ function closeSidebar(){
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
-const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','einstellungen','service'];
+const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
+const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','einstellungen','service'];
 function nav(id){
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
@@ -2036,16 +2114,11 @@ function nav(id){
   document.querySelectorAll('.scale-tick').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.scale-tick')[NAV_IDS.indexOf(id)]?.classList.add('active');
-  // Nur Übersicht/Bestellungen/Kunden/Preise haben ein eigenes Icon in der mobilen Menüleiste;
-  // alle anderen Seiten (Lieferant, Lieferantenkunden, Einstellungen, Service) laufen über den
-  // "Mehr"-Button, der stattdessen als aktiv markiert wird.
-  const primaryTabPages=['dashboard','bestellungen','kunden','preise'];
-  document.querySelectorAll('.itb-btn[data-page]').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
-  document.getElementById('itb-mehr')?.classList.toggle('active', !primaryTabPages.includes(id));
   if(id==='einstellungen'){ renderSettings(); loadTrash(); }
   if(id==='service') renderService();
   if(id==='lieferant') renderLieferantSeite();
   if(id==='lieferantenkunden') renderLieferantenkundenSeite();
+  if(id==='lagerbestand') renderLagerbestand();
   if(id==='bestellungen' || id==='lieferantenkunden') markLkSeen();
   refresh();
 }
@@ -2070,25 +2143,14 @@ function applyRoleUI(){
   document.querySelectorAll('.scale-tick').forEach((el,i)=>{
     el.style.display = allowed.includes(NAV_IDS[i]) ? 'flex' : 'none';
   });
-  document.querySelectorAll('.itb-btn[data-page]').forEach(b=>{
-    b.style.display = allowed.includes(b.dataset.page) ? '' : 'none';
-  });
-  // "Beim Lieferanten" bleibt auch ohne verknüpften Lieferanten sichtbar, weil die Seite
-  // jetzt zusätzlich die von Lieferant-unabhängigen "Sonstigen Schulden" enthält.
-  // Lieferant & Lieferantenkunden haben in der mobilen Menüleiste kein eigenes Icon mehr
-  // (die ist jetzt bewusst auf 5 klare Buttons reduziert) — beide sind stattdessen über den
-  // "Mehr"-Button (öffnet die Seitenleiste) erreichbar, dort per Sichtbarkeit wie gehabt.
+  // Das gesamte Menü läuft jetzt ausschließlich über den Hamburger/die Seitenleiste
+  // (keine separate mobile Tableiste mehr) — Sichtbarkeit einzelner Punkte hängt nur
+  // noch von den Rollenrechten ab.
   const lTick=document.getElementById('nav-lieferant-tick');
   if(lTick) lTick.style.display = allowed.includes('lieferant') ? 'flex' : 'none';
   const isSpecial = role==='special';
   const lkTick=document.getElementById('nav-lieferantenkunden-tick');
   if(lkTick) lkTick.style.display = (allowed.includes('lieferantenkunden') && isSpecial) ? 'flex' : 'none';
-  const tabbar=document.getElementById('ios-tabbar');
-  const showTabbar = allowed.length>1;
-  if(tabbar) tabbar.style.display = showTabbar ? '' : 'none';
-  const mehrTab=document.getElementById('itb-mehr');
-  if(mehrTab) mehrTab.style.display = showTabbar ? '' : 'none';
-  document.querySelector('.content-area')?.classList.toggle('no-tabbar', !showTabbar);
 }
 
 // ══════════════════════════════════════════════
@@ -2103,7 +2165,10 @@ function openModal(id){
     document.getElementById('discount-value').disabled=true;
   }
 }
-function closeModal(id){ document.getElementById('modal-'+id).classList.remove('show'); }
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('show');
+  if(id==='abholcode-confirm') stopAbholcodeScanner();
+}
 
 // Schöner, konsistenter Bestätigungs-Dialog statt des nativen (und auf Handys oft
 // hässlichen/inkonsistenten) confirm(). Wird per await genutzt: 
@@ -2175,7 +2240,7 @@ function applyMode(mode){
 // und Verkaufs-Varianten zwei getrennte Kataloge sind (S.lieferantVarianten vs. S.varianten) ohne
 // feste 1:1-Zuordnung der Varianten-IDs — pro Produkt stimmt der Abgleich dagegen immer, weil
 // "prod" (die Produkt-Kategorie) in beiden Katalogen identisch ist.
-function computeProductStock(prodId){
+function computeProductStockDetail(prodId){
   let zugang=0, abgang=0;
   for(const b of S.bestellungen){
     if(!b.delivered) continue;
@@ -2187,12 +2252,26 @@ function computeProductStock(prodId){
       else if(b.fuerLieferant && b.userId!==currentUserId) abgang+=stk;
     }
   }
-  return zugang-abgang;
+  return {zugang, abgang, net:zugang-abgang};
 }
+function computeProductStock(prodId){ return computeProductStockDetail(prodId).net; }
 function stockBadgeHtml(prodId){
   const n=computeProductStock(prodId);
   const cls = n<=0 ? 'stock-out' : (n<10 ? 'stock-low' : 'stock-ok');
   return `<span class="pc-stock ${cls}" title="Zugang (angekommene Lieferanten-Bestellungen) minus Abgang (ausgelieferte Verkäufe), über alle ${PROD_MAP[prodId]?.variantLabelPlural||'Varianten'} zusammen"><svg class="svg-ic"><use href="#ic-package"/></svg>${n} auf Lager</span>`;
+}
+// Eigene Seite (statt Badge auf der Preise-Seite): Tabelle mit Zugang/Abgang/Bestand pro Produkt.
+function renderLagerbestand(){
+  const tbl=document.getElementById('lager-tbody');
+  if(!tbl) return;
+  tbl.innerHTML=PRODUCTS.map(p=>{
+    const d=computeProductStockDetail(p.id);
+    const cls = d.net<=0 ? 'stock-out' : (d.net<10 ? 'stock-low' : 'stock-ok');
+    return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td>
+      <td class="mono" style="color:var(--success-deep)">+${d.zugang}</td>
+      <td class="mono" style="color:var(--rust)">−${d.abgang}</td>
+      <td><span class="pc-stock ${cls}"><svg class="svg-ic"><use href="#ic-package"/></svg>${d.net} auf Lager</span></td></tr>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -2208,7 +2287,7 @@ function renderPrices(){
     return `
     <div class="pc">
       <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
-      <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}${stockBadgeHtml(p.id)}</div>
+      <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
       <div class="pc-edit" style="gap:8px;margin-top:10px">
         <div style="flex:1"><label class="fl" style="margin-bottom:4px">Einkauf €</label><input type="number" id="pei-${p.id}" value="${einkauf.toFixed(2)}" step="0.01" min="0" inputmode="decimal" oninput="previewProfit('${p.id}')" onchange="savePrice('${p.id}')"/></div>
         <div style="flex:1"><label class="fl" style="margin-bottom:4px">Verkauf €</label><input type="number" id="pi-${p.id}" value="${verkauf.toFixed(2)}" step="0.01" min="0" inputmode="decimal" oninput="previewProfit('${p.id}')" onchange="savePrice('${p.id}')"/></div>
@@ -2254,7 +2333,7 @@ function variantCardHtml(p){
   return `
   <div class="pc">
     <div class="pc-eyebrow">Wirkstoff · ${p.id}</div>
-    <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}${variantenTableMissing?'':stockBadgeHtml(p.id)}</div>
+    <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}</div>
     <div class="ps" style="margin:4px 0 10px">${p.variantLabelPlural} mit jeweils eigenem Preis${variantenTableMissing?'':' und Bild'}.</div>
     ${variantenTableMissing ? `<div class="ps" style="color:var(--rust)">Dafür fehlt in Supabase noch die Tabelle "produkt_varianten" — SQL zum Anlegen siehe Hinweis oben auf dieser Seite.</div>` : `
     <div id="variant-list-${p.id}"></div>
@@ -2938,10 +3017,31 @@ async function addBestellung(){
   showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
 }
 
-// Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Kunde nennt/zeigt ihn bei Abholung zur
-// Bestätigung. Verwechslungsanfällige Zeichen (0/O, 1/I) bewusst ausgeschlossen.
-// existing: Liste aktuell bekannter Codes, gegen die auf Kollision geprüft wird (bei ~1 Mio.
-// möglichen Kombinationen extrem unwahrscheinlich, aber so ganz ausgeschlossen).
+// Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Erzeugung siehe genAbholcode() weiter unten.
+function activeAbholcodes(){
+  return S.bestellungen.map(b=>b.abholcode).filter(Boolean);
+}
+// ── Ablaufdatum für Abholcodes ──────────────────────────────────────────────
+// Ein Code, der ewig gültig bleibt, ist bei sehr alten/vergessenen Bestellungen ein Restrisiko.
+// Nach CODE_EXPIRY_DAYS ohne Abholung gilt der Code als abgelaufen und muss erst über
+// "Neu erzeugen" reaktiviert werden, bevor er wieder zum Bezahlen/Abholen genutzt werden kann.
+const CODE_EXPIRY_DAYS = 60;
+// Zeitpunkt, ab dem der aktuelle Code "läuft": bei Lieferanten-Bestellungen ab Ankunft
+// (dann wird der Code vergeben), sonst ab Bestelldatum (dann wird er direkt vergeben).
+function codeGeneratedAt(b){ return b.fuerLieferant ? b.deliveredAt : b.date; }
+function daysSince(iso){
+  if(!iso) return 0;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+function isCodeExpired(b){
+  if(!b.abholcode) return false;
+  return daysSince(codeGeneratedAt(b)) > CODE_EXPIRY_DAYS;
+}
+// ── Kurzer, gut vorlesbarer Abholcode (4 Zeichen) ───────────────────────────
+// Kunde nennt/zeigt ihn bei Abholung zur Bestätigung. Verwechslungsanfällige Zeichen
+// (0/O, 1/I) bewusst ausgeschlossen. existing: Liste aktuell bekannter Codes, gegen die auf
+// Kollision geprüft wird (bei ~1 Mio. möglichen Kombinationen extrem unwahrscheinlich, aber
+// so ganz ausgeschlossen).
 function genAbholcode(existing=[]){
   const chars='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   const taken=new Set(existing.filter(Boolean));
@@ -2953,39 +3053,109 @@ function genAbholcode(existing=[]){
   } while(taken.has(code) && tries<20);
   return code;
 }
-function activeAbholcodes(){
-  return S.bestellungen.map(b=>b.abholcode).filter(Boolean);
-}
 function copyAbholcode(){
   const val=document.getElementById('od-abholcode-val')?.textContent;
   if(!val) return;
   navigator.clipboard?.writeText(val).then(()=>showToast('Abholcode kopiert.'))
     .catch(()=>showToast('Kopieren nicht möglich.','⚠'));
 }
-// Öffnet WhatsApp mit vorausgefülltem Text, damit der Code schnell an den Kunden/
-// Lieferantenkunden weitergegeben werden kann. Da keine Telefonnummern gespeichert werden,
-// muss der Kontakt manuell ausgewählt werden — WhatsApp fragt danach automatisch.
+// ── Teilen: native Share-API statt fest auf WhatsApp verdrahtet ────────────
+// navigator.share() öffnet das systemeigene Teilen-Menü (Signal, SMS, AirDrop, Mail, WhatsApp,
+// was auch immer installiert ist). Steht die API nicht zur Verfügung (z.B. Desktop-Browser),
+// fällt es auf den bisherigen WhatsApp-Weblink zurück.
+function shareViaBestMethod(text){
+  if(navigator.share){
+    navigator.share({ text }).catch(err=>{
+      if(err && err.name==='AbortError') return; // Nutzer hat Teilen-Menü selbst geschlossen
+      window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+    });
+  } else {
+    window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+  }
+}
 function shareAbholcode(){
   const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
   if(!b || !b.abholcode) return;
   const text = b.fuerLieferant
     ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen.`
     : `Deine Bestellung ist abholbereit! Abholcode: ${b.abholcode} — bitte bei Abholung nennen.`;
-  window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+  shareViaBestMethod(text);
+}
+// ── Direktlink zum Selbst-Vorzeigen ─────────────────────────────────────────
+// Schreibgeschützter Link (?code=XXXX), den man dem Kunden schickt. Öffnet eine simple,
+// große Code-Anzeige (siehe #code-view-screen) — der Kunde muss den Code so nicht erst in
+// einer Nachricht suchen, sondern hat eine Seite, die er bei Abholung einfach aufmacht.
+function codeLinkUrl(code){
+  return location.origin + location.pathname + '?code=' + encodeURIComponent(code);
+}
+function shareAbholcodeLink(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  const url = codeLinkUrl(b.abholcode);
+  const text = `Hier ist dein Abholcode zum Vorzeigen: ${url}`;
+  shareViaBestMethod(text);
+}
+// ── QR-Code zusätzlich zum 4-stelligen Code ─────────────────────────────────
+// Statt den Code vorzulesen/abzutippen, zeigt der Kunde einen QR-Code am Handy, der gescannt
+// werden kann. Der 4-stellige Code bleibt als Fallback erhalten.
+function toggleAbholcodeQr(){
+  const wrap=document.getElementById('od-abholcode-qr-wrap');
+  const showing = wrap.style.display!=='none';
+  if(showing){ wrap.style.display='none'; return; }
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  const target=document.getElementById('od-abholcode-qr');
+  target.innerHTML='';
+  if(window.QRCode){
+    new QRCode(target, { text: b.abholcode, width:160, height:160, colorDark:'#000', colorLight:'#fff' });
+  } else {
+    target.textContent = b.abholcode;
+  }
+  wrap.style.display='flex';
 }
 // Erzeugt einen neuen Code für die aktuell im Detail geöffnete Bestellung, z.B. falls der
-// Kunde den alten Code verloren/nicht mehr zur Hand hat. Der alte Code wird dabei ungültig.
+// Kunde den alten Code verloren/nicht mehr zur Hand hat, oder falls der Code abgelaufen ist.
+// Der alte Code wird dabei ungültig.
 async function regenerateAbholcode(){
   const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
   if(!b) return;
   if(!(await confirmDialog('Der alte Code wird ungültig — gib dem Kunden anschließend den neuen Code durch.', {title:'Neuen Abholcode erzeugen?', confirmText:'Neu erzeugen', danger:false})))return;
   const newCode = genAbholcode(activeAbholcodes());
-  const { error } = await sb.from('bestellungen').update({ abholcode:newCode }).eq('id', b.id);
+  const patch = { abholcode:newCode };
+  // Bei Lieferanten-Bestellungen läuft die Ablaufuhr ab "angekommen" — beim Neu-Erzeugen
+  // (z.B. nach Ablauf) wird dieser Zeitpunkt auf jetzt zurückgesetzt, damit der neue Code
+  // wieder die volle Gültigkeitsdauer hat.
+  if(b.fuerLieferant) patch.angekommen_am = new Date().toISOString();
+  const { error } = await sb.from('bestellungen').update(patch).eq('id', b.id);
   if(error){ showToast('Code konnte nicht erneuert werden.','⚠'); return; }
   b.abholcode=newCode;
+  if(patch.angekommen_am) b.deliveredAt=patch.angekommen_am;
   document.getElementById('od-abholcode-val').textContent=newCode;
-  renderBestellungen();renderLbHistory();
+  document.getElementById('od-abholcode-qr-wrap').style.display='none';
+  renderBestellungen();renderLbHistory();renderDashboard();
   showToast('Neuer Abholcode: '+newCode);
+}
+// ── "wartet seit X Tagen"-Hinweis + Erinnerungs-Button ──────────────────────
+// Zeigt bei alten, unbezahlten/unabgeholten Bestellungen mit Code an, wie lange sie schon
+// warten — hilft, "vergessene" Abholungen nicht zu übersehen. Ein Klick auf den Badge bereitet
+// direkt eine vorausgefüllte Erinnerungs-Nachricht vor (nutzt dieselbe Teilen-Funktion).
+function isWaitingOrder(b){
+  return !!b.abholcode && !isCodeExpired(b) && (b.fuerLieferant ? !b.paid : !b.delivered);
+}
+function warteBadgeHtml(b){
+  if(!isWaitingOrder(b)) return '';
+  const d = daysSince(codeGeneratedAt(b));
+  if(d<3) return '';
+  return `<button type="button" class="warte-badge" title="Wartet seit ${d} Tagen auf Abholung — klicken für Erinnerung" onclick="event.stopPropagation();sendReminder(${b.id})">⏳ seit ${d}T <span class="wb-send">📲</span></button>`;
+}
+function sendReminder(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b || !b.abholcode) return;
+  const url = codeLinkUrl(b.abholcode);
+  const text = b.fuerLieferant
+    ? `Kurze Erinnerung: deine Bestellung wartet noch auf Bezahlung/Abholung. Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen. ${url}`
+    : `Kurze Erinnerung: deine Bestellung wartet noch auf Abholung. Abholcode: ${b.abholcode} — bitte bei Abholung nennen. ${url}`;
+  shareViaBestMethod(text);
 }
 
 // ══════════════════════════════════════════════
@@ -3070,7 +3240,9 @@ function renderLbHistory(){
     // Der Abholcode entsteht erst, sobald der Lieferant die Bestellung als "angekommen" markiert.
     // Er muss dann beim Bezahlen genannt werden — danach wird er hier nicht mehr benötigt.
     const abholcodeCell = (b.abholcode && !b.paid)
-      ? `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>`
+      ? (isCodeExpired(b)
+          ? `<span class="mono abholcode-chip expired" title="Code ist abgelaufen (>${CODE_EXPIRY_DAYS} Tage) — im Bestell-Detail neu erzeugen">abgelaufen</span>`
+          : `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>${warteBadgeHtml(b)}`)
       : '<span style="color:var(--ink-faint)">–</span>';
     return `<tr>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -3206,36 +3378,150 @@ async function setDelivered(id, newVal){
 // landet die Zahlung sicher auf der richtigen Bestellung/Person.
 let _abholcodeConfirmOrderId=null;
 let _abholcodeFailCount=0;
+let _abholcodeLockUntil=0;
+let _abholcodeLockTimer=null;
+const ABHOLCODE_MAX_FAILS = 5;
+const ABHOLCODE_LOCK_SECONDS = 30;
 function confirmPaidWithAbholcode(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b) return;
   if(!b.abholcode){ setPaid(id,true); return; } // kein Code vorhanden (z.B. noch nicht angekommen/abgeholt) -> keine Sperre
+  if(isCodeExpired(b)){
+    showToast('Dieser Abholcode ist abgelaufen — bitte im Bestell-Detail einen neuen erzeugen.','⚠');
+    return;
+  }
   _abholcodeConfirmOrderId=id;
   _abholcodeFailCount=0;
+  _abholcodeLockUntil=0;
   const label = b.fuerLieferant ? 'deinem Lieferantenkunden' : 'deinem Kunden';
   document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.`;
   const input=document.getElementById('ac-input');
-  input.value='';
+  input.value=''; input.disabled=false;
+  document.getElementById('ac-abholer').value='';
   document.getElementById('ac-error').style.display='none';
   document.getElementById('ac-error').textContent='Code stimmt nicht überein. Bitte erneut versuchen.';
+  document.getElementById('ac-lockout').style.display='none';
+  document.getElementById('ac-submit-btn').disabled=false;
   openModal('abholcode-confirm');
   setTimeout(()=>input.focus(),50);
 }
+// ── Echte Sperre statt nur Warnung nach Fehlversuchen ───────────────────────
+// Ab ABHOLCODE_MAX_FAILS Fehlversuchen gibt es einen kurzen Cooldown, statt beliebig oft
+// weiter raten zu können (bei 4 Zeichen aus 32 ist die Trefferchance zwar gering, aber nicht null).
+function _startAbholcodeLockout(){
+  _abholcodeLockUntil = Date.now() + ABHOLCODE_LOCK_SECONDS*1000;
+  document.getElementById('ac-input').disabled=true;
+  document.getElementById('ac-submit-btn').disabled=true;
+  const lockEl=document.getElementById('ac-lockout');
+  lockEl.style.display='block';
+  clearInterval(_abholcodeLockTimer);
+  _abholcodeLockTimer=setInterval(()=>{
+    const remaining=Math.ceil((_abholcodeLockUntil-Date.now())/1000);
+    if(remaining<=0){
+      clearInterval(_abholcodeLockTimer);
+      lockEl.style.display='none';
+      document.getElementById('ac-input').disabled=false;
+      document.getElementById('ac-submit-btn').disabled=false;
+      _abholcodeFailCount=0;
+      document.getElementById('ac-input').focus();
+    } else {
+      lockEl.textContent = `Zu viele Fehlversuche — bitte warte ${remaining}s, bevor du es erneut versuchst.`;
+    }
+  }, 250);
+}
 function _submitAbholcodeConfirm(){
+  if(Date.now() < _abholcodeLockUntil) return; // gesperrt
   const b=S.bestellungen.find(x=>x.id===_abholcodeConfirmOrderId);
   if(!b) return;
   const val=(document.getElementById('ac-input').value||'').trim().toUpperCase();
   if(!val || val!==b.abholcode){
     _abholcodeFailCount++;
     const errEl=document.getElementById('ac-error');
+    if(_abholcodeFailCount>=ABHOLCODE_MAX_FAILS){
+      errEl.style.display='none';
+      _startAbholcodeLockout();
+      return;
+    }
     errEl.textContent = _abholcodeFailCount>=3
       ? 'Code stimmt immer noch nicht überein. Sicher, dass es die richtige Bestellung ist?'
       : 'Code stimmt nicht überein. Bitte erneut versuchen.';
     errEl.style.display='block';
     return;
   }
+  stopAbholcodeScanner();
   closeModal('abholcode-confirm');
+  const abholerName=(document.getElementById('ac-abholer').value||'').trim();
   setPaid(b.id,true);
+  if(abholerName) appendNotiz(b.id, `Abgeholt von: ${abholerName}`);
+}
+// ── "Wer holt ab?" ───────────────────────────────────────────────────────────
+// Optionales Notizfeld beim Abholcode-Dialog, falls nicht der Kunde selbst abholt — landet
+// automatisch in der Bestellnotiz, nützlich für spätere Rückfragen. Nutzt die bereits
+// vorhandene Notiz-Spalte, daher keine neue Tabelle/Spalte nötig.
+async function appendNotiz(id, text){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b) return;
+  const merged = b.notiz ? `${b.notiz} · ${text}` : text;
+  const { error } = await sb.from('bestellungen').update({ notiz:merged }).eq('id', id);
+  if(error) return; // still, nicht kritisch für den Bezahl-Vorgang selbst
+  b.notiz=merged;
+}
+// ── QR-Code scannen statt Code eintippen ────────────────────────────────────
+// Kamera-Zugriff im Browser + jsQR: schneller, weniger Vertipper als Abtippen. Sobald ein
+// gültiger 4-stelliger Code erkannt wird, wird das Eingabefeld automatisch befüllt und
+// die Bestätigung ausgelöst.
+let _acScanStream=null;
+let _acScanRAF=null;
+async function toggleAbholcodeScanner(){
+  const wrap=document.getElementById('ac-scan-video-wrap');
+  if(wrap.classList.contains('show')){ stopAbholcodeScanner(); return; }
+  if(!navigator.mediaDevices?.getUserMedia){
+    showToast('Kamera-Zugriff wird von diesem Browser nicht unterstützt.','⚠');
+    return;
+  }
+  try{
+    _acScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } });
+  }catch(e){
+    showToast('Kamera-Zugriff nicht möglich oder verweigert.','⚠');
+    return;
+  }
+  const video=document.getElementById('ac-scan-video');
+  video.srcObject=_acScanStream;
+  await video.play();
+  wrap.classList.add('show');
+  document.getElementById('ac-scan-toggle-btn').textContent='✕ Scanner schließen';
+  _acScanLoop();
+}
+function stopAbholcodeScanner(){
+  if(_acScanRAF) cancelAnimationFrame(_acScanRAF);
+  _acScanRAF=null;
+  if(_acScanStream){ _acScanStream.getTracks().forEach(t=>t.stop()); _acScanStream=null; }
+  document.getElementById('ac-scan-video-wrap')?.classList.remove('show');
+  const btn=document.getElementById('ac-scan-toggle-btn');
+  if(btn) btn.textContent='📷 QR-Code stattdessen scannen';
+}
+function _acScanLoop(){
+  const video=document.getElementById('ac-scan-video');
+  const canvas=document.getElementById('ac-scan-canvas');
+  if(!video || video.readyState!==video.HAVE_ENOUGH_DATA || !window.jsQR){
+    _acScanRAF=requestAnimationFrame(_acScanLoop);
+    return;
+  }
+  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const result=jsQR(img.data, img.width, img.height);
+  if(result && result.data){
+    const code=result.data.trim().toUpperCase();
+    if(code.length>=4){
+      document.getElementById('ac-input').value=code.slice(0,4);
+      stopAbholcodeScanner();
+      _submitAbholcodeConfirm();
+      return;
+    }
+  }
+  _acScanRAF=requestAnimationFrame(_acScanLoop);
 }
 async function setPaid(id, newPaid){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -3484,7 +3770,11 @@ function renderBestellungen(){
     // Bei Kundenbestellungen ist der Code von Anfang an da und wird bis zur Abholung (delivered)
     // angezeigt. Bei Lieferanten-Bestellungen entsteht der Code erst bei Ankunft (delivered) und
     // wird bis zur Bezahlung angezeigt, da er ja genau dafür gebraucht wird.
-    const abholcodeChip = (b.abholcode && (b.fuerLieferant ? !b.paid : !b.delivered)) ? `<span class="mono abholcode-chip" title="Abholcode">${b.abholcode}</span>` : '';
+    const abholcodeChip = (b.abholcode && (b.fuerLieferant ? !b.paid : !b.delivered))
+      ? (isCodeExpired(b)
+          ? `<span class="mono abholcode-chip expired" title="Code ist abgelaufen (>${CODE_EXPIRY_DAYS} Tage) — im Bestell-Detail neu erzeugen">abgelaufen</span>`
+          : `<span class="mono abholcode-chip" title="Abholcode">${b.abholcode}</span>${warteBadgeHtml(b)}`)
+      : '';
     // Lieferantenkunden-Bestellungen sind fremde Bestellungen (von einem anderen Benutzer
     // aufgegeben) — wie bei fremden Kundenbestellungen kann ich sie nicht löschen, nur
     // ansehen und den Status (bestellt/bezahlt) pflegen.
@@ -3532,6 +3822,17 @@ function renderBestellungen(){
 // DASHBOARD
 // ══════════════════════════════════════════════
 function renderDashboard(){
+  // Abholstatistik: Ø Zeit zwischen Code-Vergabe und Bezahlung/Abholung.
+  const pStats = computePickupStats();
+  const pCard=document.getElementById('d-pickup-stat-card');
+  if(pStats && pCard){
+    pCard.style.display='block';
+    const days = pStats.avgDays;
+    const txt = days<1 ? `${Math.round(days*24)} Std.` : `${days.toFixed(1)} Tage`;
+    document.getElementById('d-pickup-stat-text').textContent = `${txt} im Schnitt zwischen Code-Vergabe und Abholung/Bezahlung (${pStats.count} abgeschlossene Abholungen).`;
+  } else if(pCard){
+    pCard.style.display='none';
+  }
   // "Offene Schulden" = was mir andere schulden: eigene Kundenbestellungen PLUS Bestellungen,
   // die meine Lieferantenkunden (andere Benutzer, die mich als Lieferanten eingetragen haben)
   // bei MIR aufgegeben haben. Meine eigenen Nachbestellungen bei MEINEM Lieferanten
@@ -3869,7 +4170,83 @@ function downloadHistoriePDF(){
 // BESTELLUNG DETAILS
 // ══════════════════════════════════════════════
 let currentDetailOrderId = null;
+// ── Status-Timeline im Bestell-Detail ───────────────────────────────────────
+// Zeigt auf einen Blick, wo eine Bestellung gerade steht, statt nur zweier getrennter Badges.
+function orderTimelineHtml(b){
+  const steps = b.fuerLieferant ? [
+    { lab:'Bestellt',   done:true,        sub:fmtDate(b.date) },
+    { lab:'Unterwegs',  done:!!b.delivered||!!b.paid, sub:'' },
+    { lab:'Angekommen', done:!!b.delivered, sub:b.deliveredAt?fmtDate(b.deliveredAt):'' },
+    { lab:'Bezahlt',    done:!!b.paid,      sub:b.paidAt?fmtDate(b.paidAt):'' },
+  ] : [
+    { lab:'Bestellt', done:true,       sub:fmtDate(b.date) },
+    { lab:'Abgeholt', done:!!b.delivered, sub:b.deliveredAt?fmtDate(b.deliveredAt):'' },
+    { lab:'Bezahlt',  done:!!b.paid,      sub:b.paidAt?fmtDate(b.paidAt):'' },
+  ];
+  const firstOpenIdx = steps.findIndex(s=>!s.done);
+  const html = steps.map((s,i)=>{
+    const cls = s.done ? 'done' : (i===firstOpenIdx ? 'current' : '');
+    return `<div class="od-tl-step ${cls}"><div class="od-tl-line"></div><div class="od-tl-dot">${s.done?'✓':(i+1)}</div><div class="od-tl-lab">${s.lab}</div><div class="od-tl-sub">${s.sub||''}</div></div>`;
+  }).join('');
+  return `<div class="od-timeline" id="od-timeline" style="display:flex">${html}</div>`;
+}
+// ── Sammel-Abholung: alle offenen Bestellungen desselben Kunden ────────────
+// Hat ein Kunde mehrere offene Bestellungen gleichzeitig, müsste er sonst mehrere Codes
+// durchgehen — diese Ansicht erlaubt es, alle auf einmal als bezahlt/abgeholt zu markieren.
+function openPickupsFor(b){
+  return S.bestellungen.filter(x=>{
+    if(x.fuerLieferant!==b.fuerLieferant) return false;
+    if(b.fuerLieferant){ if(x.userId!==b.userId) return false; }
+    else { if(x.kId!==b.kId) return false; }
+    return !(x.delivered && x.paid); // noch nicht ganz abgeschlossen
+  });
+}
+function countOpenPickupsFor(b){ return openPickupsFor(b).length; }
+let _batchPickupBaseId=null;
+function openBatchPickup(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b) return;
+  _batchPickupBaseId=b.id;
+  const list=openPickupsFor(b);
+  const label = b.fuerLieferant
+    ? (b.userId===currentUserId ? 'deinem Lieferanten' : usernameOf(b.userId))
+    : (S.kunden.find(k=>k.id===b.kId)?.vorname||'diesem Kunden');
+  document.getElementById('bp-hint').textContent = `${list.length} offene Bestellungen von ${label}. Ein Klick markiert alle auf einmal als bezahlt/abgeholt.`;
+  document.getElementById('bp-list').innerHTML = list.map(x=>{
+    const prods=x.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' ');
+    return `<div class="batch-item"><div class="bi-main">#${String(x.id).padStart(5,'0')} · ${fmtDate(x.date)} · ${prods}</div><div class="mono" style="font-weight:700">${fmt(displayTotal(x))}</div></div>`;
+  }).join('') || '<div class="ps">Keine weiteren offenen Bestellungen.</div>';
+  openModal('batch-pickup');
+}
+async function batchCompleteAll(){
+  const b=S.bestellungen.find(x=>x.id===_batchPickupBaseId);
+  if(!b) return;
+  const list=openPickupsFor(b);
+  if(!(await confirmDialog(`${list.length} Bestellungen werden auf einmal als angekommen/abgeholt UND bezahlt markiert.`, {title:'Alle abschließen?', confirmText:'Alle abschließen', danger:false})))return;
+  for(const x of list){
+    if(!x.delivered) await setDelivered(x.id, true);
+    if(!x.paid) await setPaid(x.id, true);
+  }
+  closeModal('batch-pickup');
+  showToast(`${list.length} Bestellungen abgeschlossen. ✓`);
+}
+// ── Abholstatistik ───────────────────────────────────────────────────────────
+// Durchschnittliche Zeit zwischen "angekommen/bestellt" und "abgeholt/bezahlt" — zeigt, ob
+// sich die Abholzeiten insgesamt verbessern oder ob sich alte Fälle häufen.
+function computePickupStats(){
+  const done = S.bestellungen.filter(b=>b.paid && b.paidAt && b.abholcode);
+  if(!done.length) return null;
+  const spans = done.map(b=>{
+    const start = new Date(codeGeneratedAt(b)||b.date).getTime();
+    const end = new Date(b.paidAt).getTime();
+    return Math.max(0, (end-start)/86400000);
+  });
+  const avgDays = spans.reduce((s,v)=>s+v,0)/spans.length;
+  return { avgDays, count:done.length };
+}
+
 function openOrderDetail(id){
+
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b){showToast('Bestellung nicht gefunden.','⚠');return;}
   currentDetailOrderId = id;
@@ -3877,7 +4254,8 @@ function openOrderDetail(id){
 
   document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
   const abBox=document.getElementById('od-abholcode-box');
-  if(b.abholcode){
+  document.getElementById('od-abholcode-qr-wrap').style.display='none';
+  if(b.abholcode && !isCodeExpired(b)){
     abBox.style.display='flex';
     document.getElementById('od-abholcode-val').textContent = b.abholcode;
     document.getElementById('od-abholcode-hint').textContent = !b.fuerLieferant
@@ -3885,8 +4263,22 @@ function openOrderDetail(id){
       : (b.userId===currentUserId ? 'Beim Bezahlen deinem Lieferanten nennen.' : 'Lieferantenkunde nennt diesen Code beim Bezahlen.');
     const actionsWrap=document.querySelector('#od-abholcode-box .abholcode-actions');
     actionsWrap.style.display = b.paid ? 'none' : 'flex';
+  } else if(b.abholcode && isCodeExpired(b)){
+    abBox.style.display='flex';
+    document.getElementById('od-abholcode-val').textContent = 'Abgelaufen';
+    document.getElementById('od-abholcode-hint').textContent = `Dieser Code ist seit über ${CODE_EXPIRY_DAYS} Tagen ungenutzt und wurde automatisch ungültig — "Neu erzeugen" für einen frischen Code.`;
+    const actionsWrap=document.querySelector('#od-abholcode-box .abholcode-actions');
+    actionsWrap.style.display = b.paid ? 'none' : 'flex';
   } else {
     abBox.style.display='none';
+  }
+  const batchRow=document.getElementById('od-batch-row');
+  const openCountForBatch = countOpenPickupsFor(b);
+  if(openCountForBatch>1){
+    batchRow.style.display='flex';
+    document.getElementById('od-batch-btn').textContent = `📋 Alle ${openCountForBatch} offenen Bestellungen dieses ${b.fuerLieferant?'Lieferantenkunden':'Kunden'}`;
+  } else {
+    batchRow.style.display='none';
   }
   const vonRow=document.getElementById('od-von-row');
   if(b.userId!==currentUserId){
@@ -3904,6 +4296,7 @@ function openOrderDetail(id){
         : `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`)
     : (k?`${k.vorname} ${k.nachname}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
+  document.getElementById('od-timeline').outerHTML = orderTimelineHtml(b);
   const lieferstatusRow=document.getElementById('od-lieferstatus-row');
   const angekommenRow=document.getElementById('od-angekommen-row');
   if(b.fuerLieferant){
@@ -4502,7 +4895,7 @@ function setLkSeenId(id){
 function updateLkBadge(){
   const seenId=getLkSeenId();
   const unseen=S.bestellungen.filter(b=>b.fuerLieferant && b.userId!==currentUserId && b.id>seenId).length;
-  document.querySelectorAll('#tk-dot-bestellungen, #itb-dot-bestellungen').forEach(el=>{
+  document.querySelectorAll('#tk-dot-bestellungen').forEach(el=>{
     if(!el)return;
     el.textContent = unseen>9 ? '9+' : String(unseen);
     el.classList.toggle('show', unseen>0);
@@ -4514,7 +4907,7 @@ function markLkSeen(){
   updateLkBadge();
 }
 function refresh(){
-  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();
+  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();renderLagerbestand();
 }
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)
