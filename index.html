@@ -267,6 +267,7 @@ button{font-family:inherit;cursor:pointer}
 .sb-brand{
   display:flex;align-items:center;gap:12px;padding:22px 22px 20px;border-bottom:1px solid var(--line2);
 }
+.sb-close-btn{display:none}
 .tb-mark{
   width:34px;height:34px;flex-shrink:0;
 }
@@ -791,27 +792,33 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   .stat-cell:nth-child(2){border-right:none}
 }
 /* < 900px: Menü läuft ausschließlich über den Hamburger — die Seitenleiste öffnet sich als
-   Panel direkt unter der Topbar und läuft von dort nach unten, mit ALLEN Menüpunkten
-   (nicht mehr nur einer Teilmenge, die früher parallel in der Bottom-Tabbar steckte). */
+   normales Drawer von links, über die volle Höhe, mit ALLEN Menüpunkten. Bewusst simpel
+   gehalten (Standard-Slide-in, kein Dropdown/Transform-Trick), damit es zuverlässig auf jedem
+   Gerät klickbar/bedienbar ist. z-index deutlich über der Topbar, damit das Drawer wirklich
+   alles andere überdeckt statt nur teilweise. */
 @media(max-width:900px){
   .mobile-topbar{display:flex}
   .main{padding-bottom:24px}
+  .sidebar-overlay{z-index:199}
   .sidebar{
-    position:fixed;left:0;right:0;
-    top:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
-    bottom:auto;width:auto;height:auto;
-    max-height:calc(100vh - (var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px));
-    transform:translateY(-8px) scaleY(.98);transform-origin:top;opacity:0;visibility:hidden;
-    transition:transform .2s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility 0s linear .2s;
-    border-right:none;border-top:1px solid var(--line2);
-    border-radius:0 0 20px 20px;
-    box-shadow:0 20px 40px rgba(0,0,0,.5);
-    padding-bottom:env(safe-area-inset-bottom);
+    position:fixed;left:0;top:0;bottom:0;right:auto;
+    width:min(300px, 84vw);height:100vh;max-height:none;
+    transform:translateX(-100%);
+    transition:transform .25s cubic-bezier(.32,.72,0,1);
+    border-right:1px solid var(--line2);border-top:none;
+    border-radius:0;
+    box-shadow:0 0 40px rgba(0,0,0,.5);
+    z-index:200;
     display:flex;flex-direction:column;
   }
-  .sidebar::before{display:none}
-  .sidebar.show{transform:translateY(0) scaleY(1);opacity:1;visibility:visible;transition:transform .22s cubic-bezier(.32,.72,0,1),opacity .18s ease}
-  .sb-brand{display:none}
+  .sidebar::after{display:none}
+  .sidebar.show{transform:translateX(0)}
+  .sb-brand{display:flex;position:relative;padding-right:52px}
+  .sb-close-btn{
+    display:flex;position:absolute;top:16px;right:14px;width:32px;height:32px;align-items:center;justify-content:center;
+    border-radius:9px;border:1px solid var(--line2);background:var(--paper3);color:var(--ink-soft);font-size:15px;line-height:1;
+  }
+  .sb-close-btn:active{transform:scale(.92)}
   .scalebar{overflow-y:auto;max-height:none}
   .ic-btn{min-width:40px;min-height:40px;font-size:15px}
   .card-head{flex-wrap:wrap;gap:10px}
@@ -1010,6 +1017,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
           <div class="tb-name">Nicotine<span>Manager</span></div>
           <div class="sub">Verwaltungssystem</div>
         </div>
+        <button class="sb-close-btn" onclick="closeSidebar()" aria-label="Menü schließen">✕</button>
       </div>
 
       <nav class="scalebar" id="scalebar">
