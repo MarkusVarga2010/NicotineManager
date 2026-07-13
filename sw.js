@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.2.0'; // Bugfix: QR-Scanner beim Abholcode erkannte auf manchen Handys (v.a. iPhone/Safari) den Code nicht, weil die Kamera ohne Auflösungs-Begrenzung angefordert wurde — jedes Bild war dadurch zu groß/langsam für die Erkennung. Jetzt mit moderater Auflösung, wiederverwendetem Canvas-Kontext (willReadFrequently) und robusterer Erkennung (attemptBoth).
+const APP_VERSION = '13.3.0'; // QR-Scanner (Abholcode) nochmal robuster: aktiver Autofokus-Constraint mit Fallback (statt OverconstrainedError bei Geräten ohne Unterstützung), video.play()/getUserMedia-Fehler werden abgefangen und mit konkreter Meldung angezeigt (Zugriff verweigert / keine Kamera / Kamera belegt), Live-Statustext während des Scans inkl. Hinweis nach ~6s ohne Treffer, optionaler Blitzlicht-Toggle auf Geräten, die das unterstützen, und die Kamera wird beim Verstecken der Seite (App-/Tab-Wechsel) zuverlässig gestoppt statt evtl. unbemerkt weiterzulaufen.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',

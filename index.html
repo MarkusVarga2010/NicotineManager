@@ -512,6 +512,9 @@ button{font-family:inherit;cursor:pointer}
 .ac-scan-video-wrap.show{display:block}
 .ac-scan-video-wrap video{width:100%;display:block;max-height:260px;object-fit:cover}
 .ac-scan-frame{position:absolute;inset:14%;border:2px solid var(--accent2);border-radius:var(--r);pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.ac-scan-torch{position:absolute;bottom:10px;right:10px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.ac-scan-torch.active{background:var(--accent2);color:#0A0B14}
+.ac-scan-status{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px;line-height:1.4}
 .ac-lockout{background:var(--rust-bg);border:1px solid var(--rust);color:var(--rust);border-radius:var(--r);padding:10px 12px;font-size:12px;margin-top:10px;text-align:center}
 /* Sammel-Abholung */
 .batch-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:var(--r);margin-bottom:8px}
@@ -1746,7 +1749,9 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="ac-scan-video-wrap" id="ac-scan-video-wrap">
           <video id="ac-scan-video" playsinline muted></video>
           <div class="ac-scan-frame"></div>
+          <button type="button" class="ac-scan-torch" id="ac-scan-torch-btn" onclick="toggleAbholcodeTorch()" style="display:none" title="Blitzlicht ein/aus">🔦</button>
         </div>
+        <p id="ac-scan-status" class="ac-scan-status" style="display:none"></p>
         <canvas id="ac-scan-canvas" style="display:none"></canvas>
       </div>
       <div style="margin-top:14px">
@@ -1905,7 +1910,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.2.0';
+const CURRENT_UI_VERSION = '8.3.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1970,6 +1975,9 @@ const WHATS_NEW = {
   ],
   '8.2.0': [
     'Fehler behoben: der Abholcode-QR-Scanner erkannte auf manchen Handys (v.a. iPhone) den Code nicht, obwohl das Kamerabild da war — lag an der zu hoch aufgelösten Kamera. Läuft jetzt zuverlässig.'
+  ],
+  '8.3.0': [
+    'QR-Scanner nochmal deutlich robuster gemacht: Autofokus wird jetzt aktiv angefordert (hilft bei kleinen/nahen Codes), es gibt eine Live-Statusanzeige ("Kamera wird gestartet…", Hinweis nach ein paar Sekunden ohne Treffer), einen Blitzlicht-Button bei unterstützten Geräten, klare Fehlermeldungen bei verweigertem/blockiertem Kamerazugriff, und die Kamera schaltet sich zuverlässig ab (auch beim App-Wechsel), statt evtl. unbemerkt weiterzulaufen.'
   ]
 };
 function checkWhatsNew(){
@@ -3667,6 +3675,17 @@ async function appendNotiz(id, text){
 let _acScanStream=null;
 let _acScanRAF=null;
 let _acScanCtx=null;
+let _acScanTrack=null;
+let _acScanTorchOn=false;
+let _acScanStartTime=0;
+
+function setScanStatus(text){
+  const el=document.getElementById('ac-scan-status');
+  if(!el) return;
+  if(text){ el.textContent=text; el.style.display='block'; }
+  else{ el.style.display='none'; }
+}
+
 async function toggleAbholcodeScanner(){
   const wrap=document.getElementById('ac-scan-video-wrap');
   if(wrap.classList.contains('show')){ stopAbholcodeScanner(); return; }
@@ -3674,32 +3693,98 @@ async function toggleAbholcodeScanner(){
     showToast('Kamera-Zugriff wird von diesem Browser nicht unterstützt.','⚠');
     return;
   }
+  if(!window.isSecureContext){
+    showToast('Kamera braucht HTTPS. Diese Seite läuft gerade unsicher (z.B. über http://).','⚠');
+    return;
+  }
+  const toggleBtn=document.getElementById('ac-scan-toggle-btn');
+  if(toggleBtn) toggleBtn.disabled=true;
+  setScanStatus('Kamera wird gestartet…');
+  // Bevorzugt mit Autofokus (hilft bei kleinen/nahen QR-Codes) — manche Browser/Geräte
+  // unterstützen focusMode aber nicht und würden die ganze Anfrage sonst ablehnen
+  // (OverconstrainedError), deshalb hier ein Fallback ohne diese Option.
+  const constraintsWithFocus = { video:{ facingMode:{ideal:'environment'}, width:{ideal:960,max:1280}, height:{ideal:720,max:960}, advanced:[{focusMode:'continuous'}] } };
+  const constraintsFallback  = { video:{ facingMode:{ideal:'environment'}, width:{ideal:960,max:1280}, height:{ideal:720,max:960} } };
   try{
-    _acScanStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode:{ideal:'environment'}, width:{ideal:960}, height:{ideal:720} }
-    });
+    try{
+      _acScanStream = await navigator.mediaDevices.getUserMedia(constraintsWithFocus);
+    }catch(inner){
+      _acScanStream = await navigator.mediaDevices.getUserMedia(constraintsFallback);
+    }
   }catch(e){
-    showToast('Kamera-Zugriff nicht möglich oder verweigert.','⚠');
+    if(toggleBtn) toggleBtn.disabled=false;
+    setScanStatus(null);
+    let msg='Kamera-Zugriff nicht möglich.';
+    if(e && e.name==='NotAllowedError') msg='Kamera-Zugriff wurde verweigert. Bitte in den Browser-/System-Einstellungen für diese Seite erlauben.';
+    else if(e && e.name==='NotFoundError') msg='Keine Kamera gefunden.';
+    else if(e && e.name==='NotReadableError') msg='Kamera wird gerade von einer anderen App benutzt.';
+    showToast(msg,'⚠');
     return;
   }
   const video=document.getElementById('ac-scan-video');
   video.srcObject=_acScanStream;
-  await video.play();
+  try{
+    await video.play();
+  }catch(e){
+    if(toggleBtn) toggleBtn.disabled=false;
+    showToast('Kamerabild konnte nicht gestartet werden. Bitte erneut versuchen.','⚠');
+    stopAbholcodeScanner();
+    return;
+  }
+  if(toggleBtn){ toggleBtn.disabled=false; toggleBtn.textContent='✕ Scanner schließen'; }
   wrap.classList.add('show');
-  document.getElementById('ac-scan-toggle-btn').textContent='✕ Scanner schließen';
   const canvas=document.getElementById('ac-scan-canvas');
   _acScanCtx=canvas.getContext('2d', { willReadFrequently:true });
+  _acScanTrack=_acScanStream.getVideoTracks()[0]||null;
+  setupTorchButton();
+  setScanStatus('Halte den QR-Code ruhig vor die Kamera…');
+  _acScanStartTime=Date.now();
   _acScanLoop();
 }
+
+function setupTorchButton(){
+  const torchBtn=document.getElementById('ac-scan-torch-btn');
+  if(!torchBtn) return;
+  _acScanTorchOn=false;
+  torchBtn.classList.remove('active');
+  let caps=null;
+  try{ caps=_acScanTrack?.getCapabilities?.(); }catch(e){ caps=null; }
+  torchBtn.style.display=(caps && caps.torch) ? 'flex' : 'none';
+}
+
+async function toggleAbholcodeTorch(){
+  if(!_acScanTrack) return;
+  const torchBtn=document.getElementById('ac-scan-torch-btn');
+  const next=!_acScanTorchOn;
+  try{
+    await _acScanTrack.applyConstraints({ advanced:[{torch:next}] });
+    _acScanTorchOn=next;
+    torchBtn?.classList.toggle('active', _acScanTorchOn);
+  }catch(e){
+    showToast('Blitzlicht konnte nicht umgeschaltet werden.','⚠');
+  }
+}
+
 function stopAbholcodeScanner(){
   if(_acScanRAF) cancelAnimationFrame(_acScanRAF);
   _acScanRAF=null;
   _acScanCtx=null;
+  _acScanTrack=null;
+  _acScanTorchOn=false;
+  _acScanStartTime=0;
   if(_acScanStream){ _acScanStream.getTracks().forEach(t=>t.stop()); _acScanStream=null; }
   document.getElementById('ac-scan-video-wrap')?.classList.remove('show');
+  const torchBtn=document.getElementById('ac-scan-torch-btn');
+  if(torchBtn){ torchBtn.style.display='none'; torchBtn.classList.remove('active'); }
+  setScanStatus(null);
   const btn=document.getElementById('ac-scan-toggle-btn');
-  if(btn) btn.textContent='📷 QR-Code stattdessen scannen';
+  if(btn){ btn.disabled=false; btn.textContent='📷 QR-Code stattdessen scannen'; }
 }
+// Kamera nie unbemerkt im Hintergrund weiterlaufen lassen (App-Wechsel, Tab verlassen etc.)
+// — schont Akku/Privatsphäre, falls das Modal aus irgendeinem Grund offen bleibt.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='hidden' && _acScanStream) stopAbholcodeScanner();
+});
 function _acScanLoop(){
   const video=document.getElementById('ac-scan-video');
   const canvas=document.getElementById('ac-scan-canvas');
@@ -3715,11 +3800,15 @@ function _acScanLoop(){
   if(result && result.data){
     const code=result.data.trim().toUpperCase();
     if(code.length>=4){
+      setScanStatus('Code erkannt ✓');
       document.getElementById('ac-input').value=code.slice(0,4);
       stopAbholcodeScanner();
       _submitAbholcodeConfirm();
       return;
     }
+  }
+  if(_acScanStartTime && (Date.now()-_acScanStartTime)>6000){
+    setScanStatus('Noch kein Code erkannt — näher heran, ruhig halten oder mehr Licht.');
   }
   _acScanRAF=requestAnimationFrame(_acScanLoop);
 }
