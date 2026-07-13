@@ -790,30 +790,29 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   .stat-strip{grid-template-columns:1fr 1fr}
   .stat-cell:nth-child(2){border-right:none}
 }
-/* < 900px: Sidebar wird zum kompakten Konto-Sheet (Navigation übernimmt die Tabbar unten) */
+/* < 900px: Menü läuft ausschließlich über den Hamburger — die Seitenleiste öffnet sich als
+   Panel direkt unter der Topbar und läuft von dort nach unten, mit ALLEN Menüpunkten
+   (nicht mehr nur einer Teilmenge, die früher parallel in der Bottom-Tabbar steckte). */
 @media(max-width:900px){
   .mobile-topbar{display:flex}
   .main{padding-bottom:24px}
   .sidebar{
-    position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;height:auto;
-    max-height:60vh;transform:translateY(100%);
-    transition:transform .25s cubic-bezier(.32,.72,0,1);
+    position:fixed;left:0;right:0;
+    top:calc(var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px);
+    bottom:auto;width:auto;height:auto;
+    max-height:calc(100vh - (var(--nav-h) + max(env(safe-area-inset-top), 44px) + 14px));
+    transform:translateY(-8px) scaleY(.98);transform-origin:top;opacity:0;visibility:hidden;
+    transition:transform .2s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility 0s linear .2s;
     border-right:none;border-top:1px solid var(--line2);
-    border-radius:20px 20px 0 0;
-    box-shadow:0 -12px 40px rgba(0,0,0,.5);
+    border-radius:0 0 20px 20px;
+    box-shadow:0 20px 40px rgba(0,0,0,.5);
     padding-bottom:env(safe-area-inset-bottom);
+    display:flex;flex-direction:column;
   }
-  .sidebar::before{
-    content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
-    width:40px;height:4px;border-radius:99px;background:var(--line2);
-  }
-  .sidebar.show{transform:translateY(0)}
+  .sidebar::before{display:none}
+  .sidebar.show{transform:translateY(0) scaleY(1);opacity:1;visibility:visible;transition:transform .22s cubic-bezier(.32,.72,0,1),opacity .18s ease}
   .sb-brand{display:none}
-  .scalebar-mehr-hint{
-    display:block;padding:18px 20px 4px;font-family:'JetBrains Mono',monospace;
-    font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
-  }
-  .scale-tick.tick-primary{display:none !important}
+  .scalebar{overflow-y:auto;max-height:none}
   .ic-btn{min-width:40px;min-height:40px;font-size:15px}
   .card-head{flex-wrap:wrap;gap:10px}
   #offline-banner{
