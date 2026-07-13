@@ -1473,8 +1473,8 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal">
     <div class="modal-head"><h3>Neuer Kunde</h3><button class="modal-close" onclick="closeModal('kunde')">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:14px"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max"/><div class="field-err" id="nk-vorname-err"></div></div>
-      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann"/><div class="field-err" id="nk-nachname-err"></div></div>
+      <div style="margin-bottom:14px"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max" onkeydown="if(event.key==='Enter')addKunde()"/><div class="field-err" id="nk-vorname-err"></div></div>
+      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann" onkeydown="if(event.key==='Enter')addKunde()"/><div class="field-err" id="nk-nachname-err"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('kunde')">Abbrechen</button>
@@ -1885,7 +1885,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.0.0';
+const CURRENT_UI_VERSION = '8.1.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1943,6 +1943,11 @@ const WHATS_NEW = {
     'Neuer Schnellansicht-Button direkt in der Zeile zeigt den Abholcode (inkl. QR-Code) an, ohne erst das ganze Bestell-Detail zu öffnen. Dazu eine Vorwarnung, wenn ein Code bald abläuft, und "Unterwegs seit X Tagen" beim Lieferstatus.',
     'Neu: Kontaktkarte für deinen Lieferanten (Telefon/Adresse, sofern er sie unter "Einstellungen" hinterlegt hat) mit direkten Anrufen/Route-Buttons.',
     'Neu auf der Lagerbestand-Seite: zusätzlicher Bereich zum manuellen Buchen des tatsächlichen Bestands (z.B. nach einer Zählung) — komplett unabhängig von der berechneten Ein-/Verkaufs-Zahl, rein zum Abgleichen.'
+  ],
+  '8.1.0': [
+    'Feinschliff: die Escape-Taste schließt jetzt jedes offene Fenster/Bild — praktisch am Desktop, kein Klick auf ✕ mehr nötig.',
+    'Im "Neuer Kunde"-Formular legt Enter den Kunden jetzt direkt an, wie schon beim Login gewohnt.',
+    'Robustheit: Kunde, Bestellung, Lieferanten-Bestellung, Variante und Benutzer werden nicht mehr versehentlich doppelt angelegt, wenn man bei langsamer Verbindung zweimal auf den Button tippt.'
   ]
 };
 function checkWhatsNew(){
@@ -2298,6 +2303,20 @@ function closeLightbox(e){
   if(e && e.target && e.target.id!=='lightbox-bg' && e.target.id!=='lightbox-close') return;
   document.getElementById('lightbox-bg').classList.remove('show');
 }
+// Escape-Taste schließt das oberste offene Fenster/Bild — sucht zuerst nach einem sichtbaren
+// Lightbox-Bild, danach nach dem zuletzt im DOM stehenden offenen Modal (entspricht meist dem
+// zuletzt geöffneten, da neu geöffnete Modals nicht verschoben werden, aber verschachtelte
+// Modals — z.B. Abholcode-Bestätigung über Bestell-Detail — i.d.R. später im Markup stehen).
+document.addEventListener('keydown', (e)=>{
+  if(e.key!=='Escape') return;
+  const lightbox=document.getElementById('lightbox-bg');
+  if(lightbox && lightbox.classList.contains('show')){ closeLightbox(); return; }
+  const openModals=[...document.querySelectorAll('.modal-bg.show')];
+  if(!openModals.length) return;
+  const top=openModals[openModals.length-1];
+  if(top.id==='modal-confirm'){ _confirmResolve(false); return; }
+  closeModal(top.id.replace(/^modal-/,''));
+});
 
 // ══════════════════════════════════════════════
 // THEME
@@ -2647,41 +2666,46 @@ function renderVariantList(prodId){
     </div>`;
   }).join('') + `</div>`;
 }
+const _addVariantBusy=new Set();
 async function addVariant(prodId){
+  if(_addVariantBusy.has(prodId)) return; // verhindert doppelt angelegte Varianten bei Doppelklick
   const p=PROD_MAP[prodId];
   const nameEl=document.getElementById('vnew-name-'+prodId), ekEl=document.getElementById('vnew-ek-'+prodId), vkEl=document.getElementById('vnew-vk-'+prodId);
   const name=(nameEl.value||'').trim();
   const ek=parseFloat(ekEl.value), vk=parseFloat(vkEl.value);
   if(!name){ showToast(`Bitte einen Namen für den ${p.variantLabel} eingeben.`,'⚠'); return; }
   if(isNaN(vk)||vk<0){ showToast('Bitte einen gültigen Verkaufspreis eingeben.','⚠'); return; }
-  const { data, error } = await sb.from('produkt_varianten').insert({
-    user_id:currentUserId, produkt_id:prodId, name, preis:vk, einkaufspreis:isNaN(ek)?0:ek
-  }).select().single();
-  if(error){ showToast(dbErrorMsg(error,`${p.variantLabel} konnte nicht gespeichert werden. Wurde die Tabelle "produkt_varianten" schon angelegt?`),'⚠'); return; }
+  _addVariantBusy.add(prodId);
+  try{
+    const { data, error } = await sb.from('produkt_varianten').insert({
+      user_id:currentUserId, produkt_id:prodId, name, preis:vk, einkaufspreis:isNaN(ek)?0:ek
+    }).select().single();
+    if(error){ showToast(dbErrorMsg(error,`${p.variantLabel} konnte nicht gespeichert werden. Wurde die Tabelle "produkt_varianten" schon angelegt?`),'⚠'); return; }
 
-  // Bild erst NACH dem Anlegen hochladen, weil der Dateipfad die Varianten-ID enthält.
-  // Wurde stattdessen ein kostenloses Vorschlagsbild gewählt, wird direkt dessen URL
-  // übernommen — dafür ist kein eigener Upload nötig.
-  const suggestedUrl=_pendingVariantImgUrl[prodId]||null;
-  const bildUrl = suggestedUrl || await uploadVariantImage(prodId, data.id);
-  if(bildUrl){
-    const { error: imgErr } = await sb.from('produkt_varianten').update({ bild_url: bildUrl }).eq('id', data.id);
-    if(imgErr) showToast(dbErrorMsg(imgErr,'Bild-URL konnte nicht gespeichert werden. Wurde die Spalte "bild_url" schon angelegt?'),'⚠');
-  }
+    // Bild erst NACH dem Anlegen hochladen, weil der Dateipfad die Varianten-ID enthält.
+    // Wurde stattdessen ein kostenloses Vorschlagsbild gewählt, wird direkt dessen URL
+    // übernommen — dafür ist kein eigener Upload nötig.
+    const suggestedUrl=_pendingVariantImgUrl[prodId]||null;
+    const bildUrl = suggestedUrl || await uploadVariantImage(prodId, data.id);
+    if(bildUrl){
+      const { error: imgErr } = await sb.from('produkt_varianten').update({ bild_url: bildUrl }).eq('id', data.id);
+      if(imgErr) showToast(dbErrorMsg(imgErr,'Bild-URL konnte nicht gespeichert werden. Wurde die Spalte "bild_url" schon angelegt?'),'⚠');
+    }
 
-  (S.varianten[prodId]=S.varianten[prodId]||[]).push({id:data.id, name:data.name, preis:Number(data.preis), einkauf:Number(data.einkaufspreis||0), bildUrl:bildUrl||null});
-  nameEl.value=''; ekEl.value=''; vkEl.value='';
-  const imgInp=document.getElementById('vnew-img-'+prodId); if(imgInp) imgInp.value='';
-  const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Bild auswählen (optional)';
-  const preview=document.getElementById('vnew-preview-'+prodId); if(preview){ preview.style.display='none'; preview.innerHTML=''; }
-  const suggestGrid=document.getElementById('vnew-suggest-'+prodId); if(suggestGrid){ suggestGrid.style.display='none'; suggestGrid.innerHTML=''; }
-  const suggestRow=document.getElementById('vnew-suggestrow-'+prodId); if(suggestRow) suggestRow.style.display='none';
-  const suggestFilter=document.getElementById('vnew-suggestfilter-'+prodId); if(suggestFilter) suggestFilter.style.display='none';
-  const suggestQ=document.getElementById('vnew-suggestq-'+prodId); if(suggestQ) suggestQ.value='';
-  _pendingVariantImg[prodId]=null;
-  _pendingVariantImgUrl[prodId]=null;
-  renderVariantList(prodId); renderPrices(); renderDashboard();
-  showToast('Gespeichert ✓');
+    (S.varianten[prodId]=S.varianten[prodId]||[]).push({id:data.id, name:data.name, preis:Number(data.preis), einkauf:Number(data.einkaufspreis||0), bildUrl:bildUrl||null});
+    nameEl.value=''; ekEl.value=''; vkEl.value='';
+    const imgInp=document.getElementById('vnew-img-'+prodId); if(imgInp) imgInp.value='';
+    const label=document.getElementById('vnew-imglabel-'+prodId); if(label) label.textContent='📷 Bild auswählen (optional)';
+    const preview=document.getElementById('vnew-preview-'+prodId); if(preview){ preview.style.display='none'; preview.innerHTML=''; }
+    const suggestGrid=document.getElementById('vnew-suggest-'+prodId); if(suggestGrid){ suggestGrid.style.display='none'; suggestGrid.innerHTML=''; }
+    const suggestRow=document.getElementById('vnew-suggestrow-'+prodId); if(suggestRow) suggestRow.style.display='none';
+    const suggestFilter=document.getElementById('vnew-suggestfilter-'+prodId); if(suggestFilter) suggestFilter.style.display='none';
+    const suggestQ=document.getElementById('vnew-suggestq-'+prodId); if(suggestQ) suggestQ.value='';
+    _pendingVariantImg[prodId]=null;
+    _pendingVariantImgUrl[prodId]=null;
+    renderVariantList(prodId); renderPrices(); renderDashboard();
+    showToast('Gespeichert ✓');
+  } finally { _addVariantBusy.delete(prodId); }
 }
 async function deleteVariant(prodId, id){
   const p=PROD_MAP[prodId];
@@ -2771,7 +2795,9 @@ function setFieldError(id, text){
   document.getElementById(id)?.classList.add('input-error');
   const err=document.getElementById(id+'-err'); if(err) err.textContent=text;
 }
+let _addKundeBusy=false;
 async function addKunde(){
+  if(_addKundeBusy) return; // verhindert Doppel-Anlegen bei Doppelklick/Enter+Klick oder langsamer Verbindung
   const v=document.getElementById('nk-vorname').value.trim();
   const n=document.getElementById('nk-nachname').value.trim();
   clearFieldError('nk-vorname'); clearFieldError('nk-nachname');
@@ -2779,11 +2805,14 @@ async function addKunde(){
   if(!v){ setFieldError('nk-vorname','Bitte Vorname eingeben.'); hasError=true; }
   if(!n){ setFieldError('nk-nachname','Bitte Nachname eingeben.'); hasError=true; }
   if(hasError) return;
-  const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
-  if(error){ showToast(dbErrorMsg(error,'Kunde konnte nicht angelegt werden.'),'⚠'); return; }
-  S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
-  document.getElementById('nk-vorname').value='';document.getElementById('nk-nachname').value='';
-  closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
+  _addKundeBusy=true;
+  try{
+    const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
+    if(error){ showToast(dbErrorMsg(error,'Kunde konnte nicht angelegt werden.'),'⚠'); return; }
+    S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
+    document.getElementById('nk-vorname').value='';document.getElementById('nk-nachname').value='';
+    closeModal('kunde');renderKunden();fillSelects();showToast('Kunde angelegt.');
+  } finally { _addKundeBusy=false; }
 }
 async function delKunde(id){
   if(!(await confirmDialog('Alle zugehörigen Bestellungen werden ebenfalls entfernt.', {title:'Kunden wirklich löschen?'})))return false;
@@ -3122,7 +3151,9 @@ function renderOrderItems(){
   }
   document.getElementById('order-total').textContent=fmt(total);
 }
+let _addBestellungBusy=false;
 async function addBestellung(){
+  if(_addBestellungBusy) return; // verhindert doppelt angelegte Bestellungen bei Doppelklick/langsamer Verbindung
   const kId=parseInt(document.getElementById('nb-kunde').value);
   if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
   if(!orderItems.length){showToast('Mindestens ein Produkt hinzufügen.','⚠');return;}
@@ -3136,19 +3167,22 @@ async function addBestellung(){
   });
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const abholcode = genAbholcode(activeAbholcodes());
-  const { data, error } = await sb.from('bestellungen').insert({
-    user_id:currentUserId, kunde_id:kId, items, subtotal,
-    discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today(), abholcode
-  }).select().single();
-  if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
-  S.bestellungen.unshift({
-    id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
-    discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null
-  });
-  closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
-  showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
+  _addBestellungBusy=true;
+  try{
+    const { data, error } = await sb.from('bestellungen').insert({
+      user_id:currentUserId, kunde_id:kId, items, subtotal,
+      discount_type: dType || null, discount_value: dType ? dValRaw : 0,
+      total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today(), abholcode
+    }).select().single();
+    if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
+    S.bestellungen.unshift({
+      id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
+      discountType:data.discount_type, discountValue:Number(data.discount_value||0),
+      total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null
+    });
+    closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
+    showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
+  } finally { _addBestellungBusy=false; }
 }
 
 // Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Erzeugung siehe genAbholcode() weiter unten.
@@ -3518,7 +3552,9 @@ async function delEigeneSchuld(id){
 function escapeHtml(str){
   const d=document.createElement('div'); d.textContent=str; return d.innerHTML;
 }
+let _submitLbBestellungBusy=false;
 async function submitLbBestellung(){
+  if(_submitLbBestellungBusy) return; // verhindert doppelt aufgegebene Lieferanten-Bestellungen bei Doppelklick
   const supplierId = M.profile?.linked_to || null;
   if(!supplierId){ showToast('Bitte zuerst unter Einstellungen einen Lieferanten auswählen.','⚠'); return; }
   if(!lbItems.length){ showToast('Mindestens ein Produkt hinzufügen.','⚠'); return; }
@@ -3536,21 +3572,24 @@ async function submitLbBestellung(){
   });
   const subtotal=calcLbTotal();
   const notiz=document.getElementById('lb-notiz').value.trim()||null;
-  const { data, error } = await sb.from('bestellungen').insert({
-    user_id:currentUserId, kunde_id:null, items, subtotal, total:subtotal,
-    discount_type:null, discount_value:0, paid:false, delivered:false,
-    fuer_lieferant:true, bestelldatum: today(), notiz
-  }).select().single();
-  if(error){ showToast(dbErrorMsg(error,'Bestellung konnte nicht angelegt werden.'),'⚠'); return; }
-  S.bestellungen.unshift({
-    id:data.id, kId:null, items:data.items, subtotal:Number(data.subtotal),
-    discountType:null, discountValue:0,
-    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null
-  });
-  lbItems=[]; document.getElementById('lb-notiz').value='';
-  closeModal('lbbestellung');
-  renderLieferantSeite(); renderBestellungen(); renderDashboard();
-  showToast('Bestellung beim Lieferanten aufgegeben. ✓');
+  _submitLbBestellungBusy=true;
+  try{
+    const { data, error } = await sb.from('bestellungen').insert({
+      user_id:currentUserId, kunde_id:null, items, subtotal, total:subtotal,
+      discount_type:null, discount_value:0, paid:false, delivered:false,
+      fuer_lieferant:true, bestelldatum: today(), notiz
+    }).select().single();
+    if(error){ showToast(dbErrorMsg(error,'Bestellung konnte nicht angelegt werden.'),'⚠'); return; }
+    S.bestellungen.unshift({
+      id:data.id, kId:null, items:data.items, subtotal:Number(data.subtotal),
+      discountType:null, discountValue:0,
+      total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null
+    });
+    lbItems=[]; document.getElementById('lb-notiz').value='';
+    closeModal('lbbestellung');
+    renderLieferantSeite(); renderBestellungen(); renderDashboard();
+    showToast('Bestellung beim Lieferanten aufgegeben. ✓');
+  } finally { _submitLbBestellungBusy=false; }
 }
 async function setDelivered(id, newVal){
   const b=S.bestellungen.find(x=>x.id===id);
@@ -4929,18 +4968,23 @@ async function setUserLink(userId, linkedTo){
   showToast(linkedTo?'Verknüpfung gespeichert. ✓':'Verknüpfung entfernt.');
   renderUserList();
 }
+let _addUserBusy=false;
 async function addUser(){
+  if(_addUserBusy) return; // verhindert doppelt angelegte Benutzer bei Doppelklick
   const n=document.getElementById('nu-name').value.trim();
   const p=document.getElementById('nu-pw').value;
   const r=document.getElementById('nu-role').value;
   const linked=document.getElementById('nu-linked')?.value||'';
   if(!n||p.length<3){showToast('Name + Passwort (≥3 Zeichen) eingeben.','⚠');return;}
-  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
-  if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
-  M.users.push({ id:data, username:n, role:r, first_login:(r==='user'||r==='special'), linked_to: (linked||null) });
-  document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
-  document.getElementById('nu-linked').value='';
-  renderUserList();showToast('Benutzer angelegt.');
+  _addUserBusy=true;
+  try{
+    const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
+    if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
+    M.users.push({ id:data, username:n, role:r, first_login:(r==='user'||r==='special'), linked_to: (linked||null) });
+    document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
+    document.getElementById('nu-linked').value='';
+    renderUserList();showToast('Benutzer angelegt.');
+  } finally { _addUserBusy=false; }
 }
 async function delUser(id, name){
   if(!(await confirmDialog(`Benutzer "${name}" wird endgültig entfernt.`, {title:`Benutzer "${name}" löschen?`})))return;

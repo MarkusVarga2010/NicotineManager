@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.0.0'; // "Beim Lieferanten"-Seite deutlich verbessert: Banner für abholbereite Bestellungen (mit Sammel-Button), abholbereite Bestellungen werden in der Tabelle nach oben sortiert, Schnellansicht-Button für den Code direkt aus der Zeile, "läuft in X Tagen ab"-Vorwarnung, "Unterwegs seit X Tagen" im Lieferstatus, sowie eine Kontaktkarte (Telefon/Adresse des Lieferanten, sofern hinterlegt) mit Anrufen/Route-Buttons. Außerdem: Lagerbestand-Seite hat jetzt einen zweiten, komplett unabhängigen Bereich zum manuellen Buchen des tatsächlichen Bestands (reine Zähl-/Abgleich-Funktion, hat nichts mit den berechneten Ein-/Verkaufszahlen zu tun).
+const APP_VERSION = '13.1.0'; // Feinschliff-Update: Escape-Taste schließt jedes offene Fenster/Bild, Enter legt im "Neuer Kunde"-Formular direkt an, und Kunde/Bestellung/Lieferanten-Bestellung/Variante/Benutzer werden bei Doppelklick oder langsamer Verbindung nicht mehr versehentlich doppelt angelegt.
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',
