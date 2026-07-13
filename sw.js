@@ -1,6 +1,6 @@
 // NicotineManager Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.3.0'; // QR-Scanner (Abholcode) nochmal robuster: aktiver Autofokus-Constraint mit Fallback (statt OverconstrainedError bei Geräten ohne Unterstützung), video.play()/getUserMedia-Fehler werden abgefangen und mit konkreter Meldung angezeigt (Zugriff verweigert / keine Kamera / Kamera belegt), Live-Statustext während des Scans inkl. Hinweis nach ~6s ohne Treffer, optionaler Blitzlicht-Toggle auf Geräten, die das unterstützen, und die Kamera wird beim Verstecken der Seite (App-/Tab-Wechsel) zuverlässig gestoppt statt evtl. unbemerkt weiterzulaufen.
+const APP_VERSION = '13.4.0'; // Formulare poliert: Login, "Neuer Kunde" und "Sonstige Schulden" nutzen jetzt einheitlich das setFieldError/clearFieldError-Muster (rote Umrandung + reservierter Fehlertext direkt am Feld, verschwindet automatisch beim Weitertippen) statt teils nur Toast, teils nur ein generisches Banner. Feldabstände in diesen Formularen sind jetzt ebenfalls einheitlich (.fw, 16px) statt uneinheitlicher Inline-Werte (10-14px).
 const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
 const ASSETS = [
   './',

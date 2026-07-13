@@ -505,8 +505,25 @@ button{font-family:inherit;cursor:pointer}
 .od-tl-step.done .od-tl-lab,.od-tl-step.current .od-tl-lab{color:var(--ink-soft)}
 .od-tl-sub{font-size:10px;color:var(--ink-faint);margin-top:2px}
 /* QR-Code Anzeige/Scan */
-.abholcode-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px}
-.abholcode-qr-wrap canvas,.abholcode-qr-wrap img{border-radius:var(--r);background:#fff;padding:8px}
+.abholcode-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:10px}
+.abholcode-qr-card{
+  padding:3px;border-radius:calc(var(--r-lg) + 3px);
+  background:var(--grad-brand);
+  box-shadow:0 10px 28px -10px color-mix(in srgb, var(--sage) 55%, transparent);
+}
+.abholcode-qr-card-inner{
+  background:#fff;border-radius:var(--r-lg);
+  padding:14px;display:flex;align-items:center;justify-content:center;
+}
+.abholcode-qr-card-inner canvas,.abholcode-qr-card-inner img{display:block;border-radius:8px}
+.abholcode-qr-canvas-wrap{position:relative;display:inline-block;line-height:0}
+.abholcode-qr-logo{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:34px;height:34px;border-radius:10px;background:var(--grad-brand);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px #fff;
+}
+.abholcode-qr-logo svg{width:19px;height:19px;display:block}
+.abholcode-qr-caption{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.12em}
 .ac-scan-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
 .ac-scan-video-wrap{position:relative;border-radius:var(--r);overflow:hidden;background:#000;display:none}
 .ac-scan-video-wrap.show{display:block}
@@ -1023,8 +1040,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
     </div>
     <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg>ZUGANG</i><span></span></div>
     <div class="login-card">
-      <div class="fw"><label class="fl">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username"/></div>
-      <div class="fw"><label class="fl">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="fw"><label class="fl">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username" oninput="clearFieldError('inp-user')"/><div class="field-err" id="inp-user-err"></div></div>
+      <div class="fw"><label class="fl">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" oninput="clearFieldError('inp-pw')" onkeydown="if(event.key==='Enter')doLogin()"/><div class="field-err" id="inp-pw-err"></div></div>
       <button class="primary-btn" onclick="doLogin()">Anmelden →</button>
       <div class="login-err" id="login-err">Falscher Benutzername oder Passwort.</div>
     </div>
@@ -1257,10 +1274,10 @@ create policy "eigene schulden eigener user"
       </div>
       <div class="card" id="es-card" style="padding:0">
         <div class="es-quickadd">
-          <div class="fw"><label class="fl">Wem schuldest du Geld?</label><input id="es-glaeubiger" placeholder="Name" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/></div>
-          <div class="fw fw-betrag"><label class="fl">Betrag €</label><input id="es-betrag" type="number" min="0" step="0.01" placeholder="0,00" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/></div>
-          <div class="fw"><label class="fl">Notiz (optional)</label><input id="es-notiz" placeholder="z.B. Grund" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/></div>
-          <button class="btn btn-primary btn-sm" onclick="addEigeneSchuld()" style="margin-bottom:16px">＋ Hinzufügen</button>
+          <div class="fw"><label class="fl">Wem schuldest du Geld?</label><input id="es-glaeubiger" placeholder="Name" oninput="clearFieldError('es-glaeubiger')" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/><div class="field-err" id="es-glaeubiger-err"></div></div>
+          <div class="fw fw-betrag"><label class="fl">Betrag €</label><input id="es-betrag" type="number" min="0" step="0.01" placeholder="0,00" oninput="clearFieldError('es-betrag')" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/><div class="field-err" id="es-betrag-err"></div></div>
+          <div class="fw"><label class="fl">Notiz (optional)</label><input id="es-notiz" placeholder="z.B. Grund" onkeydown="if(event.key==='Enter')addEigeneSchuld()"/><div class="field-err"></div></div>
+          <div class="fw" style="flex:0 0 auto"><button class="btn btn-primary btn-sm" onclick="addEigeneSchuld()">＋ Hinzufügen</button><div class="field-err"></div></div>
         </div>
         <div id="es-list"></div>
         <div class="ec" id="es-empty" style="display:none;padding:24px 20px"><div class="ec-t">Noch keine sonstigen Schulden erfasst</div></div>
@@ -1496,8 +1513,8 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal">
     <div class="modal-head"><h3>Neuer Kunde</h3><button class="modal-close" onclick="closeModal('kunde')">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:14px"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max"/><div class="field-err" id="nk-vorname-err"></div></div>
-      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann"/><div class="field-err" id="nk-nachname-err"></div></div>
+      <div class="fw"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max" oninput="clearFieldError('nk-vorname')"/><div class="field-err" id="nk-vorname-err"></div></div>
+      <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann" oninput="clearFieldError('nk-nachname')"/><div class="field-err" id="nk-nachname-err"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('kunde')">Abbrechen</button>
@@ -1649,7 +1666,10 @@ alter table profiles add column if not exists adresse text;</pre>
           <div class="abholcode-lab">Abholcode</div>
           <div class="abholcode-val mono" id="od-abholcode-val"></div>
           <div style="font-size:11px;color:var(--ink-faint);margin-top:3px" id="od-abholcode-hint"></div>
-          <div class="abholcode-qr-wrap" id="od-abholcode-qr-wrap" style="display:none"><div id="od-abholcode-qr"></div></div>
+          <div class="abholcode-qr-wrap" id="od-abholcode-qr-wrap" style="display:none">
+            <div class="abholcode-qr-card"><div class="abholcode-qr-card-inner" id="od-abholcode-qr"></div></div>
+            <div class="abholcode-qr-caption">Zum Scannen vorzeigen</div>
+          </div>
         </div>
         <div class="abholcode-actions">
           <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
@@ -1773,7 +1793,10 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-body" style="text-align:center">
       <div class="mono" id="qc-code" style="font-size:40px;font-weight:800;letter-spacing:.12em;margin-bottom:6px"></div>
       <div class="ps" id="qc-hint" style="margin-bottom:10px"></div>
-      <div class="abholcode-qr-wrap" id="qc-qr-wrap" style="display:none"><div id="qc-qr"></div></div>
+      <div class="abholcode-qr-wrap" id="qc-qr-wrap" style="display:none">
+        <div class="abholcode-qr-card"><div class="abholcode-qr-card-inner" id="qc-qr"></div></div>
+        <div class="abholcode-qr-caption">Zum Scannen vorzeigen</div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">
         <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
         <button class="btn btn-ghost btn-sm" onclick="toggleQrWrap('qc-qr-wrap','qc-qr')">▦ QR-Code</button>
@@ -1910,7 +1933,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.3.0';
+const CURRENT_UI_VERSION = '8.4.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1977,7 +2000,9 @@ const WHATS_NEW = {
     'Fehler behoben: der Abholcode-QR-Scanner erkannte auf manchen Handys (v.a. iPhone) den Code nicht, obwohl das Kamerabild da war — lag an der zu hoch aufgelösten Kamera. Läuft jetzt zuverlässig.'
   ],
   '8.3.0': [
-    'QR-Scanner nochmal deutlich robuster gemacht: Autofokus wird jetzt aktiv angefordert (hilft bei kleinen/nahen Codes), es gibt eine Live-Statusanzeige ("Kamera wird gestartet…", Hinweis nach ein paar Sekunden ohne Treffer), einen Blitzlicht-Button bei unterstützten Geräten, klare Fehlermeldungen bei verweigertem/blockiertem Kamerazugriff, und die Kamera schaltet sich zuverlässig ab (auch beim App-Wechsel), statt evtl. unbemerkt weiterzulaufen.'
+    'QR-Scanner nochmal deutlich robuster gemacht: Autofokus wird jetzt aktiv angefordert (hilft bei kleinen/nahen Codes), es gibt eine Live-Statusanzeige ("Kamera wird gestartet…", Hinweis nach ein paar Sekunden ohne Treffer), einen Blitzlicht-Button bei unterstützten Geräten, klare Fehlermeldungen bei verweigertem/blockiertem Kamerazugriff, und die Kamera schaltet sich zuverlässig ab (auch beim App-Wechsel), statt evtl. unbemerkt weiterzulaufen.',
+    'Der angezeigte Abholcode-QR-Code trägt jetzt einen Rahmen im App-Look (Farbverlauf-Karte) mit kleinem Logo in der Mitte, statt schlicht schwarz-weiß zu sein — die Scan-Zuverlässigkeit bleibt dabei unverändert hoch (maximale Fehlerkorrektur).',
+    'Formulare aufgeräumt: Login sowie "Neuer Kunde" und "Sonstige Schulden erfassen" zeigen Eingabefehler jetzt einheitlich direkt am betroffenen Feld (rote Umrandung + Hinweistext, verschwindet automatisch beim Weitertippen) statt teils nur als Meldung oder gar nicht. Abstände zwischen Feldern sind jetzt ebenfalls einheitlich.'
   ]
 };
 function checkWhatsNew(){
@@ -2062,12 +2087,19 @@ function homePage(){ return allowedPages(currentRole())[0]; }
 async function doLogin(){
   const u = document.getElementById('inp-user').value.trim();
   const p = document.getElementById('inp-pw').value;
-  if(!u||!p){ document.getElementById('login-err').style.display='block'; return; }
+  clearFieldError('inp-user'); clearFieldError('inp-pw');
+  document.getElementById('login-err').style.display='none';
+  let hasError=false;
+  if(!u){ setFieldError('inp-user','Bitte Benutzername eingeben.'); hasError=true; }
+  if(!p){ setFieldError('inp-pw','Bitte Passwort eingeben.'); hasError=true; }
+  if(hasError) return;
   const btn = document.querySelector('.primary-btn');
   btn.disabled=true; btn.style.opacity=.6;
   const { data, error } = await sb.auth.signInWithPassword({ email: toEmail(u), password: p });
   btn.disabled=false; btn.style.opacity=1;
   if(error || !data.user){
+    document.getElementById('inp-user').classList.add('input-error');
+    document.getElementById('inp-pw').classList.add('input-error');
     document.getElementById('login-err').textContent='Falscher Benutzername oder Passwort.';
     document.getElementById('login-err').style.display='block';
     document.getElementById('inp-pw').value='';
@@ -3234,7 +3266,18 @@ function toggleQrWrap(wrapId, containerId){
   const target=document.getElementById(containerId);
   target.innerHTML='';
   if(window.QRCode){
-    new QRCode(target, { text: b.abholcode, width:160, height:160, colorDark:'#000', colorLight:'#fff' });
+    const canvasWrap=document.createElement('div');
+    canvasWrap.className='abholcode-qr-canvas-wrap';
+    target.appendChild(canvasWrap);
+    // Dunkles App-Ink statt reinem Schwarz für einen dezenten Marken-Touch — der Kontrast zu
+    // Weiß bleibt dabei maximal, damit die Scan-Zuverlässigkeit unverändert hoch bleibt.
+    // correctLevel H (höchste Fehlerkorrektur) erlaubt zusätzlich das Logo in der Mitte,
+    // ohne die Lesbarkeit zu gefährden.
+    new QRCode(canvasWrap, { text: b.abholcode, width:172, height:172, colorDark:'#14121F', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H });
+    const logo=document.createElement('div');
+    logo.className='abholcode-qr-logo';
+    logo.innerHTML='<svg viewBox="0 0 40 40"><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="#fff"/></svg>';
+    canvasWrap.appendChild(logo);
   } else {
     target.textContent = b.abholcode;
   }
@@ -3479,8 +3522,11 @@ async function addEigeneSchuld(){
   const glaeubiger=document.getElementById('es-glaeubiger').value.trim();
   const betrag=parseFloat(document.getElementById('es-betrag').value);
   const notiz=document.getElementById('es-notiz').value.trim()||null;
-  if(!glaeubiger){ showToast('Bitte angeben, wem du das Geld schuldest.','⚠'); return; }
-  if(!betrag || betrag<=0){ showToast('Bitte einen gültigen Betrag angeben.','⚠'); return; }
+  clearFieldError('es-glaeubiger'); clearFieldError('es-betrag');
+  let hasError=false;
+  if(!glaeubiger){ setFieldError('es-glaeubiger','Bitte angeben, wem du das Geld schuldest.'); hasError=true; }
+  if(!betrag || betrag<=0){ setFieldError('es-betrag','Bitte einen gültigen Betrag angeben.'); hasError=true; }
+  if(hasError) return;
   const { data, error } = await sb.from('eigene_schulden').insert({
     user_id:currentUserId, glaeubiger, betrag, notiz, bezahlt:false
   }).select().single();
