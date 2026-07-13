@@ -1161,9 +1161,29 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         </div>
       </div>
 
+      <div class="card" id="lb-contact-card" style="display:none;margin-bottom:16px;padding:16px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="font-size:12px;color:var(--ink-soft)"><b id="lb-contact-name" style="color:var(--lieferant-deep)"></b><span id="lb-contact-addr"></span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a class="btn btn-ghost btn-sm" id="lb-contact-call" style="display:none">📞 Anrufen</a>
+            <a class="btn btn-ghost btn-sm" id="lb-contact-route" target="_blank" rel="noopener" style="display:none">🗺 Route</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="lb-ready-banner" style="display:none;margin-bottom:16px;padding:16px 18px;border-color:var(--sage)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🚚</span>
+            <div><div style="font-weight:700;font-size:13px" id="lb-ready-text"></div><div class="ps" style="margin:2px 0 0">Beim Bezahlen einfach den jeweiligen Code nennen.</div></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="lb-ready-batch-btn" onclick="openBatchPickupForLieferant()">📋 Alle auf einmal bezahlt markieren</button>
+        </div>
+      </div>
+
       <div class="card-head" style="border:none;padding:0;margin:0 0 12px"><h3>Deine Bestellungen beim Lieferanten</h3></div>
       <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Abholcode</th><th>Bezahlt</th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Produkte</th><th>Gesamt</th><th>Lieferstatus</th><th>Abholcode</th><th>Bezahlt</th><th></th><th></th><th></th></tr></thead><tbody id="lb-tbody"></tbody></table></div>
       </div>
       <div class="ec" id="lb-empty" style="display:none">
         <div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div>
@@ -1283,7 +1303,33 @@ create policy "varianten eigene loeschen"
     <div class="page" id="page-lagerbestand">
       <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Lagerbestand</div><div class="ps">Berechnet aus angekommenen Lieferanten-Bestellungen minus ausgelieferten Verkäufen — pro Produkt</div></div></div>
       <div class="card">
-        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Zugang</th><th>Abgang</th><th>Auf Lager</th></tr></thead><tbody id="lager-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Zugang</th><th>Abgang</th><th>Berechnet</th></tr></thead><tbody id="lager-tbody"></tbody></table></div>
+      </div>
+
+      <div class="card-head" style="border:none;padding:0;margin:28px 0 4px"><h3>Tatsächlicher Bestand (manuell)</h3></div>
+      <div class="ps" style="margin:0 0 14px">Trag hier einfach ein, was wirklich noch da ist — unabhängig von berechnetem Ein-/Verkauf. Rein zum Nachhalten/Abgleichen, verändert nichts an Preisen oder Bestellungen.</div>
+      <div class="card" id="lager-manuell-setup-hint" style="display:none">
+        <div class="ec" style="padding:8px 0">
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
+          <div class="ec-t">Noch nicht eingerichtet</div>
+          <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
+          <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table lagerbestand_manuell (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  produkt text not null,
+  menge integer not null default 0,
+  updated_at timestamptz not null default now(),
+  unique(user_id, produkt)
+);
+alter table lagerbestand_manuell enable row level security;
+create policy "lagerbestand manuell eigener user"
+  on lagerbestand_manuell for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);</pre>
+        </div>
+      </div>
+      <div class="card" id="lager-manuell-card">
+        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Tatsächlich vorhanden</th><th>Zuletzt gebucht</th><th></th></tr></thead><tbody id="lager-manuell-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -1297,6 +1343,17 @@ create policy "varianten eigene loeschen"
             <div style="margin-bottom:12px"><label class="fl">Benutzername</label><input id="set-user" disabled style="opacity:.6;cursor:not-allowed"/></div>
             <div style="margin-bottom:12px"><label class="fl">Passwort</label><input type="password" id="set-pw1" value="••••••••" disabled style="opacity:.6;cursor:not-allowed"/></div>
             <div class="ps" style="margin-top:-4px;margin-bottom:14px">Benutzername und Passwort können hier nicht geändert werden. Bitte wende dich dazu an einen Administrator.</div>
+            <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+              <label class="fl" style="margin-bottom:5px">📞 Telefon &amp; Adresse (optional)</label>
+              <div class="ps" style="margin:-2px 0 8px">Wird deinen Lieferantenkunden auf ihrer "Beim Lieferanten"-Seite als Kontakt angezeigt (Anrufen/Route).</div>
+              <div class="mr2" style="margin-bottom:8px"><input id="set-telefon" placeholder="Telefonnummer"/><input id="set-adresse" placeholder="Adresse"/></div>
+              <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="saveContactInfo()">Kontaktdaten speichern</button></div>
+              <div class="ec" id="set-contact-setup-hint" style="display:none;padding:10px 0 0;text-align:left">
+                <div class="ec-s">Dafür fehlen in Supabase noch zwei Spalten. SQL zum Anlegen:</div>
+                <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:8px;overflow-x:auto;white-space:pre-wrap">alter table profiles add column if not exists telefon text;
+alter table profiles add column if not exists adresse text;</pre>
+              </div>
+            </div>
             <div id="set-lieferant-wrap" style="display:none;border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
               <label class="fl" style="margin-bottom:5px;color:var(--lieferant-deep)">◆ Mein Lieferant</label>
               <select id="set-lieferant"><option value="">Keinen Lieferanten auswählen</option></select>
@@ -1676,6 +1733,23 @@ create policy "varianten eigene loeschen"
   </div>
 </div>
 
+<!-- SCHNELLANSICHT: Code direkt aus der Tabelle heraus zeigen, ohne erst das volle Bestell-Detail zu öffnen -->
+<div class="modal-bg" id="modal-quick-code">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-head"><h3>Abholcode</h3><button class="modal-close" onclick="closeModal('quick-code')">✕</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="mono" id="qc-code" style="font-size:40px;font-weight:800;letter-spacing:.12em;margin-bottom:6px"></div>
+      <div class="ps" id="qc-hint" style="margin-bottom:10px"></div>
+      <div class="abholcode-qr-wrap" id="qc-qr-wrap" style="display:none"><div id="qc-qr"></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleQrWrap('qc-qr-wrap','qc-qr')">▦ QR-Code</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SAMMEL-ABHOLUNG: alle offenen Bestellungen eines Kunden auf einmal abschließen -->
 <div class="modal-bg" id="modal-batch-pickup">
   <div class="modal">
@@ -1792,6 +1866,7 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{} };
 let schuldenTableMissing = false;
+let lagerManuellTableMissing = false;
 let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
 let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
@@ -1802,7 +1877,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '7.0.0';
+const CURRENT_UI_VERSION = '8.0.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -1854,6 +1929,12 @@ const WHATS_NEW = {
     'Neu bei Abholcodes: QR-Code zum Anzeigen und per Kamera Scannen, Teilen über die native Teilen-Funktion deines Geräts, Direktlink zum Selbst-Vorzeigen ohne Login, und eine Status-Timeline im Bestell-Detail.',
     '"Wartet seit X Tagen"-Hinweis mit direktem Erinnerungs-Button, Sammel-Abholung für mehrere offene Bestellungen eines Kunden auf einmal, optionales "Wer holt ab?"-Feld, sowie eine Abholstatistik im Dashboard.',
     'Codes werden nach 60 Tagen ohne Abholung automatisch ungültig, und nach 5 falschen Eingaben gibt es jetzt eine echte 30-Sekunden-Sperre statt nur einer Warnung.'
+  ],
+  '8.0.0': [
+    '"Beim Lieferanten" zeigt jetzt oben ein Banner, sobald Bestellungen abholbereit sind — mit direktem Button, um mehrere auf einmal als bezahlt/abgeholt zu markieren. Abholbereite Bestellungen stehen außerdem ganz oben in der Liste.',
+    'Neuer Schnellansicht-Button direkt in der Zeile zeigt den Abholcode (inkl. QR-Code) an, ohne erst das ganze Bestell-Detail zu öffnen. Dazu eine Vorwarnung, wenn ein Code bald abläuft, und "Unterwegs seit X Tagen" beim Lieferstatus.',
+    'Neu: Kontaktkarte für deinen Lieferanten (Telefon/Adresse, sofern er sie unter "Einstellungen" hinterlegt hat) mit direkten Anrufen/Route-Buttons.',
+    'Neu auf der Lagerbestand-Seite: zusätzlicher Bereich zum manuellen Buchen des tatsächlichen Bestands (z.B. nach einer Zählung) — komplett unabhängig von der berechneten Ein-/Verkaufs-Zahl, rein zum Abgleichen.'
   ]
 };
 function checkWhatsNew(){
@@ -2009,7 +2090,7 @@ async function loadAllData(){
   // Performance: der Papierkorb (gelöschte Bestellungen) wird NICHT mehr beim normalen
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
   // Historie unnötige Datenmenge beim täglichen Start der App.
-  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes] = await Promise.all([
+  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes, lagerManuellRes] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false}),
     sb.from('preise').select('*'),
@@ -2018,6 +2099,7 @@ async function loadAllData(){
     sb.from('service_log').select('*').order('service_date', {ascending:false}),
     sb.from('eigene_schulden').select('*').eq('user_id', currentUserId).order('id', {ascending:false}),
     sb.from('produkt_varianten').select('*').order('id'),
+    sb.from('lagerbestand_manuell').select('*').eq('user_id', currentUserId),
   ]);
   S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id, customPreise:k.custom_preise||{}}));
   S.bestellungen = (bestRes.data||[]).map(mapBestellung);
@@ -2055,6 +2137,13 @@ async function loadAllData(){
     id:s.id, glaeubiger:s.glaeubiger, betrag:Number(s.betrag), notiz:s.notiz||null,
     bezahlt:!!s.bezahlt, createdAt:s.created_at, bezahltAm:s.bezahlt_am||null
   }));
+  // Manuell gebuchter Lagerbestand: völlig unabhängig von der berechneten Ein-/Verkaufs-Zahl,
+  // eigene Tabelle (evtl. noch nicht angelegt) — dann einfach leer lassen + Hinweis anzeigen.
+  lagerManuellTableMissing = !!lagerManuellRes.error;
+  S.lagerManuell = {};
+  if(!lagerManuellRes.error){
+    (lagerManuellRes.data||[]).forEach(r=>{ S.lagerManuell[r.produkt] = { menge:Number(r.menge)||0, updatedAt:r.updated_at }; });
+  }
   // Geschmäcker/Marken: eigene Varianten (S.varianten) sowie — falls ein Lieferant verknüpft
   // ist — dessen Varianten mit seiner aktuellen Preisliste (S.lieferantVarianten), analog zu
   // S.preise/S.lieferantPreise weiter oben. bildUrl wird mit übernommen, damit Thumbnails
@@ -2269,8 +2358,46 @@ function renderLagerbestand(){
     return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td>
       <td class="mono" style="color:var(--success-deep)">+${d.zugang}</td>
       <td class="mono" style="color:var(--rust)">−${d.abgang}</td>
-      <td><span class="pc-stock ${cls}"><svg class="svg-ic"><use href="#ic-package"/></svg>${d.net} auf Lager</span></td></tr>`;
+      <td><span class="pc-stock ${cls}"><svg class="svg-ic"><use href="#ic-package"/></svg>${d.net} berechnet</span></td></tr>`;
   }).join('');
+  renderLagerManuell();
+}
+// ── Tatsächlicher Bestand (manuell) ─────────────────────────────────────────
+// Bewusst komplett getrennt von der berechneten Zugang/Abgang-Spalte oben: hier trägt man
+// einfach ein, was wirklich noch da ist (z.B. nach einer Zählung) — hat nichts mit Ein-/
+// Verkaufspreisen oder den Bestellungen zu tun, rein zum Nachhalten/Abgleichen.
+function renderLagerManuell(){
+  const hint=document.getElementById('lager-manuell-setup-hint');
+  const card=document.getElementById('lager-manuell-card');
+  if(lagerManuellTableMissing){
+    if(hint) hint.style.display='block';
+    if(card) card.style.display='none';
+    return;
+  }
+  if(hint) hint.style.display='none';
+  if(card) card.style.display='block';
+  const tbl=document.getElementById('lager-manuell-tbody');
+  if(!tbl) return;
+  tbl.innerHTML=PRODUCTS.map(p=>{
+    const entry=S.lagerManuell[p.id];
+    const val = entry ? entry.menge : '';
+    const updated = entry?.updatedAt ? fmtDateTime(entry.updatedAt) : '—';
+    return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td>
+      <td><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${val}" placeholder="—" style="width:100px" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
+      <td class="mono" style="color:var(--ink-faint);font-size:11.5px">${updated}</td>
+      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="bookLagerbestand('${p.id}')">✓ Buchen</button></td></tr>`;
+  }).join('');
+}
+async function bookLagerbestand(prodId){
+  const input=document.getElementById('lm-input-'+prodId);
+  const menge=Math.max(0, Math.round(Number(input.value)||0));
+  const { data, error } = await sb.from('lagerbestand_manuell')
+    .upsert({ user_id:currentUserId, produkt:prodId, menge, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
+    .select().single();
+  if(error){ showToast('Konnte nicht gebucht werden.', '⚠'); return; }
+  S.lagerManuell[prodId] = { menge, updatedAt:data.updated_at };
+  renderLagerManuell();
+  showToast(`${PROD_MAP[prodId]?.name||prodId}: ${menge} gebucht. ✓`);
 }
 
 // ══════════════════════════════════════════════
@@ -3053,9 +3180,9 @@ function genAbholcode(existing=[]){
   return code;
 }
 function copyAbholcode(){
-  const val=document.getElementById('od-abholcode-val')?.textContent;
-  if(!val) return;
-  navigator.clipboard?.writeText(val).then(()=>showToast('Abholcode kopiert.'))
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  navigator.clipboard?.writeText(b.abholcode).then(()=>showToast('Abholcode kopiert.'))
     .catch(()=>showToast('Kopieren nicht möglich.','⚠'));
 }
 // ── Teilen: native Share-API statt fest auf WhatsApp verdrahtet ────────────
@@ -3097,13 +3224,13 @@ function shareAbholcodeLink(){
 // ── QR-Code zusätzlich zum 4-stelligen Code ─────────────────────────────────
 // Statt den Code vorzulesen/abzutippen, zeigt der Kunde einen QR-Code am Handy, der gescannt
 // werden kann. Der 4-stellige Code bleibt als Fallback erhalten.
-function toggleAbholcodeQr(){
-  const wrap=document.getElementById('od-abholcode-qr-wrap');
+function toggleQrWrap(wrapId, containerId){
+  const wrap=document.getElementById(wrapId);
   const showing = wrap.style.display!=='none';
   if(showing){ wrap.style.display='none'; return; }
   const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
   if(!b || !b.abholcode) return;
-  const target=document.getElementById('od-abholcode-qr');
+  const target=document.getElementById(containerId);
   target.innerHTML='';
   if(window.QRCode){
     new QRCode(target, { text: b.abholcode, width:160, height:160, colorDark:'#000', colorLight:'#fff' });
@@ -3111,6 +3238,22 @@ function toggleAbholcodeQr(){
     target.textContent = b.abholcode;
   }
   wrap.style.display='flex';
+}
+function toggleAbholcodeQr(){ toggleQrWrap('od-abholcode-qr-wrap','od-abholcode-qr'); }
+// Schnellansicht direkt aus einer Tabellenzeile — ohne erst das volle Bestell-Detail zu öffnen.
+// Nutzt dieselben Funktionen (copyAbholcode/shareAbholcode/toggleQrWrap) wie das Detail, da
+// diese über currentDetailOrderId auf die Bestellung zugreifen statt auf ein bestimmtes Modal.
+function quickShowAbholcode(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b || !b.abholcode) return;
+  if(isCodeExpired(b)){ showToast('Dieser Code ist abgelaufen — im Bestell-Detail neu erzeugen.','⚠'); return; }
+  currentDetailOrderId=id;
+  document.getElementById('qc-code').textContent=b.abholcode;
+  document.getElementById('qc-hint').textContent = b.fuerLieferant
+    ? 'Beim Bezahlen deinem Lieferanten nennen.'
+    : 'Kunde nennt/zeigt diesen Code bei Abholung.';
+  document.getElementById('qc-qr-wrap').style.display='none';
+  openModal('quick-code');
 }
 // Erzeugt einen neuen Code für die aktuell im Detail geöffnete Bestellung, z.B. falls der
 // Kunde den alten Code verloren/nicht mehr zur Hand hat, oder falls der Code abgelaufen ist.
@@ -3224,25 +3367,74 @@ function renderLieferantSeite(){
   document.getElementById('lb-supplier-sub').textContent = supplier
     ? `Bestellung wird direkt bei ${supplier.username} aufgegeben — berechnet mit seiner aktuellen Preisliste.`
     : 'Kein Lieferant verknüpft — bitte zuerst unter Einstellungen einen Lieferanten auswählen.';
+  // Kontaktkarte: Telefon/Adresse des Lieferanten, sofern er sie unter "Einstellungen" hinterlegt
+  // hat. Fehlen die Spalten in der DB noch, bleibt M.users einfach ohne telefon/adresse — die
+  // Karte wird dann schlicht nicht angezeigt statt einen Fehler zu werfen.
+  const contactCard=document.getElementById('lb-contact-card');
+  if(supplier && (supplier.telefon || supplier.adresse)){
+    contactCard.style.display='block';
+    document.getElementById('lb-contact-name').textContent = supplier.username;
+    document.getElementById('lb-contact-addr').textContent = supplier.adresse ? ' · '+supplier.adresse : '';
+    const callBtn=document.getElementById('lb-contact-call');
+    const routeBtn=document.getElementById('lb-contact-route');
+    if(supplier.telefon){ callBtn.style.display='inline-flex'; callBtn.href='tel:'+supplier.telefon.replace(/\s+/g,''); } else { callBtn.style.display='none'; }
+    if(supplier.adresse){ routeBtn.style.display='inline-flex'; routeBtn.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(supplier.adresse); } else { routeBtn.style.display='none'; }
+  } else {
+    contactCard.style.display='none';
+  }
   renderLbHistory();
   renderEigeneSchulden();
+}
+// ── "läuft in X Tagen ab"-Hinweis ───────────────────────────────────────────
+// Ergänzt die reine Ablauf/Abgelaufen-Unterscheidung um eine frühzeitige Vorwarnung, statt dass
+// ein Code einfach kommentarlos irgendwann nicht mehr gilt.
+function codeExpiryHint(b){
+  if(!b.abholcode || isCodeExpired(b)) return '';
+  const daysLeft = CODE_EXPIRY_DAYS - daysSince(codeGeneratedAt(b));
+  if(daysLeft>10) return '';
+  return `<div style="font-size:10px;color:var(--rust);margin-top:2px">⏳ läuft in ${daysLeft}T ab</div>`;
 }
 function renderLbHistory(){
   const tbody=document.getElementById('lb-tbody');
   if(!tbody)return;
-  const list=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId).sort((a,b)=>b.id-a.id);
+  const all=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentUserId);
+  // Abholbereite Bestellungen (angekommen, aber noch nicht bezahlt) sind das Aktionable —
+  // die werden ganz oben einsortiert, statt zwischen längst erledigten alten Bestellungen
+  // unterzugehen. Innerhalb jeder Gruppe weiterhin neueste zuerst.
+  const rank = b => (b.delivered && !b.paid) ? 0 : (!b.delivered ? 1 : 2);
+  const list=[...all].sort((a,b)=> rank(a)-rank(b) || b.id-a.id);
   document.getElementById('lb-empty').style.display = list.length ? 'none' : 'block';
+
+  // Banner + Sammel-Button für abholbereite Bestellungen.
+  const ready = all.filter(b=>b.delivered && !b.paid);
+  const banner=document.getElementById('lb-ready-banner');
+  if(ready.length>0){
+    banner.style.display='block';
+    document.getElementById('lb-ready-text').textContent = ready.length===1
+      ? '1 Bestellung ist abholbereit!'
+      : `${ready.length} Bestellungen sind abholbereit!`;
+    document.getElementById('lb-ready-batch-btn').style.display = ready.length>1 ? '' : 'none';
+  } else {
+    banner.style.display='none';
+  }
+
   tbody.innerHTML = list.map(b=>{
     const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
-    const lieferBadge = b.delivered ? '<span class="badge b-bezahlt">✓ Angekommen</span>' : '<span class="badge b-offen">🚚 Unterwegs</span>';
+    // "Unterwegs seit X Tagen" statt nur eines nackten Badges — bei langen Lieferzeiten hilfreich.
+    const lieferBadge = b.delivered
+      ? '<span class="badge b-bezahlt">✓ Angekommen</span>'
+      : `<span class="badge b-offen">🚚 Unterwegs${daysSince(b.date)>=1?' · seit '+daysSince(b.date)+'T':''}</span>`;
     const bezahltBadge = b.paid ? '<span class="badge b-bezahlt">✓ Bezahlt</span>' : '<span class="badge b-offen">Offen</span>';
     // Der Abholcode entsteht erst, sobald der Lieferant die Bestellung als "angekommen" markiert.
     // Er muss dann beim Bezahlen genannt werden — danach wird er hier nicht mehr benötigt.
     const abholcodeCell = (b.abholcode && !b.paid)
       ? (isCodeExpired(b)
           ? `<span class="mono abholcode-chip expired" title="Code ist abgelaufen (>${CODE_EXPIRY_DAYS} Tage) — im Bestell-Detail neu erzeugen">abgelaufen</span>`
-          : `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>${warteBadgeHtml(b)}`)
+          : `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>${warteBadgeHtml(b)}${codeExpiryHint(b)}`)
       : '<span style="color:var(--ink-faint)">–</span>';
+    const quickBtn = (b.abholcode && !b.paid && !isCodeExpired(b))
+      ? `<button class="ic-btn" onclick="quickShowAbholcode(${b.id})" title="Code schnell anzeigen">▦</button>`
+      : '';
     return `<tr>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td style="font-size:12px">${prods}</td>
@@ -3250,6 +3442,7 @@ function renderLbHistory(){
       <td>${lieferBadge}</td>
       <td>${abholcodeCell}</td>
       <td>${bezahltBadge}</td>
+      <td style="text-align:right">${quickBtn}</td>
       <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
       <td style="text-align:right"><button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben">🗑</button></td>
     </tr>`;
@@ -4201,15 +4394,9 @@ function openPickupsFor(b){
   });
 }
 function countOpenPickupsFor(b){ return openPickupsFor(b).length; }
-let _batchPickupBaseId=null;
-function openBatchPickup(){
-  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
-  if(!b) return;
-  _batchPickupBaseId=b.id;
-  const list=openPickupsFor(b);
-  const label = b.fuerLieferant
-    ? (b.userId===currentUserId ? 'deinem Lieferanten' : usernameOf(b.userId))
-    : (S.kunden.find(k=>k.id===b.kId)?.vorname||'diesem Kunden');
+let _batchPickupList=[];
+function _openBatchPickupList(list, label){
+  _batchPickupList = list;
   document.getElementById('bp-hint').textContent = `${list.length} offene Bestellungen von ${label}. Ein Klick markiert alle auf einmal als bezahlt/abgeholt.`;
   document.getElementById('bp-list').innerHTML = list.map(x=>{
     const prods=x.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' ');
@@ -4217,10 +4404,24 @@ function openBatchPickup(){
   }).join('') || '<div class="ps">Keine weiteren offenen Bestellungen.</div>';
   openModal('batch-pickup');
 }
-async function batchCompleteAll(){
-  const b=S.bestellungen.find(x=>x.id===_batchPickupBaseId);
+function openBatchPickup(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
   if(!b) return;
-  const list=openPickupsFor(b);
+  const label = b.fuerLieferant
+    ? (b.userId===currentUserId ? 'deinem Lieferanten' : usernameOf(b.userId))
+    : (S.kunden.find(k=>k.id===b.kId)?.vorname||'diesem Kunden');
+  _openBatchPickupList(openPickupsFor(b), label);
+}
+// Direkter Zugang von der "Beim Lieferanten"-Seite aus, ohne erst eine einzelne Bestellung
+// öffnen zu müssen — praktisch, wenn mehrere Bestellungen gleichzeitig abholbereit sind.
+function openBatchPickupForLieferant(){
+  const list=S.bestellungen.filter(x=>x.fuerLieferant && x.userId===currentUserId && !(x.delivered && x.paid));
+  if(!list.length){ showToast('Keine offenen Bestellungen.'); return; }
+  _openBatchPickupList(list, 'deinem Lieferanten');
+}
+async function batchCompleteAll(){
+  const list=_batchPickupList;
+  if(!list.length) return;
   if(!(await confirmDialog(`${list.length} Bestellungen werden auf einmal als angekommen/abgeholt UND bezahlt markiert.`, {title:'Alle abschließen?', confirmText:'Alle abschließen', danger:false})))return;
   for(const x of list){
     if(!x.delivered) await setDelivered(x.id, true);
@@ -4645,6 +4846,8 @@ function applyViz(){
 }
 function renderSettings(){
   document.getElementById('set-user').value=currentUser||'';
+  const telIn=document.getElementById('set-telefon'); if(telIn) telIn.value=M.profile?.telefon||'';
+  const adrIn=document.getElementById('set-adresse'); if(adrIn) adrIn.value=M.profile?.adresse||'';
   const an=document.getElementById('set-anim');if(an)an.checked=VS.anim;
   const co=document.getElementById('set-compact');if(co)co.checked=VS.compact;
   const lm=document.getElementById('set-lightmode');if(lm)lm.checked=(VS.mode==='light');
@@ -4745,6 +4948,22 @@ async function saveOwnLink(){
   if(M.profile) M.profile.linked_to = val || null;
   applyRoleUI();
   showToast(val?'Lieferant gespeichert. ✓':'Lieferant entfernt.');
+}
+// Telefon/Adresse sind rein informativ für die eigenen Lieferantenkunden (Kontaktkarte auf
+// deren "Beim Lieferanten"-Seite) — betrifft NICHT Login/Rollen/Preise. Fehlen die Spalten noch
+// in der DB, wird statt eines Fehlers der SQL-Hinweis eingeblendet (gleiches Muster wie bei
+// "Sonstige Schulden").
+async function saveContactInfo(){
+  const telefon=(document.getElementById('set-telefon').value||'').trim();
+  const adresse=(document.getElementById('set-adresse').value||'').trim();
+  const { error } = await sb.from('profiles').update({ telefon, adresse }).eq('id', currentUserId);
+  const hint=document.getElementById('set-contact-setup-hint');
+  if(error){ hint.style.display='block'; showToast('Konnte nicht gespeichert werden — siehe Hinweis unten.', '⚠'); return; }
+  hint.style.display='none';
+  if(M.profile){ M.profile.telefon=telefon; M.profile.adresse=adresse; }
+  const me=M.users.find(u=>u.id===currentUserId);
+  if(me){ me.telefon=telefon; me.adresse=adresse; }
+  showToast('Kontaktdaten gespeichert. ✓');
 }
 function exportData(){
   const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
