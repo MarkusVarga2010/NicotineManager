@@ -1,7 +1,7 @@
-// NicotineManager Service Worker
+// NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.4.0'; // Formulare poliert: Login, "Neuer Kunde" und "Sonstige Schulden" nutzen jetzt einheitlich das setFieldError/clearFieldError-Muster (rote Umrandung + reservierter Fehlertext direkt am Feld, verschwindet automatisch beim Weitertippen) statt teils nur Toast, teils nur ein generisches Banner. Feldabstände in diesen Formularen sind jetzt ebenfalls einheitlich (.fw, 16px) statt uneinheitlicher Inline-Werte (10-14px).
-const CACHE_NAME = 'nicotinemanager-' + APP_VERSION;
+const APP_VERSION = '13.5.0'; // Rebrand zu NicoFlow: neuer Name überall (Titel, "Über die App", PDF-Exporte, Update-Hinweis, Backup-Dateiname, Cache-Name) und neues Icon-Set mit Farbverlauf-Monogramm "NF". EMAIL_DOMAIN in index.html bleibt bewusst 'nicotinemanager.local', damit sich bestehende Nutzer weiter einloggen können.
+const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
   './index.html',

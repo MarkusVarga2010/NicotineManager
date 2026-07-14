@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>NicotineManager</title>
+<title>NicoFlow</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -1451,7 +1451,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="set-card sg full" style="margin-bottom:16px" id="set-card-about">
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
-          <div class="about-row"><span>App-Name</span><span>NicotineManager</span></div>
+          <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
           <div class="about-row"><span>Version</span><span id="app-version">9.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
@@ -1841,7 +1841,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <div id="update-banner">
   <div class="ub-text">
     <span class="ub-ic">⟲</span>
-    <div><div>Update verfügbar</div><div class="ub-sub" id="ub-version">Neue Version von NicotineManager</div></div>
+    <div><div>Update verfügbar</div><div class="ub-sub" id="ub-version">Neue Version von NicoFlow</div></div>
   </div>
   <button class="btn btn-primary btn-sm" onclick="applyUpdate()">Jetzt aktualisieren</button>
 </div>
@@ -1933,7 +1933,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.4.0';
+const CURRENT_UI_VERSION = '8.5.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -2003,6 +2003,9 @@ const WHATS_NEW = {
     'QR-Scanner nochmal deutlich robuster gemacht: Autofokus wird jetzt aktiv angefordert (hilft bei kleinen/nahen Codes), es gibt eine Live-Statusanzeige ("Kamera wird gestartet…", Hinweis nach ein paar Sekunden ohne Treffer), einen Blitzlicht-Button bei unterstützten Geräten, klare Fehlermeldungen bei verweigertem/blockiertem Kamerazugriff, und die Kamera schaltet sich zuverlässig ab (auch beim App-Wechsel), statt evtl. unbemerkt weiterzulaufen.',
     'Der angezeigte Abholcode-QR-Code trägt jetzt einen Rahmen im App-Look (Farbverlauf-Karte) mit kleinem Logo in der Mitte, statt schlicht schwarz-weiß zu sein — die Scan-Zuverlässigkeit bleibt dabei unverändert hoch (maximale Fehlerkorrektur).',
     'Formulare aufgeräumt: Login sowie "Neuer Kunde" und "Sonstige Schulden erfassen" zeigen Eingabefehler jetzt einheitlich direkt am betroffenen Feld (rote Umrandung + Hinweistext, verschwindet automatisch beim Weitertippen) statt teils nur als Meldung oder gar nicht. Abstände zwischen Feldern sind jetzt ebenfalls einheitlich.'
+  ],
+  '8.5.0': [
+    'Die App heißt jetzt NicoFlow! Neuer Name und neues Icon (Farbverlauf-Monogramm "NF") überall — Titel, "Über die App", PDF-Exporte und Update-Hinweis. Der Login selbst funktioniert unverändert mit denselben Zugangsdaten.'
   ]
 };
 function checkWhatsNew(){
@@ -4314,7 +4317,7 @@ function downloadOpenOrdersPDF(){
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
   doc.setTextColor(20,20,20);
-  doc.text('NicotineManager', margin+12, 15.5);
+  doc.text('NicoFlow', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
   doc.setTextColor(110,110,110);
@@ -4358,7 +4361,7 @@ function downloadOpenOrdersPDF(){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
   doc.setTextColor(140,140,140);
-  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
+  doc.text(`Erstellt mit NicoFlow am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
 
   doc.save(`offene-bestellungen-${today()}.pdf`);
   showToast('PDF wird heruntergeladen. ⭳');
@@ -4385,7 +4388,7 @@ function downloadOpenLieferantPDF(){
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
   doc.setTextColor(20,20,20);
-  doc.text('NicotineManager', margin+12, 15.5);
+  doc.text('NicoFlow', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
   doc.setTextColor(110,110,110);
@@ -4427,7 +4430,7 @@ function downloadOpenLieferantPDF(){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
   doc.setTextColor(140,140,140);
-  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')} · Beträge folgen der aktuellen Preisliste des Lieferanten`, margin, doc.internal.pageSize.getHeight()-10);
+  doc.text(`Erstellt mit NicoFlow am ${new Date().toLocaleString('de-DE')} · Beträge folgen der aktuellen Preisliste des Lieferanten`, margin, doc.internal.pageSize.getHeight()-10);
 
   doc.save(`offene-lieferanten-bestellungen-${today()}.pdf`);
   showToast('PDF wird heruntergeladen. ⭳');
@@ -4454,7 +4457,7 @@ function downloadHistoriePDF(){
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
   doc.setTextColor(20,20,20);
-  doc.text('NicotineManager', margin+12, 15.5);
+  doc.text('NicoFlow', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
   doc.setTextColor(110,110,110);
@@ -4495,7 +4498,7 @@ function downloadHistoriePDF(){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
   doc.setTextColor(140,140,140);
-  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
+  doc.text(`Erstellt mit NicoFlow am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
 
   doc.save(`historie-${today()}.pdf`);
   showToast('PDF wird heruntergeladen. ⭳');
@@ -4729,7 +4732,7 @@ function printInvoice(id){
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
   doc.setTextColor(20,20,20);
-  doc.text('NicotineManager', margin+12, 15.5);
+  doc.text('NicoFlow', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
   doc.setTextColor(110,110,110);
@@ -4805,7 +4808,7 @@ function printInvoice(id){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
   doc.setTextColor(140,140,140);
-  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
+  doc.text(`Erstellt mit NicoFlow am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
 
   const kName = k ? `${k.nachname}-${k.vorname}`.replace(/\s+/g,'_') : 'kunde';
   doc.save(`rechnung-${kName}-${String(b.id).padStart(5,'0')}.pdf`);
@@ -4842,7 +4845,7 @@ function printLieferschein(id){
   doc.text('N', margin+4, 17.3, {align:'center'});
   doc.setFontSize(15);
   doc.setTextColor(20,20,20);
-  doc.text('NicotineManager', margin+12, 15.5);
+  doc.text('NicoFlow', margin+12, 15.5);
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
   doc.setTextColor(110,110,110);
@@ -4918,7 +4921,7 @@ function printLieferschein(id){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
   doc.setTextColor(140,140,140);
-  doc.text(`Erstellt mit NicotineManager am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
+  doc.text(`Erstellt mit NicoFlow am ${new Date().toLocaleString('de-DE')}`, margin, doc.internal.pageSize.getHeight()-10);
 
   const supplierSlug = partnerName.replace(/\s+/g,'_');
   doc.save(`lieferschein-${supplierSlug}-${String(b.id).padStart(5,'0')}.pdf`);
@@ -5110,7 +5113,7 @@ async function saveContactInfo(){
 }
 function exportData(){
   const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicotinemanager-backup-'+today()+'.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click();
   showToast('Export heruntergeladen. ↓');
 }
 function importData(e){
@@ -5384,7 +5387,7 @@ function showUpdateBanner(worker){
   document.getElementById('update-banner').classList.add('show');
   askWorkerVersion(worker).then(v=>{
     const sub=document.getElementById('ub-version');
-    if(sub) sub.textContent = v ? `Version ${v} verfügbar` : 'Neue Version von NicotineManager';
+    if(sub) sub.textContent = v ? `Version ${v} verfügbar` : 'Neue Version von NicoFlow';
   });
 }
 async function checkForUpdates(){
