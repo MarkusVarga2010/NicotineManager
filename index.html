@@ -1006,6 +1006,15 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .lp-nums .sc-v{font-size:20px}
 .lp-bar{height:5px;border-radius:99px;background:var(--paper3);overflow:hidden;margin-bottom:12px}
 .lp-bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+
+/* Dashboard: Lagerbestand-Warnkarte — bewusst farblich auffällig, damit ein sinkender
+   Pegel wirklich als Warnung wahrgenommen wird und nicht als neutrale Info untergeht. */
+#d-stock-alert-card.card-alert-out{border-color:color-mix(in srgb, var(--rust) 45%, var(--line2));background:linear-gradient(135deg, var(--rust-bg), var(--paper2) 62%)}
+#d-stock-alert-card.card-alert-low{border-color:color-mix(in srgb, var(--amber) 45%, var(--line2));background:linear-gradient(135deg, var(--amber-bg), var(--paper2) 62%)}
+#d-stock-alert-card .card-head h3{display:flex;align-items:center;gap:7px}
+#d-stock-alert-card.card-alert-out .card-head h3 span{color:var(--rust)}
+#d-stock-alert-card.card-alert-low .card-head h3 span{color:var(--amber)}
+.lager-alert-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 .lager-group-head{display:flex;align-items:center;gap:8px;margin:22px 0 12px}
 .lager-group-head:first-child{margin-top:0}
 .lager-group-head .lg-line{flex:1;height:1px;background:var(--line)}
@@ -1221,8 +1230,9 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <div class="card" id="d-stock-alert-card" style="display:none;cursor:pointer" onclick="nav('lagerbestand')">
-        <div class="card-head"><h3>📦 Lagerbestand</h3></div>
-        <div class="ps" id="d-stock-alert-text" style="margin:0 0 4px"></div>
+        <div class="card-head"><h3><span id="d-stock-alert-icon">⚠</span> Lagerbestand niedrig</h3></div>
+        <div class="lager-alert-chips" id="d-stock-alert-chips"></div>
+        <div class="ps" style="margin:0">Antippen, um nachzubuchen.</div>
       </div>
 
       <div class="card">
@@ -1524,7 +1534,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">13.9.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">13.10.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -2625,7 +2635,11 @@ async function bookLagerbestand(prodId){
   S.lagerManuell[prodId] = { menge, schwelle: data.schwelle!=null?Number(data.schwelle):schwelle, updatedAt:data.updated_at };
   renderLagerManuell();
   renderDashboard();
-  showToast(`${PROD_MAP[prodId]?.name||prodId}: ${menge} gebucht. ✓`);
+  const status = lagerStatus(menge, schwelle);
+  const prodName = PROD_MAP[prodId]?.name||prodId;
+  if(status==='out') showToast(`${prodName} ist jetzt leer! ⛔`, '⛔');
+  else if(status==='low') showToast(`${prodName}: ${menge} gebucht — schon niedrig. ⚠`, '⚠');
+  else showToast(`${prodName}: ${menge} gebucht. ✓`);
 }
 
 // ══════════════════════════════════════════════
@@ -4380,16 +4394,22 @@ function renderDashboard(){
         const entry=S.lagerManuell[p.id];
         if(!entry) return;
         const st=lagerStatus(entry.menge, entry.schwelle!=null?entry.schwelle:5);
-        if(st==='out') out.push(p.name); else if(st==='low') low.push(p.name);
+        if(st==='out') out.push(p); else if(st==='low') low.push(p);
       });
       if(!low.length && !out.length){
         stockCard.style.display='none';
       } else {
         stockCard.style.display='block';
-        const parts=[];
-        if(out.length) parts.push(`leer: ${out.join(', ')}`);
-        if(low.length) parts.push(`niedrig: ${low.join(', ')}`);
-        document.getElementById('d-stock-alert-text').textContent = parts.join(' · ') + ' — antippen zum Nachbuchen.';
+        stockCard.classList.toggle('card-alert-out', out.length>0);
+        stockCard.classList.toggle('card-alert-low', out.length===0 && low.length>0);
+        const icon=document.getElementById('d-stock-alert-icon'); if(icon) icon.textContent = out.length ? '⛔' : '⚠';
+        const heading=stockCard.querySelector('.card-head h3');
+        if(heading) heading.lastChild.textContent = out.length ? ' Lagerbestand leer' : ' Lagerbestand niedrig';
+        const chips = [
+          ...out.map(p=>`<span class="pc-stock stock-out">${p.icon} ${p.name}</span>`),
+          ...low.map(p=>`<span class="pc-stock stock-low">${p.icon} ${p.name}</span>`),
+        ];
+        document.getElementById('d-stock-alert-chips').innerHTML = chips.join('');
       }
     }
   }

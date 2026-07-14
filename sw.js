@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.9.0'; // Lagerbestand-Seite neu strukturiert: Donut-Chart und Ring-Füllstände entfernt (zu verspielt, zu wenig Übersicht) und durch Dashboard-Stil ersetzt — kompakte Kennzahlen-Kacheln oben (wie auf der Übersicht-Seite) und strukturierte Produktkarten mit klaren Label/Wert-Paaren und schlichtem Füllstandsbalken.
+const APP_VERSION = '13.10.0'; // Warnungen bei sinkendem Lagerbestand: 1) Beim Buchen selbst erscheint sofort ein Warn-Toast, wenn der neue Stand "Niedrig" oder "Leer" ist. 2) Die Lagerbestand-Kachel auf der Übersicht-Seite ist jetzt eine echte Warnkarte (farbiger Rahmen/Hintergrund je nach Schweregrad, Warn-Icon, farbige Chips pro betroffenem Produkt) statt einer neutralen Info-Kachel.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
