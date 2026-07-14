@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.0.0'; // Liquid-Glass-Pass (angelehnt an iOS 27): Karten, Sidebar, Modals, Tabs, Buttons, Toast und Update-Banner sind jetzt echtes Frostglas (durchscheinend + Weichzeichner + Sättigung des Hintergrunds), mit dünnem Lichtsaum oben an jeder Fläche. Ecken durchgängig stark abgerundet, Buttons und aktive Nav-Kachel jetzt volle Pillenform. Rein visuell — Struktur, Funktionen und Bedienung unverändert.
+const APP_VERSION = '15.1.0'; // Neues Logo: statt des alten blockigen N+F-Monogramms jetzt ein eigenes Zeichen — drei aufsteigende "Flow-Balken" (steigender Lagerbestand/Fluss) über einer gepunkteten Bewegungsspur, mit Glas-Glanzlicht passend zum Liquid-Glass-Look. Betrifft Login-Logo, Sidebar-/Topbar-Marke und Favicon. Die statischen PNG-Icons (icons/icon-*.png fürs Homescreen-Icon) sind nicht im Projekt enthalten und daher unverändert.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="NicoFlow">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/favicon.png">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FF7A29'/%3E%3Cstop offset='55%25' stop-color='%23FFA65C'/%3E%3Cstop offset='100%25' stop-color='%2329D9B3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cpath d='M120 176 C 170 152, 210 152, 256 176 C 302 200, 342 200, 392 176' fill='none' stroke='%23ffffff' stroke-opacity='0.16' stroke-width='14' stroke-linecap='round'/%3E%3Cpath d='M120 336 C 170 312, 210 312, 256 336 C 302 360, 342 360, 392 336' fill='none' stroke='%23ffffff' stroke-opacity='0.16' stroke-width='14' stroke-linecap='round'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='91' y='156' width='34' height='200'/%3E%3Crect x='207' y='156' width='34' height='200'/%3E%3Cpolygon points='91,156 125,156 241,356 207,356'/%3E%3Crect x='271' y='156' width='34' height='200'/%3E%3Crect x='271' y='156' width='140' height='34'/%3E%3Crect x='271' y='239' width='110' height='34'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FF7A29'/%3E%3Cstop offset='55%25' stop-color='%23FFA65C'/%3E%3Cstop offset='100%25' stop-color='%2329D9B3'/%3E%3C/linearGradient%3E%3CradialGradient id='s' cx='35%25' cy='22%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='.6'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Crect width='512' height='512' rx='112' fill='url(%23s)'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='136' y='224' width='56' height='112' rx='28'/%3E%3Crect x='228' y='160' width='56' height='176' rx='28'/%3E%3Crect x='320' y='96' width='56' height='240' rx='28'/%3E%3C/g%3E%3Cpath d='M112 400 H400' fill='none' stroke='%23ffffff' stroke-opacity='.55' stroke-width='20' stroke-linecap='round' stroke-dasharray='2 34'/%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1129,21 +1129,22 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
             <stop offset="0%" stop-color="var(--accent2)"/>
             <stop offset="100%" stop-color="var(--sage-deep)"/>
           </linearGradient>
+          <radialGradient id="lg-sheen-login" cx="35%" cy="22%" r="60%">
+            <stop offset="0%" stop-color="#fff" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
         </defs>
         <circle cx="32" cy="32" r="30.5" fill="none" stroke="url(#lg-ring)" stroke-width="1.3" opacity=".55"/>
         <circle cx="32" cy="32" r="27" fill="none" stroke="var(--accent2)" stroke-width=".6" opacity=".3" stroke-dasharray="1 4"/>
         <rect x="8" y="8" width="48" height="48" rx="16" fill="url(#lg-badge-login)"/>
+        <rect x="8" y="8" width="48" height="48" rx="16" fill="url(#lg-sheen-login)"/>
         <rect x="8.5" y="8.5" width="47" height="47" rx="15.5" fill="none" stroke="#fff" stroke-width="1" opacity=".22"/>
-        <path d="M15 22 C 21.25 19, 26.25 19, 32 22 C 37.75 25, 42.75 25, 49 22" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.75" stroke-linecap="round"/>
-        <path d="M15 42 C 21.25 39, 26.25 39, 32 42 C 37.75 45, 42.75 45, 49 42" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.75" stroke-linecap="round"/>
         <g fill="#fff">
-          <rect x="11.4" y="19.5" width="4.25" height="25"/>
-          <rect x="25.9" y="19.5" width="4.25" height="25"/>
-          <polygon points="11.4,19.5 15.65,19.5 30.15,44.5 25.9,44.5"/>
-          <rect x="33.9" y="19.5" width="4.25" height="25"/>
-          <rect x="33.9" y="19.5" width="17.5" height="4.25"/>
-          <rect x="33.9" y="30" width="13.75" height="4.25"/>
+          <rect x="17" y="28" width="7" height="14" rx="3.5"/>
+          <rect x="28.5" y="20" width="7" height="22" rx="3.5"/>
+          <rect x="40" y="12" width="7" height="30" rx="3.5"/>
         </g>
+        <path d="M14 50 H50" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round" stroke-dasharray=".25 4.5"/>
       </svg>
     </div>
     <div class="login-label">Verwaltungssystem</div>
@@ -1175,7 +1176,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   <div class="shell">
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
-        <div class="tb-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF7A29"/><stop offset="55%" stop-color="#FFA65C"/><stop offset="100%" stop-color="#29D9B3"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#tbg1)"/><path d="M120 176 C 170 152, 210 152, 256 176 C 302 200, 342 200, 392 176" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><path d="M120 336 C 170 312, 210 312, 256 336 C 302 360, 342 360, 392 336" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><g fill="#fff"><rect x="91" y="156" width="34" height="200"/><rect x="207" y="156" width="34" height="200"/><polygon points="91,156 125,156 241,356 207,356"/><rect x="271" y="156" width="34" height="200"/><rect x="271" y="156" width="140" height="34"/><rect x="271" y="239" width="110" height="34"/></g></svg></div>
+        <div class="tb-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF7A29"/><stop offset="55%" stop-color="#FFA65C"/><stop offset="100%" stop-color="#29D9B3"/></linearGradient><radialGradient id="tbs1" cx="35%" cy="22%" r="60%"><stop offset="0%" stop-color="#fff" stop-opacity=".6"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#tbg1)"/><rect width="512" height="512" rx="112" fill="url(#tbs1)"/><rect x="8.5" y="8.5" width="495" height="495" rx="108" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/><g fill="#fff"><rect x="136" y="224" width="56" height="112" rx="28"/><rect x="228" y="160" width="56" height="176" rx="28"/><rect x="320" y="96" width="56" height="240" rx="28"/></g><path d="M112 400 H400" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="20" stroke-linecap="round" stroke-dasharray="2 34"/></svg></div>
         <div>
           <div class="tb-name">Nico<span>Flow</span></div>
           <div class="sub">Verwaltungssystem</div>
@@ -1210,7 +1211,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <div class="mobile-topbar">
         <div style="display:flex;align-items:center;gap:11px">
           <button class="hamburger" onclick="openSidebar()" aria-label="Menü öffnen"><svg class="svg-ic" style="width:18px;height:18px"><use href="#ic-menu"/></svg></button>
-          <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF7A29"/><stop offset="55%" stop-color="#FFA65C"/><stop offset="100%" stop-color="#29D9B3"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#tbg2)"/><path d="M120 176 C 170 152, 210 152, 256 176 C 302 200, 342 200, 392 176" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><path d="M120 336 C 170 312, 210 312, 256 336 C 302 360, 342 360, 392 336" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><g fill="#fff"><rect x="91" y="156" width="34" height="200"/><rect x="207" y="156" width="34" height="200"/><polygon points="91,156 125,156 241,356 207,356"/><rect x="271" y="156" width="34" height="200"/><rect x="271" y="156" width="140" height="34"/><rect x="271" y="239" width="110" height="34"/></g></svg></div>
+          <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF7A29"/><stop offset="55%" stop-color="#FFA65C"/><stop offset="100%" stop-color="#29D9B3"/></linearGradient><radialGradient id="tbs2" cx="35%" cy="22%" r="60%"><stop offset="0%" stop-color="#fff" stop-opacity=".6"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#tbg2)"/><rect width="512" height="512" rx="112" fill="url(#tbs2)"/><rect x="8.5" y="8.5" width="495" height="495" rx="108" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/><g fill="#fff"><rect x="136" y="224" width="56" height="112" rx="28"/><rect x="228" y="160" width="56" height="176" rx="28"/><rect x="320" y="96" width="56" height="240" rx="28"/></g><path d="M112 400 H400" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="20" stroke-linecap="round" stroke-dasharray="2 34"/></svg></div>
           <div class="tb-name" style="font-size:15px">Nico<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Flow</span></div>
         </div>
         <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer" aria-label="Menü öffnen">A</button>
