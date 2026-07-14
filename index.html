@@ -126,6 +126,16 @@ button,.scale-tick,.ic-btn,input[type="checkbox"]+.tt{touch-action:manipulation}
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg, var(--sage), var(--accent2));border-radius:99px;opacity:.7}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
 ::selection{background:var(--sage-bg);color:var(--sage-deep)}
+/* Deckt ALLE Animationen/Übergänge ab (nicht nur die Login-Aurora weiter unten) — respektiert
+   die Systemeinstellung "Bewegung reduzieren" konsequent in der ganzen App. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
 
 h1,h2,h3,h4{font-family:'Sora',sans-serif;font-weight:600;letter-spacing:-.01em}
 
@@ -363,6 +373,13 @@ button{font-family:inherit;cursor:pointer}
 .btn-sm{padding:7px 12px;font-size:11px}
 .btn-sm.btn-primary{padding:7px 14px}
 .ic-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;color:var(--ink-faint);transition:all .15s ease;font-size:13px;min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
+.ic-btn:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+/* Klickbare divs (Karten, Nav-Einträge, Bild-Picker etc.) sind per tabindex/role="button" per
+   Tastatur erreichbar (siehe JS) — hier der dazugehörige sichtbare Fokus-Ring. */
+.kcard:focus-visible,.scale-tick:focus-visible,.vpick-card:focus-visible,.t-d:focus-visible,
+.vimg-suggest-item:focus-visible,.vshop-imgwrap:focus-visible,#d-stock-alert-card:focus-visible{
+  outline:2px solid var(--sage);outline-offset:2px;
+}
 .ic-btn:hover{background:var(--rust-bg);color:var(--rust);transform:scale(1.08)}
 .ic-btn:active{transform:scale(.92)}
 .status-btn{
@@ -629,6 +646,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .tt::before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
 .toggle input:checked+.tt{background:var(--sage-deep)}
 .toggle input:checked+.tt::before{transform:translateX(17px)}
+.toggle input:focus-visible+.tt{outline:2px solid var(--sage);outline-offset:2px}
 .mr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .about-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
 .about-row:last-child{border-bottom:none}
@@ -1132,15 +1150,15 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <nav class="scalebar" id="scalebar">
-        <div class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span>Übersicht</div>
-        <div class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
-        <div class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span>Lieferant &amp; Schulden</div>
-        <div class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span>Kunden</div>
-        <div class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
-        <div class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
-        <div class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span>Lagerbestand</div>
-        <div class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
-        <div class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span>Übersicht</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span>Lieferant &amp; Schulden</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span>Kunden</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span>Lagerbestand</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
       </nav>
       <div class="sb-footer">
         <div class="tb-user">
@@ -1161,7 +1179,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
           <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tbg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7C6FF5"/><stop offset="55%" stop-color="#5EA8FF"/><stop offset="100%" stop-color="#2DD4BF"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#tbg2)"/><path d="M120 176 C 170 152, 210 152, 256 176 C 302 200, 342 200, 392 176" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><path d="M120 336 C 170 312, 210 312, 256 336 C 302 360, 342 360, 392 336" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="14" stroke-linecap="round"/><g fill="#fff"><rect x="91" y="156" width="34" height="200"/><rect x="207" y="156" width="34" height="200"/><polygon points="91,156 125,156 241,356 207,356"/><rect x="271" y="156" width="34" height="200"/><rect x="271" y="156" width="140" height="34"/><rect x="271" y="239" width="110" height="34"/></g></svg></div>
           <div class="tb-name" style="font-size:15px">Nico<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Flow</span></div>
         </div>
-        <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer">A</button>
+        <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer" aria-label="Menü öffnen">A</button>
       </div>
 
       <div class="main">
@@ -1229,7 +1247,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div class="ps" id="d-pickup-stat-text" style="margin:0 0 4px"></div>
       </div>
 
-      <div class="card" id="d-stock-alert-card" style="display:none;cursor:pointer" onclick="nav('lagerbestand')">
+      <div class="card" id="d-stock-alert-card" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="display:none;cursor:pointer" onclick="nav('lagerbestand')">
         <div class="card-head"><h3><span id="d-stock-alert-icon">⚠</span> Lagerbestand niedrig</h3></div>
         <div class="lager-alert-chips" id="d-stock-alert-chips"></div>
         <div class="ps" style="margin:0">Antippen, um nachzubuchen.</div>
@@ -1593,7 +1611,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Neuer Kunde -->
 <div class="modal-bg" id="modal-kunde">
   <div class="modal">
-    <div class="modal-head"><h3>Neuer Kunde</h3><button class="modal-close" onclick="closeModal('kunde')">✕</button></div>
+    <div class="modal-head"><h3>Neuer Kunde</h3><button class="modal-close" onclick="closeModal('kunde')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="fw"><label class="fl">Vorname</label><input id="nk-vorname" placeholder="Max" oninput="clearFieldError('nk-vorname')"/><div class="field-err" id="nk-vorname-err"></div></div>
       <div><label class="fl">Nachname</label><input id="nk-nachname" placeholder="Mustermann" oninput="clearFieldError('nk-nachname')"/><div class="field-err" id="nk-nachname-err"></div></div>
@@ -1608,7 +1626,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Kunde Detail -->
 <div class="modal-bg" id="modal-kundendetail">
   <div class="modal wide">
-    <div class="modal-head"><h3 id="kd-name">Kunde</h3><button class="modal-close" onclick="closeModal('kundendetail')">✕</button></div>
+    <div class="modal-head"><h3 id="kd-name">Kunde</h3><button class="modal-close" onclick="closeModal('kundendetail')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="tab-group" style="width:100%;margin-bottom:16px">
         <button type="button" class="tab-btn active" id="kd-tab-infos" onclick="switchKdTab('infos')" style="flex:1;justify-content:center">Infos</button>
@@ -1652,7 +1670,7 @@ alter table profiles add column if not exists adresse text;</pre>
      kein eigener Datensatz) -->
 <div class="modal-bg" id="modal-lieferantenkundendetail">
   <div class="modal wide">
-    <div class="modal-head"><h3 id="lkd-name">◆ Lieferantenkunde</h3><button class="modal-close" onclick="closeModal('lieferantenkundendetail')">✕</button></div>
+    <div class="modal-head"><h3 id="lkd-name">◆ Lieferantenkunde</h3><button class="modal-close" onclick="closeModal('lieferantenkundendetail')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="tab-group" style="width:100%;margin-bottom:16px">
         <button type="button" class="tab-btn active" id="lkd-tab-bestellungen" onclick="switchLkdTab('bestellungen')" style="flex:1;justify-content:center">Bestellungen</button>
@@ -1681,7 +1699,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Neue Bestellung -->
 <div class="modal-bg" id="modal-bestellung">
   <div class="modal wide">
-    <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')">✕</button></div>
+    <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde" onchange="renderOrderItems()"></select></div>
       <label class="fl" style="margin-bottom:8px">Produkte</label>
@@ -1718,7 +1736,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Neue Bestellung beim Lieferanten -->
 <div class="modal-bg" id="modal-lbbestellung">
   <div class="modal wide">
-    <div class="modal-head"><h3><svg class="h-ic"><use href="#ic-truck"/></svg>Neue Bestellung beim Lieferanten</h3><button class="modal-close" onclick="closeModal('lbbestellung')">✕</button></div>
+    <div class="modal-head"><h3><svg class="h-ic"><use href="#ic-truck"/></svg>Neue Bestellung beim Lieferanten</h3><button class="modal-close" onclick="closeModal('lbbestellung')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <label class="fl" style="margin-bottom:8px">Produkte</label>
       <div id="lb-order-items"></div>
@@ -1741,7 +1759,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Bestellung Details -->
 <div class="modal-bg" id="modal-orderdetail">
   <div class="modal wide">
-    <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')">✕</button></div>
+    <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="abholcode-box" id="od-abholcode-box" style="display:none">
         <div>
@@ -1791,7 +1809,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Was ist neu -->
 <div class="modal-bg" id="modal-whatsnew">
   <div class="modal">
-    <div class="modal-head"><h3>✨ Was ist neu</h3><button class="modal-close" onclick="closeModal('whatsnew')">✕</button></div>
+    <div class="modal-head"><h3>✨ Was ist neu</h3><button class="modal-close" onclick="closeModal('whatsnew')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <ul id="wn-list" style="margin:0;padding-left:20px;line-height:1.7"></ul>
     </div>
@@ -1802,7 +1820,7 @@ alter table profiles add column if not exists adresse text;</pre>
 </div>
 <div class="modal-bg" id="modal-pricehistory">
   <div class="modal">
-    <div class="modal-head"><h3>Preis-Verlauf <span class="mono" id="ph-prod-name" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('pricehistory')">✕</button></div>
+    <div class="modal-head"><h3>Preis-Verlauf <span class="mono" id="ph-prod-name" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('pricehistory')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="tbl-wrap"><table><thead><tr><th>Geändert am</th><th>Einkauf</th><th>Verkauf</th></tr></thead><tbody id="ph-tbody"></tbody></table></div>
       <div class="ec" id="ph-empty" style="display:none">
@@ -1819,14 +1837,14 @@ alter table profiles add column if not exists adresse text;</pre>
 
 <!-- LIGHTBOX: Varianten-Bild in groß -->
 <div id="lightbox-bg" onclick="closeLightbox(event)">
-  <button id="lightbox-close" onclick="closeLightbox(event)">✕</button>
+  <button id="lightbox-close" onclick="closeLightbox(event)" aria-label="Schließen">✕</button>
   <img id="lightbox-img" src="" alt="Produktbild">
 </div>
 
 <!-- BESTÄTIGUNGS-DIALOG (ersetzt natives confirm() bei kritischen Aktionen) -->
 <div class="modal-bg" id="modal-confirm">
   <div class="modal" style="max-width:400px">
-    <div class="modal-head"><h3 id="cf-title">Bist du sicher?</h3><button class="modal-close" onclick="_confirmResolve(false)">✕</button></div>
+    <div class="modal-head"><h3 id="cf-title">Bist du sicher?</h3><button class="modal-close" onclick="_confirmResolve(false)" aria-label="Schließen">✕</button></div>
     <div class="modal-body"><p id="cf-text" style="font-size:13px;color:var(--ink-soft);line-height:1.55"></p></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="cf-cancel-btn" onclick="_confirmResolve(false)">Abbrechen</button>
@@ -1839,7 +1857,7 @@ alter table profiles add column if not exists adresse text;</pre>
      Kunden genannt und hier eingegeben werden, bevor als bezahlt markiert werden kann) -->
 <div class="modal-bg" id="modal-abholcode-confirm">
   <div class="modal" style="max-width:380px">
-    <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')">✕</button></div>
+    <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <p id="ac-hint" style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.</p>
       <label class="fl">Abholcode</label>
@@ -1851,7 +1869,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="ac-scan-video-wrap" id="ac-scan-video-wrap">
           <video id="ac-scan-video" playsinline muted></video>
           <div class="ac-scan-frame"></div>
-          <button type="button" class="ac-scan-torch" id="ac-scan-torch-btn" onclick="toggleAbholcodeTorch()" style="display:none" title="Blitzlicht ein/aus">🔦</button>
+          <button type="button" class="ac-scan-torch" id="ac-scan-torch-btn" onclick="toggleAbholcodeTorch()" style="display:none" title="Blitzlicht ein/aus" aria-label="Blitzlicht ein/aus">🔦</button>
         </div>
         <p id="ac-scan-status" class="ac-scan-status" style="display:none"></p>
         <canvas id="ac-scan-canvas" style="display:none"></canvas>
@@ -1871,7 +1889,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- SCHNELLANSICHT: Code direkt aus der Tabelle heraus zeigen, ohne erst das volle Bestell-Detail zu öffnen -->
 <div class="modal-bg" id="modal-quick-code">
   <div class="modal" style="max-width:340px">
-    <div class="modal-head"><h3>Abholcode</h3><button class="modal-close" onclick="closeModal('quick-code')">✕</button></div>
+    <div class="modal-head"><h3>Abholcode</h3><button class="modal-close" onclick="closeModal('quick-code')" aria-label="Schließen">✕</button></div>
     <div class="modal-body" style="text-align:center">
       <div class="mono" id="qc-code" style="font-size:40px;font-weight:800;letter-spacing:.12em;margin-bottom:6px"></div>
       <div class="ps" id="qc-hint" style="margin-bottom:10px"></div>
@@ -1891,7 +1909,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- SAMMEL-ABHOLUNG: alle offenen Bestellungen eines Kunden auf einmal abschließen -->
 <div class="modal-bg" id="modal-batch-pickup">
   <div class="modal">
-    <div class="modal-head"><h3>Alle offenen Bestellungen</h3><button class="modal-close" onclick="closeModal('batch-pickup')">✕</button></div>
+    <div class="modal-head"><h3>Alle offenen Bestellungen</h3><button class="modal-close" onclick="closeModal('batch-pickup')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--ink-soft);margin-bottom:12px" id="bp-hint"></p>
       <div id="bp-list"></div>
@@ -2016,6 +2034,15 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
+// Macht klickbare <div>s (Karten, Nav-Einträge, Bild-Picker …) per Tastatur bedienbar: zusammen
+// mit tabindex="0" role="button" im Markup lösen Enter/Leertaste denselben Klick aus wie ein
+// Mausklick, statt dass Tastatur-Nutzer:innen dort einfach hängen bleiben.
+function onKeyActivate(e){
+  if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){
+    e.preventDefault();
+    e.currentTarget.click();
+  }
+}
 const CURRENT_UI_VERSION = '8.7.0';
 const WHATS_NEW = {
   '4.0.0': [
@@ -2462,6 +2489,22 @@ function closeLightbox(e){
   if(e && e.target && e.target.id!=='lightbox-bg' && e.target.id!=='lightbox-close') return;
   document.getElementById('lightbox-bg').classList.remove('show');
 }
+// Escape schließt (in dieser Reihenfolge) Lightbox → offenes Modal → Sidebar. Bisher gab es
+// dafür gar keinen Tastatur-Weg — Maus/Touch waren die einzige Möglichkeit, etwas zu schließen.
+document.addEventListener('keydown', (e)=>{
+  if(e.key!=='Escape') return;
+  const lightbox=document.getElementById('lightbox-bg');
+  if(lightbox && lightbox.classList.contains('show')){ closeLightbox({target:lightbox}); return; }
+  const openModalEl=document.querySelector('.modal-bg.show');
+  if(openModalEl){
+    const id=openModalEl.id.replace(/^modal-/,'');
+    if(id==='confirm') _confirmResolve(false);
+    else closeModal(id);
+    return;
+  }
+  const sidebar=document.getElementById('sidebar');
+  if(sidebar && sidebar.classList.contains('show')){ closeSidebar(); return; }
+});
 
 // ══════════════════════════════════════════════
 // THEME
@@ -2834,7 +2877,7 @@ async function runVariantImageSearch(prodId){
       grid.innerHTML = results.map(r=>{
         const thumb=(r.thumbnail||r.url).replace(/"/g,'&quot;');
         const full=(r.url||r.thumbnail).replace(/"/g,'&quot;');
-        return `<div class="vimg-suggest-item" title="Dieses Bild verwenden" onclick="pickSuggestedImage('${prodId}','${full}','${thumb}')"><img src="${thumb}" alt="Vorschlag" loading="lazy"></div>`;
+        return `<div class="vimg-suggest-item" tabindex="0" role="button" onkeydown="onKeyActivate(event)" title="Dieses Bild verwenden" aria-label="Dieses Bild verwenden" onclick="pickSuggestedImage('${prodId}','${full}','${thumb}')"><img src="${thumb}" alt="Vorschlag" loading="lazy"></div>`;
       }).join('') + `<div class="vimg-suggest-note">Kostenlos über Openverse (frei lizenzierte Bilder). Antippen zum Übernehmen.</div>`;
     }
   }catch(e){
@@ -2871,8 +2914,8 @@ function renderVariantList(prodId){
       ? `<img src="${escapeAttr(v.bildUrl)}" alt="${escapeAttr(v.name)}">`
       : `📦`;
     return `<div class="vshop-card">
-      <button class="ic-btn vshop-rm" onclick="deleteVariant('${prodId}',${v.id})" title="Löschen">✕</button>
-      <div class="vshop-imgwrap ${v.bildUrl?'':'noimg'}" onclick="${v.bildUrl?`openLightbox('${escapeAttr(v.bildUrl)}')`:''}" title="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}">${imgBlock}</div>
+      <button class="ic-btn vshop-rm" onclick="deleteVariant('${prodId}',${v.id})" title="Löschen" aria-label="Variante löschen">✕</button>
+      <div class="vshop-imgwrap ${v.bildUrl?'':'noimg'}" ${v.bildUrl?'tabindex="0" role="button" onkeydown="onKeyActivate(event)"':''} onclick="${v.bildUrl?`openLightbox('${escapeAttr(v.bildUrl)}')`:''}" title="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}" aria-label="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}">${imgBlock}</div>
       <div class="vshop-name" title="${escapeAttr(v.name)}">${escapeHtml(v.name)}</div>
       <div class="vshop-meta">
         <span class="vshop-price">${fmt(v.preis)}</span>
@@ -3072,7 +3115,7 @@ function renderKdBestellungen(){
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td class="mono" style="font-weight:700">${fmt(b.total)}</td>
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
-      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
+      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button></td>
     </tr>`;
   }).join('');
 }
@@ -3159,8 +3202,8 @@ function renderKunden(){
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
     const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${escapeHtml(usernameOf(k.userId))}</span>` : '';
-    return `<div class="kcard" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
-      <div class="kc-top"><div class="kc-name">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
+    return `<div class="kcard" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
+      <div class="kc-top"><div class="kc-name">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})" title="Kunde löschen" aria-label="Kunde löschen">🗑</button>`}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -3190,7 +3233,7 @@ function renderLieferantenkundenSeite(){
   g.innerHTML = lkUsers.map(u=>{
     const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
     const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
-    return `<div class="kcard" style="cursor:pointer" onclick="openLieferantenkundeDetail('${u.id}')">
+    return `<div class="kcard" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="cursor:pointer" onclick="openLieferantenkundeDetail('${u.id}')">
       <div class="kc-top"><div class="kc-name">◆ ${escapeHtml(u.username)}</div></div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
@@ -3227,7 +3270,7 @@ function renderLkdBestellungen(){
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       <td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td>
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
-      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
+      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button></td>
     </tr>`;
   }).join('');
 }
@@ -3315,7 +3358,7 @@ function variantPickerHtml(uid, prodId, currentVariantId, forLieferant, updaterF
   const cards = variants.map(v=>{
     const sel = String(v.id)===String(currentVariantId);
     const imgBlock = v.bildUrl ? `<img src="${escapeAttr(v.bildUrl)}" alt="${escapeAttr(v.name)}">` : '📦';
-    return `<div class="vpick-card${sel?' selected':''}" onclick="${updaterFnName}(${uid},'variant','${v.id}')">
+    return `<div class="vpick-card${sel?' selected':''}" tabindex="0" role="button" onkeydown="onKeyActivate(event)" onclick="${updaterFnName}(${uid},'variant','${v.id}')">
       <div class="vpick-imgwrap">${imgBlock}</div>
       <div class="vpick-name" title="${escapeAttr(v.name)}">${escapeHtml(v.name)}</div>
       <div class="vpick-price">${fmt(v.preis)}</div>
@@ -3341,7 +3384,7 @@ function renderOrderItems(){
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateOrderItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono" title="${custom!=null?'Individueller Preis für diesen Kunden':''}">${sub}${custom!=null?' ★':''}</div>
-      <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})">✕</button>
+      <button class="ic-btn oi-rm" onclick="removeOrderItem(${it.uid})" title="Position entfernen" aria-label="Position entfernen">✕</button>
       ${variantPickerHtml(it.uid, it.prod, it.variant, false, 'updateOrderItem')}
     </div>`;
   }).join('');
@@ -3600,7 +3643,7 @@ function renderLbItems(){
       </select>
       <input type="number" min="1" value="${it.stueck}" onchange="updateLbItem(${it.uid},'stueck',this.value)"/>
       <div class="oi-total mono">${sub}</div>
-      <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})">✕</button>
+      <button class="ic-btn oi-rm" onclick="removeLbItem(${it.uid})" title="Position entfernen" aria-label="Position entfernen">✕</button>
       ${variantPickerHtml(it.uid, it.prod, it.variant, true, 'updateLbItem')}
     </div>`;
   }).join('');
@@ -3686,7 +3729,7 @@ function renderLbHistory(){
           : `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>${warteBadgeHtml(b)}${codeExpiryHint(b)}`)
       : '<span style="color:var(--ink-faint)">–</span>';
     const quickBtn = (b.abholcode && !b.paid && !isCodeExpired(b))
-      ? `<button class="ic-btn" onclick="quickShowAbholcode(${b.id})" title="Code schnell anzeigen">▦</button>`
+      ? `<button class="ic-btn" onclick="quickShowAbholcode(${b.id})" title="Code schnell anzeigen" aria-label="Abholcode schnell anzeigen">▦</button>`
       : '';
     return `<tr>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -3696,8 +3739,8 @@ function renderLbHistory(){
       <td>${abholcodeCell}</td>
       <td>${bezahltBadge}</td>
       <td style="text-align:right">${quickBtn}</td>
-      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button></td>
-      <td style="text-align:right"><button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben">🗑</button></td>
+      <td style="text-align:right"><button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button></td>
+      <td style="text-align:right"><button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben" aria-label="In den Papierkorb verschieben">🗑</button></td>
     </tr>`;
   }).join('');
 }
@@ -3722,8 +3765,8 @@ function renderEigeneSchulden(){
     <div class="es-row-amount mono">${fmt(x.betrag)}</div>
     <span class="badge ${x.bezahlt?'b-bezahlt':'b-offen'}">${x.bezahlt?'Bezahlt':'Offen'}</span>
     <div class="es-row-actions">
-      <button class="ic-btn" onclick="toggleEigeneSchuld(${x.id})" title="${x.bezahlt?'Als offen markieren':'Als bezahlt markieren'}">${x.bezahlt?'↺':'✓'}</button>
-      <button class="ic-btn" onclick="delEigeneSchuld(${x.id})" title="Löschen">🗑</button>
+      <button class="ic-btn" onclick="toggleEigeneSchuld(${x.id})" title="${x.bezahlt?'Als offen markieren':'Als bezahlt markieren'}" aria-label="${x.bezahlt?'Als offen markieren':'Als bezahlt markieren'}">${x.bezahlt?'↺':'✓'}</button>
+      <button class="ic-btn" onclick="delEigeneSchuld(${x.id})" title="Löschen" aria-label="Schuld löschen">🗑</button>
     </div>
   </div>`).join('');
 }
@@ -4207,7 +4250,7 @@ function renderTrash(){
       <td class="mono" style="font-weight:700">${fmt(b.total)}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="restoreBestellung(${b.id})">↺ Wiederherstellen</button>
-        <button class="ic-btn" onclick="purgeBestellung(${b.id})" title="Endgültig löschen">🗑</button>
+        <button class="ic-btn" onclick="purgeBestellung(${b.id})" title="Endgültig löschen" aria-label="Endgültig löschen">🗑</button>
       </td>
     </tr>`;
   }).join('');
@@ -4345,8 +4388,8 @@ function renderBestellungen(){
         <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDateTime(b.paidAt)}</td>
         ${gesamt}
         <td style="text-align:right;white-space:nowrap">
-          <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
-          ${canDelete?`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`:''}
+          <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button>
+          ${canDelete?`<button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben" aria-label="In den Papierkorb verschieben">🗑</button>`:''}
         </td>
       </tr>`;
     }
@@ -4366,8 +4409,8 @@ function renderBestellungen(){
       <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
       <td style="text-align:right;white-space:nowrap">
         ${actionBtn}
-        <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen">👁</button>
-        ${canDelete?`<button class="ic-btn" onclick="delBestellung(${b.id})">🗑</button>`:''}
+        <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button>
+        ${canDelete?`<button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben" aria-label="In den Papierkorb verschieben">🗑</button>`:''}
       </td>
     </tr>`;
   }).join('');
@@ -5247,7 +5290,7 @@ function renderSettings(){
   const co=document.getElementById('set-compact');if(co)co.checked=VS.compact;
   const lm=document.getElementById('set-lightmode');if(lm)lm.checked=(VS.mode==='light');
   const tg=document.getElementById('theme-grid');
-  if(tg) tg.innerHTML=THEMES.map((t,i)=>`<div class="t-d ${i===VS.themeIdx?'on':''}" style="background:${t.accent}" onclick="applyTheme(${i})" title="${t.name}"></div>`).join('');
+  if(tg) tg.innerHTML=THEMES.map((t,i)=>`<div class="t-d ${i===VS.themeIdx?'on':''}" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="background:${t.accent}" onclick="applyTheme(${i})" title="${escapeAttr(t.name)}" aria-label="Theme: ${escapeAttr(t.name)}"></div>`).join('');
   renderUserList();
   document.getElementById('set-stat').textContent=`${S.kunden.length} Kunden · ${S.bestellungen.length} Bestellungen · ${M.users.length} Benutzer`;
   // Karten je nach Rolle ein-/ausblenden (gleich auf Desktop und Handy).
@@ -5304,7 +5347,7 @@ function renderUserList(){
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
       <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div><div class="ul-role"><span class="badge ${roleBadgeClass(u.role)}">${roleLabel(u.role)}</span></div></div>
       ${linkSelect}
-      ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
+      ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
     </div>`;
   }).join('');
 }
