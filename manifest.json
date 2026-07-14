@@ -1,6 +1,6 @@
 {
-  "name": "NicotineManager",
-  "short_name": "NicotineMgr",
+  "name": "NicoFlow",
+  "short_name": "NicoFlow",
   "description": "Bestand, Bestellungen und Schulden verwalten",
   "start_url": "./index.html",
   "scope": "./",
