@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.8.0'; // Umbenennung auf NicoFlow + neues NF-Logo überall nachgezogen (Login, Sidebar, mobile Topbar, Favicon). Lagerbestand-Seite grafisch aufgewertet: Donut-Chart-Übersicht statt reiner Text-Badges, Produktkarten mit animiertem Ring-Füllstand statt dünnem Balken, Niedrig-Status jetzt farblich (Amber) von Leer (Rot) unterschieden.
+const APP_VERSION = '13.8.1'; // Schriftart der Lagerbestand-Übersicht (Donut-Zahl) korrigiert: nutzt jetzt wie überall sonst (z.B. auf der Übersicht/Dashboard-Seite bei den Kennzahlen-Kacheln) JetBrains Mono statt der Überschriften-Schriftart, damit alle großen Zahlen im gesamten App konsistent aussehen.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
