@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.12.0'; // Barrierefreiheit nachgezogen: 1) Alle bisher unbeschrifteten Icon-Buttons (Löschen/Details/Schließen etc.) haben jetzt ein aria-label, nicht mehr nur ein title-Attribut. 2) Klickbare Kacheln ohne echtes <button> (Sidebar-Navigation, Kunden-/Lieferantenkunden-Karten, Varianten-Auswahl, Theme-Muster, Bildvorschläge, Lagerbestand-Warnkarte) sind jetzt per Tab erreichbar und mit Enter/Leertaste bedienbar, inkl. sichtbarem Fokus-Ring — vorher nur per Maus/Touch nutzbar. 3) Escape schließt jetzt Lightbox/offenes Modal/Sidebar (gab es bisher gar nicht). 4) "Bewegung reduzieren" (prefers-reduced-motion) wirkt jetzt global auf alle Animationen/Übergänge, nicht nur auf die Login-Aurora. 5) Sichtbarer Fokus-Ring für die Toggle-Switches ergänzt.
+const APP_VERSION = '14.0.0'; // Neues Layout/Look: komplett neues Farb- und Typo-System ("Signal" — warmes Signal-Orange statt Violett), Space Grotesk für Überschriften, gestrichelte "Flow"-Signaturlinie in Seiten-/Karten-Köpfen statt durchgezogenem Farbverlauf, dezentes Blaupausen-Raster im Hintergrund statt weicher Farbflecken. Rein visuell — Struktur, Funktionen und Bedienung unverändert. Alle bisherigen Theme-Farben (Einstellungen → Design) funktionieren weiterhin, das Standard-Theme heißt jetzt "Signal".
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
