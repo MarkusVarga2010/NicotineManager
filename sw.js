@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.6.0'; // Wichtiger Fix: jsQR wurde von einer nicht existenten cdnjs-URL geladen (window.jsQR war immer undefined) — der QR-Scanner öffnete zwar die Kamera, hat aber NIE einen Code erkannt. Jetzt über die korrekte jsDelivr-URL eingebunden + Startprüfung mit klarer Fehlermeldung, falls die Bibliothek doch mal nicht laden sollte. Außerdem: Lagerbestand mit Warnschwelle/Status/Sortierung/Dashboard-Warnung professionalisiert, neuer Marken-Ladebildschirm beim Start.
+const APP_VERSION = '13.7.0'; // Lagerbestand-Seite von dichter Tabelle auf Karten-Grid umgestellt (gleicher visueller Stil wie Preise-Seite), mit Mini-Füllstandsbalken und eigener "Braucht Aufmerksamkeit"-Gruppe für leere/niedrige Produkte ganz oben.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

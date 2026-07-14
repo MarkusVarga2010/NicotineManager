@@ -983,6 +983,13 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .pc-stock.stock-out{background:var(--rust-bg);color:var(--rust);border:1px solid color-mix(in srgb, var(--rust) 45%, transparent)}
 .lager-summary{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px 0}
 .lager-summary .pc-stock{cursor:default}
+.lager-group-head{display:flex;align-items:center;gap:8px;margin:22px 0 12px}
+.lager-group-head:first-child{margin-top:0}
+.lager-group-head .lg-line{flex:1;height:1px;background:var(--line)}
+.lager-group-head .lg-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);white-space:nowrap}
+.lager-group-head.lg-critical .lg-label{color:var(--rust)}
+.lager-fill{height:4px;border-radius:2px;background:var(--paper3);overflow:hidden;margin-bottom:12px}
+.lager-fill-bar{height:100%;border-radius:2px}
 </style>
 </head>
 <body>
@@ -1415,8 +1422,8 @@ create policy "lagerbestand manuell eigener user"
       </div>
       <div class="card" id="lager-manuell-card">
         <div id="lager-summary" class="lager-summary"></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Status</th><th>Tatsächlich vorhanden</th><th>Warnschwelle</th><th>Zuletzt gebucht</th><th></th></tr></thead><tbody id="lager-manuell-tbody"></tbody></table></div>
       </div>
+      <div id="lager-manuell-groups"></div>
     </div>
 
     <!-- EINSTELLUNGEN -->
@@ -1972,7 +1979,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.6.0';
+const CURRENT_UI_VERSION = '8.7.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -2050,6 +2057,9 @@ const WHATS_NEW = {
     'QR-Scanner-Fehler endlich wirklich behoben: die Erkennungs-Bibliothek wurde von einer kaputten Adresse geladen, dadurch lief die Kamera zwar, hat aber nie etwas erkannt. Jetzt korrekt eingebunden, inkl. Warnhinweis statt stillem Versagen, falls das nochmal passieren sollte.',
     'Lagerbestand professionalisiert: jedes Produkt hat jetzt eine eigene Warnschwelle, ein Status ("Auf Lager" / "Niedrig" / "Leer") wird direkt angezeigt, knappe Produkte stehen automatisch oben in der Liste, eine Zusammenfassung zeigt die Lage auf einen Blick, und eine neue Dashboard-Kachel warnt, sobald etwas zur Neige geht.',
     'Neuer Ladebildschirm mit Marken-Optik beim Start/Login, statt eines kurzzeitig leeren Bildschirms während die Daten geladen werden.'
+  ],
+  '8.7.0': [
+    'Lagerbestand übersichtlicher: statt einer dichten Tabelle jetzt Karten im selben Stil wie die Preise-Seite, mit Mini-Füllstandsbalken pro Produkt. Kritische Produkte (leer/niedrig) stehen in einer eigenen "Braucht Aufmerksamkeit"-Gruppe ganz oben, getrennt vom Rest.'
   ]
 };
 function checkWhatsNew(){
@@ -2457,13 +2467,16 @@ function lagerStatus(menge, schwelle){
 function renderLagerManuell(){
   const hint=document.getElementById('lager-manuell-setup-hint');
   const card=document.getElementById('lager-manuell-card');
+  const groupsEl=document.getElementById('lager-manuell-groups');
   if(lagerManuellTableMissing){
     if(hint) hint.style.display='block';
     if(card) card.style.display='none';
+    if(groupsEl) groupsEl.style.display='none';
     return;
   }
   if(hint) hint.style.display='none';
   if(card) card.style.display='block';
+  if(groupsEl) groupsEl.style.display='block';
   const schwelleHint=document.getElementById('lager-schwelle-setup-hint');
   if(schwelleHint) schwelleHint.style.display = lagerSchwelleSpalteMissing ? 'block' : 'none';
 
@@ -2489,19 +2502,40 @@ function renderLagerManuell(){
 
   const statusLabel={ out:'Leer', low:'Niedrig', ok:'Auf Lager', unset:'Noch nicht erfasst' };
   const statusClass={ out:'stock-out', low:'stock-low', ok:'stock-ok', unset:'' };
+  const barColor={ out:'var(--rust)', low:'var(--rust)', ok:'var(--success)', unset:'var(--line2)' };
 
-  const tbl=document.getElementById('lager-manuell-tbody');
-  if(!tbl) return;
-  tbl.innerHTML=rows.map(({p, menge, schwelle, hasEntry, status})=>{
+  function cardHtml({p, menge, schwelle, hasEntry, status}){
     const updated = S.lagerManuell[p.id]?.updatedAt ? fmtDateTime(S.lagerManuell[p.id].updatedAt) : '—';
     const badge = status==='unset' ? `<span class="pc-stock" style="background:var(--paper3);color:var(--ink-faint);border:1px solid var(--line)">${statusLabel[status]}</span>` : `<span class="pc-stock ${statusClass[status]}">${statusLabel[status]}</span>`;
-    return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td>
-      <td>${badge}</td>
-      <td><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${hasEntry?menge:''}" placeholder="—" style="width:90px" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
-      <td><input type="number" min="0" step="1" id="lm-schwelle-${p.id}" value="${schwelle}" style="width:80px" title="Ab dieser Menge oder darunter gilt das Produkt als 'Niedrig'" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
-      <td class="mono" style="color:var(--ink-faint);font-size:11.5px">${updated}</td>
-      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="bookLagerbestand('${p.id}')">✓ Buchen</button></td></tr>`;
-  }).join('');
+    // Füllstand relativ zur doppelten Warnschwelle (= grobe Referenz für "gut gefüllt"), auf 100% gedeckelt.
+    const fillPct = hasEntry ? Math.max(4, Math.min(100, Math.round((menge/Math.max(1,schwelle*2))*100))) : 0;
+    return `
+    <div class="pc">
+      <div class="pc-eyebrow">Bestand · ${p.id}</div>
+      <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}${badge}</div>
+      <div class="pc-val">${hasEntry?menge:'—'} Stk</div>
+      <div class="lager-fill"><div class="lager-fill-bar" style="width:${fillPct}%;background:${barColor[status]}"></div></div>
+      <div class="ps" style="margin:0 0 10px">Zuletzt gebucht: ${updated}</div>
+      <div class="pc-edit">
+        <div style="flex:1"><label class="fl" style="margin-bottom:4px">Vorhanden</label><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${hasEntry?menge:''}" placeholder="—" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></div>
+        <div style="flex:1"><label class="fl" style="margin-bottom:4px">Warnschwelle</label><input type="number" min="0" step="1" id="lm-schwelle-${p.id}" value="${schwelle}" title="Ab dieser Menge oder darunter gilt das Produkt als 'Niedrig'" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%;justify-content:center" onclick="bookLagerbestand('${p.id}')">✓ Buchen</button>
+    </div>`;
+  }
+
+  const critical = rows.filter(r=>r.status==='out'||r.status==='low');
+  const rest = rows.filter(r=>r.status==='ok'||r.status==='unset');
+  let html='';
+  if(critical.length){
+    html += `<div class="lager-group-head lg-critical"><span class="lg-label">⚠ Braucht Aufmerksamkeit (${critical.length})</span><span class="lg-line"></span></div>`;
+    html += `<div class="pg">${critical.map(cardHtml).join('')}</div>`;
+  }
+  if(rest.length){
+    html += `<div class="lager-group-head"><span class="lg-label">Auf Lager / offen</span><span class="lg-line"></span></div>`;
+    html += `<div class="pg">${rest.map(cardHtml).join('')}</div>`;
+  }
+  if(groupsEl) groupsEl.innerHTML = html;
 }
 async function bookLagerbestand(prodId){
   const input=document.getElementById('lm-input-'+prodId);
