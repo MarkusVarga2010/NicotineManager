@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.10.0'; // Warnungen bei sinkendem Lagerbestand: 1) Beim Buchen selbst erscheint sofort ein Warn-Toast, wenn der neue Stand "Niedrig" oder "Leer" ist. 2) Die Lagerbestand-Kachel auf der Übersicht-Seite ist jetzt eine echte Warnkarte (farbiger Rahmen/Hintergrund je nach Schweregrad, Warn-Icon, farbige Chips pro betroffenem Produkt) statt einer neutralen Info-Kachel.
+const APP_VERSION = '13.11.0'; // Sicherheits-Fix: HTML-Escaping konsequent nachgezogen. Zuvor wurden an mehreren Stellen Freitext-Felder (Kunden-Vor-/Nachname, Benutzername, Varianten-/Produktname, Notiz aus dem Service-Log) ungeschützt per innerHTML gerendert statt über die bereits vorhandene escapeHtml()-Funktion — dadurch konnte HTML/JS in diesen Feldern (z.B. ein Kundenname mit <script>) bei anderen Nutzern ausgeführt werden (stored XSS). Zusätzlich neue Helper-Funktion escapeAttr() für Attribut-Kontexte (alt=, title=, onclick=…('…')) ergänzt, da escapeHtml() allein dort Anführungszeichen nicht kodiert. Der "Benutzer löschen"-Button übergibt den Benutzernamen jetzt nicht mehr roh im onclick-Attribut, sondern schlägt ihn serverseitig im Speicher nach.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

@@ -2672,7 +2672,7 @@ function renderPrices(){
       if(!list.length) return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td><td colspan="7" style="color:var(--ink-faint)">Noch keine ${p.variantLabelPlural} hinterlegt</td></tr>`;
       return list.map(v=>{
         const gewinn=v.preis-v.einkauf;
-        return `<tr><td style="font-weight:600">${p.icon} ${p.name} — ${v.name}</td>
+        return `<tr><td style="font-weight:600">${p.icon} ${p.name} — ${escapeHtml(v.name)}</td>
         <td class="mono">${fmt(v.einkauf)}</td>
         <td class="mono" style="font-weight:700">${fmt(v.preis)}</td>
         <td class="mono" style="color:${gewinn>=0?'var(--success)':'var(--rust)'}">${fmt(gewinn)}</td>
@@ -2868,12 +2868,12 @@ function renderVariantList(prodId){
   el.innerHTML = `<div class="vshop-grid">` + list.map(v=>{
     const gewinn=v.preis-v.einkauf;
     const imgBlock = v.bildUrl
-      ? `<img src="${v.bildUrl}" alt="${v.name}">`
+      ? `<img src="${escapeAttr(v.bildUrl)}" alt="${escapeAttr(v.name)}">`
       : `📦`;
     return `<div class="vshop-card">
       <button class="ic-btn vshop-rm" onclick="deleteVariant('${prodId}',${v.id})" title="Löschen">✕</button>
-      <div class="vshop-imgwrap ${v.bildUrl?'':'noimg'}" onclick="${v.bildUrl?`openLightbox('${v.bildUrl}')`:''}" title="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}">${imgBlock}</div>
-      <div class="vshop-name" title="${v.name}">${v.name}</div>
+      <div class="vshop-imgwrap ${v.bildUrl?'':'noimg'}" onclick="${v.bildUrl?`openLightbox('${escapeAttr(v.bildUrl)}')`:''}" title="${v.bildUrl?'Bild vergrößern':'Kein Bild hinterlegt'}">${imgBlock}</div>
+      <div class="vshop-name" title="${escapeAttr(v.name)}">${escapeHtml(v.name)}</div>
       <div class="vshop-meta">
         <span class="vshop-price">${fmt(v.preis)}</span>
         <span class="vshop-profit" style="color:${gewinn>=0?'var(--success)':'var(--rust)'}">${gewinn>=0?'+':''}${fmt(gewinn)}</span>
@@ -3066,7 +3066,7 @@ function renderKdBestellungen(){
   const orders=S.bestellungen.filter(b=>b.kId===currentKdId).sort((a,b)=>b.id-a.id);
   document.getElementById('kd-best-empty').style.display = orders.length ? 'none' : 'block';
   tbody.innerHTML = orders.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -3158,9 +3158,9 @@ function renderKunden(){
     const debt=S.bestellungen.filter(b=>b.kId===k.id&&!b.paid).reduce((s,b)=>s+b.total,0);
     const cnt=S.bestellungen.filter(b=>b.kId===k.id).length;
     const foreign = k.userId!==currentUserId;
-    const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${usernameOf(k.userId)}</span>` : '';
+    const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${escapeHtml(usernameOf(k.userId))}</span>` : '';
     return `<div class="kcard" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
-      <div class="kc-top"><div class="kc-name">${k.vorname} ${k.nachname}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
+      <div class="kc-top"><div class="kc-name">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})">🗑</button>`}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -3191,7 +3191,7 @@ function renderLieferantenkundenSeite(){
     const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
     const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
     return `<div class="kcard" style="cursor:pointer" onclick="openLieferantenkundeDetail('${u.id}')">
-      <div class="kc-top"><div class="kc-name">◆ ${u.username}</div></div>
+      <div class="kc-top"><div class="kc-name">◆ ${escapeHtml(u.username)}</div></div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -3221,7 +3221,7 @@ function renderLkdBestellungen(){
   const orders=S.bestellungen.filter(b=>b.fuerLieferant && b.userId===currentLkdUserId).sort((a,b)=>b.id-a.id);
   document.getElementById('lkd-best-empty').style.display = orders.length ? 'none' : 'block';
   tbody.innerHTML = orders.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
@@ -3253,8 +3253,8 @@ function usernameOf(userId){
   return u ? u.username : '—';
 }
 function fillSelects(){
-  const allOpts=S.kunden.map(k=>`<option value="${k.id}">${k.vorname} ${k.nachname}</option>`).join('');
-  const ownOpts=S.kunden.filter(k=>k.userId===currentUserId).map(k=>`<option value="${k.id}">${k.vorname} ${k.nachname}</option>`).join('');
+  const allOpts=S.kunden.map(k=>`<option value="${k.id}">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}</option>`).join('');
+  const ownOpts=S.kunden.filter(k=>k.userId===currentUserId).map(k=>`<option value="${k.id}">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}</option>`).join('');
   const fk=document.getElementById('filter-kunde');
   if(fk) fk.innerHTML='<option value="">Alle Kunden</option>'+allOpts;
   const nb=document.getElementById('nb-kunde');
@@ -3314,10 +3314,10 @@ function variantPickerHtml(uid, prodId, currentVariantId, forLieferant, updaterF
   }
   const cards = variants.map(v=>{
     const sel = String(v.id)===String(currentVariantId);
-    const imgBlock = v.bildUrl ? `<img src="${v.bildUrl}" alt="${v.name}">` : '📦';
+    const imgBlock = v.bildUrl ? `<img src="${escapeAttr(v.bildUrl)}" alt="${escapeAttr(v.name)}">` : '📦';
     return `<div class="vpick-card${sel?' selected':''}" onclick="${updaterFnName}(${uid},'variant','${v.id}')">
       <div class="vpick-imgwrap">${imgBlock}</div>
-      <div class="vpick-name" title="${v.name}">${v.name}</div>
+      <div class="vpick-name" title="${escapeAttr(v.name)}">${escapeHtml(v.name)}</div>
       <div class="vpick-price">${fmt(v.preis)}</div>
     </div>`;
   }).join('');
@@ -3672,7 +3672,7 @@ function renderLbHistory(){
   }
 
   tbody.innerHTML = list.map(b=>{
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     // "Unterwegs seit X Tagen" statt nur eines nackten Badges — bei langen Lieferzeiten hilfreich.
     const lieferBadge = b.delivered
       ? '<span class="badge b-bezahlt">✓ Angekommen</span>'
@@ -3766,7 +3766,14 @@ async function delEigeneSchuld(id){
   showToast('Gelöscht. 🗑');
 }
 function escapeHtml(str){
-  const d=document.createElement('div'); d.textContent=str; return d.innerHTML;
+  if(str==null) return '';
+  const d=document.createElement('div'); d.textContent=String(str); return d.innerHTML;
+}
+// Für HTML-Attribute (alt="…", title="…", onclick="…('…')"): escapeHtml allein reicht hier
+// NICHT, weil Anführungszeichen beim Text-Node-Trick nicht kodiert werden — ein " oder ' im
+// Wert könnte sonst aus dem Attribut ausbrechen. Deshalb zusätzlich Quotes escapen.
+function escapeAttr(str){
+  return escapeHtml(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 async function submitLbBestellung(){
   const supplierId = M.profile?.linked_to || null;
@@ -4191,8 +4198,8 @@ function renderTrash(){
   empty.style.display='none';
   tbody.innerHTML=S.trash.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
-    const name = b.fuerLieferant ? `◆ ${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}` : (k?k.vorname+' '+k.nachname:'—');
-    const prods=(b.items||[]).map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const name = b.fuerLieferant ? `◆ ${escapeHtml(M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant')}` : (k?escapeHtml(k.vorname+' '+k.nachname):'—');
+    const prods=(b.items||[]).map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr>
       <td style="font-weight:600">${name}</td>
       <td style="font-size:12px">${prods}</td>
@@ -4297,7 +4304,7 @@ function renderBestellungen(){
   tbody.innerHTML=list.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const foreign = b.userId!==currentUserId;
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     const discBadge = b.discountType ? `<span class="badge" style="background:var(--gold-bg);color:var(--gold);margin-left:6px">${b.discountType==='percent'?'-'+b.discountValue+'%':'-'+fmt(b.discountValue)}</span>` : '';
     // Rein informativ: der Betrag einer Lieferantenkunden-Bestellung bleibt zum Bestellzeitpunkt
     // eingefroren (siehe displayTotal), aber falls sich mein Preis seither geändert hat, weise
@@ -4310,11 +4317,11 @@ function renderBestellungen(){
     // "Von" ist nur für echte Kunden interessant, die einem anderen (verlinkten) Konto
     // gehören. Bei Lieferantenkunden steht der Name schon eindeutig in der Kunde-Spalte,
     // daher hier ein Strich statt einer redundanten Wiederholung.
-    const vonCell = showVon ? `<td style="font-weight:600">${b.fuerLieferant?'<span style="color:var(--ink-faint)">—</span>':(foreign?`<span style="color:var(--lieferant-deep)">${usernameOf(b.userId)}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>')}</td>` : '';
+    const vonCell = showVon ? `<td style="font-weight:600">${b.fuerLieferant?'<span style="color:var(--ink-faint)">—</span>':(foreign?`<span style="color:var(--lieferant-deep)">${escapeHtml(usernameOf(b.userId))}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>')}</td>` : '';
     const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>`;
     const nameCell = b.fuerLieferant
-      ? `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`
-      : (k?k.vorname+' '+k.nachname:'—');
+      ? `<span style="color:var(--lieferant-deep)">◆ ${escapeHtml(usernameOf(b.userId))}</span>`
+      : (k?escapeHtml(k.vorname+' '+k.nachname):'—');
     // Bei Kundenbestellungen ist der Code von Anfang an da und wird bis zur Abholung (delivered)
     // angezeigt. Bei Lieferanten-Bestellungen entsteht der Code erst bei Ankunft (delivered) und
     // wird bis zur Bezahlung angezeigt, da er ja genau dafür gebraucht wird.
@@ -4497,7 +4504,7 @@ function renderDashboard(){
       const name = e.fuerLieferant
         ? (usernameOf(e.userId) || 'Unbekannt')
         : (S.kunden.find(k=>String(k.id)===String(e.kId)) ? `${S.kunden.find(k=>String(k.id)===String(e.kId)).vorname} ${S.kunden.find(k=>String(k.id)===String(e.kId)).nachname}` : 'Unbekannt');
-      return {sum:e.sum, name};
+      return {sum:e.sum, name:escapeHtml(name)};
     })
     .sort((a,b)=>b.sum-a.sum);
   const top=ranked.slice(0,4);
@@ -4530,8 +4537,8 @@ function renderDashboard(){
   if(!recent.length){tbody.innerHTML=`<tr><td colspan="4" class="ec"><div class="ec-ic">✓</div><div class="ec-t">Keine offenen Bestellungen</div></td></tr>`;}
   else tbody.innerHTML=recent.map(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
-    const name = b.fuerLieferant ? `◆ ${usernameOf(b.userId)}` : (k?k.vorname+' '+k.nachname:'—');
-    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${prodLabel(it)}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
+    const name = b.fuerLieferant ? `◆ ${escapeHtml(usernameOf(b.userId))}` : (k?escapeHtml(k.vorname+' '+k.nachname):'—');
+    const prods=b.items.map(it=>{const p=PROD_MAP[it.prod];return p?`<span title="${escapeAttr(prodLabel(it))}">${p.icon} ${it.stueck}×</span>`:''}).join(' &nbsp; ');
     return `<tr><td style="font-weight:600">${name}</td><td style="font-size:12px">${prods}</td><td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td><td><span class="badge b-offen">Offen</span></td></tr>`;
   }).join('');
   document.getElementById('service-banner').style.display=M.service.due?'flex':'none';
@@ -4880,9 +4887,9 @@ function openOrderDetail(id){
     : 'Kunde';
   document.getElementById('od-kunde').innerHTML = b.fuerLieferant
     ? (b.userId===currentUserId
-        ? `<span style="color:var(--lieferant-deep)">${M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant'}</span>`
-        : `<span style="color:var(--lieferant-deep)">◆ ${usernameOf(b.userId)}</span>`)
-    : (k?`${k.vorname} ${k.nachname}`:'—');
+        ? `<span style="color:var(--lieferant-deep)">${escapeHtml(M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant')}</span>`
+        : `<span style="color:var(--lieferant-deep)">◆ ${escapeHtml(usernameOf(b.userId))}</span>`)
+    : (k?`${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-timeline').outerHTML = orderTimelineHtml(b);
   const lieferstatusRow=document.getElementById('od-lieferstatus-row');
@@ -4926,7 +4933,7 @@ function openOrderDetail(id){
     const preis = liveUnpaidLieferant
       ? lieferantPriceFor(it)
       : (it.preis!=null?it.preis:(hasVariant(it.prod)?0:(S.preise[it.prod]||0)));
-    return `<tr><td>${p?p.icon+' '+prodLabel(it):it.prod}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
+    return `<tr><td>${p?p.icon+' '+escapeHtml(prodLabel(it)):escapeHtml(it.prod)}</td><td>${it.stueck}</td><td class="mono">${fmt(preis)}</td><td class="mono" style="font-weight:700">${fmt(preis*it.stueck)}</td></tr>`;
   }).join('');
 
   const odSubtotal = liveUnpaidLieferant
@@ -5219,7 +5226,7 @@ function renderService(){
   const hist=M.service.history;
   const tbody=document.getElementById('svc-tbody');
   if(!hist.length){tbody.innerHTML=`<tr><td colspan="3" class="ec">Noch kein Service durchgeführt.</td></tr>`;}
-  else tbody.innerHTML=hist.map(h=>`<tr><td class="mono">${fmtDate(h.date)}</td><td style="font-weight:600">${h.by}</td><td style="color:var(--ink-soft)">${h.note}</td></tr>`).join('');
+  else tbody.innerHTML=hist.map(h=>`<tr><td class="mono">${fmtDate(h.date)}</td><td style="font-weight:600">${escapeHtml(h.by)}</td><td style="color:var(--ink-soft)">${escapeHtml(h.note)}</td></tr>`).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -5255,7 +5262,7 @@ function renderSettings(){
     if(showLieferant){
       const specials = M.users.filter(u=>u.role==='special' && u.id!==currentUserId);
       const sel=document.getElementById('set-lieferant');
-      sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
+      sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
       sel.value = M.profile?.linked_to || '';
     }
   }
@@ -5273,7 +5280,7 @@ function roleBadgeClass(r){
 }
 function fillLinkedUsersSelect(){
   const specials = M.users.filter(u=>u.role==='special');
-  const opts = specials.map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
+  const opts = specials.map(u=>`<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
   const nu=document.getElementById('nu-linked');
   if(nu) nu.innerHTML='<option value="">Keine Verknüpfung</option>'+opts;
 }
@@ -5287,17 +5294,17 @@ function renderUserList(){
   fillLinkedUsersSelect();
   const specials = M.users.filter(u=>u.role==='special');
   el.innerHTML=M.users.map(u=>{
-    const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${s.username}</option>`).join('');
+    const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${escapeHtml(s.username)}</option>`).join('');
     const linkSelect = `
       <select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)">
         <option value="">Keine Verknüpfung</option>${linkOpts}
       </select>`;
     return `
     <div class="ul-item">
-      <div class="ul-av">${u.username[0].toUpperCase()}</div>
-      <div class="ul-info"><div class="ul-name">${u.username}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div><div class="ul-role"><span class="badge ${roleBadgeClass(u.role)}">${roleLabel(u.role)}</span></div></div>
+      <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
+      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div><div class="ul-role"><span class="badge ${roleBadgeClass(u.role)}">${roleLabel(u.role)}</span></div></div>
       ${linkSelect}
-      ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}','${u.username}')">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
+      ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
     </div>`;
   }).join('');
 }
@@ -5322,7 +5329,8 @@ async function addUser(){
   document.getElementById('nu-linked').value='';
   renderUserList();showToast('Benutzer angelegt.');
 }
-async function delUser(id, name){
+async function delUser(id){
+  const name = M.users.find(u=>u.id===id)?.username || '';
   if(!(await confirmDialog(`Benutzer "${name}" wird endgültig entfernt.`, {title:`Benutzer "${name}" löschen?`})))return;
   const { error } = await sb.rpc('delete_app_user', { p_user_id:id });
   if(error){ showToast(error.message || 'Löschen fehlgeschlagen.', '⚠'); return; }
