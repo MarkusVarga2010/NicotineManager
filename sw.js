@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.5.0'; // Rebrand zu NicoFlow: neuer Name überall (Titel, "Über die App", PDF-Exporte, Update-Hinweis, Backup-Dateiname, Cache-Name) und neues Icon-Set mit Farbverlauf-Monogramm "NF". EMAIL_DOMAIN in index.html bleibt bewusst 'nicotinemanager.local', damit sich bestehende Nutzer weiter einloggen können.
+const APP_VERSION = '13.6.0'; // Wichtiger Fix: jsQR wurde von einer nicht existenten cdnjs-URL geladen (window.jsQR war immer undefined) — der QR-Scanner öffnete zwar die Kamera, hat aber NIE einen Code erkannt. Jetzt über die korrekte jsDelivr-URL eingebunden + Startprüfung mit klarer Fehlermeldung, falls die Bibliothek doch mal nicht laden sollte. Außerdem: Lagerbestand mit Warnschwelle/Status/Sortierung/Dashboard-Warnung professionalisiert, neuer Marken-Ladebildschirm beim Start.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

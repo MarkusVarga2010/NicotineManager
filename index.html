@@ -22,7 +22,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <style>
@@ -506,6 +506,22 @@ button{font-family:inherit;cursor:pointer}
 .od-tl-sub{font-size:10px;color:var(--ink-faint);margin-top:2px}
 /* QR-Code Anzeige/Scan */
 .abholcode-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:10px}
+.app-boot-loading{
+  position:fixed;inset:0;z-index:999;background:var(--paper);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+.app-boot-mark{
+  width:56px;height:56px;border-radius:16px;background:var(--grad-brand);
+  position:relative;animation:appBootPulse 1.4s ease-in-out infinite;
+}
+.app-boot-mark::after{
+  content:'';position:absolute;inset:-6px;border-radius:20px;
+  border:2px solid transparent;border-top-color:var(--sage-deep);border-right-color:var(--accent2);
+  animation:appBootSpin .9s linear infinite;
+}
+.app-boot-text{font-size:12px;font-weight:600;color:var(--ink-faint);letter-spacing:.02em}
+@keyframes appBootPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(.94)}}
+@keyframes appBootSpin{to{transform:rotate(360deg)}}
 .abholcode-qr-card{
   padding:3px;border-radius:calc(var(--r-lg) + 3px);
   background:var(--grad-brand);
@@ -965,6 +981,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .pc-stock.stock-ok{background:var(--success-bg);color:var(--success-deep);border:1px solid color-mix(in srgb, var(--success) 30%, transparent)}
 .pc-stock.stock-low{background:color-mix(in srgb, var(--rust) 14%, var(--paper2));color:var(--rust);border:1px solid color-mix(in srgb, var(--rust) 30%, transparent)}
 .pc-stock.stock-out{background:var(--rust-bg);color:var(--rust);border:1px solid color-mix(in srgb, var(--rust) 45%, transparent)}
+.lager-summary{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px 0}
+.lager-summary .pc-stock{cursor:default}
 </style>
 </head>
 <body>
@@ -1052,6 +1070,10 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 <!-- APP -->
 <div id="offline-banner">📡 Keine Internetverbindung — Daten können veraltet sein</div>
 <div id="app-screen">
+<div id="app-boot-loading" class="app-boot-loading" style="display:none">
+  <div class="app-boot-mark"></div>
+  <div class="app-boot-text">NicoFlow wird geladen…</div>
+</div>
 
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
@@ -1162,6 +1184,11 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <div class="card" id="d-pickup-stat-card" style="display:none">
         <div class="card-head"><h3>⏱ Ø Abholzeit</h3></div>
         <div class="ps" id="d-pickup-stat-text" style="margin:0 0 4px"></div>
+      </div>
+
+      <div class="card" id="d-stock-alert-card" style="display:none;cursor:pointer" onclick="nav('lagerbestand')">
+        <div class="card-head"><h3>📦 Lagerbestand</h3></div>
+        <div class="ps" id="d-stock-alert-text" style="margin:0 0 4px"></div>
       </div>
 
       <div class="card">
@@ -1355,7 +1382,7 @@ create policy "varianten eigene loeschen"
 
     <!-- LAGERBESTAND -->
     <div class="page" id="page-lagerbestand">
-      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Lagerbestand</div><div class="ps">Trag hier einfach ein, was du von jedem Produkt gerade tatsächlich vorrätig hast.</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Lagerbestand</div><div class="ps">Trag hier einfach ein, was du von jedem Produkt gerade tatsächlich vorrätig hast. Produkte unter deiner Warnschwelle werden oben hervorgehoben.</div></div></div>
       <div class="card" id="lager-manuell-setup-hint" style="display:none">
         <div class="ec" style="padding:8px 0">
           <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
@@ -1366,6 +1393,7 @@ create policy "varianten eigene loeschen"
   user_id uuid not null,
   produkt text not null,
   menge integer not null default 0,
+  schwelle integer not null default 5,
   updated_at timestamptz not null default now(),
   unique(user_id, produkt)
 );
@@ -1376,8 +1404,18 @@ create policy "lagerbestand manuell eigener user"
   with check (auth.uid() = user_id);</pre>
         </div>
       </div>
+      <div class="card" id="lager-schwelle-setup-hint" style="display:none">
+        <div class="ec" style="padding:8px 0">
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
+          <div class="ec-t">Warnschwelle noch nicht verfügbar</div>
+          <div class="ec-s">Der Bestand selbst wird schon gespeichert — nur die Warnschwelle pro Produkt braucht noch eine zusätzliche Spalte. SQL zum Nachrüsten:</div>
+          <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">alter table lagerbestand_manuell
+  add column if not exists schwelle integer not null default 5;</pre>
+        </div>
+      </div>
       <div class="card" id="lager-manuell-card">
-        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Tatsächlich vorhanden</th><th>Zuletzt gebucht</th><th></th></tr></thead><tbody id="lager-manuell-tbody"></tbody></table></div>
+        <div id="lager-summary" class="lager-summary"></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Status</th><th>Tatsächlich vorhanden</th><th>Warnschwelle</th><th>Zuletzt gebucht</th><th></th></tr></thead><tbody id="lager-manuell-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -1923,6 +1961,7 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{} };
 let schuldenTableMissing = false;
 let lagerManuellTableMissing = false;
+let lagerSchwelleSpalteMissing = false;
 let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
 let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
@@ -1933,7 +1972,7 @@ const saveVis = () => localStorage.setItem('nm_vis', JSON.stringify(VS));
 const fmt = n => Number(n).toFixed(2).replace('.',',') + ' €';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const today = () => new Date().toISOString().slice(0,10);
-const CURRENT_UI_VERSION = '8.5.0';
+const CURRENT_UI_VERSION = '8.6.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -2006,6 +2045,11 @@ const WHATS_NEW = {
   ],
   '8.5.0': [
     'Die App heißt jetzt NicoFlow! Neuer Name und neues Icon (Farbverlauf-Monogramm "NF") überall — Titel, "Über die App", PDF-Exporte und Update-Hinweis. Der Login selbst funktioniert unverändert mit denselben Zugangsdaten.'
+  ],
+  '8.6.0': [
+    'QR-Scanner-Fehler endlich wirklich behoben: die Erkennungs-Bibliothek wurde von einer kaputten Adresse geladen, dadurch lief die Kamera zwar, hat aber nie etwas erkannt. Jetzt korrekt eingebunden, inkl. Warnhinweis statt stillem Versagen, falls das nochmal passieren sollte.',
+    'Lagerbestand professionalisiert: jedes Produkt hat jetzt eine eigene Warnschwelle, ein Status ("Auf Lager" / "Niedrig" / "Leer") wird direkt angezeigt, knappe Produkte stehen automatisch oben in der Liste, eine Zusammenfassung zeigt die Lage auf einen Blick, und eine neue Dashboard-Kachel warnt, sobald etwas zur Neige geht.',
+    'Neuer Ladebildschirm mit Marken-Optik beim Start/Login, statt eines kurzzeitig leeren Bildschirms während die Daten geladen werden.'
   ]
 };
 function checkWhatsNew(){
@@ -2127,6 +2171,8 @@ async function onLoggedIn(authUser, displayName){
   const tbAvMobile=document.getElementById('tb-av-mobile'); if(tbAvMobile) tbAvMobile.textContent=currentUser[0].toUpperCase();
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
+  const bootLoading=document.getElementById('app-boot-loading');
+  if(bootLoading) bootLoading.style.display='flex';
 
   await loadAllData();
   applyTheme(VS.themeIdx);
@@ -2134,6 +2180,7 @@ async function onLoggedIn(authUser, displayName){
   applyRoleUI();
   checkServiceDue();
   nav(homePage());
+  if(bootLoading) bootLoading.style.display='none';
   // Benutzer und Spezial-Konten bekommen beim ersten Login automatisch die
   // Einführungstour — ganz ohne Zwang zur Passwortänderung. Das Passwort
   // kann jederzeit freiwillig unter Einstellungen → Mein Konto geändert werden.
@@ -2220,7 +2267,7 @@ async function loadAllData(){
   lagerManuellTableMissing = !!lagerManuellRes.error;
   S.lagerManuell = {};
   if(!lagerManuellRes.error){
-    (lagerManuellRes.data||[]).forEach(r=>{ S.lagerManuell[r.produkt] = { menge:Number(r.menge)||0, updatedAt:r.updated_at }; });
+    (lagerManuellRes.data||[]).forEach(r=>{ S.lagerManuell[r.produkt] = { menge:Number(r.menge)||0, schwelle: r.schwelle!=null?Number(r.schwelle):5, updatedAt:r.updated_at }; });
   }
   // Geschmäcker/Marken: eigene Varianten (S.varianten) sowie — falls ein Lieferant verknüpft
   // ist — dessen Varianten mit seiner aktuellen Preisliste (S.lieferantVarianten), analog zu
@@ -2402,6 +2449,11 @@ function renderLagerbestand(){
 }
 // ── Tatsächlicher Bestand (manuell) ─────────────────────────────────────────
 // Einfache Zähl-/Abgleich-Funktion: hat nichts mit Ein-/Verkaufspreisen oder Bestellungen zu tun.
+function lagerStatus(menge, schwelle){
+  if(!menge) return 'out';
+  if(menge<=schwelle) return 'low';
+  return 'ok';
+}
 function renderLagerManuell(){
   const hint=document.getElementById('lager-manuell-setup-hint');
   const card=document.getElementById('lager-manuell-card');
@@ -2412,27 +2464,65 @@ function renderLagerManuell(){
   }
   if(hint) hint.style.display='none';
   if(card) card.style.display='block';
+  const schwelleHint=document.getElementById('lager-schwelle-setup-hint');
+  if(schwelleHint) schwelleHint.style.display = lagerSchwelleSpalteMissing ? 'block' : 'none';
+
+  const rows = PRODUCTS.map(p=>{
+    const entry=S.lagerManuell[p.id];
+    const menge = entry ? entry.menge : 0;
+    const schwelle = entry && entry.schwelle!=null ? entry.schwelle : 5;
+    const hasEntry = !!entry;
+    return { p, menge, schwelle, hasEntry, status: hasEntry ? lagerStatus(menge, schwelle) : 'unset' };
+  });
+  const severity = { out:0, low:1, unset:2, ok:3 };
+  rows.sort((a,b)=> severity[a.status]-severity[b.status] || a.p.name.localeCompare(b.p.name,'de'));
+
+  const counts = { out:0, low:0, ok:0 };
+  rows.forEach(r=>{ if(r.status!=='unset') counts[r.status]++; });
+  const summaryEl=document.getElementById('lager-summary');
+  if(summaryEl){
+    summaryEl.innerHTML = `
+      <span class="pc-stock stock-ok" title="Über der Warnschwelle">${counts.ok} auf Lager</span>
+      <span class="pc-stock stock-low" title="Auf oder unter der Warnschwelle">${counts.low} niedrig</span>
+      <span class="pc-stock stock-out" title="Nicht vorrätig">${counts.out} leer</span>`;
+  }
+
+  const statusLabel={ out:'Leer', low:'Niedrig', ok:'Auf Lager', unset:'Noch nicht erfasst' };
+  const statusClass={ out:'stock-out', low:'stock-low', ok:'stock-ok', unset:'' };
+
   const tbl=document.getElementById('lager-manuell-tbody');
   if(!tbl) return;
-  tbl.innerHTML=PRODUCTS.map(p=>{
-    const entry=S.lagerManuell[p.id];
-    const val = entry ? entry.menge : '';
-    const updated = entry?.updatedAt ? fmtDateTime(entry.updatedAt) : '—';
+  tbl.innerHTML=rows.map(({p, menge, schwelle, hasEntry, status})=>{
+    const updated = S.lagerManuell[p.id]?.updatedAt ? fmtDateTime(S.lagerManuell[p.id].updatedAt) : '—';
+    const badge = status==='unset' ? `<span class="pc-stock" style="background:var(--paper3);color:var(--ink-faint);border:1px solid var(--line)">${statusLabel[status]}</span>` : `<span class="pc-stock ${statusClass[status]}">${statusLabel[status]}</span>`;
     return `<tr><td style="font-weight:600">${p.icon} ${p.name}</td>
-      <td><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${val}" placeholder="—" style="width:100px" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
+      <td>${badge}</td>
+      <td><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${hasEntry?menge:''}" placeholder="—" style="width:90px" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
+      <td><input type="number" min="0" step="1" id="lm-schwelle-${p.id}" value="${schwelle}" style="width:80px" title="Ab dieser Menge oder darunter gilt das Produkt als 'Niedrig'" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></td>
       <td class="mono" style="color:var(--ink-faint);font-size:11.5px">${updated}</td>
       <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="bookLagerbestand('${p.id}')">✓ Buchen</button></td></tr>`;
   }).join('');
 }
 async function bookLagerbestand(prodId){
   const input=document.getElementById('lm-input-'+prodId);
+  const schwelleInput=document.getElementById('lm-schwelle-'+prodId);
   const menge=Math.max(0, Math.round(Number(input.value)||0));
-  const { data, error } = await sb.from('lagerbestand_manuell')
-    .upsert({ user_id:currentUserId, produkt:prodId, menge, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
+  const schwelle=Math.max(0, Math.round(Number(schwelleInput?.value)||5));
+  let { data, error } = await sb.from('lagerbestand_manuell')
+    .upsert({ user_id:currentUserId, produkt:prodId, menge, schwelle, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
     .select().single();
+  if(error && /schwelle/i.test(error.message||'')){
+    // Ältere Installationen ohne die "schwelle"-Spalte: Bestand trotzdem speichern,
+    // nur die Warnschwelle kann dann (noch) nicht mitgespeichert werden.
+    lagerSchwelleSpalteMissing = true;
+    ({ data, error } = await sb.from('lagerbestand_manuell')
+      .upsert({ user_id:currentUserId, produkt:prodId, menge, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
+      .select().single());
+  }
   if(error){ showToast('Konnte nicht gebucht werden.', '⚠'); return; }
-  S.lagerManuell[prodId] = { menge, updatedAt:data.updated_at };
+  S.lagerManuell[prodId] = { menge, schwelle: data.schwelle!=null?Number(data.schwelle):schwelle, updatedAt:data.updated_at };
   renderLagerManuell();
+  renderDashboard();
   showToast(`${PROD_MAP[prodId]?.name||prodId}: ${menge} gebucht. ✓`);
 }
 
@@ -3742,6 +3832,10 @@ async function toggleAbholcodeScanner(){
     showToast('Kamera-Zugriff wird von diesem Browser nicht unterstützt.','⚠');
     return;
   }
+  if(!window.jsQR){
+    showToast('QR-Erkennung konnte nicht geladen werden (Internetverbindung prüfen). Code bitte manuell eingeben.','⚠');
+    return;
+  }
   if(!window.isSecureContext){
     showToast('Kamera braucht HTTPS. Diese Seite läuft gerade unsicher (z.B. über http://).','⚠');
     return;
@@ -4170,6 +4264,32 @@ function renderDashboard(){
     document.getElementById('d-pickup-stat-text').textContent = `${txt} im Schnitt zwischen Code-Vergabe und Abholung/Bezahlung (${pStats.count} abgeschlossene Abholungen).`;
   } else if(pCard){
     pCard.style.display='none';
+  }
+  // Lagerbestand-Kurzwarnung: nur anzeigen, wenn überhaupt etwas erfasst ist UND
+  // mindestens ein Produkt niedrig/leer ist — sonst bleibt die Kachel ganz weg,
+  // statt mit "0 niedrig, 0 leer" Platz zu verschwenden.
+  const stockCard=document.getElementById('d-stock-alert-card');
+  if(stockCard){
+    if(lagerManuellTableMissing || !Object.keys(S.lagerManuell).length){
+      stockCard.style.display='none';
+    } else {
+      const low=[], out=[];
+      PRODUCTS.forEach(p=>{
+        const entry=S.lagerManuell[p.id];
+        if(!entry) return;
+        const st=lagerStatus(entry.menge, entry.schwelle!=null?entry.schwelle:5);
+        if(st==='out') out.push(p.name); else if(st==='low') low.push(p.name);
+      });
+      if(!low.length && !out.length){
+        stockCard.style.display='none';
+      } else {
+        stockCard.style.display='block';
+        const parts=[];
+        if(out.length) parts.push(`leer: ${out.join(', ')}`);
+        if(low.length) parts.push(`niedrig: ${low.join(', ')}`);
+        document.getElementById('d-stock-alert-text').textContent = parts.join(' · ') + ' — antippen zum Nachbuchen.';
+      }
+    }
   }
   // "Offene Schulden" = was mir andere schulden: eigene Kundenbestellungen PLUS Bestellungen,
   // die meine Lieferantenkunden (andere Benutzer, die mich als Lieferanten eingetragen haben)
