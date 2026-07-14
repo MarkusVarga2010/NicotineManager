@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '14.0.0'; // Neues Layout/Look: komplett neues Farb- und Typo-System ("Signal" — warmes Signal-Orange statt Violett), Space Grotesk für Überschriften, gestrichelte "Flow"-Signaturlinie in Seiten-/Karten-Köpfen statt durchgezogenem Farbverlauf, dezentes Blaupausen-Raster im Hintergrund statt weicher Farbflecken. Rein visuell — Struktur, Funktionen und Bedienung unverändert. Alle bisherigen Theme-Farben (Einstellungen → Design) funktionieren weiterhin, das Standard-Theme heißt jetzt "Signal".
+const APP_VERSION = '15.0.0'; // Liquid-Glass-Pass (angelehnt an iOS 27): Karten, Sidebar, Modals, Tabs, Buttons, Toast und Update-Banner sind jetzt echtes Frostglas (durchscheinend + Weichzeichner + Sättigung des Hintergrunds), mit dünnem Lichtsaum oben an jeder Fläche. Ecken durchgängig stark abgerundet, Buttons und aktive Nav-Kachel jetzt volle Pillenform. Rein visuell — Struktur, Funktionen und Bedienung unverändert.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
