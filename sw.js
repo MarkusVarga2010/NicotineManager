@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.7.0'; // Lagerbestand-Seite von dichter Tabelle auf Karten-Grid umgestellt (gleicher visueller Stil wie Preise-Seite), mit Mini-Füllstandsbalken und eigener "Braucht Aufmerksamkeit"-Gruppe für leere/niedrige Produkte ganz oben.
+const APP_VERSION = '13.8.0'; // Umbenennung auf NicoFlow + neues NF-Logo überall nachgezogen (Login, Sidebar, mobile Topbar, Favicon). Lagerbestand-Seite grafisch aufgewertet: Donut-Chart-Übersicht statt reiner Text-Badges, Produktkarten mit animiertem Ring-Füllstand statt dünnem Balken, Niedrig-Status jetzt farblich (Amber) von Leer (Rot) unterschieden.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

@@ -51,6 +51,9 @@
   --success:#2FD98F;
   --success-deep:#7CF0BB;
   --success-bg:#0C2A22;
+  --amber:#FFB020;
+  --amber-deep:#FFCB66;
+  --amber-bg:#332208;
   --lieferant:#F5729B;
   --lieferant-deep:#FFA0BE;
   --lieferant-bg:#2B1526;
@@ -86,6 +89,9 @@ html[data-mode="light"]{
   --success:#159A63;
   --success-deep:#0C6E47;
   --success-bg:#D6F3E4;
+  --amber:#B4740A;
+  --amber-deep:#8A5806;
+  --amber-bg:#FBEACB;
   --lieferant:#D94E80;
   --lieferant-deep:#A93261;
   --lieferant-bg:#FBDCE9;
@@ -979,8 +985,40 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   .pc-stock{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:4px 9px 4px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;white-space:nowrap;letter-spacing:.01em;cursor:help}
 .pc-stock .svg-ic{width:12px;height:12px}
 .pc-stock.stock-ok{background:var(--success-bg);color:var(--success-deep);border:1px solid color-mix(in srgb, var(--success) 30%, transparent)}
-.pc-stock.stock-low{background:color-mix(in srgb, var(--rust) 14%, var(--paper2));color:var(--rust);border:1px solid color-mix(in srgb, var(--rust) 30%, transparent)}
+.pc-stock.stock-low{background:var(--amber-bg);color:var(--amber-deep);border:1px solid color-mix(in srgb, var(--amber) 40%, transparent)}
 .pc-stock.stock-out{background:var(--rust-bg);color:var(--rust);border:1px solid color-mix(in srgb, var(--rust) 45%, transparent)}
+
+/* ── Lagerbestand: grafische Übersicht (Donut) + Bestandskarten mit Ring-Anzeige ── */
+.lager-overview{display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.lo-donut{position:relative;width:108px;height:108px;border-radius:50%;flex-shrink:0;transition:background .4s ease}
+.lo-donut::before{content:'';position:absolute;inset:15px;border-radius:50%;background:var(--paper2)}
+.lo-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.lo-total{font-family:'Sora',sans-serif;font-size:23px;font-weight:800;line-height:1;color:var(--ink)}
+.lo-total-label{font-size:8.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;font-family:'JetBrains Mono',monospace}
+.lo-legend{display:flex;flex-direction:column;gap:10px;flex:1;min-width:170px}
+.lo-legend-item{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft)}
+.lo-legend-item b{margin-left:auto;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700}
+.lo-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb, currentColor 18%, transparent)}
+@media(max-width:640px){.lager-overview{gap:20px}.lo-legend{min-width:0}}
+
+.lager-pc{border-left:3px solid var(--line2);overflow:hidden}
+.lager-pc-out{border-left-color:var(--rust);background:linear-gradient(120deg, color-mix(in srgb, var(--rust) 7%, var(--paper2)), var(--paper2) 55%)}
+.lager-pc-low{border-left-color:var(--amber);background:linear-gradient(120deg, color-mix(in srgb, var(--amber) 9%, var(--paper2)), var(--paper2) 55%)}
+.lager-pc-ok{border-left-color:var(--success)}
+.lager-pc-unset{border-left-color:var(--line2)}
+.lp-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.lp-ring-wrap{position:relative;width:58px;height:58px;flex-shrink:0}
+.lp-ring{width:58px;height:58px;transform:rotate(-90deg);display:block}
+.lp-ring-bg{fill:none;stroke:var(--paper3);stroke-width:5}
+.lp-ring-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.lp-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.lp-info{flex:1;min-width:0}
+.lager-pc .pc-name{margin-bottom:4px}
+.lager-pc .pc-eyebrow{margin-bottom:3px}
+.lp-stats{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.lp-qty{font-family:'JetBrains Mono',monospace;font-size:27px;font-weight:800;color:var(--ink)}
+.lp-qty span{font-size:12px;font-weight:600;color:var(--ink-faint);margin-left:4px}
+.lp-thresh{font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;text-align:right}
 .lager-summary{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px 0}
 .lager-summary .pc-stock{cursor:default}
 .lager-group-head{display:flex;align-items:center;gap:8px;margin:22px 0 12px}
@@ -988,8 +1026,6 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .lager-group-head .lg-line{flex:1;height:1px;background:var(--line)}
 .lager-group-head .lg-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);white-space:nowrap}
 .lager-group-head.lg-critical .lg-label{color:var(--rust)}
-.lager-fill{height:4px;border-radius:2px;background:var(--paper3);overflow:hidden;margin-bottom:12px}
-.lager-fill-bar{height:100%;border-radius:2px}
 </style>
 </head>
 <body>
@@ -1503,7 +1539,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">9.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">13.8.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
@@ -2498,29 +2534,68 @@ function renderLagerManuell(){
 
   const counts = { out:0, low:0, ok:0 };
   rows.forEach(r=>{ if(r.status!=='unset') counts[r.status]++; });
+  const unsetCount = rows.length - counts.ok - counts.low - counts.out;
+
+  // Grafische Gesamtübersicht: Donut-Chart (per conic-gradient) zeigt den Mix aus
+  // Auf-Lager / Niedrig / Leer / Offen auf einen Blick, statt nur Text-Badges.
   const summaryEl=document.getElementById('lager-summary');
   if(summaryEl){
+    const total = rows.length;
+    const segs = [
+      { label:'Auf Lager', val:counts.ok,  color:'var(--success)' },
+      { label:'Niedrig',   val:counts.low, color:'var(--amber)' },
+      { label:'Leer',      val:counts.out, color:'var(--rust)' },
+      { label:'Offen',     val:unsetCount, color:'var(--line2)' },
+    ];
+    let cum=0;
+    const gradParts=[];
+    segs.forEach(s=>{
+      if(!s.val) return;
+      const start=cum;
+      cum += total ? (s.val/total*360) : 0;
+      gradParts.push(`${s.color} ${start}deg ${cum}deg`);
+    });
+    const donutGrad = gradParts.length ? `conic-gradient(${gradParts.join(',')})` : 'conic-gradient(var(--line2) 0deg 360deg)';
+    summaryEl.className='lager-overview';
     summaryEl.innerHTML = `
-      <span class="pc-stock stock-ok" title="Über der Warnschwelle">${counts.ok} auf Lager</span>
-      <span class="pc-stock stock-low" title="Auf oder unter der Warnschwelle">${counts.low} niedrig</span>
-      <span class="pc-stock stock-out" title="Nicht vorrätig">${counts.out} leer</span>`;
+      <div class="lo-donut" style="background:${donutGrad}">
+        <div class="lo-donut-center"><div class="lo-total">${total}</div><div class="lo-total-label">Produkte</div></div>
+      </div>
+      <div class="lo-legend">
+        ${segs.filter(s=>s.val>0).map(s=>`<div class="lo-legend-item"><span class="lo-dot" style="background:${s.color};color:${s.color}"></span>${s.label}<b>${s.val}</b></div>`).join('')}
+      </div>`;
   }
 
   const statusLabel={ out:'Leer', low:'Niedrig', ok:'Auf Lager', unset:'Noch nicht erfasst' };
   const statusClass={ out:'stock-out', low:'stock-low', ok:'stock-ok', unset:'' };
-  const barColor={ out:'var(--rust)', low:'var(--rust)', ok:'var(--success)', unset:'var(--line2)' };
+  const ringColor={ out:'var(--rust)', low:'var(--amber)', ok:'var(--success)', unset:'var(--line2)' };
+  const RING_R = 24, RING_C = 2*Math.PI*RING_R;
 
   function cardHtml({p, menge, schwelle, hasEntry, status}){
     const updated = S.lagerManuell[p.id]?.updatedAt ? fmtDateTime(S.lagerManuell[p.id].updatedAt) : '—';
     const badge = status==='unset' ? `<span class="pc-stock" style="background:var(--paper3);color:var(--ink-faint);border:1px solid var(--line)">${statusLabel[status]}</span>` : `<span class="pc-stock ${statusClass[status]}">${statusLabel[status]}</span>`;
     // Füllstand relativ zur doppelten Warnschwelle (= grobe Referenz für "gut gefüllt"), auf 100% gedeckelt.
     const fillPct = hasEntry ? Math.max(4, Math.min(100, Math.round((menge/Math.max(1,schwelle*2))*100))) : 0;
+    const dashOffset = RING_C * (1 - fillPct/100);
     return `
-    <div class="pc">
-      <div class="pc-eyebrow">Bestand · ${p.id}</div>
-      <div class="pc-name"><span class="pc-ic">${p.icon}</span>${p.name}${badge}</div>
-      <div class="pc-val">${hasEntry?menge:'—'} Stk</div>
-      <div class="lager-fill"><div class="lager-fill-bar" style="width:${fillPct}%;background:${barColor[status]}"></div></div>
+    <div class="pc lager-pc lager-pc-${status}">
+      <div class="lp-top">
+        <div class="lp-ring-wrap">
+          <svg class="lp-ring" viewBox="0 0 58 58">
+            <circle class="lp-ring-bg" cx="29" cy="29" r="${RING_R}"></circle>
+            <circle class="lp-ring-fg" cx="29" cy="29" r="${RING_R}" style="stroke:${ringColor[status]};stroke-dasharray:${RING_C};stroke-dashoffset:${hasEntry?dashOffset:RING_C}"></circle>
+          </svg>
+          <div class="lp-ring-center">${p.icon}</div>
+        </div>
+        <div class="lp-info">
+          <div class="pc-eyebrow">Bestand · ${p.id}</div>
+          <div class="pc-name">${p.name}${badge}</div>
+        </div>
+      </div>
+      <div class="lp-stats">
+        <div class="lp-qty">${hasEntry?menge:'—'}<span>Stk</span></div>
+        <div class="lp-thresh">Warnschwelle<br>${schwelle} Stk</div>
+      </div>
       <div class="ps" style="margin:0 0 10px">Zuletzt gebucht: ${updated}</div>
       <div class="pc-edit">
         <div style="flex:1"><label class="fl" style="margin-bottom:4px">Vorhanden</label><input type="number" min="0" step="1" id="lm-input-${p.id}" value="${hasEntry?menge:''}" placeholder="—" onkeydown="if(event.key==='Enter')bookLagerbestand('${p.id}')"></div>
