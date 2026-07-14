@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '13.8.1'; // Schriftart der Lagerbestand-Übersicht (Donut-Zahl) korrigiert: nutzt jetzt wie überall sonst (z.B. auf der Übersicht/Dashboard-Seite bei den Kennzahlen-Kacheln) JetBrains Mono statt der Überschriften-Schriftart, damit alle großen Zahlen im gesamten App konsistent aussehen.
+const APP_VERSION = '13.9.0'; // Lagerbestand-Seite neu strukturiert: Donut-Chart und Ring-Füllstände entfernt (zu verspielt, zu wenig Übersicht) und durch Dashboard-Stil ersetzt — kompakte Kennzahlen-Kacheln oben (wie auf der Übersicht-Seite) und strukturierte Produktkarten mit klaren Label/Wert-Paaren und schlichtem Füllstandsbalken.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
