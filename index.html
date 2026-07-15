@@ -30,6 +30,7 @@
    TOKENS
    ════════════════════════════════════════════════════════ */
 :root{
+  --ui-zoom:1;
   --paper:#0B0D10;
   --paper2:color-mix(in srgb, #181C22 68%, transparent);
   --paper3:color-mix(in srgb, #232830 62%, transparent);
@@ -105,6 +106,9 @@ html[data-mode="light"] body{-webkit-font-smoothing:auto}
 html,body{height:100%}
 html{color-scheme:dark}
 html[data-mode="light"]{color-scheme:light}
+/* Schriftgröße-Einstellung: skaliert die komplette Oberfläche (Text, Abstände, Icons)
+   gleichmäßig, ohne dass jede einzelne px-Angabe im CSS umgeschrieben werden müsste. */
+html{zoom:var(--ui-zoom,1);}
 body{
   background:var(--paper);
   background-image:
@@ -136,6 +140,9 @@ body,.card,.kcard,.stat-cell,.modal,.sidebar,.mobile-topbar,.ios-tabbar,.tab-gro
 .es-quickadd,.abholcode-box,.vpick-card,.batch-item{
   backdrop-filter:blur(26px) saturate(200%);-webkit-backdrop-filter:blur(26px) saturate(200%);
 }
+/* "Liquid Glass"-Einstellung ausgeschaltet: Frost-Unschärfe app-weit deaktivieren.
+   Greift auf jedes Element, egal wo der Blur inline im CSS gesetzt ist. */
+html.no-glass *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
 .card,.kcard,.pc,.set-card,.dose-card,.modal,.login-card,.stat-cell,#toast,#update-banner,
 .tab-group,.vshop-card,.lager-pc,.es-quickadd,.danger-zone,.service-banner{
   position:relative;
@@ -1185,16 +1192,20 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
     <div class="login-label">Verwaltungssystem</div>
     <div class="login-brand">
       <h1>Nico<span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Flow</span></h1>
-      <div class="sub">Bestand · Bestellungen · Dosierung</div>
+      <div class="sub" data-i18n="app.tagline">Bestand · Bestellungen · Dosierung</div>
     </div>
-    <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg>ZUGANG</i><span></span></div>
+    <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg><span data-i18n="login.access">ZUGANG</span></i><span></span></div>
     <div class="login-card">
-      <div class="fw"><label class="fl">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username" oninput="clearFieldError('inp-user')"/><div class="field-err" id="inp-user-err"></div></div>
-      <div class="fw"><label class="fl">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" oninput="clearFieldError('inp-pw')" onkeydown="if(event.key==='Enter')doLogin()"/><div class="field-err" id="inp-pw-err"></div></div>
-      <button class="primary-btn" onclick="doLogin()">Anmelden →</button>
+      <div class="fw"><label class="fl" data-i18n="login.username">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username" oninput="clearFieldError('inp-user')"/><div class="field-err" id="inp-user-err"></div></div>
+      <div class="fw"><label class="fl" data-i18n="login.password">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" oninput="clearFieldError('inp-pw')" onkeydown="if(event.key==='Enter')doLogin()"/><div class="field-err" id="inp-pw-err"></div></div>
+      <button class="primary-btn" onclick="doLogin()" data-i18n="login.submit">Anmelden →</button>
       <div class="login-err" id="login-err">Falscher Benutzername oder Passwort.</div>
     </div>
-    <div class="login-hint">Standard: <b>admin / 1234</b></div>
+    <div class="login-hint"><span data-i18n="login.hint-prefix">Standard:</span> <b>admin / 1234</b></div>
+    <div class="tab-group lang-switch" style="margin:18px auto 0;justify-content:center">
+      <button type="button" class="tab-btn active" data-lang="de" onclick="setLang('de')">Deutsch</button>
+      <button type="button" class="tab-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
   </div>
 </div>
 
@@ -1220,16 +1231,16 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <nav class="scalebar" id="scalebar">
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span>Übersicht</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span>Bestellungen<span class="tk-dot" id="tk-dot-bestellungen"></span></div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span>Lieferant &amp; Schulden</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span>Kunden</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span>Lagerbestand</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span>Eigenverbrauch</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span><span data-i18n="nav.dashboard">Übersicht</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span><span data-i18n="nav.bestellungen">Bestellungen</span><span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span data-i18n="nav.lieferant">Lieferant &amp; Schulden</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span><span data-i18n="nav.kunden">Kunden</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span><span data-i18n="nav.lieferantenkunden">Lieferantenkunden</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span><span data-i18n="nav.preise">Preise</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span><span data-i18n="nav.lagerbestand">Lagerbestand</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span><span data-i18n="nav.eigenverbrauch">Eigenverbrauch</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
       </nav>
       <div class="sb-footer">
         <div class="tb-user">
@@ -1258,7 +1269,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="ph">
-        <div><div class="ph-eyebrow">Datenblatt · Echtzeit</div><div class="pt">Übersicht</div><div class="ps">Offene Schulden und ausstehende Bestellungen</div></div>
+        <div><div class="ph-eyebrow" data-i18n="page.dashboard.eyebrow">Datenblatt · Echtzeit</div><div class="pt" data-i18n="page.dashboard.title">Übersicht</div><div class="ps" data-i18n="page.dashboard.sub">Offene Schulden und ausstehende Bestellungen</div></div>
       </div>
       <div id="service-banner" style="display:none" class="service-banner">
         <div class="sb-left"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></div>
@@ -1348,23 +1359,23 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
     <!-- BESTELLUNGEN -->
     <div class="page" id="page-bestellungen">
       <div class="ph">
-        <div><div class="ph-eyebrow">Protokoll</div><div class="pt">Bestellungen</div><div class="ps">Bestellungen anlegen und verwalten</div></div>
+        <div><div class="ph-eyebrow" data-i18n="page.bestellungen.eyebrow">Protokoll</div><div class="pt" data-i18n="page.bestellungen.title">Bestellungen</div><div class="ps" data-i18n="page.bestellungen.sub">Bestellungen anlegen und verwalten</div></div>
         <div class="pa">
           <button class="btn btn-ghost" id="best-pdf-btn" onclick="downloadOpenOrdersPDF()">⭳ Offene als PDF</button>
           <button class="btn btn-ghost" onclick="exportBestellungenCSV()">⭳ CSV Export</button>
           <button class="btn btn-ghost" onclick="delAllBestellungen()">🗑 Alle löschen</button>
-          <button class="btn btn-primary" onclick="openModal('bestellung')">＋ Neue Bestellung</button>
+          <button class="btn btn-primary" onclick="openModal('bestellung')" data-i18n="common.new-order">＋ Neue Bestellung</button>
         </div>
       </div>
       <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div class="tab-group" id="best-tabs">
-          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-receipt"/></svg>Abholen <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
-          <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
-          <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-clock"/></svg>Historie</button>
+          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-receipt"/></svg><span data-i18n="best.tab.bestellt">Abholen</span> <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
+          <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 <span data-i18n="best.tab.bezahlt">Bezahlt</span> <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
+          <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-clock"/></svg><span data-i18n="best.tab.historie">Historie</span></button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" oninput="resetBestellPage()" style="width:auto;min-width:200px"/>
-          <select id="filter-kunde" onchange="resetBestellPage()" style="width:auto;min-width:180px"><option value="">Alle Kunden</option></select>
+          <input type="search" id="best-search" placeholder="🔍 Kunde oder Produkt suchen…" data-i18n-ph="best.search-placeholder" oninput="resetBestellPage()" style="width:auto;min-width:200px"/>
+          <select id="filter-kunde" onchange="resetBestellPage()" style="width:auto;min-width:180px"><option value="" data-i18n="common.all">Alle Kunden</option></select>
         </div>
       </div>
       <div class="ps" id="best-tab-hint" style="margin:-8px 0 16px;color:var(--ink-faint)"></div>
@@ -1463,7 +1474,7 @@ create policy "eigene schulden eigener user"
     <!-- KUNDEN -->
     <div class="page" id="page-kunden">
       <div class="ph">
-        <div><div class="ph-eyebrow">Register</div><div class="pt">Kunden</div><div class="ps">Kundenstamm verwalten</div></div>
+        <div><div class="ph-eyebrow" data-i18n="page.kunden.eyebrow">Register</div><div class="pt" data-i18n="page.kunden.title">Kunden</div><div class="ps" data-i18n="page.kunden.sub">Kundenstamm verwalten</div></div>
         <div class="pa"><button class="btn btn-primary" onclick="openModal('kunde')">＋ Neuer Kunde</button></div>
       </div>
       <div style="margin-bottom:16px"><input type="search" id="kunden-search" placeholder="🔍 Kunde suchen…" oninput="renderKunden()" style="max-width:280px"/></div>
@@ -1479,7 +1490,7 @@ create policy "eigene schulden eigener user"
          da es sich um andere Benutzer handelt, die bei MIR bestellen, nicht um eigene Kunden. -->
     <div class="page" id="page-lieferantenkunden">
       <div class="ph">
-        <div><div class="ph-eyebrow">Register</div><div class="pt"><svg class="h-ic"><use href="#ic-store"/></svg>Lieferantenkunden</div><div class="ps">Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen</div></div>
+        <div><div class="ph-eyebrow" data-i18n="page.lieferantenkunden.eyebrow">Register</div><div class="pt"><svg class="h-ic"><use href="#ic-store"/></svg><span data-i18n="page.lieferantenkunden.title">Lieferantenkunden</span></div><div class="ps" data-i18n="page.lieferantenkunden.sub">Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen</div></div>
       </div>
       <div style="margin-bottom:16px"><input type="search" id="lieferantenkunden-search" placeholder="🔍 Lieferantenkunde suchen…" oninput="renderLieferantenkundenSeite()" style="max-width:280px"/></div>
       <div class="kg" id="lieferantenkunden-grid"></div>
@@ -1492,7 +1503,7 @@ create policy "eigene schulden eigener user"
 
     <!-- PREISE -->
     <div class="page" id="page-preise">
-      <div class="ph"><div><div class="ph-eyebrow">Beipackzettel</div><div class="pt">Preise</div><div class="ps">Einkaufs- und Verkaufspreise für alle Produkte</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.preise.eyebrow">Beipackzettel</div><div class="pt" data-i18n="page.preise.title">Preise</div><div class="ps" data-i18n="page.preise.sub">Einkaufs- und Verkaufspreise für alle Produkte</div></div></div>
       <div class="card" id="vt-setup-hint" style="display:none;margin-bottom:16px">
         <div class="ec" style="padding:8px 0">
           <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
@@ -1531,7 +1542,7 @@ create policy "varianten eigene loeschen"
 
     <!-- LAGERBESTAND -->
     <div class="page" id="page-lagerbestand">
-      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Lagerbestand</div><div class="ps">Trag hier einfach ein, was du von jedem Produkt gerade tatsächlich vorrätig hast. Produkte unter deiner Warnschwelle werden oben hervorgehoben.</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.lagerbestand.eyebrow">Bestand</div><div class="pt" data-i18n="page.lagerbestand.title">Lagerbestand</div><div class="ps">Trag hier einfach ein, was du von jedem Produkt gerade tatsächlich vorrätig hast. Produkte unter deiner Warnschwelle werden oben hervorgehoben.</div></div></div>
       <div class="card" id="lager-manuell-setup-hint" style="display:none">
         <div class="ec" style="padding:8px 0">
           <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
@@ -1570,7 +1581,7 @@ create policy "lagerbestand manuell eigener user"
 
     <!-- EIGENVERBRAUCH -->
     <div class="page" id="page-eigenverbrauch">
-      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Eigenverbrauch</div><div class="ps">Trag hier ein, was du selbst konsumiert hast (nicht verkauft) — der Lagerbestand wird automatisch entsprechend reduziert.</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.eigenverbrauch.eyebrow">Bestand</div><div class="pt" data-i18n="page.eigenverbrauch.title">Eigenverbrauch</div><div class="ps">Trag hier ein, was du selbst konsumiert hast (nicht verkauft) — der Lagerbestand wird automatisch entsprechend reduziert.</div></div></div>
       <div class="card" id="ev-setup-hint" style="display:none">
         <div class="ec" style="padding:8px 0">
           <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
@@ -1611,7 +1622,7 @@ create policy "eigenverbrauch eigener user"
 
     <!-- EINSTELLUNGEN -->
     <div class="page" id="page-einstellungen">
-      <div class="ph"><div><div class="ph-eyebrow">Konfiguration</div><div class="pt">Einstellungen</div><div class="ps">App konfigurieren und Konto verwalten</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.einstellungen.eyebrow">Konfiguration</div><div class="pt" data-i18n="page.einstellungen.title">Einstellungen</div><div class="ps" data-i18n="page.einstellungen.sub">App konfigurieren und Konto verwalten</div></div></div>
       <div class="sg" style="margin-bottom:16px" id="set-row-1">
         <div class="set-card" id="set-card-konto">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></div><div><h3>Mein Konto</h3><p>Benutzername & Passwort</p></div></div>
@@ -1639,12 +1650,27 @@ alter table profiles add column if not exists adresse text;</pre>
           </div>
         </div>
         <div class="set-card" id="set-card-anzeige">
-          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3>Anzeige</h3><p>Design anpassen</p></div></div>
+          <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3 data-i18n="set.card.anzeige.title">Anzeige</h3><p data-i18n="set.card.anzeige.sub">Design anpassen</p></div></div>
           <div class="scb">
-            <div class="sr"><div><div class="sr-label">Helles Design</div><div class="sr-sub">Statt des dunklen Standard-Designs</div></div><label class="toggle"><input type="checkbox" id="set-lightmode" onchange="applyMode(this.checked?'light':'dark')"><div class="tt"></div></label></div>
-            <div class="sr"><div><div class="sr-label">Animationen</div><div class="sr-sub">Seitenübergänge</div></div><label class="toggle"><input type="checkbox" id="set-anim" checked onchange="applyViz()"><div class="tt"></div></label></div>
-            <div class="sr"><div><div class="sr-label">Kompakte Ansicht</div><div class="sr-sub">Weniger Abstände</div></div><label class="toggle"><input type="checkbox" id="set-compact" onchange="applyViz()"><div class="tt"></div></label></div>
-            <div style="padding-top:12px"><div class="sr-label" style="margin-bottom:9px">Akzentfarbe</div><div class="theme-grid" id="theme-grid"></div></div>
+            <div class="sr"><div><div class="sr-label" data-i18n="set.lightmode.label">Helles Design</div><div class="sr-sub" data-i18n="set.lightmode.sub">Statt des dunklen Standard-Designs</div></div><label class="toggle"><input type="checkbox" id="set-lightmode" onchange="applyMode(this.checked?'light':'dark')"><div class="tt"></div></label></div>
+            <div class="sr"><div><div class="sr-label" data-i18n="set.anim.label">Animationen</div><div class="sr-sub" data-i18n="set.anim.sub">Seitenübergänge</div></div><label class="toggle"><input type="checkbox" id="set-anim" checked onchange="applyViz()"><div class="tt"></div></label></div>
+            <div class="sr"><div><div class="sr-label" data-i18n="set.compact.label">Kompakte Ansicht</div><div class="sr-sub" data-i18n="set.compact.sub">Weniger Abstände</div></div><label class="toggle"><input type="checkbox" id="set-compact" onchange="applyViz()"><div class="tt"></div></label></div>
+            <div class="sr"><div><div class="sr-label" data-i18n="set.liquidglass.label">Liquid Glass</div><div class="sr-sub" data-i18n="set.liquidglass.sub">Milchglas-Effekt auf Karten &amp; Leisten</div></div><label class="toggle"><input type="checkbox" id="set-liquidglass" checked onchange="applyLiquidGlass(this.checked)"><div class="tt"></div></label></div>
+            <div style="padding-top:12px"><div class="sr-label" style="margin-bottom:9px" data-i18n="set.accent.label">Akzentfarbe</div><div class="theme-grid" id="theme-grid"></div></div>
+            <div style="padding-top:16px"><div class="sr-label" style="margin-bottom:9px" data-i18n="set.fontsize.label">Schriftgröße</div>
+              <div class="tab-group" id="fontsize-group">
+                <button type="button" class="tab-btn" data-size="sm" onclick="applyFontSize('sm')" style="font-size:11px">A</button>
+                <button type="button" class="tab-btn active" data-size="md" onclick="applyFontSize('md')" style="font-size:13px">A</button>
+                <button type="button" class="tab-btn" data-size="lg" onclick="applyFontSize('lg')" style="font-size:15px">A</button>
+                <button type="button" class="tab-btn" data-size="xl" onclick="applyFontSize('xl')" style="font-size:17px">A</button>
+              </div>
+            </div>
+            <div style="padding-top:16px"><div class="sr-label" style="margin-bottom:9px" data-i18n="set.language.label">Sprache</div>
+              <div class="tab-group lang-switch" id="lang-group">
+                <button type="button" class="tab-btn active" data-lang="de" onclick="setLang('de')">Deutsch</button>
+                <button type="button" class="tab-btn" data-lang="en" onclick="setLang('en')">English</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1673,6 +1699,11 @@ alter table profiles add column if not exists adresse text;</pre>
             <div class="sr"><div><div class="sr-label">Exportieren</div><div class="sr-sub">JSON-Datei herunterladen</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">↓ Export</button></div>
             <div class="sr"><div><div class="sr-label">Importieren</div><div class="sr-sub">Backup wiederherstellen</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">↑ Import</button><input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)"></div>
             <div class="sr" style="border-bottom:none"><div><div class="sr-label">Statistik</div><div class="sr-sub" id="set-stat">Wird geladen…</div></div></div>
+            <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
+              <div class="sr-label" style="margin-bottom:6px">Vorauszahlungen bei Bestellungen</div>
+              <div class="ps" style="margin:-2px 0 8px">Damit Vorauszahlungen bei Bestellungen gespeichert werden können, einmalig in Supabase (SQL-Editor) ausführen — schadet nicht, falls schon vorhanden:</div>
+              <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:4px;overflow-x:auto;white-space:pre-wrap">alter table bestellungen add column if not exists vorauszahlung numeric default 0;</pre>
+            </div>
           </div>
         </div>
       </div>
@@ -1708,7 +1739,7 @@ alter table profiles add column if not exists adresse text;</pre>
 
     <!-- SERVICE -->
     <div class="page" id="page-service">
-      <div class="ph"><div><div class="ph-eyebrow">Wartung</div><div class="pt">Service</div><div class="ps">Jährlichen Service verwalten</div></div></div>
+      <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.service.eyebrow">Wartung</div><div class="pt" data-i18n="page.service.title">Service</div><div class="ps" data-i18n="page.service.sub">Jährlichen Service verwalten</div></div></div>
       <div class="card">
         <div class="card-head"><h3>Service-Status</h3></div>
         <div class="scb" style="padding:18px 20px">
@@ -1827,12 +1858,12 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Neue Bestellung -->
 <div class="modal-bg" id="modal-bestellung">
   <div class="modal wide">
-    <div class="modal-head"><h3>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')" aria-label="Schließen">✕</button></div>
+    <div class="modal-head"><h3 data-i18n="order.new-title">Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bestellung')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl">Kunde</label><select id="nb-kunde" onchange="renderOrderItems()"></select></div>
-      <label class="fl" style="margin-bottom:8px">Produkte</label>
+      <div id="nb-kunde-wrap" style="margin-bottom:16px"><label class="fl" data-i18n="order.customer">Kunde</label><select id="nb-kunde" onchange="renderOrderItems()"></select></div>
+      <label class="fl" style="margin-bottom:8px" data-i18n="order.products">Produkte</label>
       <div id="order-items"></div>
-      <button class="add-item-btn" onclick="addOrderItem()">＋ Produkt hinzufügen</button>
+      <button class="add-item-btn" onclick="addOrderItem()" data-i18n="order.add-product">＋ Produkt hinzufügen</button>
 
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
         <label class="fl" style="margin-bottom:8px">Rabatt (optional)</label>
@@ -1846,17 +1877,28 @@ alter table profiles add column if not exists adresse text;</pre>
         </div>
       </div>
 
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+        <label class="fl" style="margin-bottom:8px" id="nb-vz-label" data-i18n="order.prepayment">Vorauszahlung (optional)</label>
+        <input type="number" id="nb-vorauszahlung" min="0" step="0.01" placeholder="0,00" oninput="renderOrderItems()"/>
+      </div>
+
       <div class="order-total-row" style="border-top:none;padding-top:8px" id="subtotal-row">
-        <span class="otl">Zwischensumme</span><span class="otv mono" id="order-subtotal" style="font-size:13px;color:var(--ink-soft)">0,00 €</span>
+        <span class="otl" data-i18n="order.subtotal">Zwischensumme</span><span class="otv mono" id="order-subtotal" style="font-size:13px;color:var(--ink-soft)">0,00 €</span>
       </div>
       <div class="order-total-row" id="discount-row" style="display:none">
-        <span class="otl" style="color:var(--rust)">Rabatt</span><span class="otv mono" id="order-discount" style="font-size:13px;color:var(--rust)">−0,00 €</span>
+        <span class="otl" style="color:var(--rust)" data-i18n="order.discount">Rabatt</span><span class="otv mono" id="order-discount" style="font-size:13px;color:var(--rust)">−0,00 €</span>
       </div>
-      <div class="order-total-row"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="order-total">0,00 €</span></div>
+      <div class="order-total-row"><span class="otl" data-i18n="order.total">Gesamtbetrag</span><span class="otv mono" id="order-total">0,00 €</span></div>
+      <div class="order-total-row" id="nb-vz-row" style="display:none">
+        <span class="otl" style="color:var(--ink-faint)" data-i18n="order.prepayment">Vorauszahlung</span><span class="otv mono" id="order-vz" style="font-size:13px;color:var(--ink-faint)">−0,00 €</span>
+      </div>
+      <div class="order-total-row" id="nb-rest-row" style="display:none">
+        <span class="otl" data-i18n="order.remaining">Restbetrag</span><span class="otv mono" id="order-rest">0,00 €</span>
+      </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('bestellung')">Abbrechen</button>
-      <button class="btn btn-primary" onclick="addBestellung()">Bestellung anlegen</button>
+      <button class="btn btn-ghost" onclick="closeModal('bestellung')" data-i18n="common.cancel">Abbrechen</button>
+      <button class="btn btn-primary" onclick="addBestellung()" data-i18n="order.create-btn">Bestellung anlegen</button>
     </div>
   </div>
 </div>
@@ -1887,7 +1929,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Bestellung Details -->
 <div class="modal-bg" id="modal-orderdetail">
   <div class="modal wide">
-    <div class="modal-head"><h3>Bestellung <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')" aria-label="Schließen">✕</button></div>
+    <div class="modal-head"><h3><span data-i18n="order.detail-title">Bestellung</span> <span class="mono" id="od-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('orderdetail')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="abholcode-box" id="od-abholcode-box" style="display:none">
         <div>
@@ -1911,25 +1953,35 @@ alter table profiles add column if not exists adresse text;</pre>
       </div>
       <div class="od-timeline" id="od-timeline" style="display:none"></div>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
-      <div class="about-row"><span id="od-kunde-label">Kunde</span><span id="od-kunde"></span></div>
+      <div class="about-row"><span id="od-kunde-label" data-i18n="order.customer">Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row" id="od-batch-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" id="od-batch-btn" onclick="openBatchPickup()">📋 Alle offenen Bestellungen dieses Kunden</button></div>
-      <div class="about-row"><span>Bestellt am</span><span id="od-datum"></span></div>
+      <div class="about-row"><span data-i18n="best.th.bestelltam">Bestellt am</span><span id="od-datum"></span></div>
       <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
-      <div class="about-row" id="od-angekommen-row" style="display:none"><span>Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
-      <div class="about-row" id="od-bezahlt-row" style="display:none"><span>Bezahlt am</span><span id="od-bezahlt-am" style="color:var(--success-deep);font-weight:600"></span></div>
+      <div class="about-row" id="od-angekommen-row" style="display:none"><span data-i18n="best.th.angekommenam">Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
+      <div class="about-row" id="od-bezahlt-row" style="display:none"><span data-i18n="best.th.bezahltam">Bezahlt am</span><span id="od-bezahlt-am" style="color:var(--success-deep);font-weight:600"></span></div>
       <div class="about-row" id="od-notiz-row" style="display:none;align-items:flex-start"><span>Notiz</span><span id="od-notiz" style="text-align:right;max-width:70%"></span></div>
-      <div class="about-row"><span>Status</span><span id="od-status"></span></div>
-      <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
+      <div class="about-row"><span data-i18n="best.th.status">Status</span><span id="od-status"></span></div>
+      <div class="tbl-wrap" style="margin-top:16px"><table><thead><tr><th data-i18n="order.products">Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Summe</th></tr></thead><tbody id="od-items"></tbody></table></div>
       <div class="order-total-row" id="od-subtotal-row">
-        <span class="otl">Zwischensumme</span><span class="otv mono" id="od-subtotal" style="font-size:13px;color:var(--ink-soft)"></span>
+        <span class="otl" data-i18n="order.subtotal">Zwischensumme</span><span class="otv mono" id="od-subtotal" style="font-size:13px;color:var(--ink-soft)"></span>
       </div>
       <div class="order-total-row" id="od-discount-row" style="display:none">
-        <span class="otl" id="od-discount-label" style="color:var(--rust)">Rabatt</span><span class="otv mono" id="od-discount" style="font-size:13px;color:var(--rust)"></span>
+        <span class="otl" id="od-discount-label" style="color:var(--rust)" data-i18n="order.discount">Rabatt</span><span class="otv mono" id="od-discount" style="font-size:13px;color:var(--rust)"></span>
       </div>
-      <div class="order-total-row"><span class="otl">Gesamtbetrag</span><span class="otv mono" id="od-total"></span></div>
+      <div class="order-total-row"><span class="otl" data-i18n="order.total">Gesamtbetrag</span><span class="otv mono" id="od-total"></span></div>
+      <div class="order-total-row" id="od-vz-row" style="align-items:center">
+        <span class="otl" data-i18n="order.prepayment">Vorauszahlung</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="od-vz-input" min="0" step="0.01" placeholder="0,00" style="width:96px;padding:7px 9px;font-size:12px"/>
+          <button class="btn btn-ghost btn-sm" id="od-vz-save-btn" onclick="saveVorauszahlung()" data-i18n="common.save">Speichern</button>
+        </span>
+      </div>
+      <div class="order-total-row" id="od-rest-row" style="display:none">
+        <span class="otl" data-i18n="order.remaining">Restbetrag</span><span class="otv mono" id="od-rest" style="font-weight:700"></span>
+      </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('orderdetail')">Schließen</button>
+      <button class="btn btn-ghost" onclick="closeModal('orderdetail')" data-i18n="common.close">Schließen</button>
       <button class="btn btn-primary" id="od-lieferschein-btn" style="display:none" onclick="printLieferscheinFromDetail()">📦 Lieferschein herunterladen</button>
       <button class="btn btn-primary" id="od-rechnung-btn" onclick="printInvoiceFromDetail()">🖨 Rechnung herunterladen</button>
     </div>
@@ -2143,6 +2195,275 @@ const THEMES = [
 ];
 
 // ══════════════════════════════════════════════
+// SPRACHE (DE / EN)
+// Deckt die feste App-Oberfläche ab (Navigation, Seitenköpfe, Einstellungen, Bestellungen,
+// gängige Buttons/Status). Frei getippte Inhalte (Kundennamen, Notizen …) bleiben natürlich
+// unverändert. Über t('schlüssel') im JS und data-i18n="schlüssel" im HTML angebunden.
+// ══════════════════════════════════════════════
+const I18N = {
+  de: {
+    'app.tagline':'Bestand · Bestellungen · Dosierung',
+    'login.access':'ZUGANG',
+    'login.username':'Benutzername',
+    'login.password':'Passwort',
+    'login.submit':'Anmelden →',
+    'login.hint-prefix':'Standard:',
+    'nav.dashboard':'Übersicht',
+    'nav.bestellungen':'Bestellungen',
+    'nav.lieferant':'Lieferant & Schulden',
+    'nav.kunden':'Kunden',
+    'nav.lieferantenkunden':'Lieferantenkunden',
+    'nav.preise':'Preise',
+    'nav.lagerbestand':'Lagerbestand',
+    'nav.eigenverbrauch':'Eigenverbrauch',
+    'nav.einstellungen':'Einstellungen',
+    'nav.service':'Service',
+    'common.save':'Speichern',
+    'common.cancel':'Abbrechen',
+    'common.delete':'Löschen',
+    'common.close':'Schließen',
+    'common.edit':'Bearbeiten',
+    'common.search':'Suchen',
+    'common.export':'Export',
+    'common.import':'Import',
+    'common.new-order':'＋ Neue Bestellung',
+    'common.all':'Alle',
+    'status.open':'Offen',
+    'status.paid':'Bezahlt',
+    'status.delivered':'Angekommen',
+    'status.underway':'Unterwegs',
+    'status.partial':'Teilweise bezahlt',
+    'page.dashboard.eyebrow':'Datenblatt · Echtzeit',
+    'page.dashboard.title':'Übersicht',
+    'page.dashboard.sub':'Offene Schulden und ausstehende Bestellungen',
+    'page.bestellungen.eyebrow':'Protokoll',
+    'page.bestellungen.title':'Bestellungen',
+    'page.bestellungen.sub':'Bestellungen anlegen und verwalten',
+    'page.kunden.eyebrow':'Register',
+    'page.kunden.title':'Kunden',
+    'page.kunden.sub':'Kundenstamm verwalten',
+    'page.lieferantenkunden.eyebrow':'Register',
+    'page.lieferantenkunden.title':'Lieferantenkunden',
+    'page.lieferantenkunden.sub':'Benutzer, die dich als Lieferanten hinterlegt haben und bei dir bestellen',
+    'page.preise.eyebrow':'Beipackzettel',
+    'page.preise.title':'Preise',
+    'page.preise.sub':'Einkaufs- und Verkaufspreise für alle Produkte',
+    'page.lagerbestand.eyebrow':'Bestand',
+    'page.lagerbestand.title':'Lagerbestand',
+    'page.eigenverbrauch.eyebrow':'Bestand',
+    'page.eigenverbrauch.title':'Eigenverbrauch',
+    'page.einstellungen.eyebrow':'Konfiguration',
+    'page.einstellungen.title':'Einstellungen',
+    'page.einstellungen.sub':'App konfigurieren und Konto verwalten',
+    'page.service.eyebrow':'Wartung',
+    'page.service.title':'Service',
+    'page.service.sub':'Jährlichen Service verwalten',
+    'page.lieferant.title':'Beim Lieferanten bestellen',
+    'best.tab.bestellt':'Bestellt',
+    'best.tab.bezahlt':'Bezahlt',
+    'best.tab.historie':'Historie',
+    'best.th.kunde':'Kunde',
+    'best.th.produkte':'Produkte',
+    'best.th.datum':'Datum',
+    'best.th.gesamt':'Gesamt',
+    'best.th.status':'Status',
+    'best.th.von':'Von',
+    'best.action.abholen':'✓ Abholen',
+    'best.action.bezahlt':'✓ Bezahlt',
+    'best.search-placeholder':'Kunde oder Produkt suchen…',
+    'best.hint.bestellt':'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Abholen", sobald der Kunde da ist — ist ein Abholcode hinterlegt, wird er dabei abgefragt.',
+    'best.hint.bezahlt':'Bestellungen mit offenem Betrag. Klick auf „Bezahlt", sobald bezahlt wurde — dabei wird automatisch eine Rechnung erstellt.',
+    'best.hint.historie':'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.',
+    'best.empty.nomatch':'Keine Treffer für diese Suche/Filter.',
+    'best.empty.bestellt':'Keine offenen Bestellungen zum Abholen.',
+    'best.empty.bezahlt':'Keine offenen Zahlungen.',
+    'best.empty.historie':'Noch keine abgeschlossenen Bestellungen.',
+    'best.th.bestelltam':'Bestellt am',
+    'best.th.angekommenam':'Angekommen am',
+    'best.th.bezahltam':'Bezahlt am',
+    'best.loadmore':'Mehr laden',
+    'set.card.konto.title':'Mein Konto',
+    'set.card.konto.sub':'Benutzername & Passwort',
+    'set.card.anzeige.title':'Anzeige',
+    'set.card.anzeige.sub':'Design anpassen',
+    'set.lightmode.label':'Helles Design',
+    'set.lightmode.sub':'Statt des dunklen Standard-Designs',
+    'set.anim.label':'Animationen',
+    'set.anim.sub':'Seitenübergänge',
+    'set.compact.label':'Kompakte Ansicht',
+    'set.compact.sub':'Weniger Abstände',
+    'set.accent.label':'Akzentfarbe',
+    'set.fontsize.label':'Schriftgröße',
+    'set.liquidglass.label':'Liquid Glass',
+    'set.liquidglass.sub':'Milchglas-Effekt auf Karten & Leisten',
+    'set.language.label':'Sprache',
+    'set.language.sub':'App-Sprache umstellen',
+    'set.card.benutzer.title':'Benutzer',
+    'set.card.benutzer.sub':'Zugänge verwalten',
+    'set.card.backup.title':'Daten & Backup',
+    'set.card.backup.sub':'Export und Import',
+    'set.card.about.title':'Über die App',
+    'set.card.about.sub':'Version und Infos',
+    'set.card.trash.title':'Papierkorb',
+    'set.card.danger.title':'Gefahrenzone',
+    'set.card.danger.sub':'Diese Aktionen können nicht rückgängig gemacht werden.',
+    'order.subtotal':'Zwischensumme',
+    'order.discount':'Rabatt',
+    'order.total':'Gesamtbetrag',
+    'order.prepayment':'Vorauszahlung',
+    'order.remaining':'Restbetrag',
+    'order.customer':'Kunde',
+    'order.products':'Produkte',
+    'order.add-product':'＋ Produkt hinzufügen',
+    'order.new-title':'Neue Bestellung',
+    'order.create-btn':'Bestellung anlegen',
+    'order.detail-title':'Bestellung',
+  },
+  en: {
+    'app.tagline':'Stock · Orders · Dosing',
+    'login.access':'ACCESS',
+    'login.username':'Username',
+    'login.password':'Password',
+    'login.submit':'Log in →',
+    'login.hint-prefix':'Default:',
+    'nav.dashboard':'Overview',
+    'nav.bestellungen':'Orders',
+    'nav.lieferant':'Supplier & Debts',
+    'nav.kunden':'Customers',
+    'nav.lieferantenkunden':'Reseller customers',
+    'nav.preise':'Prices',
+    'nav.lagerbestand':'Stock',
+    'nav.eigenverbrauch':'Own use',
+    'nav.einstellungen':'Settings',
+    'nav.service':'Service',
+    'common.save':'Save',
+    'common.cancel':'Cancel',
+    'common.delete':'Delete',
+    'common.close':'Close',
+    'common.edit':'Edit',
+    'common.search':'Search',
+    'common.export':'Export',
+    'common.import':'Import',
+    'common.new-order':'＋ New order',
+    'common.all':'All',
+    'status.open':'Open',
+    'status.paid':'Paid',
+    'status.delivered':'Arrived',
+    'status.underway':'On the way',
+    'status.partial':'Partially paid',
+    'page.dashboard.eyebrow':'Data sheet · Live',
+    'page.dashboard.title':'Overview',
+    'page.dashboard.sub':'Open debts and pending orders',
+    'page.bestellungen.eyebrow':'Log',
+    'page.bestellungen.title':'Orders',
+    'page.bestellungen.sub':'Create and manage orders',
+    'page.kunden.eyebrow':'Register',
+    'page.kunden.title':'Customers',
+    'page.kunden.sub':'Manage your customer base',
+    'page.lieferantenkunden.eyebrow':'Register',
+    'page.lieferantenkunden.title':'Reseller customers',
+    'page.lieferantenkunden.sub':'Users who set you as their supplier and order from you',
+    'page.preise.eyebrow':'Info sheet',
+    'page.preise.title':'Prices',
+    'page.preise.sub':'Purchase and sale prices for all products',
+    'page.lagerbestand.eyebrow':'Stock',
+    'page.lagerbestand.title':'Stock',
+    'page.eigenverbrauch.eyebrow':'Stock',
+    'page.eigenverbrauch.title':'Own use',
+    'page.einstellungen.eyebrow':'Configuration',
+    'page.einstellungen.title':'Settings',
+    'page.einstellungen.sub':'Configure the app and manage your account',
+    'page.service.eyebrow':'Maintenance',
+    'page.service.title':'Service',
+    'page.service.sub':'Manage yearly service',
+    'page.lieferant.title':'Order from supplier',
+    'best.tab.bestellt':'Ordered',
+    'best.tab.bezahlt':'Paid',
+    'best.tab.historie':'History',
+    'best.th.kunde':'Customer',
+    'best.th.produkte':'Products',
+    'best.th.datum':'Date',
+    'best.th.gesamt':'Total',
+    'best.th.status':'Status',
+    'best.th.von':'From',
+    'best.action.abholen':'✓ Pick up',
+    'best.action.bezahlt':'✓ Paid',
+    'best.search-placeholder':'Search customer or product…',
+    'best.hint.bestellt':'Orders that still need to be picked up/delivered. Click "Pick up" once the customer is there — if a pickup code is set, it will be requested.',
+    'best.hint.bezahlt':'Orders with an open amount. Click "Paid" once it has been paid — an invoice is created automatically.',
+    'best.hint.historie':'Completed orders (delivered & paid) with timestamps — when ordered and when paid.',
+    'best.empty.nomatch':'No matches for this search/filter.',
+    'best.empty.bestellt':'No open orders to pick up.',
+    'best.empty.bezahlt':'No open payments.',
+    'best.empty.historie':'No completed orders yet.',
+    'best.th.bestelltam':'Ordered on',
+    'best.th.angekommenam':'Arrived on',
+    'best.th.bezahltam':'Paid on',
+    'best.loadmore':'Load more',
+    'set.card.konto.title':'My account',
+    'set.card.konto.sub':'Username & password',
+    'set.card.anzeige.title':'Display',
+    'set.card.anzeige.sub':'Customize the design',
+    'set.lightmode.label':'Light design',
+    'set.lightmode.sub':'Instead of the default dark design',
+    'set.anim.label':'Animations',
+    'set.anim.sub':'Page transitions',
+    'set.compact.label':'Compact view',
+    'set.compact.sub':'Less spacing',
+    'set.accent.label':'Accent color',
+    'set.fontsize.label':'Font size',
+    'set.liquidglass.label':'Liquid Glass',
+    'set.liquidglass.sub':'Frosted-glass effect on cards & bars',
+    'set.language.label':'Language',
+    'set.language.sub':'Switch the app language',
+    'set.card.benutzer.title':'Users',
+    'set.card.benutzer.sub':'Manage accounts',
+    'set.card.backup.title':'Data & backup',
+    'set.card.backup.sub':'Export and import',
+    'set.card.about.title':'About the app',
+    'set.card.about.sub':'Version and info',
+    'set.card.trash.title':'Trash',
+    'set.card.danger.title':'Danger zone',
+    'set.card.danger.sub':'These actions cannot be undone.',
+    'order.subtotal':'Subtotal',
+    'order.discount':'Discount',
+    'order.total':'Total',
+    'order.prepayment':'Prepayment',
+    'order.remaining':'Remaining amount',
+    'order.customer':'Customer',
+    'order.products':'Products',
+    'order.add-product':'＋ Add product',
+    'order.new-title':'New order',
+    'order.create-btn':'Create order',
+    'order.detail-title':'Order',
+  }
+};
+function t(key){
+  const lang = (VS && VS.lang) || 'de';
+  const dict = I18N[lang] || I18N.de;
+  return dict[key] != null ? dict[key] : (I18N.de[key] != null ? I18N.de[key] : key);
+}
+// Wendet die aktuelle Sprache auf alle markierten Elemente an: data-i18n für Textinhalt,
+// data-i18n-ph für Platzhalter, data-i18n-title für title-Attribute (Tooltips).
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.setAttribute('title', t(el.getAttribute('data-i18n-title'))); });
+  document.documentElement.setAttribute('lang', (VS && VS.lang)==='en' ? 'en' : 'de');
+}
+function setLang(lang){
+  VS.lang = (lang==='en') ? 'en' : 'de';
+  applyI18n();
+  document.querySelectorAll('.lang-switch .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===VS.lang));
+  // Ein paar Stellen (Statuslabels/Tabs) werden dynamisch aus JS heraus neu gerendert statt
+  // per data-i18n direkt im HTML gepflegt — die also nach einem Sprachwechsel neu zeichnen,
+  // damit sie nicht in der alten Sprache "hängen bleiben".
+  if(typeof renderBestellungen==='function' && document.getElementById('b-tbody')) renderBestellungen();
+  if(typeof renderSettings==='function' && document.getElementById('page-einstellungen')?.classList.contains('active')) renderSettings();
+  saveVis();
+}
+
+// ══════════════════════════════════════════════
 // SUPABASE CLIENT
 // ══════════════════════════════════════════════
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -2193,7 +2514,12 @@ let lagerManuellTableMissing = false;
 let lagerSchwelleSpalteMissing = false;
 let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
-let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark'};
+let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark',fontSize:'md',liquidGlass:true,lang:'de'};
+// Ältere Backups/Local-Storage-Stände kennen diese Felder evtl. noch nicht — sinnvolle
+// Defaults nachrüsten, statt dass z.B. die Schriftgröße plötzlich "undefined" ist.
+if(VS.fontSize==null) VS.fontSize='md';
+if(VS.liquidGlass==null) VS.liquidGlass=true;
+if(VS.lang==null) VS.lang='de';
 let currentUser = null;   // Anzeigename (z.B. "admin")
 let currentUserId = null; // Supabase auth.users UUID
 
@@ -2370,6 +2696,11 @@ function displayTotal(b){
   else if(b.discountType==='fixed') discAmt = Math.min(Math.max(b.discountValue,0), subtotal);
   return Math.max(0, subtotal-discAmt);
 }
+// Restbetrag (Nachzahlung): Gesamtbetrag abzüglich einer evtl. hinterlegten Vorauszahlung.
+// Wird nie negativ (falls die Vorauszahlung aus Versehen höher als der Gesamtbetrag ist).
+function restAmount(b){
+  return Math.max(0, displayTotal(b) - (b.vorauszahlung||0));
+}
 
 // ══════════════════════════════════════════════
 // ROLLEN-RECHTE
@@ -2434,6 +2765,9 @@ async function onLoggedIn(authUser, displayName){
   await loadAllData();
   applyTheme(VS.themeIdx);
   applyMode(VS.mode||'dark');
+  applyFontSize(VS.fontSize||'md');
+  applyLiquidGlass(VS.liquidGlass!==false);
+  setLang(VS.lang||'de');
   applyRoleUI();
   checkServiceDue();
   nav(homePage());
@@ -2464,7 +2798,8 @@ function mapBestellung(b){
   return {
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null, trackingToken:b.tracking_token||null
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null, trackingToken:b.tracking_token||null,
+    vorauszahlung: b.vorauszahlung!=null ? Number(b.vorauszahlung) : 0
   };
 }
 let trashLoaded = false;
@@ -2642,6 +2977,7 @@ function openModal(id){
     document.getElementById('discount-type').value='';
     document.getElementById('discount-value').value='';
     document.getElementById('discount-value').disabled=true;
+    const vzIn=document.getElementById('nb-vorauszahlung'); if(vzIn) vzIn.value='';
   }
 }
 function closeModal(id){
@@ -2718,6 +3054,29 @@ function applyMode(mode){
   document.documentElement.setAttribute('data-mode', VS.mode);
   const cb=document.getElementById('set-lightmode');
   if(cb) cb.checked = VS.mode==='light';
+  saveVis();
+}
+// ══════════════════════════════════════════════
+// SCHRIFTGRÖSSE — skaliert die ganze Oberfläche via CSS-Zoom (siehe html{zoom:...} weiter
+// oben), damit nicht jede einzelne px-Angabe im Stylesheet angefasst werden muss.
+// ══════════════════════════════════════════════
+const FONT_SIZES = {sm:0.9, md:1, lg:1.125, xl:1.25};
+function applyFontSize(size){
+  if(!FONT_SIZES[size]) size='md';
+  VS.fontSize = size;
+  document.documentElement.style.setProperty('--ui-zoom', FONT_SIZES[size]);
+  document.querySelectorAll('#fontsize-group .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.size===size));
+  saveVis();
+}
+// ══════════════════════════════════════════════
+// LIQUID GLASS — Ein/Aus. Blendet den Milchglas-Frost (backdrop-filter) app-weit aus,
+// falls das auf dem Gerät der Person zu unruhig/leistungshungrig ist (siehe CSS oben).
+// ══════════════════════════════════════════════
+function applyLiquidGlass(on){
+  VS.liquidGlass = !!on;
+  document.documentElement.classList.toggle('no-glass', !VS.liquidGlass);
+  const cb=document.getElementById('set-liquidglass');
+  if(cb) cb.checked = VS.liquidGlass;
   saveVis();
 }
 
@@ -3232,6 +3591,15 @@ function dbErrorMsg(error, fallback){
   if(error.code==='23505') return 'Eintrag existiert bereits.';
   return error.message ? `${fallback} (${error.message})` : fallback;
 }
+// Erkennt, ob ein Supabase-Fehler daher kommt, dass eine bestimmte Spalte in der Tabelle
+// noch nicht angelegt wurde (Postgres-Code 42703 = "undefined_column") — genutzt für die
+// Vorauszahlung-Spalte, die per SQL-Hinweis manuell nachgerüstet werden muss.
+function isMissingColumnError(error, col){
+  if(!error) return false;
+  const msg=(error.message||'').toLowerCase();
+  return error.code==='42703' || (msg.includes('column') && msg.includes(col.toLowerCase()));
+}
+const VZ_SQL_HINT = 'alter table bestellungen add column if not exists vorauszahlung numeric default 0;';
 function clearFieldError(id){
   document.getElementById(id)?.classList.remove('input-error');
   const err=document.getElementById(id+'-err'); if(err) err.textContent='';
@@ -3590,6 +3958,17 @@ function renderOrderItems(){
     discRow.style.display='none';
   }
   document.getElementById('order-total').textContent=fmt(total);
+  // Vorauszahlung: wird vom Gesamtbetrag abgezogen, der Rest ist der Betrag, der bei
+  // "Bezahlt" tatsächlich noch fällig ist (Nachzahlung) — siehe restAmount().
+  const vz = Math.max(0, parseFloat(document.getElementById('nb-vorauszahlung')?.value)||0);
+  const vzRow=document.getElementById('nb-vz-row'), restRow=document.getElementById('nb-rest-row');
+  if(vz>0){
+    vzRow.style.display='flex'; restRow.style.display='flex';
+    document.getElementById('order-vz').textContent='−'+fmt(vz);
+    document.getElementById('order-rest').textContent=fmt(Math.max(0,total-vz));
+  } else {
+    vzRow.style.display='none'; restRow.style.display='none';
+  }
 }
 // ── Nochmal bestellen ────────────────────────────────────────────────────────
 // Übernimmt Kunde, Produkte/Varianten/Mengen und Rabatt einer abgeschlossenen Bestellung
@@ -3613,6 +3992,7 @@ function reorderBestellung(id){
   dType.value=b.discountType||'';
   dVal.value=b.discountType?b.discountValue:'';
   dVal.disabled=!b.discountType;
+  const vzIn=document.getElementById('nb-vorauszahlung'); if(vzIn) vzIn.value='';
   renderOrderItems();
   showToast('Bestellung als Vorlage übernommen — bitte prüfen und anlegen.');
 }
@@ -3626,14 +4006,14 @@ function csvEscape(val){
 function exportBestellungenCSV(){
   const verkaufsBestellungen = S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId));
   if(!verkaufsBestellungen.length){ showToast('Keine Bestellungen zum Exportieren.','⚠'); return; }
-  const rows=[['ID','Kunde','Produkte','Bestellt am','Abgeholt/Angekommen am','Bezahlt am','Zwischensumme','Rabatt','Gesamtbetrag','Status']];
+  const rows=[['ID','Kunde','Produkte','Bestellt am','Abgeholt/Angekommen am','Bezahlt am','Zwischensumme','Rabatt','Gesamtbetrag','Vorauszahlung','Restbetrag','Status']];
   [...verkaufsBestellungen].sort((a,b)=>a.id-b.id).forEach(b=>{
     const k=S.kunden.find(x=>x.id===b.kId);
     const name = b.fuerLieferant ? usernameOf(b.userId) : (k?`${k.vorname} ${k.nachname}`:'—');
     const prods = (b.items||[]).map(it=>`${PROD_MAP[it.prod]?.name||it.prod}${it.varianteName?' ('+it.varianteName+')':''} x${it.stueck}`).join(', ');
     const discount = b.discountType ? (b.discountType==='percent'?`-${b.discountValue}%`:`-${fmt(b.discountValue)}`) : '';
     const status = b.paid ? 'Bezahlt' : (b.delivered ? 'Abgeholt, unbezahlt' : 'Offen');
-    rows.push([b.id, name, prods, fmtDate(b.date), fmtDateTime(b.deliveredAt), fmtDateTime(b.paidAt), fmt(b.subtotal), discount, fmt(displayTotal(b)), status]);
+    rows.push([b.id, name, prods, fmtDate(b.date), fmtDateTime(b.deliveredAt), fmtDateTime(b.paidAt), fmt(b.subtotal), discount, fmt(displayTotal(b)), b.vorauszahlung>0?fmt(b.vorauszahlung):'', b.vorauszahlung>0?fmt(restAmount(b)):'', status]);
   });
   const csv = rows.map(r=>r.map(csvEscape).join(';')).join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'}); // BOM: Excel erkennt UTF-8 zuverlässig
@@ -3658,19 +4038,34 @@ async function addBestellung(){
   });
   const { subtotal, dType, dValRaw, discountAmount, total } = calcOrderTotals();
   const abholcode = genAbholcode(activeAbholcodes());
-  const { data, error } = await sb.from('bestellungen').insert({
+  const vorauszahlung = Math.min(Math.max(0, parseFloat(document.getElementById('nb-vorauszahlung')?.value)||0), total);
+  const payload = {
     user_id:currentUserId, kunde_id:kId, items, subtotal,
     discount_type: dType || null, discount_value: dType ? dValRaw : 0,
-    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today(), abholcode
-  }).select().single();
+    total, paid:false, delivered:false, fuer_lieferant:false, bestelldatum: today(), abholcode, vorauszahlung
+  };
+  let { data, error } = await sb.from('bestellungen').insert(payload).select().single();
+  let vzColumnMissing = false;
+  if(error && isMissingColumnError(error,'vorauszahlung')){
+    // Spalte gibt es in Supabase noch nicht — Bestellung trotzdem ganz normal anlegen
+    // (nur ohne Vorauszahlung), statt die ganze Aktion scheitern zu lassen.
+    vzColumnMissing = true;
+    const { vorauszahlung: _omit, ...payloadNoVz } = payload;
+    ({ data, error } = await sb.from('bestellungen').insert(payloadNoVz).select().single());
+  }
   if(error){ showToast('Bestellung konnte nicht angelegt werden.','⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null, trackingToken:data.tracking_token||null
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null, trackingToken:data.tracking_token||null,
+    vorauszahlung: data.vorauszahlung!=null ? Number(data.vorauszahlung) : (vzColumnMissing?0:vorauszahlung)
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
-  showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
+  if(vzColumnMissing && vorauszahlung>0){
+    showToast(`Bestellung angelegt, aber Vorauszahlung konnte nicht gespeichert werden — Spalte fehlt in Supabase. Einmalig ausführen: ${VZ_SQL_HINT}`,'⚠');
+  } else {
+    showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
+  }
 }
 
 // Kurzer, gut vorlesbarer Abholcode (4 Zeichen) — Erzeugung siehe genAbholcode() weiter unten.
@@ -4756,29 +5151,29 @@ function renderBestellungen(){
 
   const hint=document.getElementById('best-tab-hint');
   hint.textContent = bestellungenTab==='bestellt'
-    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Abholen“, sobald der Kunde da ist — ist ein Abholcode hinterlegt, wird er dabei abgefragt.'
+    ? t('best.hint.bestellt')
     : bestellungenTab==='bezahlt'
-    ? 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald bezahlt wurde — dabei wird automatisch eine Rechnung erstellt.'
-    : 'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.';
+    ? t('best.hint.bezahlt')
+    : t('best.hint.historie');
 
   const showVon = currentRole()==='special';
   const theadRow=document.getElementById('b-thead-row');
   if(theadRow){
     theadRow.innerHTML = bestellungenTab==='historie'
-      ? (showVon?'<th>Von</th>':'') + '<th>Kunde</th><th>Produkte</th><th>Bestellt am</th><th>Angekommen am</th><th>Bezahlt am</th><th>Gesamt</th><th></th>'
+      ? (showVon?`<th>${t('best.th.von')}</th>`:'') + `<th>${t('best.th.kunde')}</th><th>${t('best.th.produkte')}</th><th>${t('best.th.bestelltam')}</th><th>${t('best.th.angekommenam')}</th><th>${t('best.th.bezahltam')}</th><th>${t('best.th.gesamt')}</th><th></th>`
       : (showVon
-        ? '<th>Von</th><th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>'
-        : '<th>Kunde</th><th>Produkte</th><th>Datum</th><th>Gesamt</th><th>Status</th><th></th>');
+        ? `<th>${t('best.th.von')}</th><th>${t('best.th.kunde')}</th><th>${t('best.th.produkte')}</th><th>${t('best.th.datum')}</th><th>${t('best.th.gesamt')}</th><th>${t('best.th.status')}</th><th></th>`
+        : `<th>${t('best.th.kunde')}</th><th>${t('best.th.produkte')}</th><th>${t('best.th.datum')}</th><th>${t('best.th.gesamt')}</th><th>${t('best.th.status')}</th><th></th>`);
   }
 
   if(!list.length){
     tbody.innerHTML='';empty.style.display='block';
     document.getElementById('b-loadmore-wrap').style.display='none';
     document.getElementById('b-empty-text').textContent = (searchTerm||fk)
-      ? 'Keine Treffer für diese Suche/Filter.'
-      : (bestellungenTab==='bestellt' ? 'Keine offenen Bestellungen zum Abholen.'
-        : bestellungenTab==='bezahlt' ? 'Keine offenen Zahlungen.'
-        : 'Noch keine abgeschlossenen Bestellungen.');
+      ? t('best.empty.nomatch')
+      : (bestellungenTab==='bestellt' ? t('best.empty.bestellt')
+        : bestellungenTab==='bezahlt' ? t('best.empty.bezahlt')
+        : t('best.empty.historie'));
     return;
   }
   empty.style.display='none';
@@ -4787,7 +5182,7 @@ function renderBestellungen(){
   const loadmoreWrap=document.getElementById('b-loadmore-wrap');
   if(totalCount>list.length){
     loadmoreWrap.style.display='block';
-    document.getElementById('b-loadmore-btn').textContent=`Mehr laden (${list.length} von ${totalCount})`;
+    document.getElementById('b-loadmore-btn').textContent=`${t('best.loadmore')} (${list.length} ${VS.lang==='en'?'of':'von'} ${totalCount})`;
   } else {
     loadmoreWrap.style.display='none';
   }
@@ -4809,7 +5204,11 @@ function renderBestellungen(){
     // gehören. Bei Lieferantenkunden steht der Name schon eindeutig in der Kunde-Spalte,
     // daher hier ein Strich statt einer redundanten Wiederholung.
     const vonCell = showVon ? `<td style="font-weight:600">${b.fuerLieferant?'<span style="color:var(--ink-faint)">—</span>':(foreign?`<span style="color:var(--lieferant-deep)">${escapeHtml(usernameOf(b.userId))}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>')}</td>` : '';
-    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}</td>`;
+    // Wurde eine Vorauszahlung hinterlegt, zeige das direkt unter dem Gesamtbetrag mit an —
+    // so sieht man auf einen Blick, wie viel noch offen (Restbetrag/Nachzahlung) ist.
+    const vz = b.vorauszahlung||0;
+    const vzNote = (vz>0 && !b.paid) ? `<div style="font-size:10px;font-weight:600;color:var(--ink-faint);margin-top:2px;white-space:nowrap">${t('order.prepayment')}: ${fmt(vz)} · ${t('order.remaining')}: ${fmt(restAmount(b))}</div>` : '';
+    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}${vzNote}</td>`;
     const nameCell = b.fuerLieferant
       ? `<span style="color:var(--lieferant-deep)">◆ ${escapeHtml(usernameOf(b.userId))}</span>`
       : (k?escapeHtml(k.vorname+' '+k.nachname):'—');
@@ -4847,16 +5246,16 @@ function renderBestellungen(){
     // markiert, ohne Code-Bestätigung (siehe confirmDeliveredWithAbholcode für den Abholen-Fall).
     const actionBtn = bestellungenTab==='bestellt'
       ? (b.abholcode
-        ? `<button class="status-btn active-offen" onclick="confirmDeliveredWithAbholcode(${b.id})">✓ Abholen</button>`
-        : `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Abholen</button>`)
-      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
+        ? `<button class="status-btn active-offen" onclick="confirmDeliveredWithAbholcode(${b.id})">${t('best.action.abholen')}</button>`
+        : `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">${t('best.action.abholen')}</button>`)
+      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">${t('best.action.bezahlt')}</button>`;
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}${abholcodeChip}</td>
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       ${gesamt}
-      <td>${b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>'}</td>
+      <td>${b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`}</td>
       <td style="text-align:right;white-space:nowrap">
         ${actionBtn}
         <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button>
@@ -5457,7 +5856,7 @@ function openOrderDetail(id){
   }
   document.getElementById('od-kunde-label').textContent = b.fuerLieferant
     ? (b.userId===currentUserId ? 'Lieferant' : 'Lieferantenkunde')
-    : 'Kunde';
+    : t('order.customer');
   document.getElementById('od-kunde').innerHTML = b.fuerLieferant
     ? (b.userId===currentUserId
         ? `<span style="color:var(--lieferant-deep)">${escapeHtml(M.profile?.linked_to?usernameOf(M.profile.linked_to):'Lieferant')}</span>`
@@ -5489,7 +5888,7 @@ function openOrderDetail(id){
   } else {
     bezahltRow.style.display='none';
   }
-  document.getElementById('od-status').innerHTML = b.paid?'<span class="badge b-bezahlt">Bezahlt</span>':'<span class="badge b-offen">Offen</span>';
+  document.getElementById('od-status').innerHTML = b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`;
   const notizRow=document.getElementById('od-notiz-row');
   if(b.notiz){
     notizRow.style.display='flex';
@@ -5525,7 +5924,45 @@ function openOrderDetail(id){
   }
   document.getElementById('od-total').textContent = fmt(odTotal);
 
+  // Vorauszahlung ist jederzeit nachträglich änderbar (auch nach dem Anlegen der
+  // Bestellung) — nur bei bereits vollständig bezahlten Bestellungen ergibt eine
+  // Änderung keinen Sinn mehr, daher dort schreibgeschützt.
+  const vzInput=document.getElementById('od-vz-input');
+  const vzSaveBtn=document.getElementById('od-vz-save-btn');
+  vzInput.value = b.vorauszahlung>0 ? b.vorauszahlung : '';
+  vzInput.disabled = !!b.paid;
+  vzSaveBtn.style.display = b.paid ? 'none' : '';
+  const restRow=document.getElementById('od-rest-row');
+  if(b.vorauszahlung>0){
+    restRow.style.display='flex';
+    document.getElementById('od-rest').textContent = fmt(restAmount(b));
+  } else {
+    restRow.style.display='none';
+  }
+
   openModal('orderdetail');
+}
+// Vorauszahlung nachträglich anlegen/ändern (siehe auch die Eingabe schon beim Anlegen
+// der Bestellung im "Neue Bestellung"-Dialog, addBestellung()).
+async function saveVorauszahlung(){
+  const id=currentDetailOrderId;
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b) return;
+  const raw=document.getElementById('od-vz-input').value;
+  const val=Math.min(Math.max(0, parseFloat(raw)||0), displayTotal(b));
+  const { error } = await sb.from('bestellungen').update({ vorauszahlung: val }).eq('id', id);
+  if(error){
+    if(isMissingColumnError(error,'vorauszahlung')){
+      showToast(`Spalte fehlt in Supabase. Einmalig ausführen: ${VZ_SQL_HINT}`,'⚠');
+    } else {
+      showToast(dbErrorMsg(error,'Vorauszahlung konnte nicht gespeichert werden.'),'⚠');
+    }
+    return;
+  }
+  b.vorauszahlung = val;
+  showToast('Vorauszahlung gespeichert.');
+  openOrderDetail(id);
+  renderBestellungen();
 }
 function printInvoiceFromDetail(){
   if(currentDetailOrderId!=null) printInvoice(currentDetailOrderId);
@@ -5625,6 +6062,24 @@ function printInvoice(id){
   doc.setTextColor(20,20,20);
   doc.text('Gesamtbetrag', pageW-margin-70, y+2);
   doc.text(fmt(b.total), pageW-margin, y+2, {align:'right'});
+
+  // Vorauszahlung & Restbetrag (falls eine Vorauszahlung hinterlegt wurde) — informativ auf
+  // der Rechnung mit ausweisen, damit für den Kunden klar ist, was schon geleistet wurde.
+  if(b.vorauszahlung>0){
+    y += 8;
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(80,80,80);
+    doc.text('Vorauszahlung', pageW-margin-70, y);
+    doc.text('−'+fmt(b.vorauszahlung), pageW-margin, y, {align:'right'});
+    y += 7;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(20,20,20);
+    doc.text('Restbetrag', pageW-margin-70, y);
+    doc.text(fmt(restAmount(b)), pageW-margin, y, {align:'right'});
+  }
+
 
   // Fußzeile
   doc.setFont('helvetica','normal');
@@ -5819,6 +6274,9 @@ function renderSettings(){
   const an=document.getElementById('set-anim');if(an)an.checked=VS.anim;
   const co=document.getElementById('set-compact');if(co)co.checked=VS.compact;
   const lm=document.getElementById('set-lightmode');if(lm)lm.checked=(VS.mode==='light');
+  const lg=document.getElementById('set-liquidglass');if(lg)lg.checked=(VS.liquidGlass!==false);
+  document.querySelectorAll('#fontsize-group .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.size===(VS.fontSize||'md')));
+  document.querySelectorAll('.lang-switch .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===(VS.lang||'de')));
   const tg=document.getElementById('theme-grid');
   if(tg) tg.innerHTML=THEMES.map((t,i)=>`<div class="t-d ${i===VS.themeIdx?'on':''}" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="background:${t.accent}" onclick="applyTheme(${i})" title="${escapeAttr(t.name)}" aria-label="Theme: ${escapeAttr(t.name)}"></div>`).join('');
   renderUserList();
@@ -6099,6 +6557,9 @@ function refresh(){
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)
 applyMode(VS.mode||'dark'); // Hell/Dunkel ebenfalls schon vor Login anwenden
+applyFontSize(VS.fontSize||'md'); // Schriftgröße ebenfalls schon vor Login anwenden
+applyLiquidGlass(VS.liquidGlass!==false); // Liquid Glass ebenfalls schon vor Login anwenden
+setLang(VS.lang||'de'); // Sprache ebenfalls schon vor Login anwenden (Login-Bildschirm)
 
 // ══════════════════════════════════════════════
 // SESSION-CHECK BEIM START

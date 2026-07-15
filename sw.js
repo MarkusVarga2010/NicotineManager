@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.6.0'; // Neuer Menüpunkt "Eigenverbrauch": eigener Konsum erfassen, bucht Lagerbestand automatisch runter.
+const APP_VERSION = '16.0.0'; // Sprache (DE/EN), Schriftgröße, Liquid-Glass-Schalter in den Einstellungen + Vorauszahlung/Restbetrag bei Bestellungen.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
