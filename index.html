@@ -460,6 +460,22 @@ button{font-family:inherit;cursor:pointer}
 .dose-fill-seg{position:absolute;top:0;bottom:0;transition:width .5s ease,left .5s ease;box-shadow:0 0 12px -1px currentColor}
 .dose-ticks{display:flex;justify-content:space-between;margin-top:6px}
 .dose-ticks span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint)}
+/* Statistik-Karte: Wochen-Umsatz-Balken + Top-Produkte/Top-Kunden-Listen (Dashboard) */
+.rev-chart{display:flex;align-items:flex-end;gap:8px;height:140px;margin:8px 0 20px;padding:0 2px}
+.rev-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.rev-bar-val{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);margin-bottom:4px;white-space:nowrap}
+.rev-bar-track{width:100%;max-width:26px;flex:1;display:flex;align-items:flex-end;background:var(--paper3);border-radius:6px;overflow:hidden;border:1px solid var(--line2)}
+.rev-bar-fill{width:100%;background:var(--grad-brand, var(--sage));border-radius:5px 5px 0 0;min-height:2px;transition:height .4s ease}
+.rev-bar-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);margin-top:6px}
+.stat-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:760px){.stat-stats-grid{grid-template-columns:1fr}}
+.stat-bars-title{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:10px;text-transform:uppercase;letter-spacing:.03em}
+.stat-bars{display:flex;flex-direction:column;gap:9px}
+.stat-bar-row{display:grid;grid-template-columns:38% 1fr auto;align-items:center;gap:8px}
+.stat-bar-label{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-bar-track{height:9px;background:var(--paper3);border-radius:99px;overflow:hidden;border:1px solid var(--line2)}
+.stat-bar-fill{height:100%;background:var(--sage);border-radius:99px;min-width:3px;transition:width .4s ease}
+.stat-bar-val{font-size:11px;color:var(--ink-soft);white-space:nowrap}
 
 /* ════════════════════════════════════════════════════════
    STAT LABELS — pharmacy datasheet style, replaces stat cards
@@ -1277,6 +1293,21 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div class="dose-ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></div>
       </div>
 
+      <div class="card" id="d-stats-card">
+        <div class="card-head"><h3>📈 Statistik</h3><span class="ps" style="margin:0">Bezahlte Bestellungen · letzte 8 Wochen</span></div>
+        <div class="rev-chart" id="stat-rev-chart"></div>
+        <div class="stat-stats-grid">
+          <div>
+            <div class="stat-bars-title">Top-Produkte nach Umsatz</div>
+            <div class="stat-bars" id="stat-top-products"></div>
+          </div>
+          <div>
+            <div class="stat-bars-title">Top-Kunden nach Umsatz</div>
+            <div class="stat-bars" id="stat-top-kunden"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="d-pickup-stat-card" style="display:none">
         <div class="card-head"><h3>⏱ Ø Abholzeit</h3></div>
         <div class="ps" id="d-pickup-stat-text" style="margin:0 0 4px"></div>
@@ -1300,13 +1331,14 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div><div class="ph-eyebrow">Protokoll</div><div class="pt">Bestellungen</div><div class="ps">Bestellungen anlegen und verwalten</div></div>
         <div class="pa">
           <button class="btn btn-ghost" id="best-pdf-btn" onclick="downloadOpenOrdersPDF()">⭳ Offene als PDF</button>
+          <button class="btn btn-ghost" onclick="exportBestellungenCSV()">⭳ CSV Export</button>
           <button class="btn btn-ghost" onclick="delAllBestellungen()">🗑 Alle löschen</button>
           <button class="btn btn-primary" onclick="openModal('bestellung')">＋ Neue Bestellung</button>
         </div>
       </div>
       <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div class="tab-group" id="best-tabs">
-          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-receipt"/></svg>Bestellt <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
+          <button class="tab-btn tab-bestellt active" id="tab-btn-bestellt" onclick="switchBestellungenTab('bestellt')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-receipt"/></svg>Abholen <span class="badge b-offen" id="tab-count-bestellt">0</span></button>
           <button class="tab-btn tab-bezahlt" id="tab-btn-bezahlt" onclick="switchBestellungenTab('bezahlt')">💶 Bezahlt <span class="badge b-offen" id="tab-count-bezahlt">0</span></button>
           <button class="tab-btn" id="tab-btn-historie" onclick="switchBestellungenTab('historie')"><svg class="svg-ic" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><use href="#ic-clock"/></svg>Historie</button>
         </div>
@@ -1810,6 +1842,7 @@ alter table profiles add column if not exists adresse text;</pre>
           <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
           <button class="btn btn-ghost btn-sm" onclick="toggleAbholcodeQr()">▦ QR-Code</button>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeQrFromDetail()">🖼 QR-Bild teilen</button>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeLink()">🔗 Link zum Vorzeigen</button>
           <button class="btn btn-ghost btn-sm" id="od-abholcode-regen-btn" onclick="regenerateAbholcode()">↺ Neu erzeugen</button>
         </div>
@@ -1936,6 +1969,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <button class="btn btn-ghost btn-sm" onclick="copyAbholcode()">⧉ Kopieren</button>
         <button class="btn btn-ghost btn-sm" onclick="toggleQrWrap('qc-qr-wrap','qc-qr')">▦ QR-Code</button>
         <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeQrFromQuick()">🖼 QR-Bild</button>
       </div>
     </div>
   </div>
@@ -2078,7 +2112,7 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '8.7.0';
+const CURRENT_UI_VERSION = '8.9.0';
 const WHATS_NEW = {
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
@@ -2159,6 +2193,15 @@ const WHATS_NEW = {
   ],
   '8.7.0': [
     'Lagerbestand übersichtlicher: statt einer dichten Tabelle jetzt Karten im selben Stil wie die Preise-Seite, mit Mini-Füllstandsbalken pro Produkt. Kritische Produkte (leer/niedrig) stehen in einer eigenen "Braucht Aufmerksamkeit"-Gruppe ganz oben, getrennt vom Rest.'
+  ],
+  '8.8.0': [
+    'Der bisherige "Bestellt"-Button auf der Bestellungen-Seite heißt jetzt klar "Abholen" — und verlangt, genau wie beim Bezahlen, erst die Bestätigung des Abholcodes, bevor die Bestellung als abgeholt markiert wird.',
+    'Neu: der Abholcode-QR lässt sich jetzt auch direkt als Bild teilen (z.B. per WhatsApp, Signal, AirDrop, Mail) — zusätzlich zum bisherigen Teilen als Text/Link.'
+  ],
+  '8.9.0': [
+    'Neu im Dashboard: Statistik-Karte mit Wochen-Umsatz der letzten 8 Wochen sowie Top-5-Produkte und Top-5-Kunden nach Umsatz — alles auf Basis der bezahlten Bestellungen.',
+    'Neu in der Historie: "🔁 Nochmal bestellen" übernimmt Kunde, Produkte und Rabatt einer abgeschlossenen Bestellung direkt als Vorlage für eine neue.',
+    'Neu: "⭳ CSV Export" auf der Bestellungen-Seite exportiert alle eigenen Verkaufs-Bestellungen als CSV-Datei, z.B. für Steuerberater/Buchhaltung.'
   ]
 };
 function checkWhatsNew(){
@@ -3434,6 +3477,59 @@ function renderOrderItems(){
   }
   document.getElementById('order-total').textContent=fmt(total);
 }
+// ── Nochmal bestellen ────────────────────────────────────────────────────────
+// Übernimmt Kunde, Produkte/Varianten/Mengen und Rabatt einer abgeschlossenen Bestellung
+// als Vorlage in den "Neue Bestellung"-Dialog — Preise werden dabei ganz normal neu (mit den
+// aktuell gültigen Preisen) berechnet, nicht die alten eingefrorenen Werte übernommen.
+// Nur für eigene, normale Kundenbestellungen gedacht (nicht für Lieferanten-Bestellungen).
+function reorderBestellung(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b || b.fuerLieferant || !b.kId){ showToast('Für diese Bestellung nicht möglich.','⚠'); return; }
+  fillSelects();
+  orderItems=(b.items||[]).map(it=>({
+    uid:Date.now()+Math.random(), prod:it.prod, stueck:it.stueck||1,
+    variant: it.variante!=null ? it.variante : defaultVariantId(it.prod,false)
+  }));
+  if(!orderItems.length) addOrderItem();
+  document.getElementById('modal-bestellung').classList.add('show');
+  const nb=document.getElementById('nb-kunde');
+  if(nb) nb.value=b.kId;
+  const dType=document.getElementById('discount-type');
+  const dVal=document.getElementById('discount-value');
+  dType.value=b.discountType||'';
+  dVal.value=b.discountType?b.discountValue:'';
+  dVal.disabled=!b.discountType;
+  renderOrderItems();
+  showToast('Bestellung als Vorlage übernommen — bitte prüfen und anlegen.');
+}
+// ── CSV-Export ───────────────────────────────────────────────────────────────
+// Alle eigenen Verkaufs-Bestellungen (nicht die eigenen Nachbestellungen beim Lieferanten)
+// als CSV, z.B. für Steuerberater/Buchhaltung. Semikolon als Trennzeichen (deutsches Excel).
+function csvEscape(val){
+  const s=String(val==null?'':val);
+  return /[;"\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function exportBestellungenCSV(){
+  const verkaufsBestellungen = S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId));
+  if(!verkaufsBestellungen.length){ showToast('Keine Bestellungen zum Exportieren.','⚠'); return; }
+  const rows=[['ID','Kunde','Produkte','Bestellt am','Abgeholt/Angekommen am','Bezahlt am','Zwischensumme','Rabatt','Gesamtbetrag','Status']];
+  [...verkaufsBestellungen].sort((a,b)=>a.id-b.id).forEach(b=>{
+    const k=S.kunden.find(x=>x.id===b.kId);
+    const name = b.fuerLieferant ? usernameOf(b.userId) : (k?`${k.vorname} ${k.nachname}`:'—');
+    const prods = (b.items||[]).map(it=>`${PROD_MAP[it.prod]?.name||it.prod}${it.varianteName?' ('+it.varianteName+')':''} x${it.stueck}`).join(', ');
+    const discount = b.discountType ? (b.discountType==='percent'?`-${b.discountValue}%`:`-${fmt(b.discountValue)}`) : '';
+    const status = b.paid ? 'Bezahlt' : (b.delivered ? 'Abgeholt, unbezahlt' : 'Offen');
+    rows.push([b.id, name, prods, fmtDate(b.date), fmtDateTime(b.deliveredAt), fmtDateTime(b.paidAt), fmt(b.subtotal), discount, fmt(displayTotal(b)), status]);
+  });
+  const csv = rows.map(r=>r.map(csvEscape).join(';')).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'}); // BOM: Excel erkennt UTF-8 zuverlässig
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`bestellungen-${today()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('CSV-Export heruntergeladen. ⭳');
+}
 async function addBestellung(){
   const kId=parseInt(document.getElementById('nb-kunde').value);
   if(!kId){showToast('Bitte einen Kunden auswählen.','⚠');return;}
@@ -3544,12 +3640,10 @@ function shareAbholcodeLink(){
 // ── QR-Code zusätzlich zum 4-stelligen Code ─────────────────────────────────
 // Statt den Code vorzulesen/abzutippen, zeigt der Kunde einen QR-Code am Handy, der gescannt
 // werden kann. Der 4-stellige Code bleibt als Fallback erhalten.
-function toggleQrWrap(wrapId, containerId){
-  const wrap=document.getElementById(wrapId);
-  const showing = wrap.style.display!=='none';
-  if(showing){ wrap.style.display='none'; return; }
-  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
-  if(!b || !b.abholcode) return;
+// Zeichnet den Abholcode-QR (inkl. Logo) in einen Container — genutzt sowohl vom
+// Ein-/Ausklappen (toggleQrWrap) als auch vom direkten Bild-Teilen (shareAbholcodeQrImage),
+// damit ein Canvas zum Teilen bereitsteht, auch wenn der QR-Code gerade nicht sichtbar ist.
+function renderAbholcodeQr(containerId, code){
   const target=document.getElementById(containerId);
   target.innerHTML='';
   if(window.QRCode){
@@ -3560,17 +3654,69 @@ function toggleQrWrap(wrapId, containerId){
     // Weiß bleibt dabei maximal, damit die Scan-Zuverlässigkeit unverändert hoch bleibt.
     // correctLevel H (höchste Fehlerkorrektur) erlaubt zusätzlich das Logo in der Mitte,
     // ohne die Lesbarkeit zu gefährden.
-    new QRCode(canvasWrap, { text: b.abholcode, width:172, height:172, colorDark:'#14121F', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H });
+    new QRCode(canvasWrap, { text: code, width:172, height:172, colorDark:'#14121F', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H });
     const logo=document.createElement('div');
     logo.className='abholcode-qr-logo';
     logo.innerHTML='<svg viewBox="0 0 40 40"><path d="M12 28V12h3.6l9.2 11V12H28v16h-3.6l-9.2-11v11H12z" fill="#fff"/></svg>';
     canvasWrap.appendChild(logo);
+    return true;
   } else {
-    target.textContent = b.abholcode;
+    target.textContent = code;
+    return false;
   }
+}
+function toggleQrWrap(wrapId, containerId){
+  const wrap=document.getElementById(wrapId);
+  const showing = wrap.style.display!=='none';
+  if(showing){ wrap.style.display='none'; return; }
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  renderAbholcodeQr(containerId, b.abholcode);
   wrap.style.display='flex';
 }
 function toggleAbholcodeQr(){ toggleQrWrap('od-abholcode-qr-wrap','od-abholcode-qr'); }
+// ── QR-Code als Bild teilen ──────────────────────────────────────────────────
+// Zusätzlich zum Teilen des Codes/Links als Text lässt sich der QR-Code jetzt auch direkt
+// als Bilddatei teilen (z.B. per WhatsApp, Signal, AirDrop, Mail) — praktisch, wenn der
+// Kunde den QR-Code lieber selbst irgendwo zeigen/speichern will statt den Text abzutippen.
+// Nutzt die native Web-Share-API mit Dateianhang; ist die auf dem Gerät/Browser nicht
+// verfügbar (z.B. am Desktop), wird das Bild stattdessen heruntergeladen.
+async function shareAbholcodeQrImage(containerId, wrapId){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.abholcode) return;
+  if(!window.QRCode){ showToast('QR-Code konnte nicht erzeugt werden.','⚠'); return; }
+  let canvas=document.querySelector('#'+containerId+' canvas');
+  if(!canvas){
+    renderAbholcodeQr(containerId, b.abholcode);
+    if(wrapId) document.getElementById(wrapId).style.display='flex';
+    canvas=document.querySelector('#'+containerId+' canvas');
+  }
+  if(!canvas){ showToast('QR-Bild konnte nicht erstellt werden.','⚠'); return; }
+  canvas.toBlob(async (blob)=>{
+    if(!blob){ showToast('QR-Bild konnte nicht erstellt werden.','⚠'); return; }
+    const file=new File([blob], `abholcode-${b.abholcode}.png`, {type:'image/png'});
+    const shareText = b.fuerLieferant
+      ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen.`
+      : `Deine Bestellung ist abholbereit! Abholcode: ${b.abholcode} — bitte bei Abholung vorzeigen.`;
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({ files:[file], text: shareText });
+      }catch(err){
+        if(err && err.name==='AbortError') return; // Nutzer hat Teilen-Menü selbst geschlossen
+        showToast('Teilen nicht möglich.','⚠');
+      }
+    } else {
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=`abholcode-${b.abholcode}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      showToast('QR-Bild heruntergeladen — dieses Gerät/dieser Browser unterstützt kein direktes Teilen von Bildern.');
+    }
+  }, 'image/png');
+}
+function shareAbholcodeQrFromDetail(){ shareAbholcodeQrImage('od-abholcode-qr','od-abholcode-qr-wrap'); }
+function shareAbholcodeQrFromQuick(){ shareAbholcodeQrImage('qc-qr','qc-qr-wrap'); }
 // Schnellansicht direkt aus einer Tabellenzeile — ohne erst das volle Bestell-Detail zu öffnen.
 // Nutzt dieselben Funktionen (copyAbholcode/shareAbholcode/toggleQrWrap) wie das Detail, da
 // diese über currentDetailOrderId auf die Bestellung zugreifen statt auf ein bestimmtes Modal.
@@ -3912,24 +4058,34 @@ async function setDelivered(id, newVal){
 // Code verglichen. Erst bei Übereinstimmung wird die Bestellung als bezahlt markiert — so
 // landet die Zahlung sicher auf der richtigen Bestellung/Person.
 let _abholcodeConfirmOrderId=null;
+let _abholcodeConfirmMode='paid'; // 'paid' (Bezahlt-Tab) oder 'delivered' (Abholen-Tab)
 let _abholcodeFailCount=0;
 let _abholcodeLockUntil=0;
 let _abholcodeLockTimer=null;
 const ABHOLCODE_MAX_FAILS = 5;
 const ABHOLCODE_LOCK_SECONDS = 30;
-function confirmPaidWithAbholcode(id){
+// Zum Bezahlen: Code muss genannt/bestätigt werden, bevor als bezahlt markiert wird.
+function confirmPaidWithAbholcode(id){ _openAbholcodeConfirm(id, 'paid'); }
+// Zum Abholen: derselbe Code-Check, diesmal bevor die Bestellung als abgeholt/geliefert
+// markiert wird — so landet auch die Abholung sicher bei der richtigen Person, nicht nur
+// die Bezahlung.
+function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id, 'delivered'); }
+function _openAbholcodeConfirm(id, mode){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b) return;
-  if(!b.abholcode){ setPaid(id,true); return; } // kein Code vorhanden (z.B. noch nicht angekommen/abgeholt) -> keine Sperre
+  if(!b.abholcode){ mode==='delivered' ? setDelivered(id,true) : setPaid(id,true); return; } // kein Code vorhanden -> keine Sperre
   if(isCodeExpired(b)){
     showToast('Dieser Abholcode ist abgelaufen — bitte im Bestell-Detail einen neuen erzeugen.','⚠');
     return;
   }
   _abholcodeConfirmOrderId=id;
+  _abholcodeConfirmMode=mode;
   _abholcodeFailCount=0;
   _abholcodeLockUntil=0;
   const label = b.fuerLieferant ? 'deinem Lieferantenkunden' : 'deinem Kunden';
-  document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.`;
+  const actionLabel = mode==='delivered' ? 'als abgeholt markiert wird' : 'als bezahlt markiert wird';
+  document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung ${actionLabel}.`;
+  document.getElementById('ac-submit-btn').textContent = mode==='delivered' ? '✓ Bestätigen & abgeholt markieren' : '✓ Bestätigen & bezahlt markieren';
   const input=document.getElementById('ac-input');
   input.value=''; input.disabled=false;
   document.getElementById('ac-abholer').value='';
@@ -3986,7 +4142,8 @@ function _submitAbholcodeConfirm(){
   stopAbholcodeScanner();
   closeModal('abholcode-confirm');
   const abholerName=(document.getElementById('ac-abholer').value||'').trim();
-  setPaid(b.id,true);
+  if(_abholcodeConfirmMode==='delivered') setDelivered(b.id,true);
+  else setPaid(b.id,true);
   if(abholerName) appendNotiz(b.id, `Abgeholt von: ${abholerName}`);
 }
 // ── "Wer holt ab?" ───────────────────────────────────────────────────────────
@@ -4208,7 +4365,7 @@ async function delAllBestellungen(){
 
   if(!list.length){ showToast('Keine Bestellungen zum Löschen in dieser Ansicht.','⚠'); return; }
 
-  const scopeLabel = bestellungenTab==='bestellt' ? ' im Tab „Bestellt“' : bestellungenTab==='bezahlt' ? ' im Tab „Bezahlt“' : bestellungenTab==='historie' ? ' in der Historie' : '';
+  const scopeLabel = bestellungenTab==='bestellt' ? ' im Tab „Abholen“' : bestellungenTab==='bezahlt' ? ' im Tab „Bezahlt“' : bestellungenTab==='historie' ? ' in der Historie' : '';
   const filterNote = (fk||searchTerm) ? ' (mit aktivem Filter/Suche)' : '';
   if(!(await confirmDialog(`${list.length} Bestellung${list.length===1?'':'en'}${scopeLabel}${filterNote} wandern in den Papierkorb und können dort 30 Tage lang wiederhergestellt werden. Um wirklich ALLE Bestellungen zu löschen, zuerst Suche/Filter leeren und den Tab wechseln.`, {title:'Alle in dieser Ansicht löschen?', confirmText:'Alle in Papierkorb', danger:true})))return;
 
@@ -4343,7 +4500,7 @@ function renderBestellungen(){
 
   const hint=document.getElementById('best-tab-hint');
   hint.textContent = bestellungenTab==='bestellt'
-    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Bestellt“, sobald erledigt.'
+    ? 'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Abholen“, sobald der Kunde da ist — ist ein Abholcode hinterlegt, wird er dabei abgefragt.'
     : bestellungenTab==='bezahlt'
     ? 'Bestellungen mit offenem Betrag. Klick auf „Bezahlt“, sobald bezahlt wurde — dabei wird automatisch eine Rechnung erstellt.'
     : 'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.';
@@ -4424,14 +4581,19 @@ function renderBestellungen(){
         ${gesamt}
         <td style="text-align:right;white-space:nowrap">
           <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button>
+          ${(canDelete && !b.fuerLieferant)?`<button class="ic-btn" onclick="reorderBestellung(${b.id})" title="Nochmal bestellen" aria-label="Nochmal bestellen">🔁</button>`:''}
           ${canDelete?`<button class="ic-btn" onclick="delBestellung(${b.id})" title="In den Papierkorb verschieben" aria-label="In den Papierkorb verschieben">🗑</button>`:''}
         </td>
       </tr>`;
     }
 
-    // Standard: Bestellt / Bezahlt
+    // Standard: Abholen / Bezahlt — beide Abschluss-Buttons verlangen, sofern ein Abholcode
+    // hinterlegt ist, erst dessen Bestätigung (siehe confirmDeliveredWithAbholcode /
+    // confirmPaidWithAbholcode), bevor der Status wirklich umspringt.
     const actionBtn = bestellungenTab==='bestellt'
-      ? `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Bestellt</button>`
+      ? (b.abholcode
+        ? `<button class="status-btn active-offen" onclick="confirmDeliveredWithAbholcode(${b.id})">✓ Abholen</button>`
+        : `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Abholen</button>`)
       : (b.abholcode
         ? `<button class="status-btn active-bezahlt" onclick="confirmPaidWithAbholcode(${b.id})">✓ Bezahlt</button>`
         : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
@@ -4620,6 +4782,86 @@ function renderDashboard(){
     return `<tr><td style="font-weight:600">${name}</td><td style="font-size:12px">${prods}</td><td class="mono" style="font-weight:700">${fmt(displayTotal(b))}</td><td><span class="badge b-offen">Offen</span></td></tr>`;
   }).join('');
   document.getElementById('service-banner').style.display=M.service.due?'flex':'none';
+  renderRevenueStats();
+}
+// ── Statistik: Wochen-Umsatz + Top-Produkte/Top-Kunden ─────────────────────────
+// Rein aus den bereits geladenen Bestellungen berechnet (kein zusätzlicher DB-Call nötig).
+// Nur eigene Verkäufe zählen (nicht die eigenen Nachbestellungen beim Lieferanten) — dieselbe
+// Abgrenzung wie auf der Bestellungen-Seite.
+function renderRevenueStats(){
+  const chartWrap=document.getElementById('stat-rev-chart');
+  if(!chartWrap) return;
+  const verkauf = S.bestellungen.filter(b=>b.paid && !(b.fuerLieferant && b.userId===currentUserId));
+
+  // Wochen-Balken: letzte 8 Wochen (Montag–Sonntag) nach Bezahldatum.
+  const startOfWeek=(d)=>{ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; };
+  const thisWeekStart=startOfWeek(new Date());
+  const weeks=[];
+  for(let i=7;i>=0;i--){
+    const ws=new Date(thisWeekStart); ws.setDate(ws.getDate()-7*i);
+    const we=new Date(ws); we.setDate(we.getDate()+7);
+    weeks.push({start:ws, end:we, sum:0});
+  }
+  verkauf.forEach(b=>{
+    if(!b.paidAt) return;
+    const d=new Date(b.paidAt);
+    const w=weeks.find(w=>d>=w.start && d<w.end);
+    if(w) w.sum+=displayTotal(b);
+  });
+  const maxSum=Math.max(1, ...weeks.map(w=>w.sum));
+  chartWrap.innerHTML=weeks.map(w=>{
+    const h=Math.max(3, Math.round(w.sum/maxSum*100));
+    const label=w.start.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+    return `<div class="rev-bar-col" title="Woche ab ${label}: ${fmt(w.sum)}">
+      <div class="rev-bar-val">${w.sum>0?fmt(w.sum):''}</div>
+      <div class="rev-bar-track"><div class="rev-bar-fill" style="height:${h}%"></div></div>
+      <div class="rev-bar-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  // Top 5 Produkte nach Umsatz (über alle bezahlten Verkäufe, nicht nur die letzten 8 Wochen).
+  const prodRevenue={};
+  verkauf.forEach(b=>{
+    (b.items||[]).forEach(it=>{
+      const rev = it.sub!=null ? it.sub : (it.preis||0)*(it.stueck||0);
+      prodRevenue[it.prod]=(prodRevenue[it.prod]||0)+rev;
+    });
+  });
+  const topProd=Object.entries(prodRevenue)
+    .map(([prod,sum])=>({name:PROD_MAP[prod]?.name||prod, icon:PROD_MAP[prod]?.icon||'📦', sum}))
+    .sort((a,b)=>b.sum-a.sum).slice(0,5);
+  const maxProd=Math.max(1, ...topProd.map(p=>p.sum));
+  const prodWrap=document.getElementById('stat-top-products');
+  if(prodWrap){
+    prodWrap.innerHTML = topProd.length ? topProd.map(p=>`
+      <div class="stat-bar-row">
+        <div class="stat-bar-label" title="${escapeAttr(p.name)}">${p.icon} ${escapeHtml(p.name)}</div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${(p.sum/maxProd*100)}%"></div></div>
+        <div class="stat-bar-val mono">${fmt(p.sum)}</div>
+      </div>`).join('') : `<div class="ps" style="margin:0">Noch keine bezahlten Bestellungen.</div>`;
+  }
+
+  // Top 5 Kunden nach Umsatz — Lieferantenkunden laufen unter ihrem Benutzernamen.
+  const kundenRevenue={};
+  verkauf.forEach(b=>{
+    const key = b.fuerLieferant ? 'lk:'+b.userId : 'k:'+b.kId;
+    if(!kundenRevenue[key]){
+      const name = b.fuerLieferant ? usernameOf(b.userId) : (()=>{ const k=S.kunden.find(x=>x.id===b.kId); return k?`${k.vorname} ${k.nachname}`:'Unbekannt'; })();
+      kundenRevenue[key]={name, sum:0};
+    }
+    kundenRevenue[key].sum+=displayTotal(b);
+  });
+  const topKunden=Object.values(kundenRevenue).sort((a,b)=>b.sum-a.sum).slice(0,5);
+  const maxKunde=Math.max(1, ...topKunden.map(k=>k.sum));
+  const kundenWrap=document.getElementById('stat-top-kunden');
+  if(kundenWrap){
+    kundenWrap.innerHTML = topKunden.length ? topKunden.map(k=>`
+      <div class="stat-bar-row">
+        <div class="stat-bar-label" title="${escapeAttr(k.name)}">${escapeHtml(k.name)}</div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${(k.sum/maxKunde*100)}%;background:var(--accent3)"></div></div>
+        <div class="stat-bar-val mono">${fmt(k.sum)}</div>
+      </div>`).join('') : `<div class="ps" style="margin:0">Noch keine bezahlten Bestellungen.</div>`;
+  }
 }
 
 // ══════════════════════════════════════════════

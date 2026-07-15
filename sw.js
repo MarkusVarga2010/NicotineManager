@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.1.0'; // Neues Logo: statt des alten blockigen N+F-Monogramms jetzt ein eigenes Zeichen — drei aufsteigende "Flow-Balken" (steigender Lagerbestand/Fluss) über einer gepunkteten Bewegungsspur, mit Glas-Glanzlicht passend zum Liquid-Glass-Look. Betrifft Login-Logo, Sidebar-/Topbar-Marke und Favicon. Die statischen PNG-Icons (icons/icon-*.png fürs Homescreen-Icon) sind nicht im Projekt enthalten und daher unverändert.
+const APP_VERSION = '15.3.0'; // Dashboard: neue Statistik-Karte (Wochen-Umsatz, Top-Produkte, Top-Kunden). Bestellungen: "🔁 Nochmal bestellen" in der Historie übernimmt eine alte Bestellung als Vorlage, und "⭳ CSV Export" exportiert alle eigenen Verkäufe als CSV-Datei.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
