@@ -1941,13 +1941,14 @@ alter table profiles add column if not exists adresse text;</pre>
   </div>
 </div>
 
-<!-- ABHOLCODE-BESTÄTIGUNG (beim Bezahlen von Lieferanten-Bestellungen: Code muss vom
-     Kunden genannt und hier eingegeben werden, bevor als bezahlt markiert werden kann) -->
+<!-- ABHOLCODE-BESTÄTIGUNG (beim Abholen: Code muss vom Kunden/Lieferantenkunden genannt und
+     hier eingegeben werden, bevor die Bestellung als abgeholt markiert werden kann. Beim
+     Bezahlen wird kein Code mehr verlangt.) -->
 <div class="modal-bg" id="modal-abholcode-confirm">
   <div class="modal" style="max-width:380px">
     <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <p id="ac-hint" style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als bezahlt markiert wird.</p>
+      <p id="ac-hint" style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als abgeholt markiert wird.</p>
       <label class="fl">Abholcode</label>
       <input type="text" id="ac-input" maxlength="4" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center" placeholder="XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()">
       <p id="ac-error" style="display:none;color:var(--rust);font-size:12px;margin-top:8px">Code stimmt nicht überein. Bitte erneut versuchen.</p>
@@ -1969,7 +1970,7 @@ alter table profiles add column if not exists adresse text;</pre>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('abholcode-confirm')">Abbrechen</button>
-      <button class="btn btn-primary" id="ac-submit-btn" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; bezahlt markieren</button>
+      <button class="btn btn-primary" id="ac-submit-btn" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; abgeholt markieren</button>
     </div>
   </div>
 </div>
@@ -2260,6 +2261,9 @@ const WHATS_NEW = {
   '15.4.0': [
     'Neu: Lieferverfolgung zum Teilen — im Bestell-Detail gibt es jetzt neben "Link zum Vorzeigen" auch "🚚 Verfolgungslink teilen". Der Kunde sieht darüber jederzeit den aktuellen Status als Timeline (Bestellt / Unterwegs / Angekommen / Bezahlt) und, sobald vorhanden, direkt den Abholcode — ganz ohne Login.',
     'Dafür fehlt in Supabase noch eine Spalte und eine Funktion — siehe SQL-Hinweis in der Konsole bzw. den Chat-Verlauf.'
+  ],
+  '15.5.0': [
+    'Abholcode wird jetzt nur noch beim Abholen abgefragt, nicht mehr beim Bezahlen — der "Bezahlt"-Button markiert direkt als bezahlt, ohne Code-Bestätigung.'
   ]
 };
 function checkWhatsNew(){
@@ -3677,7 +3681,7 @@ function shareAbholcode(){
   const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
   if(!b || !b.abholcode) return;
   const text = b.fuerLieferant
-    ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen.`
+    ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte bei Abholung vorzeigen.`
     : `Deine Bestellung ist abholbereit! Abholcode: ${b.abholcode} — bitte bei Abholung nennen.`;
   shareViaBestMethod(text);
 }
@@ -3768,7 +3772,7 @@ async function shareAbholcodeQrImage(containerId, wrapId){
     if(!blob){ showToast('QR-Bild konnte nicht erstellt werden.','⚠'); return; }
     const file=new File([blob], `abholcode-${b.abholcode}.png`, {type:'image/png'});
     const shareText = b.fuerLieferant
-      ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen.`
+      ? `Deine Bestellung ist angekommen! Abholcode: ${b.abholcode} — bitte bei Abholung vorzeigen.`
       : `Deine Bestellung ist abholbereit! Abholcode: ${b.abholcode} — bitte bei Abholung vorzeigen.`;
     if(navigator.canShare && navigator.canShare({files:[file]})){
       try{
@@ -3799,7 +3803,7 @@ function quickShowAbholcode(id){
   currentDetailOrderId=id;
   document.getElementById('qc-code').textContent=b.abholcode;
   document.getElementById('qc-hint').textContent = b.fuerLieferant
-    ? 'Beim Bezahlen deinem Lieferanten nennen.'
+    ? 'Bei Abholung deinem Lieferanten zeigen/nennen.'
     : 'Kunde nennt/zeigt diesen Code bei Abholung.';
   document.getElementById('qc-qr-wrap').style.display='none';
   openModal('quick-code');
@@ -3844,7 +3848,7 @@ function sendReminder(id){
   if(!b || !b.abholcode) return;
   const url = codeLinkUrl(b.abholcode);
   const text = b.fuerLieferant
-    ? `Kurze Erinnerung: deine Bestellung wartet noch auf Bezahlung/Abholung. Abholcode: ${b.abholcode} — bitte beim Bezahlen nennen. ${url}`
+    ? `Kurze Erinnerung: deine Bestellung wartet noch auf Bezahlung/Abholung. Abholcode: ${b.abholcode} — bitte bei Abholung vorzeigen. ${url}`
     : `Kurze Erinnerung: deine Bestellung wartet noch auf Abholung. Abholcode: ${b.abholcode} — bitte bei Abholung nennen. ${url}`;
   shareViaBestMethod(text);
 }
@@ -3975,11 +3979,12 @@ function renderLbHistory(){
       : `<span class="badge b-offen">🚚 Unterwegs${daysSince(b.date)>=1?' · seit '+daysSince(b.date)+'T':''}</span>`;
     const bezahltBadge = b.paid ? '<span class="badge b-bezahlt">✓ Bezahlt</span>' : '<span class="badge b-offen">Offen</span>';
     // Der Abholcode entsteht erst, sobald der Lieferant die Bestellung als "angekommen" markiert.
-    // Er muss dann beim Bezahlen genannt werden — danach wird er hier nicht mehr benötigt.
+    // Er wird nicht mehr automatisch abgefragt (siehe renderBestellungen), dient aber weiterhin
+    // als optionaler, manueller Nachweis bei der Abholung — danach nicht mehr benötigt.
     const abholcodeCell = (b.abholcode && !b.paid)
       ? (isCodeExpired(b)
           ? `<span class="mono abholcode-chip expired" title="Code ist abgelaufen (>${CODE_EXPIRY_DAYS} Tage) — im Bestell-Detail neu erzeugen">abgelaufen</span>`
-          : `<span class="mono abholcode-chip" title="Diesen Code beim Bezahlen nennen">${b.abholcode}</span>${warteBadgeHtml(b)}${codeExpiryHint(b)}`)
+          : `<span class="mono abholcode-chip" title="Dein Abholcode">${b.abholcode}</span>${warteBadgeHtml(b)}${codeExpiryHint(b)}`)
       : '<span style="color:var(--ink-faint)">–</span>';
     const quickBtn = (b.abholcode && !b.paid && !isCodeExpired(b))
       ? `<button class="ic-btn" onclick="quickShowAbholcode(${b.id})" title="Code schnell anzeigen" aria-label="Abholcode schnell anzeigen">▦</button>`
@@ -4110,9 +4115,8 @@ async function setDelivered(id, newVal){
   if(!b || b.delivered===newVal)return;
   const patch = { delivered:newVal, angekommen_am: newVal ? new Date().toISOString() : null };
   // Lieferanten-Bestellungen (b.fuerLieferant): sobald die Ware als angekommen markiert wird,
-  // bekommt der Kunde automatisch einen Abholcode. Er muss diesen Code beim Bezahlen nennen
-  // (siehe confirmPaidWithAbholcode) — so wird sichergestellt, dass wirklich die richtige
-  // Bestellung/Person bezahlt und abgeholt wird.
+  // bekommt der Kunde automatisch einen Abholcode. Anders als früher wird dieser Code beim
+  // Bezahlen NICHT mehr abgefragt — er dient nur noch als optionaler, manueller Übergabe-Nachweis.
   if(newVal && b.fuerLieferant && !b.abholcode){
     patch.abholcode = genAbholcode(activeAbholcodes());
   }
@@ -4125,39 +4129,33 @@ async function setDelivered(id, newVal){
     ? (patch.abholcode ? `Als angekommen markiert · Abholcode ${patch.abholcode}` : 'Als erhalten/bestellt markiert. ✓')
     : 'Als unterwegs markiert.');
 }
-// Bezahlen einer Bestellung mit Abholcode: statt direkt setPaid aufzurufen, wird zuerst der
-// Code abgefragt (den Kunde/Lieferantenkunde bei Abholung nennt) und mit dem gespeicherten
-// Code verglichen. Erst bei Übereinstimmung wird die Bestellung als bezahlt markiert — so
-// landet die Zahlung sicher auf der richtigen Bestellung/Person.
+// Abholen einer Bestellung mit Abholcode: statt direkt setDelivered aufzurufen, wird zuerst
+// der Code abgefragt (den Kunde/Lieferantenkunde bei Abholung nennt) und mit dem gespeicherten
+// Code verglichen. Erst bei Übereinstimmung wird die Bestellung als abgeholt markiert — so
+// landet die Abholung sicher bei der richtigen Person. Beim Bezahlen wird seit Version 15.5.0
+// KEIN Code mehr verlangt (setPaid läuft direkt, siehe renderBestellungen) — der Code dient
+// nur noch dazu, die Übergabe der Ware abzusichern, nicht die Bezahlung.
 let _abholcodeConfirmOrderId=null;
-let _abholcodeConfirmMode='paid'; // 'paid' (Bezahlt-Tab) oder 'delivered' (Abholen-Tab)
 let _abholcodeFailCount=0;
 let _abholcodeLockUntil=0;
 let _abholcodeLockTimer=null;
 const ABHOLCODE_MAX_FAILS = 5;
 const ABHOLCODE_LOCK_SECONDS = 30;
-// Zum Bezahlen: Code muss genannt/bestätigt werden, bevor als bezahlt markiert wird.
-function confirmPaidWithAbholcode(id){ _openAbholcodeConfirm(id, 'paid'); }
-// Zum Abholen: derselbe Code-Check, diesmal bevor die Bestellung als abgeholt/geliefert
-// markiert wird — so landet auch die Abholung sicher bei der richtigen Person, nicht nur
-// die Bezahlung.
-function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id, 'delivered'); }
-function _openAbholcodeConfirm(id, mode){
+function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id); }
+function _openAbholcodeConfirm(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b) return;
-  if(!b.abholcode){ mode==='delivered' ? setDelivered(id,true) : setPaid(id,true); return; } // kein Code vorhanden -> keine Sperre
+  if(!b.abholcode){ setDelivered(id,true); return; } // kein Code vorhanden -> keine Sperre
   if(isCodeExpired(b)){
     showToast('Dieser Abholcode ist abgelaufen — bitte im Bestell-Detail einen neuen erzeugen.','⚠');
     return;
   }
   _abholcodeConfirmOrderId=id;
-  _abholcodeConfirmMode=mode;
   _abholcodeFailCount=0;
   _abholcodeLockUntil=0;
   const label = b.fuerLieferant ? 'deinem Lieferantenkunden' : 'deinem Kunden';
-  const actionLabel = mode==='delivered' ? 'als abgeholt markiert wird' : 'als bezahlt markiert wird';
-  document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung ${actionLabel}.`;
-  document.getElementById('ac-submit-btn').textContent = mode==='delivered' ? '✓ Bestätigen & abgeholt markieren' : '✓ Bestätigen & bezahlt markieren';
+  document.getElementById('ac-hint').textContent = `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als abgeholt markiert wird.`;
+  document.getElementById('ac-submit-btn').textContent = '✓ Bestätigen & abgeholt markieren';
   const input=document.getElementById('ac-input');
   input.value=''; input.disabled=false;
   document.getElementById('ac-abholer').value='';
@@ -4214,8 +4212,7 @@ function _submitAbholcodeConfirm(){
   stopAbholcodeScanner();
   closeModal('abholcode-confirm');
   const abholerName=(document.getElementById('ac-abholer').value||'').trim();
-  if(_abholcodeConfirmMode==='delivered') setDelivered(b.id,true);
-  else setPaid(b.id,true);
+  setDelivered(b.id,true);
   if(abholerName) appendNotiz(b.id, `Abgeholt von: ${abholerName}`);
 }
 // ── "Wer holt ab?" ───────────────────────────────────────────────────────────
@@ -4659,16 +4656,13 @@ function renderBestellungen(){
       </tr>`;
     }
 
-    // Standard: Abholen / Bezahlt — beide Abschluss-Buttons verlangen, sofern ein Abholcode
-    // hinterlegt ist, erst dessen Bestätigung (siehe confirmDeliveredWithAbholcode /
-    // confirmPaidWithAbholcode), bevor der Status wirklich umspringt.
+    // Der Abholcode wird nur noch beim Abholen abgefragt — beim Bezahlen wird direkt bezahlt
+    // markiert, ohne Code-Bestätigung (siehe confirmDeliveredWithAbholcode für den Abholen-Fall).
     const actionBtn = bestellungenTab==='bestellt'
       ? (b.abholcode
         ? `<button class="status-btn active-offen" onclick="confirmDeliveredWithAbholcode(${b.id})">✓ Abholen</button>`
         : `<button class="status-btn active-offen" onclick="setDelivered(${b.id},true)">✓ Abholen</button>`)
-      : (b.abholcode
-        ? `<button class="status-btn active-bezahlt" onclick="confirmPaidWithAbholcode(${b.id})">✓ Bezahlt</button>`
-        : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`);
+      : `<button class="status-btn active-bezahlt" onclick="setPaid(${b.id},true)">✓ Bezahlt</button>`;
     return `<tr>
       ${vonCell}
       <td style="font-weight:600">${nameCell}${abholcodeChip}</td>
@@ -5247,7 +5241,7 @@ function openOrderDetail(id){
     document.getElementById('od-abholcode-val').textContent = b.abholcode;
     document.getElementById('od-abholcode-hint').textContent = !b.fuerLieferant
       ? 'Kunde nennt/zeigt diesen Code bei Abholung.'
-      : (b.userId===currentUserId ? 'Beim Bezahlen deinem Lieferanten nennen.' : 'Lieferantenkunde nennt diesen Code beim Bezahlen.');
+      : (b.userId===currentUserId ? 'Bei Abholung deinem Lieferanten zeigen/nennen.' : 'Lieferantenkunde zeigt/nennt diesen Code bei Abholung.');
     const actionsWrap=document.querySelector('#od-abholcode-box .abholcode-actions');
     actionsWrap.style.display = b.paid ? 'none' : 'flex';
   } else if(b.abholcode && isCodeExpired(b)){

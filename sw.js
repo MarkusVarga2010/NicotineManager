@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.4.0'; // Neu: Lieferverfolgung zum Teilen (Status-Timeline + Abholcode, live per Link ohne Login) im Bestell-Detail über "🚚 Verfolgungslink teilen".
+const APP_VERSION = '15.5.0'; // Abholcode wird nur noch beim Abholen abgefragt, nicht mehr beim Bezahlen.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',
