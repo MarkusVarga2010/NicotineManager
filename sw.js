@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.5.0'; // Abholcode wird nur noch beim Abholen abgefragt, nicht mehr beim Bezahlen.
+const APP_VERSION = '15.6.0'; // Neuer Menüpunkt "Eigenverbrauch": eigener Konsum erfassen, bucht Lagerbestand automatisch runter.
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

@@ -1227,8 +1227,9 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span>Lieferantenkunden</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span>Preise</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span>Lagerbestand</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span>Eigenverbrauch</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span>Einstellungen</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span>Service</div>
       </nav>
       <div class="sb-footer">
         <div class="tb-user">
@@ -1565,6 +1566,47 @@ create policy "lagerbestand manuell eigener user"
         <div id="lager-summary"></div>
       </div>
       <div id="lager-manuell-groups"></div>
+    </div>
+
+    <!-- EIGENVERBRAUCH -->
+    <div class="page" id="page-eigenverbrauch">
+      <div class="ph"><div><div class="ph-eyebrow">Bestand</div><div class="pt">Eigenverbrauch</div><div class="ps">Trag hier ein, was du selbst konsumiert hast (nicht verkauft) — der Lagerbestand wird automatisch entsprechend reduziert.</div></div></div>
+      <div class="card" id="ev-setup-hint" style="display:none">
+        <div class="ec" style="padding:8px 0">
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></div>
+          <div class="ec-t">Noch nicht eingerichtet</div>
+          <div class="ec-s">Dafür fehlt in Supabase noch eine Tabelle. SQL zum Anlegen:</div>
+          <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:10px;overflow-x:auto;white-space:pre-wrap">create table eigenverbrauch (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  produkt text not null,
+  variante_id bigint,
+  variante_name text,
+  menge integer not null default 1,
+  notiz text,
+  erfasst_am timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+alter table eigenverbrauch enable row level security;
+create policy "eigenverbrauch eigener user"
+  on eigenverbrauch for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);</pre>
+        </div>
+      </div>
+      <div id="ev-summary" style="margin-bottom:16px"></div>
+      <div class="card" id="ev-card" style="padding:0">
+        <div class="es-quickadd">
+          <div class="fw"><label class="fl">Produkt</label><select id="ev-prod" onchange="onEvProdChange()"></select></div>
+          <div class="fw" id="ev-variant-wrap" style="display:none"><label class="fl" id="ev-variant-label">Variante</label><select id="ev-variant"></select></div>
+          <div class="fw" style="flex:0 0 100px;min-width:80px"><label class="fl">Menge</label><input id="ev-menge" type="number" min="1" step="1" value="1" oninput="clearFieldError('ev-menge')" onkeydown="if(event.key==='Enter')addEigenverbrauch()"/><div class="field-err" id="ev-menge-err"></div></div>
+          <div class="fw" style="flex:0 0 150px;min-width:130px"><label class="fl">Datum (optional)</label><input id="ev-datum" type="date"/></div>
+          <div class="fw"><label class="fl">Notiz (optional)</label><input id="ev-notiz" placeholder="z.B. Anlass" onkeydown="if(event.key==='Enter')addEigenverbrauch()"/></div>
+          <div class="fw" style="flex:0 0 auto"><button class="btn btn-primary btn-sm" onclick="addEigenverbrauch()">＋ Buchen</button><div class="field-err"></div></div>
+        </div>
+        <div id="ev-list"></div>
+        <div class="ec" id="ev-empty" style="display:none;padding:24px 20px"><div class="ec-t">Noch kein Eigenverbrauch erfasst</div></div>
+      </div>
     </div>
 
     <!-- EINSTELLUNGEN -->
@@ -2144,8 +2186,9 @@ const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 // ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
-let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{} };
+let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{}, eigenverbrauch:[] };
 let schuldenTableMissing = false;
+let eigenverbrauchTableMissing = false;
 let lagerManuellTableMissing = false;
 let lagerSchwelleSpalteMissing = false;
 let variantenTableMissing = false;
@@ -2337,7 +2380,7 @@ function currentRole(){ return M.profile ? M.profile.role : 'user'; }
 function allowedPages(role){
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','einstellungen']; // 'user'/'special'
+  return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -2429,7 +2472,7 @@ async function loadAllData(){
   // Performance: der Papierkorb (gelöschte Bestellungen) wird NICHT mehr beim normalen
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
   // Historie unnötige Datenmenge beim täglichen Start der App.
-  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes, lagerManuellRes] = await Promise.all([
+  const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes, lagerManuellRes, eigenverbrauchRes] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false}),
     sb.from('preise').select('*'),
@@ -2439,6 +2482,7 @@ async function loadAllData(){
     sb.from('eigene_schulden').select('*').eq('user_id', currentUserId).order('id', {ascending:false}),
     sb.from('produkt_varianten').select('*').order('id'),
     sb.from('lagerbestand_manuell').select('*').eq('user_id', currentUserId),
+    sb.from('eigenverbrauch').select('*').eq('user_id', currentUserId).order('erfasst_am', {ascending:false}),
   ]);
   S.kunden = (kundenRes.data||[]).map(k=>({id:k.id, vorname:k.vorname, nachname:k.nachname, userId:k.user_id, customPreise:k.custom_preise||{}}));
   S.bestellungen = (bestRes.data||[]).map(mapBestellung);
@@ -2483,6 +2527,13 @@ async function loadAllData(){
   if(!lagerManuellRes.error){
     (lagerManuellRes.data||[]).forEach(r=>{ S.lagerManuell[r.produkt] = { menge:Number(r.menge)||0, schwelle: r.schwelle!=null?Number(r.schwelle):5, updatedAt:r.updated_at }; });
   }
+  // Eigenverbrauch: frei erfasste Selbstentnahmen aus dem Lagerbestand (nicht verkauft) —
+  // eigene Tabelle (evtl. noch nicht angelegt), dann einfach leer lassen + Hinweis anzeigen.
+  eigenverbrauchTableMissing = !!eigenverbrauchRes.error;
+  S.eigenverbrauch = eigenverbrauchRes.error ? [] : (eigenverbrauchRes.data||[]).map(e=>({
+    id:e.id, produkt:e.produkt, varianteId:e.variante_id||null, varianteName:e.variante_name||null,
+    menge:Number(e.menge)||0, notiz:e.notiz||null, erfasstAm:e.erfasst_am||e.created_at
+  }));
   // Geschmäcker/Marken: eigene Varianten (S.varianten) sowie — falls ein Lieferant verknüpft
   // ist — dessen Varianten mit seiner aktuellen Preisliste (S.lieferantVarianten), analog zu
   // S.preise/S.lieferantPreise weiter oben. bildUrl wird mit übernommen, damit Thumbnails
@@ -2533,7 +2584,7 @@ function closeSidebar(){
 // NAVIGATION
 // ══════════════════════════════════════════════
 const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','einstellungen','service'];
+const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service'];
 function nav(id){
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
@@ -2546,6 +2597,7 @@ function nav(id){
   if(id==='lieferant') renderLieferantSeite();
   if(id==='lieferantenkunden') renderLieferantenkundenSeite();
   if(id==='lagerbestand') renderLagerbestand();
+  if(id==='eigenverbrauch') renderEigenverbrauch();
   if(id==='bestellungen' || id==='lieferantenkunden') markLkSeen();
   refresh();
 }
@@ -4064,6 +4116,141 @@ async function delEigeneSchuld(id){
   if(error){ showToast('Konnte nicht gelöscht werden.','⚠'); return; }
   S.schulden=S.schulden.filter(s=>s.id!==id);
   renderEigeneSchulden();renderDashboard();
+  showToast('Gelöscht. 🗑');
+}
+
+// ══════════════════════════════════════════════
+// EIGENVERBRAUCH: eigener Konsum, der nicht verkauft wird — läuft über eine eigene Tabelle
+// (evtl. noch nicht angelegt, dann Hinweis wie bei den anderen optionalen Tabellen) und bucht
+// den passenden Lagerbestand (S.lagerManuell, siehe oben) automatisch entsprechend runter/rauf.
+// ══════════════════════════════════════════════
+function onEvProdChange(){
+  const prod=document.getElementById('ev-prod')?.value;
+  const wrap=document.getElementById('ev-variant-wrap');
+  const sel=document.getElementById('ev-variant');
+  if(!wrap||!sel)return;
+  if(prod && hasVariant(prod)){
+    const p=PROD_MAP[prod];
+    document.getElementById('ev-variant-label').textContent = p.variantLabel;
+    const list=variantList(prod,false);
+    sel.innerHTML = list.length ? list.map(v=>`<option value="${v.id}">${escapeHtml(v.name)}</option>`).join('') : `<option value="">— noch kein ${p.variantLabel} hinterlegt —</option>`;
+    wrap.style.display='';
+  } else {
+    wrap.style.display='none';
+    sel.innerHTML='';
+  }
+}
+function fillEvProdSelect(){
+  const sel=document.getElementById('ev-prod');
+  if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML = PRODUCTS.map(p=>`<option value="${p.id}">${p.icon} ${p.name}</option>`).join('');
+  sel.value = PRODUCTS.some(p=>p.id===prev) ? prev : PRODUCTS[0].id;
+  onEvProdChange();
+}
+// Passt den manuell gepflegten Lagerbestand um `delta` Stück an (negativ beim Buchen, positiv
+// beim Rückgängigmachen einer Löschung) — nie unter 0. Legt bei Bedarf einen neuen Eintrag an.
+async function adjustLagerbestand(prodId, delta){
+  if(lagerManuellTableMissing) return;
+  const entry=S.lagerManuell[prodId];
+  const schwelle = entry && entry.schwelle!=null ? entry.schwelle : 5;
+  const menge = Math.max(0, (entry?entry.menge:0) + delta);
+  let { data, error } = await sb.from('lagerbestand_manuell')
+    .upsert({ user_id:currentUserId, produkt:prodId, menge, schwelle, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
+    .select().single();
+  if(error && /schwelle/i.test(error.message||'')){
+    lagerSchwelleSpalteMissing = true;
+    ({ data, error } = await sb.from('lagerbestand_manuell')
+      .upsert({ user_id:currentUserId, produkt:prodId, menge, updated_at:new Date().toISOString() }, { onConflict:'user_id,produkt' })
+      .select().single());
+  }
+  if(error) return;
+  S.lagerManuell[prodId] = { menge, schwelle: data.schwelle!=null?Number(data.schwelle):schwelle, updatedAt:data.updated_at };
+}
+function renderEigenverbrauch(){
+  fillEvProdSelect();
+  const dateInput=document.getElementById('ev-datum');
+  if(dateInput && !dateInput.value) dateInput.value = today();
+  const card=document.getElementById('ev-card'), hint=document.getElementById('ev-setup-hint');
+  if(!card)return;
+  if(eigenverbrauchTableMissing){ card.style.display='none'; hint.style.display='block'; document.getElementById('ev-summary').innerHTML=''; return; }
+  card.style.display=''; hint.style.display='none';
+
+  // Kennzahlen: Gesamtmenge diesen Monat sowie insgesamt, im selben Kachel-Stil wie Lagerbestand.
+  const nowMonth = today().slice(0,7);
+  const totalAll = S.eigenverbrauch.reduce((s,e)=>s+e.menge,0);
+  const totalMonth = S.eigenverbrauch.filter(e=>String(e.erfasstAm||'').slice(0,7)===nowMonth).reduce((s,e)=>s+e.menge,0);
+  const summaryEl=document.getElementById('ev-summary');
+  if(summaryEl){
+    summaryEl.innerHTML = `
+      <div class="stat-strip">
+        <div class="stat-cell">
+          <div class="sc-lab">Einträge</div>
+          <div class="sc-v mono">${S.eigenverbrauch.length}</div>
+          <div class="sc-sub">insgesamt erfasst</div>
+        </div>
+        <div class="stat-cell">
+          <div class="sc-lab">Menge insgesamt</div>
+          <div class="sc-v mono">${totalAll}</div>
+          <div class="sc-sub">Stück eigener Verbrauch</div>
+        </div>
+        <div class="stat-cell">
+          <div class="sc-lab">Diesen Monat</div>
+          <div class="sc-v mono">${totalMonth}</div>
+          <div class="sc-sub">Stück seit Monatsbeginn</div>
+        </div>
+      </div>`;
+  }
+
+  const list=[...S.eigenverbrauch].sort((a,b)=>String(b.erfasstAm||'').localeCompare(String(a.erfasstAm||'')) || (b.id-a.id));
+  document.getElementById('ev-empty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('ev-list').innerHTML = list.map(e=>{
+    const p=PROD_MAP[e.produkt];
+    const name = p ? `${p.icon} ${p.name}${e.varianteName?` (${escapeHtml(e.varianteName)})`:''}` : e.produkt;
+    return `<div class="es-row">
+      <div class="es-row-ic">📤</div>
+      <div class="es-row-main">
+        <div class="es-row-name">${name}</div>
+        <div class="es-row-notiz">${fmtDate(e.erfasstAm)}${e.notiz?' · '+escapeHtml(e.notiz):''}</div>
+      </div>
+      <div class="es-row-amount mono">${e.menge} Stk.</div>
+      <div class="es-row-actions">
+        <button class="ic-btn" onclick="delEigenverbrauch(${e.id})" title="Löschen" aria-label="Eintrag löschen">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function addEigenverbrauch(){
+  const prod=document.getElementById('ev-prod').value;
+  const variantSel=document.getElementById('ev-variant');
+  const variantId = hasVariant(prod) && variantSel && variantSel.value ? variantSel.value : null;
+  const variantName = variantId ? findVariant(prod, variantId, false)?.name||null : null;
+  const menge=Math.max(0, Math.round(Number(document.getElementById('ev-menge').value)||0));
+  const datum=document.getElementById('ev-datum').value;
+  const notiz=document.getElementById('ev-notiz').value.trim()||null;
+  clearFieldError('ev-menge');
+  if(!prod){ showToast('Bitte ein Produkt wählen.','⚠'); return; }
+  if(!menge || menge<=0){ setFieldError('ev-menge','Bitte eine gültige Menge angeben.'); return; }
+  const erfasstAm = datum ? new Date(datum+'T12:00:00').toISOString() : new Date().toISOString();
+  const { data, error } = await sb.from('eigenverbrauch').insert({
+    user_id:currentUserId, produkt:prod, variante_id:variantId, variante_name:variantName, menge, notiz, erfasst_am:erfasstAm
+  }).select().single();
+  if(error){ showToast(dbErrorMsg(error,'Konnte nicht gespeichert werden. Siehe Einrichtungshinweis unten.'),'⚠'); return; }
+  S.eigenverbrauch.unshift({ id:data.id, produkt:data.produkt, varianteId:data.variante_id||null, varianteName:data.variante_name||null, menge:Number(data.menge), notiz:data.notiz||null, erfasstAm:data.erfasst_am||data.created_at });
+  await adjustLagerbestand(prod, -menge);
+  document.getElementById('ev-menge').value='1';
+  document.getElementById('ev-notiz').value='';
+  renderEigenverbrauch();renderLagerbestand();renderDashboard();
+  showToast(`${menge} × ${PROD_MAP[prod]?.name||prod} als Eigenverbrauch gebucht — Lagerbestand angepasst. ✓`);
+}
+async function delEigenverbrauch(id){
+  if(!(await confirmDialog('Diesen Eintrag endgültig löschen? Der Lagerbestand wird wieder um die entsprechende Menge erhöht.', {title:'Eintrag löschen?', confirmText:'Löschen', danger:true})))return;
+  const entry=S.eigenverbrauch.find(e=>e.id===id);
+  const { error } = await sb.from('eigenverbrauch').delete().eq('id', id);
+  if(error){ showToast('Konnte nicht gelöscht werden.','⚠'); return; }
+  S.eigenverbrauch=S.eigenverbrauch.filter(e=>e.id!==id);
+  if(entry) await adjustLagerbestand(entry.produkt, entry.menge);
+  renderEigenverbrauch();renderLagerbestand();renderDashboard();
   showToast('Gelöscht. 🗑');
 }
 function escapeHtml(str){
@@ -5907,7 +6094,7 @@ function markLkSeen(){
   updateLkBadge();
 }
 function refresh(){
-  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();renderLagerbestand();
+  fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();renderLagerbestand();renderEigenverbrauch();
 }
 
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)
