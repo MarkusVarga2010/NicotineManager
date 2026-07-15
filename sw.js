@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '15.3.0'; // Dashboard: neue Statistik-Karte (Wochen-Umsatz, Top-Produkte, Top-Kunden). Bestellungen: "🔁 Nochmal bestellen" in der Historie übernimmt eine alte Bestellung als Vorlage, und "⭳ CSV Export" exportiert alle eigenen Verkäufe als CSV-Datei.
+const APP_VERSION = '15.4.0'; // Neu: Lieferverfolgung zum Teilen (Status-Timeline + Abholcode, live per Link ohne Login) im Bestell-Detail über "🚚 Verfolgungslink teilen".
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

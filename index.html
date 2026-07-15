@@ -1130,6 +1130,25 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   <div style="color:var(--ink-soft);font-size:13px;max-width:320px">Zeig diesen Code bei der Abholung vor.</div>
 </div>
 
+<!-- LIEFERVERFOLGUNG (?track=TOKEN): schreibgeschützte Live-Ansicht ohne Login, die den
+     aktuellen Bestellstatus (Timeline, wiederverwendet aus orderTimelineHtml) sowie — sobald
+     vorhanden und nicht abgelaufen — den Abholcode zeigt. Anders als der reine Code-Direktlink
+     oben lädt diese Ansicht bewusst live aus Supabase (per get_tracking-RPC, siehe SQL-Notiz
+     weiter unten im Script), damit der Kunde immer den aktuellen Stand sieht. -->
+<div id="track-view-screen" style="display:none;position:fixed;inset:0;z-index:9999;overflow:auto;padding:24px;background:var(--paper)">
+  <div style="max-width:420px;margin:40px auto">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.16em;margin-bottom:18px;text-align:center">Deine Lieferverfolgung</div>
+    <div id="tv-loading" style="text-align:center;color:var(--ink-faint);font-size:13px">Lädt…</div>
+    <div id="tv-timeline"></div>
+    <div class="abholcode-box" id="tv-abholcode-box" style="display:none;margin-top:18px">
+      <div class="abholcode-lab">Abholcode</div>
+      <div class="abholcode-val mono" id="tv-abholcode-val"></div>
+      <div style="font-size:11px;color:var(--ink-faint);margin-top:3px">Zeig diesen Code bei der Abholung vor.</div>
+    </div>
+    <div id="tv-error" style="display:none;color:var(--ink-soft);font-size:13px;text-align:center;margin-top:20px">Diese Lieferverfolgung wurde nicht gefunden oder ist nicht mehr gültig.</div>
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-wrap">
@@ -1844,6 +1863,7 @@ alter table profiles add column if not exists adresse text;</pre>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcode()">📲 Teilen</button>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeQrFromDetail()">🖼 QR-Bild teilen</button>
           <button class="btn btn-ghost btn-sm" onclick="shareAbholcodeLink()">🔗 Link zum Vorzeigen</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareTrackingLink()">🚚 Verfolgungslink teilen</button>
           <button class="btn btn-ghost btn-sm" id="od-abholcode-regen-btn" onclick="regenerateAbholcode()">↺ Neu erzeugen</button>
         </div>
       </div>
@@ -2087,6 +2107,40 @@ const EMAIL_DOMAIN = 'nicotinemanager.local'; // interner Trick: Benutzername ->
 const toEmail = u => `${u.toLowerCase()}@${EMAIL_DOMAIN}`;
 
 // ══════════════════════════════════════════════
+// LIEFERVERFOLGUNG (?track=TOKEN)
+// ══════════════════════════════════════════════
+// Anders als die reine Abholcode-Direktlink-Ansicht (?code=, siehe oben) lädt diese Ansicht
+// bewusst live aus Supabase, damit der Kunde immer den aktuellen Bestellstatus sieht — auch
+// wenn er den Link schon vor Tagen bekommen hat. Der Abruf läuft über die get_tracking-RPC
+// (SECURITY DEFINER, siehe SQL-Hinweis in der Konsole unten), die anhand eines langen,
+// unratbaren tracking_token nur genau eine Bestellung mit reduziertem Feldsatz zurückgibt —
+// dafür braucht der Kunde kein Login, und trotzdem kann niemand fremde Bestellungen abfragen.
+(function(){
+  const token = (new URLSearchParams(location.search).get('track')||'').trim();
+  if(!token) return;
+  document.getElementById('track-view-screen').style.display='block';
+  document.title = 'Lieferverfolgung';
+  sb.rpc('get_tracking', { p_token: token }).then(({data,error})=>{
+    document.getElementById('tv-loading').style.display='none';
+    const row = Array.isArray(data) ? data[0] : data;
+    if(error || !row){
+      if(error) console.error('get_tracking fehlgeschlagen — ist die RPC-Funktion in Supabase schon angelegt?', error);
+      document.getElementById('tv-error').style.display='block';
+      return;
+    }
+    const b = {
+      fuerLieferant: row.fuer_lieferant, date: row.bestelldatum, delivered: !!row.delivered,
+      deliveredAt: row.angekommen_am, paid: !!row.paid, paidAt: row.bezahlt_am
+    };
+    document.getElementById('tv-timeline').innerHTML = orderTimelineHtml(b);
+    if(row.abholcode && !isCodeExpired({ ...b, abholcode: row.abholcode })){
+      document.getElementById('tv-abholcode-box').style.display='block';
+      document.getElementById('tv-abholcode-val').textContent = row.abholcode;
+    }
+  });
+})();
+
+// ══════════════════════════════════════════════
 // STATE (im Speicher, wird per Supabase befüllt/synchronisiert)
 // ══════════════════════════════════════════════
 let S = { kunden:[], bestellungen:[], trash:[], preise:{}, einkauf:{}, schulden:[], varianten:{}, lieferantVarianten:{} };
@@ -2202,6 +2256,10 @@ const WHATS_NEW = {
     'Neu im Dashboard: Statistik-Karte mit Wochen-Umsatz der letzten 8 Wochen sowie Top-5-Produkte und Top-5-Kunden nach Umsatz — alles auf Basis der bezahlten Bestellungen.',
     'Neu in der Historie: "🔁 Nochmal bestellen" übernimmt Kunde, Produkte und Rabatt einer abgeschlossenen Bestellung direkt als Vorlage für eine neue.',
     'Neu: "⭳ CSV Export" auf der Bestellungen-Seite exportiert alle eigenen Verkaufs-Bestellungen als CSV-Datei, z.B. für Steuerberater/Buchhaltung.'
+  ],
+  '15.4.0': [
+    'Neu: Lieferverfolgung zum Teilen — im Bestell-Detail gibt es jetzt neben "Link zum Vorzeigen" auch "🚚 Verfolgungslink teilen". Der Kunde sieht darüber jederzeit den aktuellen Status als Timeline (Bestellt / Unterwegs / Angekommen / Bezahlt) und, sobald vorhanden, direkt den Abholcode — ganz ohne Login.',
+    'Dafür fehlt in Supabase noch eine Spalte und eine Funktion — siehe SQL-Hinweis in der Konsole bzw. den Chat-Verlauf.'
   ]
 };
 function checkWhatsNew(){
@@ -2359,7 +2417,7 @@ function mapBestellung(b){
   return {
     id:b.id, kId:b.kunde_id, items:b.items, subtotal:Number(b.subtotal),
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
-    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null
+    total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null, trackingToken:b.tracking_token||null
   };
 }
 let trashLoaded = false;
@@ -3553,7 +3611,7 @@ async function addBestellung(){
   S.bestellungen.unshift({
     id:data.id, kId:data.kunde_id, items:data.items, subtotal:Number(data.subtotal),
     discountType:data.discount_type, discountValue:Number(data.discount_value||0),
-    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null
+    total:Number(data.total), paid:data.paid, delivered:!!data.delivered, fuerLieferant:false, date:data.bestelldatum, paidAt:data.bezahlt_am||null, deliveredAt:data.angekommen_am||null, userId:data.user_id, notiz:data.notiz||null, abholcode:data.abholcode||null, trackingToken:data.tracking_token||null
   });
   closeModal('bestellung');renderBestellungen();renderKunden();renderDashboard();
   showToast('Bestellung angelegt · Abholcode '+(data.abholcode||'—'));
@@ -3635,6 +3693,20 @@ function shareAbholcodeLink(){
   if(!b || !b.abholcode) return;
   const url = codeLinkUrl(b.abholcode);
   const text = `Hier ist dein Abholcode zum Vorzeigen: ${url}`;
+  shareViaBestMethod(text);
+}
+// ── Lieferverfolgung teilen ─────────────────────────────────────────────────
+// Anders als codeLinkUrl() (fixer Code im Link, siehe oben) verweist dieser Link über
+// ?track=<tracking_token> auf eine Live-Ansicht (siehe get_tracking-RPC + #track-view-screen),
+// die Status-Timeline UND — sobald vorhanden — den aktuellen Abholcode zeigt.
+function trackingLinkUrl(b){
+  return location.origin + location.pathname + '?track=' + encodeURIComponent(b.trackingToken);
+}
+function shareTrackingLink(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  if(!b || !b.trackingToken){ showToast('Lieferverfolgung noch nicht eingerichtet — dafür fehlt in Supabase die Spalte "tracking_token".','⚠'); return; }
+  const url = trackingLinkUrl(b);
+  const text = `Hier kannst du deine Bestellung verfolgen: ${url}`;
   shareViaBestMethod(text);
 }
 // ── QR-Code zusätzlich zum 4-stelligen Code ─────────────────────────────────
@@ -4026,7 +4098,7 @@ async function submitLbBestellung(){
   S.bestellungen.unshift({
     id:data.id, kId:null, items:data.items, subtotal:Number(data.subtotal),
     discountType:null, discountValue:0,
-    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null
+    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null, trackingToken:data.tracking_token||null
   });
   lbItems=[]; document.getElementById('lb-notiz').value='';
   closeModal('lbbestellung');
