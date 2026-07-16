@@ -1,6 +1,6 @@
 // NicoFlow Service Worker
 // Versionsnummer hochzählen, wenn sich index.html / Assets ändern -> erzwingt Update beim nächsten Start.
-const APP_VERSION = '16.0.0'; // Sprache (DE/EN), Schriftgröße, Liquid-Glass-Schalter in den Einstellungen + Vorauszahlung/Restbetrag bei Bestellungen.
+const APP_VERSION = '16.1.0'; // Feinschliff: Dashboard-Kachel für offene Restbeträge, Schnell-Bearbeiten der Vorauszahlung direkt in der Liste, Warnhinweis bei zu hoher Vorauszahlung, mehr Übersetzungen, frischeres Kartendesign (Hover-Lift, weichere Rundungen).
 const CACHE_NAME = 'nicoflow-' + APP_VERSION;
 const ASSETS = [
   './',

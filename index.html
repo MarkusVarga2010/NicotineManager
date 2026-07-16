@@ -1095,6 +1095,37 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .lager-group-head .lg-line{flex:1;height:1px;background:var(--line)}
 .lager-group-head .lg-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);white-space:nowrap}
 .lager-group-head.lg-critical .lg-label{color:var(--rust)}
+
+/* ══════════════════════════════════════════════
+   DESIGN-POLISH: etwas softere Rundungen, spürbareres Hover/Active-Feedback und eine
+   knackigere Timing-Kurve auf Karten/Buttons — rein optisch, ändert kein Layout/Verhalten.
+   ══════════════════════════════════════════════ */
+:root{ --r:16px; --r-lg:28px; }
+.card,.kcard,.pc,.set-card,.dose-card,.modal,.login-card,.vshop-card,.lager-pc,.danger-zone,
+.service-banner,.es-quickadd,.abholcode-box,.vpick-card,.batch-item{
+  transition:transform .22s cubic-bezier(.22,.9,.3,1), box-shadow .22s cubic-bezier(.22,.9,.3,1), border-color .18s ease, background-color .22s ease;
+}
+.card:hover,.kcard:hover,.pc:hover,.lager-pc:hover,.vshop-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 20px 40px -22px rgba(0,0,0,.5);
+  border-color:color-mix(in srgb, var(--sage) 28%, var(--line2));
+}
+.btn,.status-btn,.ic-btn,.tab-btn{
+  transition:all .18s cubic-bezier(.22,.9,.3,1) !important;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-ghost:hover{box-shadow:0 10px 22px -14px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08)}
+.btn-primary:hover{box-shadow:0 12px 26px -10px color-mix(in srgb, var(--sage) 65%, transparent), inset 0 1px 0 rgba(255,255,255,.5)}
+.badge{padding:5px 10px;letter-spacing:.09em}
+.status-btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.tab-btn:hover:not(.active){transform:translateY(-1px)}
+/* Kleiner, freundlicherer "Pop" beim Öffnen von Modals — etwas mehr Sprungkraft als vorher. */
+.modal{transition:transform .28s cubic-bezier(.34,1.56,.64,1), opacity .22s ease}
+/* Theme-Punkte (Akzentfarbe wählen) bekommen einen sanften Hover-Ring, damit klarer ist,
+   dass sie klickbar sind. */
+.t-d{transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease}
+.t-d:hover{transform:scale(1.14)}
+.t-d.on{box-shadow:0 0 0 3px var(--paper2), 0 0 0 5px var(--sage), 0 4px 12px -2px color-mix(in srgb, var(--sage) 60%, transparent)}
 </style>
 </head>
 <body>
@@ -1279,39 +1310,50 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <div class="stat-strip bento-dash">
         <div class="stat-cell s-debt" data-bento="debt">
           <svg class="bento-ic-bg"><use href="#ic-wallet"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-wallet"/></svg>Offene Schulden</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-wallet"/></svg><span data-i18n="dash.offene-schulden">Offene Schulden</span></div>
           <div class="sc-v mono" id="d-schulden">0,00 €</div>
           <div class="sc-sub" id="d-s-sub">0 offen</div>
         </div>
         <div class="stat-cell" id="profit-card" data-bento="profit" title="Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt, über alle Verkäufe an Kunden und Lieferantenkunden">
           <svg class="bento-ic-bg"><use href="#ic-trend"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-trend"/></svg>Gesamtgewinn</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-trend"/></svg><span data-i18n="dash.gesamtgewinn">Gesamtgewinn</span></div>
           <div class="sc-v mono" id="d-gewinn">0,00 €</div>
           <div class="sc-sub">Verkauf − Einkauf · alle Verkäufe</div>
         </div>
         <div class="stat-cell" data-bento="best">
           <svg class="bento-ic-bg"><use href="#ic-receipt"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-receipt"/></svg>Bestellungen</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-receipt"/></svg><span data-i18n="dash.bestellungen">Bestellungen</span></div>
           <div class="sc-v mono" id="d-best">0</div>
           <div class="sc-sub">gesamt</div>
         </div>
         <div class="stat-cell" data-bento="schuldner">
           <svg class="bento-ic-bg"><use href="#ic-user-circle"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-user-circle"/></svg>Schuldner</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-user-circle"/></svg><span data-i18n="dash.schuldner">Schuldner</span></div>
           <div class="sc-v mono" id="d-schuldner">0</div>
           <div class="sc-sub">Kunden mit offenem Betrag</div>
         </div>
         <div class="stat-cell" data-bento="kunden">
           <svg class="bento-ic-bg"><use href="#ic-users"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-users"/></svg>Kunden</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-users"/></svg><span data-i18n="dash.kunden">Kunden</span></div>
           <div class="sc-v mono" id="d-kunden">0</div>
           <div class="sc-sub">registriert</div>
         </div>
         <div class="stat-cell" id="d-lieferant-cell" data-bento="lief" style="display:none">
           <svg class="bento-ic-bg"><use href="#ic-truck"/></svg>
-          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-truck"/></svg>Eigene Schulden</div>
+          <div class="sc-lab"><svg class="lab-ic"><use href="#ic-truck"/></svg><span data-i18n="dash.eigene-schulden">Eigene Schulden</span></div>
           <div class="sc-v mono" id="d-lieferant-schulden" style="color:var(--lieferant-deep)">0,00 €</div>
           <div class="sc-sub" id="d-lieferant-sub">0 Bestellungen · eigener Einkauf, getrennt von Schulden anderer bei dir</div>
+        </div>
+      </div>
+
+      <div class="card" id="d-vz-card" style="display:none;padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="svg-ic" style="width:18px;height:18px"><use href="#ic-wallet"/></svg></div>
+          <div style="flex:1;min-width:0">
+            <div class="sc-lab" style="margin-bottom:5px" data-i18n="dash.vz-outstanding">Offene Restbeträge (Vorauszahlungen)</div>
+            <div class="sc-v mono" id="d-vz-total" style="font-size:19px">0,00 €</div>
+            <div class="sc-sub" id="d-vz-sub">0 Bestellungen mit Vorauszahlung</div>
+          </div>
         </div>
       </div>
 
@@ -1535,8 +1577,8 @@ create policy "varianten eigene loeschen"
         </div>
       </div>
       <div class="pg" id="price-grid"></div>
-      <div class="card"><div class="card-head"><h3>Preisübersicht</h3></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Produkt</th><th>Einkauf/Stk</th><th>Verkauf/Stk</th><th>Gewinn/Stk</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
+      <div class="card"><div class="card-head"><h3 data-i18n="preise.overview">Preisübersicht</h3></div>
+        <div class="tbl-wrap"><table><thead><tr><th data-i18n="order.products">Produkt</th><th data-i18n="preise.th.einkauf">Einkauf/Stk</th><th data-i18n="preise.th.verkauf">Verkauf/Stk</th><th data-i18n="preise.th.gewinn">Gewinn/Stk</th><th>10×</th><th>25×</th><th>50×</th><th>100×</th></tr></thead><tbody id="price-table"></tbody></table></div>
       </div>
     </div>
 
@@ -1880,6 +1922,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
         <label class="fl" style="margin-bottom:8px" id="nb-vz-label" data-i18n="order.prepayment">Vorauszahlung (optional)</label>
         <input type="number" id="nb-vorauszahlung" min="0" step="0.01" placeholder="0,00" oninput="renderOrderItems()"/>
+        <div id="nb-vz-warn" style="display:none;font-size:11px;color:var(--rust);margin-top:6px"></div>
       </div>
 
       <div class="order-total-row" style="border-top:none;padding-top:8px" id="subtotal-row">
@@ -1972,10 +2015,11 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="order-total-row" id="od-vz-row" style="align-items:center">
         <span class="otl" data-i18n="order.prepayment">Vorauszahlung</span>
         <span style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="od-vz-input" min="0" step="0.01" placeholder="0,00" style="width:96px;padding:7px 9px;font-size:12px"/>
+          <input type="number" id="od-vz-input" min="0" step="0.01" placeholder="0,00" oninput="checkVzWarn()" style="width:96px;padding:7px 9px;font-size:12px"/>
           <button class="btn btn-ghost btn-sm" id="od-vz-save-btn" onclick="saveVorauszahlung()" data-i18n="common.save">Speichern</button>
         </span>
       </div>
+      <div id="od-vz-warn" style="display:none;font-size:11px;color:var(--rust);text-align:right;margin:-6px 0 6px"></div>
       <div class="order-total-row" id="od-rest-row" style="display:none">
         <span class="otl" data-i18n="order.remaining">Restbetrag</span><span class="otv mono" id="od-rest" style="font-weight:700"></span>
       </div>
@@ -2318,6 +2362,18 @@ const I18N = {
     'order.new-title':'Neue Bestellung',
     'order.create-btn':'Bestellung anlegen',
     'order.detail-title':'Bestellung',
+    'order.vz-toohigh':'Vorauszahlung kann nicht höher als der Gesamtbetrag sein — wird beim Speichern auf {max} begrenzt.',
+    'dash.vz-outstanding':'Offene Restbeträge (Vorauszahlungen)',
+    'preise.overview':'Preisübersicht',
+    'preise.th.einkauf':'Einkauf/Stk',
+    'preise.th.verkauf':'Verkauf/Stk',
+    'preise.th.gewinn':'Gewinn/Stk',
+    'dash.offene-schulden':'Offene Schulden',
+    'dash.gesamtgewinn':'Gesamtgewinn',
+    'dash.bestellungen':'Bestellungen',
+    'dash.schuldner':'Schuldner',
+    'dash.kunden':'Kunden',
+    'dash.eigene-schulden':'Eigene Schulden',
   },
   en: {
     'app.tagline':'Stock · Orders · Dosing',
@@ -2436,6 +2492,18 @@ const I18N = {
     'order.new-title':'New order',
     'order.create-btn':'Create order',
     'order.detail-title':'Order',
+    'order.vz-toohigh':'Prepayment can\'t be higher than the total — will be capped at {max} when saving.',
+    'dash.vz-outstanding':'Outstanding balances (prepayments)',
+    'preise.overview':'Price overview',
+    'preise.th.einkauf':'Cost/unit',
+    'preise.th.verkauf':'Price/unit',
+    'preise.th.gewinn':'Profit/unit',
+    'dash.offene-schulden':'Open debts',
+    'dash.gesamtgewinn':'Total profit',
+    'dash.bestellungen':'Orders',
+    'dash.schuldner':'Debtors',
+    'dash.kunden':'Customers',
+    'dash.eigene-schulden':'Own debts',
   }
 };
 function t(key){
@@ -3960,11 +4028,21 @@ function renderOrderItems(){
   document.getElementById('order-total').textContent=fmt(total);
   // Vorauszahlung: wird vom Gesamtbetrag abgezogen, der Rest ist der Betrag, der bei
   // "Bezahlt" tatsächlich noch fällig ist (Nachzahlung) — siehe restAmount().
-  const vz = Math.max(0, parseFloat(document.getElementById('nb-vorauszahlung')?.value)||0);
+  const vzRaw = parseFloat(document.getElementById('nb-vorauszahlung')?.value)||0;
+  const vz = Math.max(0, vzRaw);
+  const vzWarn=document.getElementById('nb-vz-warn');
+  if(vzWarn){
+    if(vzRaw>total && total>0){
+      vzWarn.style.display='block';
+      vzWarn.textContent = t('order.vz-toohigh').replace('{max}', fmt(total));
+    } else {
+      vzWarn.style.display='none';
+    }
+  }
   const vzRow=document.getElementById('nb-vz-row'), restRow=document.getElementById('nb-rest-row');
   if(vz>0){
     vzRow.style.display='flex'; restRow.style.display='flex';
-    document.getElementById('order-vz').textContent='−'+fmt(vz);
+    document.getElementById('order-vz').textContent='−'+fmt(Math.min(vz,total));
     document.getElementById('order-rest').textContent=fmt(Math.max(0,total-vz));
   } else {
     vzRow.style.display='none'; restRow.style.display='none';
@@ -5206,9 +5284,15 @@ function renderBestellungen(){
     const vonCell = showVon ? `<td style="font-weight:600">${b.fuerLieferant?'<span style="color:var(--ink-faint)">—</span>':(foreign?`<span style="color:var(--lieferant-deep)">${escapeHtml(usernameOf(b.userId))}</span>`:'<span style="color:var(--ink-faint)">(eigene)</span>')}</td>` : '';
     // Wurde eine Vorauszahlung hinterlegt, zeige das direkt unter dem Gesamtbetrag mit an —
     // so sieht man auf einen Blick, wie viel noch offen (Restbetrag/Nachzahlung) ist.
+    // Kleiner Stift direkt in der Liste: Vorauszahlung eintragen/ändern, ohne extra ins
+    // Bestellungs-Detail zu müssen. Ergibt bei bereits vollständig bezahlten Bestellungen
+    // keinen Sinn mehr, daher dort ausgeblendet.
     const vz = b.vorauszahlung||0;
-    const vzNote = (vz>0 && !b.paid) ? `<div style="font-size:10px;font-weight:600;color:var(--ink-faint);margin-top:2px;white-space:nowrap">${t('order.prepayment')}: ${fmt(vz)} · ${t('order.remaining')}: ${fmt(restAmount(b))}</div>` : '';
-    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}${vzNote}</td>`;
+    const vzEditBtn = !b.paid ? `<button class="ic-btn" onclick="quickEditVorauszahlung(${b.id})" title="${t('order.prepayment')}" aria-label="${t('order.prepayment')}" style="width:16px;height:16px;min-width:16px;min-height:16px;font-size:9px;vertical-align:-2px;margin-left:4px;opacity:.55;padding:0">✎</button>` : '';
+    const vzNote = (vz>0 && !b.paid)
+      ? `<div style="font-size:10px;font-weight:600;color:var(--ink-faint);margin-top:2px;white-space:nowrap">${t('order.prepayment')}: ${fmt(vz)} · ${t('order.remaining')}: ${fmt(restAmount(b))}${vzEditBtn}</div>`
+      : '';
+    const gesamt = `<td class="mono" style="font-weight:700">${fmt(displayTotal(b))}${discBadge}${priceBadge}${vz===0?vzEditBtn:''}${vzNote}</td>`;
     const nameCell = b.fuerLieferant
       ? `<span style="color:var(--lieferant-deep)">◆ ${escapeHtml(usernameOf(b.userId))}</span>`
       : (k?escapeHtml(k.vorname+' '+k.nachname):'—');
@@ -5255,7 +5339,7 @@ function renderBestellungen(){
       <td style="font-size:12px">${prods}</td>
       <td class="mono" style="color:var(--ink-faint);font-size:12px">${fmtDate(b.date)}</td>
       ${gesamt}
-      <td>${b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`}</td>
+      <td>${b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:(vz>0?`<span class="badge b-lieferant">${t('status.partial')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`)}</td>
       <td style="text-align:right;white-space:nowrap">
         ${actionBtn}
         <button class="ic-btn" onclick="openOrderDetail(${b.id})" title="Details ansehen" aria-label="Details ansehen">👁</button>
@@ -5279,6 +5363,21 @@ function renderDashboard(){
     document.getElementById('d-pickup-stat-text').textContent = `${txt} im Schnitt zwischen Code-Vergabe und Abholung/Bezahlung (${pStats.count} abgeschlossene Abholungen).`;
   } else if(pCard){
     pCard.style.display='none';
+  }
+  // "Offene Restbeträge (Vorauszahlungen)": Summe aller Restbeträge von Bestellungen, bei
+  // denen eine Vorauszahlung hinterlegt, aber noch nicht vollständig bezahlt wurde — reine
+  // Verkaufs-Bestellungen (keine eigenen Nachbestellungen beim Lieferanten).
+  const vzCard=document.getElementById('d-vz-card');
+  if(vzCard){
+    const vzOrders = S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId) && !b.paid && (b.vorauszahlung||0)>0);
+    if(vzOrders.length){
+      vzCard.style.display='block';
+      const totalRest = vzOrders.reduce((s,b)=>s+restAmount(b),0);
+      document.getElementById('d-vz-total').textContent = fmt(totalRest);
+      document.getElementById('d-vz-sub').textContent = `${vzOrders.length} ${vzOrders.length===1?(VS.lang==='en'?'order with prepayment':'Bestellung mit Vorauszahlung'):(VS.lang==='en'?'orders with prepayment':'Bestellungen mit Vorauszahlung')}`;
+    } else {
+      vzCard.style.display='none';
+    }
   }
   // Lagerbestand-Kurzwarnung: nur anzeigen, wenn überhaupt etwas erfasst ist UND
   // mindestens ein Produkt niedrig/leer ist — sonst bleibt die Kachel ganz weg,
@@ -5888,7 +5987,7 @@ function openOrderDetail(id){
   } else {
     bezahltRow.style.display='none';
   }
-  document.getElementById('od-status').innerHTML = b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`;
+  document.getElementById('od-status').innerHTML = b.paid?`<span class="badge b-bezahlt">${t('status.paid')}</span>`:(b.vorauszahlung>0?`<span class="badge b-lieferant">${t('status.partial')}</span>`:`<span class="badge b-offen">${t('status.open')}</span>`);
   const notizRow=document.getElementById('od-notiz-row');
   if(b.notiz){
     notizRow.style.display='flex';
@@ -5932,6 +6031,7 @@ function openOrderDetail(id){
   vzInput.value = b.vorauszahlung>0 ? b.vorauszahlung : '';
   vzInput.disabled = !!b.paid;
   vzSaveBtn.style.display = b.paid ? 'none' : '';
+  document.getElementById('od-vz-warn').style.display='none';
   const restRow=document.getElementById('od-rest-row');
   if(b.vorauszahlung>0){
     restRow.style.display='flex';
@@ -5944,6 +6044,42 @@ function openOrderDetail(id){
 }
 // Vorauszahlung nachträglich anlegen/ändern (siehe auch die Eingabe schon beim Anlegen
 // der Bestellung im "Neue Bestellung"-Dialog, addBestellung()).
+function checkVzWarn(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
+  const warn=document.getElementById('od-vz-warn');
+  if(!b || !warn) return;
+  const raw=parseFloat(document.getElementById('od-vz-input')?.value)||0;
+  const total=displayTotal(b);
+  if(raw>total && total>0){
+    warn.style.display='block';
+    warn.textContent = t('order.vz-toohigh').replace('{max}', fmt(total));
+  } else {
+    warn.style.display='none';
+  }
+}
+// Direkte Kurz-Bearbeitung aus der Bestellliste heraus (Stift-Icon neben dem Gesamtbetrag) —
+// spart bei einer schnellen Anpassung den Umweg über das Bestellungs-Detail. Nutzt bewusst
+// den nativen prompt(), damit es wirklich ein Ein-Klick-Vorgang bleibt.
+async function quickEditVorauszahlung(id){
+  const b=S.bestellungen.find(x=>x.id===id);
+  if(!b || b.paid) return;
+  const total=displayTotal(b);
+  const raw=prompt(`${t('order.prepayment')} (€, ${t('order.total')}: ${fmt(total)}):`, b.vorauszahlung>0?String(b.vorauszahlung):'');
+  if(raw==null) return; // Abgebrochen
+  const val=Math.min(Math.max(0, parseFloat(raw.replace(',','.'))||0), total);
+  const { error } = await sb.from('bestellungen').update({ vorauszahlung: val }).eq('id', id);
+  if(error){
+    if(isMissingColumnError(error,'vorauszahlung')){
+      showToast(`Spalte fehlt in Supabase. Einmalig ausführen: ${VZ_SQL_HINT}`,'⚠');
+    } else {
+      showToast(dbErrorMsg(error,'Vorauszahlung konnte nicht gespeichert werden.'),'⚠');
+    }
+    return;
+  }
+  b.vorauszahlung = val;
+  renderBestellungen();renderDashboard();
+  showToast('Vorauszahlung gespeichert.');
+}
 async function saveVorauszahlung(){
   const id=currentDetailOrderId;
   const b=S.bestellungen.find(x=>x.id===id);
