@@ -1157,6 +1157,57 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .bs-pick.dis{opacity:.45;cursor:not-allowed}
 .bs-counter{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink-soft)}
 .bs-counter.full{color:var(--sage-deep);font-weight:700}
+
+/* ── Besteller-Shop ── */
+.bs-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--sage);color:#fff;font-size:11px;font-weight:700;margin-left:6px}
+.bs-badge.zero{background:var(--line2);color:var(--ink-soft)}
+.shop-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.shop-bar input[type=search]{max-width:320px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.shop-card{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s}
+.shop-card:hover{transform:translateY(-2px);border-color:var(--sage)}
+.shop-tile{height:112px;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,var(--sage-bg),color-mix(in srgb,var(--accent2) 14%,var(--paper3)));position:relative}
+.shop-incart{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;background:var(--success-bg);color:var(--success-deep);padding:3px 8px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+.shop-body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.shop-name{font-weight:700;font-size:14px}
+.shop-sub{font-size:11px;color:var(--ink-faint);margin-top:-6px}
+.qty{display:flex;align-items:center;border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;width:max-content}
+.qty button{background:var(--paper3);border:none;color:var(--ink);width:34px;height:34px;font-size:16px;cursor:pointer}
+.qty button:hover{background:var(--sage-bg)}
+.qty input{width:52px;text-align:center;border:none;border-radius:0;background:transparent;padding:0;height:34px}
+.shop-body .btn{margin-top:auto;justify-content:center}
+.bs-line{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line2);border-radius:var(--r);margin-bottom:8px;background:var(--paper2)}
+.bs-line-ic{font-size:26px}
+.bs-line-main{flex:1;min-width:0}
+.bs-line-main b{font-size:13px}
+.bs-line-main div{font-size:11px;color:var(--ink-faint)}
+.bs-steps{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:6px}
+.bs-steps i{width:9px;height:9px;border-radius:50%;background:var(--line2);display:inline-block}
+.bs-steps i.on{background:var(--success)}
+.bs-steps u{width:22px;height:2px;background:var(--line2);display:inline-block;text-decoration:none}
+.bs-steps u.on{background:var(--success)}
+.bs-group.fresh{border-color:var(--success);box-shadow:0 0 0 3px var(--success-bg)}
+
+/* ── Sendungsverfolgung ── */
+.bs-bar{height:6px;border-radius:4px;background:var(--line2);overflow:hidden}
+.bs-bar span{display:block;height:100%;background:var(--grad-brand);border-radius:4px;transition:width .4s}
+.trk-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--line2);border-radius:var(--r);background:var(--paper2);margin-bottom:18px}
+.trk-cur{font-size:18px;font-weight:700}
+.trk-list{position:relative;padding-left:6px}
+.trk-step{display:flex;gap:14px;position:relative;padding-bottom:20px}
+.trk-step:last-child{padding-bottom:0}
+.trk-step::before{content:"";position:absolute;left:15px;top:32px;bottom:-2px;width:2px;background:var(--line2)}
+.trk-step:last-child::before{display:none}
+.trk-step.done::before{background:var(--success)}
+.trk-dot{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--paper3);border:2px solid var(--line2);filter:grayscale(1);opacity:.6}
+.trk-step.done .trk-dot{background:var(--success-bg);border-color:var(--success);filter:none;opacity:1}
+.trk-step.cur .trk-dot{box-shadow:0 0 0 5px var(--success-bg)}
+.trk-t{font-weight:600;font-size:13px}
+.trk-step:not(.done) .trk-t{color:var(--ink-faint);font-weight:500}
+.trk-d{font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.trk-n{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.trk-form{border:1px solid var(--line2);border-radius:var(--r);padding:14px;margin:14px 0;background:var(--paper2)}
+.trk-form .mr2{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -1822,23 +1873,28 @@ alter table profiles add column if not exists adresse text;</pre>
     <!-- BESTELLER -->
     <div class="page" id="page-besteller">
       <div class="ph">
-        <div><div class="ph-eyebrow">Besteller</div><div class="pt">Meine Bestellungen</div><div class="ps" id="bs-sub">Gib Bestellungen auf — sie gehen an die Lieferanten, die du auswählst.</div></div>
+        <div><div class="ph-eyebrow">Shop</div><div class="pt">Bestellen</div><div class="ps" id="bs-sub"></div></div>
         <div class="pa">
-          <button class="btn btn-ghost" onclick="reloadBesteller()">↻ Aktualisieren</button>
-          <button class="btn btn-primary" onclick="openBsModal()">＋ Neue Bestellung</button>
+          <button class="btn btn-ghost" onclick="reloadBesteller()" title="Aktualisieren">↻</button>
+          <button class="btn btn-primary" onclick="openBsModal()">🛒 Warenkorb<span class="bs-badge zero" id="bs-cart-count">0</span></button>
         </div>
       </div>
-      <div class="card" style="margin-bottom:16px;padding:16px 18px;border-color:var(--sage)">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:22px">📨</span>
-          <div><div style="font-weight:700;font-size:13px" id="bs-limit-text"></div><div class="ps" style="margin:2px 0 0">Jeder ausgewählte Lieferant erhält deine Bestellung und bearbeitet sie getrennt.</div></div>
-        </div>
+      <div class="tab-group" style="margin-bottom:18px">
+        <button type="button" class="tab-btn active" id="bs-tab-shop" onclick="setBsTab('shop')">Sortiment</button>
+        <button type="button" class="tab-btn" id="bs-tab-orders" onclick="setBsTab('orders')">Meine Bestellungen<span class="bs-badge zero" id="bs-orders-count">0</span></button>
       </div>
-      <div id="bs-list"></div>
-      <div class="ec" id="bs-empty" style="display:none">
-        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div>
-        <div class="ec-t">Noch keine Bestellungen</div>
-        <div class="ec-s">Lege oben deine erste Bestellung an.</div>
+      <div id="bs-view-shop">
+        <div class="shop-bar"><input type="search" id="bs-search" placeholder="🔍 Produkt suchen…" oninput="renderBsShop()"/></div>
+        <div class="shop-grid" id="bs-grid"></div>
+        <div class="ec" id="bs-noresult" style="display:none"><div class="ec-t">Keine Produkte gefunden</div></div>
+      </div>
+      <div id="bs-view-orders" style="display:none">
+        <div id="bs-list"></div>
+        <div class="ec" id="bs-empty" style="display:none">
+          <div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div>
+          <div class="ec-t">Noch keine Bestellungen</div>
+          <div class="ec-s">Stelle dir im Sortiment deinen Warenkorb zusammen.</div>
+        </div>
       </div>
     </div>
 
@@ -2012,29 +2068,35 @@ alter table profiles add column if not exists adresse text;</pre>
 <!-- MODAL: Besteller-Bestellung -->
 <div class="modal-bg" id="modal-bsbestellung">
   <div class="modal wide">
-    <div class="modal-head"><h3><svg class="h-ic"><use href="#ic-truck"/></svg>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bsbestellung')" aria-label="Schließen">✕</button></div>
+    <div class="modal-head"><h3><span style="margin-right:8px">🛒</span>Warenkorb &amp; Bestellung</h3><button class="modal-close" onclick="closeModal('bsbestellung')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <label class="fl" style="margin-bottom:8px">Produkte</label>
+      <label class="fl" style="margin-bottom:8px">1 · Deine Artikel</label>
       <div id="bs-order-items"></div>
-      <button class="add-item-btn" onclick="addBsItem()">＋ Produkt hinzufügen</button>
-
-      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label class="fl" style="margin:0">An welche Lieferanten?</label>
+          <label class="fl" style="margin:0">2 · An welche Lieferanten?</label>
           <span class="bs-counter" id="bs-counter"></span>
         </div>
         <div id="bs-suppliers"></div>
       </div>
-
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
-        <label class="fl" style="margin-bottom:6px">Bestellhinweis (optional)</label>
+        <label class="fl" style="margin-bottom:6px">3 · Bestellhinweis (optional)</label>
         <textarea id="bs-notiz" rows="2" placeholder="z.B. Lieferadresse, Wunschtermin, Bemerkung…" style="width:100%;resize:vertical"></textarea>
       </div>
+      <div class="order-total-row" style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px"><span class="otl">Zusammenfassung</span><span class="otv mono" id="bs-summary" style="font-size:13px"></span></div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('bsbestellung')">Abbrechen</button>
-      <button class="btn btn-primary" id="bs-submit-btn" onclick="submitBsBestellung()">📨 Bestellung absenden</button>
+      <button class="btn btn-ghost" onclick="closeModal('bsbestellung')">Weiter einkaufen</button>
+      <button class="btn btn-primary" id="bs-submit-btn" onclick="submitBsBestellung()">📨 Verbindlich bestellen</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bstrack">
+  <div class="modal">
+    <div class="modal-head"><h3><span style="margin-right:8px">📍</span>Bestellstatus</h3><button class="modal-close" onclick="closeModal('bstrack')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body" id="bstrack-body"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="reloadBsTrack()">↻ Aktualisieren</button><button class="btn btn-primary" onclick="closeModal('bstrack')">Schließen</button></div>
   </div>
 </div>
 
@@ -2087,6 +2149,7 @@ alter table profiles add column if not exists adresse text;</pre>
         </div>
       </div>
       <div class="od-timeline" id="od-timeline" style="display:none"></div>
+      <div id="od-sendung"></div>
       <div class="about-row" id="od-unterschrift-row" style="display:none;align-items:center">
         <span>Unterschrift</span>
         <span style="display:flex;align-items:center;gap:8px">
@@ -3057,6 +3120,10 @@ async function loadAllData(){
       S.lieferantEinkauf[p.produkt_id]=Number(p.einkaufspreis||0);
     }
   });
+  const logRes = await sb.from('bestell_status_log').select('*').order('created_at');
+  statusLogMissing = !!logRes.error;
+  S.statusLog = {};
+  (logRes.data||[]).forEach(r=>{ (S.statusLog[r.bestellung_id]=S.statusLog[r.bestellung_id]||[]).push(r); });
   M.users = usersRes.data||[];
   if(svcStatusRes.data){
     M.service.lastDate = svcStatusRes.data.last_date;
@@ -3225,118 +3292,144 @@ async function doRegister(){
 // ══════════════════════════════════════════════
 // BESTELLER: Bestellungen an mehrere Lieferanten
 // ══════════════════════════════════════════════
-let bsItems=[];
+let bsCart=[];
 let bsSelected=new Set();
+let bsFresh=null;
 function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
 function bsSuppliers(){ return M.users.filter(u=>u.role==='special').sort((a,b)=>a.username.localeCompare(b.username,'de')); }
-async function reloadBesteller(){
-  await loadAllData();
-  renderBesteller();
-  showToast('Aktualisiert. ✓');
-}
-function bsStatus(b){
-  if(b.paid) return '<span class="badge b-bezahlt">Bezahlt</span>';
-  if(b.delivered) return '<span class="badge b-bezahlt">Bestätigt / angekommen</span>';
-  return '<span class="badge b-offen">Gesendet</span>';
+function bsCartQty(){ return bsCart.reduce((n,l)=>n+l.stueck,0); }
+async function reloadBesteller(){ await loadAllData(); renderBesteller(); showToast('Aktualisiert. ✓'); }
+function setBsTab(tab){
+  document.getElementById('bs-view-shop').style.display = tab==='shop' ? '' : 'none';
+  document.getElementById('bs-view-orders').style.display = tab==='orders' ? '' : 'none';
+  document.getElementById('bs-tab-shop').classList.toggle('active', tab==='shop');
+  document.getElementById('bs-tab-orders').classList.toggle('active', tab==='orders');
 }
 function renderBesteller(){
-  const lt=document.getElementById('bs-limit-text');
-  if(lt) lt.textContent = `Jede Bestellung kannst du an bis zu ${bsMax()} Lieferanten senden.`;
-  const list=document.getElementById('bs-list'), em=document.getElementById('bs-empty');
-  if(!list) return;
+  const sub=document.getElementById('bs-sub');
+  if(sub) sub.textContent=`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`;
+  renderBsShop(); renderBsOrders(); updateBsCartBadge();
+}
+function updateBsCartBadge(){
+  const c=document.getElementById('bs-cart-count'); if(!c) return;
+  const n=bsCartQty(); c.textContent=n; c.classList.toggle('zero', n===0);
+}
+function renderBsShop(){
+  const grid=document.getElementById('bs-grid'); if(!grid) return;
+  const q=(document.getElementById('bs-search')?.value||'').trim().toLowerCase();
+  const list=PRODUCTS.filter(p=>!q || p.name.toLowerCase().includes(q));
+  document.getElementById('bs-noresult').style.display = list.length ? 'none' : 'block';
+  // Eingaben der Kacheln beim Neuzeichnen erhalten
+  const keep={}; PRODUCTS.forEach(p=>{ keep[p.id]={q:document.getElementById('bsq-'+p.id)?.value, w:document.getElementById('bsw-'+p.id)?.value}; });
+  grid.innerHTML=list.map(p=>{
+    const inCart=bsCart.filter(l=>l.prod===p.id).reduce((n,l)=>n+l.stueck,0);
+    const k=keep[p.id]||{};
+    return `<div class="shop-card">
+      <div class="shop-tile">${p.icon}${inCart?`<span class="shop-incart">🛒 ${inCart}</span>`:''}</div>
+      <div class="shop-body">
+        <div class="shop-name">${escapeHtml(p.name)}</div>
+        ${p.variantLabel?`<input id="bsw-${p.id}" type="text" maxlength="60" value="${escapeAttr(k.w||'')}" placeholder="${escapeAttr(p.variantLabel)} (z.B. ${escapeAttr(p.variantExample)})" style="font-size:12px"/>`:'<div class="shop-sub">Standardausführung</div>'}
+        <div class="qty"><button type="button" onclick="bsStep('${p.id}',-1)" aria-label="Weniger">−</button><input id="bsq-${p.id}" type="number" min="1" max="1000" value="${k.q||1}"/><button type="button" onclick="bsStep('${p.id}',1)" aria-label="Mehr">＋</button></div>
+        <button class="btn btn-primary btn-sm" onclick="bsAddToCart('${p.id}')">In den Warenkorb</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function bsStep(id,d){
+  const el=document.getElementById('bsq-'+id); if(!el) return;
+  el.value=Math.max(1, Math.min(1000, (parseInt(el.value)||1)+d));
+}
+function bsAddToCart(id){
+  const qty=Math.max(1, Math.min(1000, parseInt(document.getElementById('bsq-'+id)?.value)||1));
+  const w=(document.getElementById('bsw-'+id)?.value||'').trim();
+  const ex=bsCart.find(l=>l.prod===id && l.wunsch===w);
+  if(ex) ex.stueck=Math.min(1000, ex.stueck+qty); else bsCart.push({uid:Date.now()+Math.random(), prod:id, stueck:qty, wunsch:w});
+  const q=document.getElementById('bsq-'+id); if(q) q.value=1;
+  const wi=document.getElementById('bsw-'+id); if(wi) wi.value='';
+  renderBsShop(); updateBsCartBadge();
+  showToast(`${PROD_MAP[id].name} im Warenkorb. 🛒`);
+}
+function renderBsOrders(){
+  const list=document.getElementById('bs-list'), em=document.getElementById('bs-empty'); if(!list) return;
   const mine=S.bestellungen.filter(b=>b.userId===currentUserId && b.fuerLieferant);
-  // Zeilen einer Sammelbestellung (ein Absenden = eine Zeile je Lieferant) wieder zusammenfassen.
   const groups=new Map();
-  mine.forEach(b=>{
-    const key=b.sammelId || ('single-'+b.id);
-    if(!groups.has(key)) groups.set(key,[]);
-    groups.get(key).push(b);
-  });
-  const arr=[...groups.values()].sort((a,b)=>Math.max(...b.map(x=>x.id))-Math.max(...a.map(x=>x.id)));
+  mine.forEach(b=>{ const key=b.sammelId||('single-'+b.id); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(b); });
+  const arr=[...groups.entries()].sort((a,b)=>Math.max(...b[1].map(x=>x.id))-Math.max(...a[1].map(x=>x.id)));
+  const oc=document.getElementById('bs-orders-count'); if(oc){ oc.textContent=arr.length; oc.classList.toggle('zero', !arr.length); }
   em.style.display = arr.length ? 'none' : 'block';
-  list.innerHTML = arr.map(g=>{
-    const first=g[0];
-    const prods=(first.items||[]).map(it=>`${PROD_MAP[it.prod]?.icon||''} ${it.stueck}× ${escapeHtml(prodLabel(it))}`).join(' &nbsp;·&nbsp; ');
-    const rcpts=g.slice().sort((a,b)=>usernameOf(a.lieferantId).localeCompare(usernameOf(b.lieferantId),'de')).map(b=>
-      `<div class="bs-rcpt"><span>◆ <b>${escapeHtml(usernameOf(b.lieferantId))}</b></span>${bsStatus(b)}</div>`).join('');
-    return `<div class="bs-group">
-      <div class="bs-group-head"><div class="bs-group-items">${prods}</div><div class="bs-group-date">${fmtDate(first.date)} · ${g.length} Lieferant${g.length===1?'':'en'}</div></div>
+  list.innerHTML=arr.map(([key,g])=>{
+    const first=g[0], nr=Math.max(...g.map(x=>x.id));
+    const prods=(first.items||[]).map(it=>`<div>${PROD_MAP[it.prod]?.icon||''} ${it.stueck}× ${escapeHtml(prodLabel(it))}</div>`).join('');
+    const rc=g.slice().sort((a,b)=>usernameOf(a.lieferantId).localeCompare(usernameOf(b.lieferantId),'de')).map(b=>{
+      const ss=shipSteps(b), done=ss.filter(x=>x.done), cur=done[done.length-1], pct=Math.round(done.length/ss.length*100);
+      return `<div class="bs-rcpt" style="flex-wrap:wrap"><span>◆ <b>${escapeHtml(usernameOf(b.lieferantId))}</b></span>
+        <div style="flex:1;min-width:140px;max-width:260px"><div class="bs-bar"><span style="width:${pct}%"></span></div><div style="font-size:11px;color:var(--ink-soft);margin-top:4px">${cur.ic} ${cur.l}</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="openBsTrack(${b.id})">📍 Verfolgen</button></div>`;
+    }).join('');
+    return `<div class="bs-group${bsFresh===key?' fresh':''}">
+      <div class="bs-group-head"><div style="font-weight:700">Bestellung #${nr}</div><div class="bs-group-date">${fmtDate(first.date)} · ${g.length} Lieferant${g.length===1?'':'en'}</div></div>
+      <div class="bs-group-items" style="font-weight:500">${prods}</div>
       ${first.notiz?`<div class="bs-group-note">📝 ${escapeHtml(first.notiz)}</div>`:''}
-      ${rcpts}
+      ${rc}
     </div>`;
   }).join('');
 }
-function addBsItem(){
-  bsItems.push({uid:Date.now()+Math.random(), prod:PRODUCTS[0].id, stueck:1, wunsch:''});
-  renderBsItems();
+function bsLineStep(uid,d){
+  const l=bsCart.find(x=>x.uid===uid); if(!l) return;
+  l.stueck=Math.max(1, Math.min(1000, l.stueck+d)); renderBsCart();
 }
-function removeBsItem(uid){
-  bsItems=bsItems.filter(x=>x.uid!==uid);
-  if(!bsItems.length) addBsItem(); else renderBsItems();
-}
-function updateBsItem(uid, field, val){
-  const it=bsItems.find(x=>x.uid===uid); if(!it) return;
-  if(field==='stueck') it.stueck=Math.max(1, Math.min(1000, parseInt(val)||1));
-  else it[field]=val;
-  if(field==='prod') renderBsItems();
-}
-function renderBsItems(){
+function bsRemoveLine(uid){ bsCart=bsCart.filter(x=>x.uid!==uid); renderBsCart(); }
+function renderBsCart(){
   const wrap=document.getElementById('bs-order-items'); if(!wrap) return;
-  wrap.innerHTML=bsItems.map(it=>{
-    const p=PROD_MAP[it.prod];
-    return `<div class="oi">
-      <select onchange="updateBsItem(${it.uid},'prod',this.value)">
-        ${PRODUCTS.map(x=>`<option value="${x.id}"${x.id===it.prod?' selected':''}>${x.icon} ${x.name}</option>`).join('')}
-      </select>
-      <input type="number" min="1" max="1000" value="${it.stueck}" onchange="updateBsItem(${it.uid},'stueck',this.value)" style="max-width:90px"/>
-      <button class="ic-btn oi-rm" onclick="removeBsItem(${it.uid})" title="Position entfernen" aria-label="Position entfernen">✕</button>
-      ${p && p.variantLabel ? `<input type="text" maxlength="60" value="${escapeAttr(it.wunsch)}" placeholder="${escapeAttr(p.variantLabel)} (optional, z.B. ${escapeAttr(p.variantExample)})" oninput="updateBsItem(${it.uid},'wunsch',this.value)" style="flex:1 1 100%"/>` : ''}
-    </div>`;
-  }).join('');
+  wrap.innerHTML = bsCart.length ? bsCart.map(l=>{
+    const p=PROD_MAP[l.prod];
+    return `<div class="bs-line"><div class="bs-line-ic">${p.icon}</div>
+      <div class="bs-line-main"><b>${escapeHtml(p.name)}</b>${l.wunsch?`<div>${escapeHtml(p.variantLabel||'Variante')}: ${escapeHtml(l.wunsch)}</div>`:''}</div>
+      <div class="qty"><button type="button" onclick="bsLineStep(${l.uid},-1)">−</button><input type="number" value="${l.stueck}" readonly/><button type="button" onclick="bsLineStep(${l.uid},1)">＋</button></div>
+      <button class="ic-btn oi-rm" onclick="bsRemoveLine(${l.uid})" title="Entfernen" aria-label="Entfernen">✕</button></div>`;
+  }).join('') : '<div class="ec" style="padding:18px 0"><div class="ec-t">Dein Warenkorb ist leer</div><div class="ec-s">Füge im Sortiment Artikel hinzu.</div></div>';
+  renderBsSuppliers(); updateBsCartBadge(); renderBsShop();
 }
 function renderBsSuppliers(){
   const wrap=document.getElementById('bs-suppliers'); if(!wrap) return;
-  const max=bsMax(), sup=bsSuppliers();
-  const full=bsSelected.size>=max;
+  const max=bsMax(), sup=bsSuppliers(), full=bsSelected.size>=max;
   const c=document.getElementById('bs-counter');
   if(c){ c.textContent=`${bsSelected.size} von max. ${max} gewählt`; c.classList.toggle('full', full); }
+  const sm=document.getElementById('bs-summary');
+  if(sm) sm.textContent=`${bsCartQty()} Artikel · ${bsSelected.size} Lieferant${bsSelected.size===1?'':'en'}`;
   if(!sup.length){ wrap.innerHTML='<div class="ps">Es sind noch keine Lieferanten verfügbar.</div>'; return; }
   wrap.innerHTML=sup.map(u=>{
-    const on=bsSelected.has(u.id);
-    const dis=!on && full;
-    return `<label class="bs-pick${on?' sel':''}${dis?' dis':''}">
-      <input type="checkbox" ${on?'checked':''} ${dis?'disabled':''} onchange="toggleBsSupplier('${u.id}', this.checked)"/>
-      <span>◆ ${escapeHtml(u.username)}</span>
-    </label>`;
+    const on=bsSelected.has(u.id), dis=!on && full;
+    return `<label class="bs-pick${on?' sel':''}${dis?' dis':''}"><input type="checkbox" ${on?'checked':''} ${dis?'disabled':''} onchange="toggleBsSupplier('${u.id}', this.checked)"/><span>◆ ${escapeHtml(u.username)}</span></label>`;
   }).join('');
 }
-function toggleBsSupplier(id, on){
+function toggleBsSupplier(id,on){
   if(on){ if(bsSelected.size>=bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); renderBsSuppliers(); return; } bsSelected.add(id); }
   else bsSelected.delete(id);
   renderBsSuppliers();
 }
 function openBsModal(){
-  if(!bsSuppliers().length){ showToast('Es sind noch keine Lieferanten verfügbar.','⚠'); return; }
-  bsItems=[]; bsSelected=new Set(); addBsItem();
-  document.getElementById('bs-notiz').value='';
-  renderBsSuppliers();
+  renderBsCart();
   openModal('bsbestellung');
 }
 async function submitBsBestellung(){
-  if(!bsItems.length){ showToast('Mindestens ein Produkt hinzufügen.','⚠'); return; }
+  if(!bsCart.length){ showToast('Dein Warenkorb ist leer.','⚠'); return; }
   if(!bsSelected.size){ showToast('Bitte mindestens einen Lieferanten auswählen.','⚠'); return; }
   if(bsSelected.size>bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); return; }
   const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
-  const items=bsItems.map(it=>({prod:it.prod, stueck:it.stueck||1, wunsch:(it.wunsch||'').trim()}));
+  const items=bsCart.map(l=>({prod:l.prod, stueck:l.stueck, wunsch:l.wunsch}));
   const notiz=document.getElementById('bs-notiz').value.trim()||null;
-  const { data, error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
+  const { error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
   btn.disabled=false; btn.style.opacity=1;
   if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
   const n=bsSelected.size;
+  bsCart=[]; bsSelected=new Set(); document.getElementById('bs-notiz').value='';
   closeModal('bsbestellung');
   await loadAllData();
-  renderBesteller();
-  showToast(`Bestellung an ${n} Lieferant${n===1?'':'en'} gesendet. ✓`);
+  const mine=S.bestellungen.filter(b=>b.userId===currentUserId && b.fuerLieferant).sort((a,b)=>b.id-a.id);
+  bsFresh = mine[0] ? (mine[0].sammelId||('single-'+mine[0].id)) : null;
+  renderBesteller(); setBsTab('orders');
+  showToast(`Danke! Bestellung an ${n} Lieferant${n===1?'':'en'} gesendet. ✓`);
 }
 async function setMaxLieferanten(userId, val){
   const n=Math.max(1, Math.min(50, parseInt(val)||BESTELLER_DEFAULT_MAX));
@@ -3347,6 +3440,95 @@ async function setMaxLieferanten(userId, val){
   renderUserList();
 }
 
+
+// ══════════════════════════════════════════════
+// BESTELLSTATUS (persönliche Übergabe, kein Versand)
+// Statusereignisse (bestätigt, bereit, unterwegs, übergeben) trägt der Lieferant ein und
+// werden in bestell_status_log gespeichert (siehe sendungsverfolgung_setup.sql). "Bestellt"
+// und "Bezahlt" ergeben sich aus der Bestellung selbst.
+// ══════════════════════════════════════════════
+let statusLogMissing=false;
+const SHIP_DEFS=[['bestellt','Bestellt','📝'],['bestaetigt','Bestätigt','✅'],['bereit','Bereit zur Übergabe','📦'],['unterwegs','Lieferant ist unterwegs','🚗'],['uebergeben','Persönlich übergeben','🤝'],['bezahlt','Bezahlt','💶']];
+function shipSteps(b){
+  const logs=(S.statusLog&&S.statusLog[b.id])||[];
+  const last=k=>{ for(let i=logs.length-1;i>=0;i--) if(logs[i].status===k) return logs[i]; return null; };
+  const steps=SHIP_DEFS.map(([k,l,ic])=>{
+    let log=last(k), at=null, done=false;
+    if(k==='bestellt'){ done=true; at=b.date; }
+    else if(k==='uebergeben'){ done=!!log||b.delivered; at=log?log.created_at:b.deliveredAt; }
+    else if(k==='bezahlt'){ done=!!b.paid; at=b.paidAt; }
+    else { done=!!log; at=log?log.created_at:null; }
+    return {k,l,ic,log,at,done};
+  });
+  // Spätere Schritte setzen frühere als erledigt voraus (z.B. direkt "Übergeben" gemeldet).
+  for(let i=steps.length-1;i>0;i--) if(steps[i].done) for(let j=0;j<i;j++) steps[j].done=true;
+  return steps;
+}
+function fmtTs(v){ if(!v) return ''; return String(v).length>10 ? fmtDateTime(v) : fmtDate(v); }
+function trackHtml(b, who){
+  const ss=shipSteps(b), done=ss.filter(x=>x.done), cur=done[done.length-1];
+  const logs=(S.statusLog&&S.statusLog[b.id])||[];
+  const plan=!b.delivered && [...logs].reverse().find(l=>l.termin && (l.status==='bereit'||l.status==='unterwegs'));
+  return `<div class="trk-head"><div><div class="trk-d">${who}</div><div class="trk-cur">${cur.ic} ${cur.l}</div></div>
+      <div style="text-align:right"><div class="trk-d">Bestellung #${b.id}</div>${plan?`<div class="trk-n">🗓 Übergabe: <b>${escapeHtml(plan.termin)}</b></div>`:''}</div></div>
+    <div class="trk-list">${ss.map(x=>`<div class="trk-step${x.done?' done':''}${x===cur?' cur':''}">
+      <div class="trk-dot">${x.ic}</div>
+      <div><div class="trk-t">${x.l}</div>
+        ${x.done&&x.at?`<div class="trk-d">${fmtTs(x.at)}</div>`:(x.done?'':'<div class="trk-d">ausstehend</div>')}
+        ${x.log&&x.log.termin?`<div class="trk-n">🗓 ${escapeHtml(x.log.termin)}</div>`:''}
+        ${x.log&&x.log.notiz?`<div class="trk-n">💬 ${escapeHtml(x.log.notiz)}</div>`:''}
+      </div></div>`).join('')}</div>`;
+}
+let bsTrackId=null;
+function openBsTrack(id){
+  bsTrackId=id; renderBsTrack(); openModal('bstrack');
+}
+function renderBsTrack(){
+  const b=S.bestellungen.find(x=>x.id===bsTrackId); const el=document.getElementById('bstrack-body'); if(!el||!b) return;
+  el.innerHTML=trackHtml(b, '◆ '+escapeHtml(usernameOf(b.lieferantId)));
+}
+async function reloadBsTrack(){ await loadAllData(); renderBsTrack(); renderBesteller(); showToast('Aktualisiert. ✓'); }
+// Automatische Aktualisierung, solange ein Besteller angemeldet und die Seite sichtbar ist.
+setInterval(async()=>{
+  if(document.hidden || currentRole()!=='besteller' || !currentUserId) return;
+  await loadAllData(); renderBesteller();
+  if(document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack();
+}, 45000);
+
+// Lieferanten-Seite: Status setzen (im Bestelldetail)
+const NEED_TERMIN=['bereit','unterwegs'];
+function onOdstChange(){
+  const v=document.getElementById('odst-status').value;
+  document.getElementById('odst-termin').style.display = NEED_TERMIN.includes(v) ? '' : 'none';
+}
+function renderOdSendung(b){
+  const el=document.getElementById('od-sendung'); if(!el) return;
+  if(!b.fuerLieferant || b.userId===currentUserId){ el.innerHTML=''; return; }
+  let html=trackHtml(b,'◆ '+escapeHtml(usernameOf(b.userId)));
+  if(statusLogMissing){
+    html+='<div class="ps" style="margin-top:12px">Zum Setzen des Status fehlt in Supabase noch die Tabelle — bitte sendungsverfolgung_setup.sql ausführen.</div>';
+  } else if(!b.paid){
+    const doneKeys=new Set(shipSteps(b).filter(x=>x.done).map(x=>x.k));
+    const opts=[['bestaetigt','✅ Bestätigt'],['bereit','📦 Bereit zur Übergabe'],['unterwegs','🚗 Bin unterwegs zum Kunden'],['uebergeben','🤝 Persönlich übergeben']].filter(o=>!doneKeys.has(o[0]));
+    if(opts.length) html+=`<div class="trk-form"><div class="sr-label" style="margin-bottom:9px">Status aktualisieren</div>
+      <div class="mr2"><select id="odst-status" onchange="onOdstChange()">${opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select><input id="odst-notiz" maxlength="200" placeholder="Hinweis für den Besteller (optional)"/></div>
+      <div class="mr2" style="display:${NEED_TERMIN.includes(opts[0][0])?'':'none'}" id="odst-termin"><input id="odst-termin-in" maxlength="100" placeholder="Übergabetermin / Treffpunkt (z.B. Sa 15:00, Bahnhof)"/></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="saveSendungStatus(${b.id})">Status speichern</button></div></div>`;
+  }
+  el.innerHTML=`<div style="margin:6px 0 18px">${html}</div>`;
+}
+async function saveSendungStatus(id){
+  const b=S.bestellungen.find(x=>x.id===id); if(!b) return;
+  const status=document.getElementById('odst-status').value;
+  const notiz=document.getElementById('odst-notiz').value.trim()||null;
+  const termin=NEED_TERMIN.includes(status) ? (document.getElementById('odst-termin-in').value.trim()||null) : null;
+  const { error } = await sb.rpc('set_bestell_status', { p_bestellung_id:id, p_status:status, p_notiz:notiz, p_termin:termin });
+  if(error){ showToast(error.message||'Status konnte nicht gespeichert werden.','⚠'); return; }
+  (S.statusLog[id]=S.statusLog[id]||[]).push({bestellung_id:id,status,notiz,termin,created_at:new Date().toISOString()});
+  if(status==='uebergeben' && !b.delivered) await setDelivered(id,true);
+  renderOdSendung(b); renderBestellungen();
+  showToast('Status gespeichert. ✓');
+}
 // ══════════════════════════════════════════════
 // ROLLEN-UI
 // ══════════════════════════════════════════════
@@ -6408,6 +6590,7 @@ function openOrderDetail(id){
     : (k?`${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}`:'—');
   document.getElementById('od-datum').textContent = fmtDate(b.date);
   document.getElementById('od-timeline').outerHTML = orderTimelineHtml(b);
+  renderOdSendung(b);
   const lieferstatusRow=document.getElementById('od-lieferstatus-row');
   const angekommenRow=document.getElementById('od-angekommen-row');
   if(b.fuerLieferant){
