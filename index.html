@@ -1761,8 +1761,13 @@ create policy "eigenverbrauch eigener user"
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></div><div><h3>Mein Konto</h3><p>Benutzername & Passwort</p></div></div>
           <div class="scb">
             <div style="margin-bottom:12px"><label class="fl">Benutzername</label><input id="set-user" disabled style="opacity:.6;cursor:not-allowed"/></div>
-            <div style="margin-bottom:12px"><label class="fl">Passwort</label><input type="password" id="set-pw1" value="••••••••" disabled style="opacity:.6;cursor:not-allowed"/></div>
-            <div class="ps" style="margin-top:-4px;margin-bottom:14px">Benutzername und Passwort können hier nicht geändert werden. Bitte wende dich dazu an einen Administrator.</div>
+            <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+              <label class="fl" style="margin-bottom:8px">🔒 Passwort ändern</label>
+              <div style="margin-bottom:8px"><input type="password" id="pwc-old" placeholder="Aktuelles Passwort" autocomplete="current-password" oninput="clearFieldError('pwc-old')"/><div class="field-err" id="pwc-old-err"></div></div>
+              <div style="margin-bottom:8px"><input type="password" id="pwc-new" placeholder="Neues Passwort (mind. 6 Zeichen)" autocomplete="new-password" oninput="clearFieldError('pwc-new')"/><div class="field-err" id="pwc-new-err"></div></div>
+              <div style="margin-bottom:10px"><input type="password" id="pwc-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password" oninput="clearFieldError('pwc-new2')" onkeydown="if(event.key==='Enter')changeOwnPassword()"/><div class="field-err" id="pwc-new2-err"></div></div>
+              <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="changeOwnPassword()">Passwort ändern</button></div>
+            </div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
               <label class="fl" style="margin-bottom:5px">📞 Telefon &amp; Adresse (optional)</label>
               <div class="ps" style="margin:-2px 0 8px">Wird deinen Lieferantenkunden auf ihrer "Beim Lieferanten"-Seite als Kontakt angezeigt (Anrufen/Route).</div>
@@ -2097,6 +2102,39 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-head"><h3><span style="margin-right:8px">📍</span>Bestellstatus</h3><button class="modal-close" onclick="closeModal('bstrack')" aria-label="Schließen">✕</button></div>
     <div class="modal-body" id="bstrack-body"></div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="reloadBsTrack()">↻ Aktualisieren</button><button class="btn btn-primary" onclick="closeModal('bstrack')">Schließen</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-pwforce">
+  <div class="modal">
+    <div class="modal-head"><h3><span style="margin-right:8px">🔒</span>Neues Passwort festlegen</h3></div>
+    <div class="modal-body">
+      <div class="ps" style="margin-bottom:14px">Dein Konto wurde mit einem vorläufigen Passwort eingerichtet. Bitte lege jetzt ein eigenes Passwort fest, um fortzufahren.</div>
+      <div class="fw"><label class="fl">Neues Passwort</label><input type="password" id="fpw-new" placeholder="mind. 6 Zeichen" autocomplete="new-password" oninput="clearFieldError('fpw-new')"/><div class="field-err" id="fpw-new-err"></div></div>
+      <div class="fw"><label class="fl">Passwort wiederholen</label><input type="password" id="fpw-new2" placeholder="••••••••" autocomplete="new-password" oninput="clearFieldError('fpw-new2')" onkeydown="if(event.key==='Enter')submitForcedPassword()"/><div class="field-err" id="fpw-new2-err"></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="doLogout()">Abmelden</button><button class="btn btn-primary" id="fpw-btn" onclick="submitForcedPassword()">Passwort speichern</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-edituser">
+  <div class="modal">
+    <div class="modal-head"><h3><span style="margin-right:8px">✏️</span>Benutzer bearbeiten</h3><button class="modal-close" onclick="closeModal('edituser')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px"><label class="fl">Benutzername</label><input id="eu-name" maxlength="30" autocapitalize="off"/><div class="ps" style="margin-top:4px">Nach einer Änderung meldet sich der Benutzer mit dem neuen Namen an.</div></div>
+      <div class="mr2" style="margin-bottom:12px">
+        <div><label class="fl">Rolle</label><select id="eu-role" onchange="onEuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option><option value="besteller">Besteller</option></select></div>
+        <div id="eu-linked-wrap"><label class="fl">Verknüpft mit</label><select id="eu-linked"><option value="">Keine Verknüpfung</option></select></div>
+        <div id="eu-max-wrap" style="display:none"><label class="fl">Max. Lieferanten</label><input type="number" id="eu-max" min="1" max="50"/></div>
+      </div>
+      <div class="mr2" style="margin-bottom:12px"><div><label class="fl">Telefon</label><input id="eu-telefon" maxlength="40"/></div><div><label class="fl">Adresse</label><input id="eu-adresse" maxlength="120"/></div></div>
+      <div style="border-top:1px solid var(--line);padding-top:14px">
+        <label class="fl" style="margin-bottom:6px">🔑 Neues Passwort setzen (optional)</label>
+        <input type="password" id="eu-pw" placeholder="Leer lassen = Passwort bleibt" autocomplete="new-password"/>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:8px;cursor:pointer"><input type="checkbox" id="eu-force" checked style="width:auto;margin:0"/> Benutzer muss es beim nächsten Login ändern</label>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('edituser')">Abbrechen</button><button class="btn btn-primary" onclick="saveEditUser()">Speichern</button></div>
   </div>
 </div>
 
@@ -3050,18 +3088,18 @@ async function onLoggedIn(authUser, displayName){
   if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
-  // Benutzer und Spezial-Konten bekommen beim ersten Login automatisch die
-  // Einführungstour — ganz ohne Zwang zur Passwortänderung. Das Passwort
-  // kann jederzeit freiwillig unter Einstellungen → Mein Konto geändert werden.
-  if((prof.role==='user' || prof.role==='special') && prof.first_login){
-    M.profile.first_login=false;
-    await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
-    startTour();
+  // Beim ersten Login (first_login) muss ein eigenes Passwort festgelegt werden. Erst danach
+  // geht es weiter — bei Benutzer/Spezial-Konten mit der Einführungstour.
+  if(prof.first_login){
+    forcePasswordChange().then(()=>{
+      if(prof.role==='user' || prof.role==='special') startTour(); else checkWhatsNew();
+    });
   } else {
     checkWhatsNew();
   }
 }
 async function doLogout(){
+  closeModal('pwforce');
   await sb.auth.signOut();
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -3529,6 +3567,108 @@ async function saveSendungStatus(id){
   renderOdSendung(b); renderBestellungen();
   showToast('Status gespeichert. ✓');
 }
+
+// ══════════════════════════════════════════════
+// PASSWORT ÄNDERN (selbst) + ERSTER LOGIN + ADMIN: BENUTZER BEARBEITEN
+// ══════════════════════════════════════════════
+async function applyNewPassword(pw){
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if(error) return error;
+  await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
+  if(M.profile) M.profile.first_login=false;
+  const me=M.users.find(u=>u.id===currentUserId); if(me) me.first_login=false;
+  return null;
+}
+function pwErrText(e){
+  const m=e.message||'';
+  if(/different from the old/i.test(m)) return 'Das neue Passwort muss sich vom alten unterscheiden.';
+  if(/at least|characters|weak/i.test(m)) return 'Passwort zu kurz oder zu schwach (mind. 6 Zeichen).';
+  return m||'Passwort konnte nicht geändert werden.';
+}
+async function changeOwnPassword(){
+  const old=document.getElementById('pwc-old').value, n1=document.getElementById('pwc-new').value, n2=document.getElementById('pwc-new2').value;
+  ['pwc-old','pwc-new','pwc-new2'].forEach(clearFieldError);
+  let bad=false;
+  if(!old){ setFieldError('pwc-old','Bitte aktuelles Passwort eingeben.'); bad=true; }
+  if(n1.length<6){ setFieldError('pwc-new','Mindestens 6 Zeichen.'); bad=true; }
+  if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
+  if(bad) return;
+  const { error: vErr } = await sb.auth.signInWithPassword({ email: toEmail(currentUser), password: old });
+  if(vErr){ setFieldError('pwc-old','Aktuelles Passwort ist falsch.'); return; }
+  const err=await applyNewPassword(n1);
+  if(err){ setFieldError('pwc-new', pwErrText(err)); return; }
+  ['pwc-old','pwc-new','pwc-new2'].forEach(id=>document.getElementById(id).value='');
+  showToast('Passwort geändert. ✓');
+}
+let _pwForceResolve=null;
+function forcePasswordChange(){
+  document.getElementById('fpw-new').value=''; document.getElementById('fpw-new2').value='';
+  openModal('pwforce');
+  setTimeout(()=>document.getElementById('fpw-new')?.focus(),100);
+  return new Promise(res=>{ _pwForceResolve=res; });
+}
+async function submitForcedPassword(){
+  const n1=document.getElementById('fpw-new').value, n2=document.getElementById('fpw-new2').value;
+  ['fpw-new','fpw-new2'].forEach(clearFieldError);
+  const temp=document.getElementById('inp-pw')?.value||'';
+  let bad=false;
+  if(n1.length<6){ setFieldError('fpw-new','Mindestens 6 Zeichen.'); bad=true; }
+  else if(temp && n1===temp){ setFieldError('fpw-new','Bitte wähle ein anderes Passwort als das vorläufige.'); bad=true; }
+  if(n2!==n1){ setFieldError('fpw-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
+  if(bad) return;
+  const btn=document.getElementById('fpw-btn'); btn.disabled=true; btn.style.opacity=.6;
+  const err=await applyNewPassword(n1);
+  btn.disabled=false; btn.style.opacity=1;
+  if(err){ setFieldError('fpw-new', pwErrText(err)); return; }
+  document.getElementById('inp-pw').value='';
+  closeModal('pwforce');
+  showToast('Passwort gespeichert. ✓');
+  if(_pwForceResolve){ _pwForceResolve(); _pwForceResolve=null; }
+}
+let editUserId=null;
+function onEuRoleChange(){
+  const r=document.getElementById('eu-role').value;
+  document.getElementById('eu-max-wrap').style.display = r==='besteller' ? '' : 'none';
+  document.getElementById('eu-linked-wrap').style.display = r==='besteller' ? 'none' : '';
+}
+function openEditUser(id){
+  const u=M.users.find(x=>x.id===id); if(!u) return;
+  editUserId=id;
+  document.getElementById('eu-name').value=u.username||'';
+  const roleSel=document.getElementById('eu-role'); roleSel.value=u.role||'user';
+  roleSel.disabled = id===currentUserId; // eigene Rolle nicht änderbar (Aussperr-Schutz)
+  document.getElementById('eu-linked').innerHTML='<option value="">Keine Verknüpfung</option>'+M.users.filter(x=>x.role==='special' && x.id!==id).map(x=>`<option value="${x.id}">${escapeHtml(x.username)}</option>`).join('');
+  document.getElementById('eu-linked').value=u.linked_to||'';
+  document.getElementById('eu-max').value=u.max_lieferanten||BESTELLER_DEFAULT_MAX;
+  document.getElementById('eu-telefon').value=u.telefon||'';
+  document.getElementById('eu-adresse').value=u.adresse||'';
+  document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true;
+  onEuRoleChange();
+  openModal('edituser');
+}
+async function saveEditUser(){
+  const id=editUserId, u=M.users.find(x=>x.id===id); if(!u) return;
+  const name=document.getElementById('eu-name').value.trim();
+  const role=document.getElementById('eu-role').value;
+  const linked=role==='besteller' ? '' : document.getElementById('eu-linked').value;
+  const max=role==='besteller' ? Math.max(1,Math.min(50,parseInt(document.getElementById('eu-max').value)||BESTELLER_DEFAULT_MAX)) : null;
+  const telefon=document.getElementById('eu-telefon').value.trim(), adresse=document.getElementById('eu-adresse').value.trim();
+  const pw=document.getElementById('eu-pw').value, force=document.getElementById('eu-force').checked;
+  if(name.toLowerCase()!==String(u.username).toLowerCase() && !/^[A-Za-z0-9._-]{3,30}$/.test(name)){ showToast('Benutzername: 3–30 Zeichen (Buchstaben, Zahlen, . _ -).','⚠'); return; }
+  if(pw && pw.length<6){ showToast('Neues Passwort: mindestens 6 Zeichen.','⚠'); return; }
+  const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:linked||null, p_max:max });
+  if(error){ showToast(error.message||'Speichern fehlgeschlagen.','⚠'); return; }
+  if(pw){
+    const { error: pErr } = await sb.rpc('admin_set_password', { p_user_id:id, p_password:pw, p_force:force });
+    if(pErr){ showToast(pErr.message||'Passwort konnte nicht gesetzt werden.','⚠'); }
+    else u.first_login=force;
+  }
+  if(name.toLowerCase()!==String(u.username).toLowerCase()) u.username=name.toLowerCase();
+  Object.assign(u,{ role, linked_to:linked||null, telefon:telefon||null, adresse:adresse||null, max_lieferanten:max||u.max_lieferanten });
+  closeModal('edituser'); renderUserList();
+  showToast('Benutzer gespeichert. ✓');
+}
+
 // ══════════════════════════════════════════════
 // ROLLEN-UI
 // ══════════════════════════════════════════════
@@ -3607,6 +3747,7 @@ document.addEventListener('keydown', (e)=>{
   if(lightbox && lightbox.classList.contains('show')){ closeLightbox({target:lightbox}); return; }
   const openModalEl=document.querySelector('.modal-bg.show');
   if(openModalEl){
+    if(openModalEl.id==='modal-pwforce') return;
     const id=openModalEl.id.replace(/^modal-/,'');
     if(id==='confirm') _confirmResolve(false);
     else closeModal(id);
@@ -7110,6 +7251,7 @@ function renderUserList(){
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
       <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div><div class="ul-role"><span class="badge ${roleBadgeClass(u.role)}">${roleLabel(u.role)}</span></div></div>
       ${linkSelect}
+      <button class="ic-btn" onclick="openEditUser('${u.id}')" title="Benutzer bearbeiten" aria-label="Benutzer bearbeiten">✏️</button>
       ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
     </div>`;
   }).join('');
@@ -7127,13 +7269,16 @@ async function addUser(){
   const p=document.getElementById('nu-pw').value;
   const r=document.getElementById('nu-role').value;
   const linked=document.getElementById('nu-linked')?.value||'';
-  if(!n||p.length<3){showToast('Name + Passwort (≥3 Zeichen) eingeben.','⚠');return;}
+  if(!n||p.length<6){showToast('Name + vorläufiges Passwort (≥6 Zeichen) eingeben.','⚠');return;}
   const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
   if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
-  M.users.push({ id:data, username:n, role:r, first_login:(r==='user'||r==='special'), linked_to: (linked||null) });
+  // Neu angelegte Konten müssen beim ersten Login ein eigenes Passwort setzen.
+  const { error: fErr } = await sb.rpc('admin_set_password', { p_user_id:data, p_password:p, p_force:true });
+  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null) });
+  if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (benutzerverwaltung_setup.sql ausführen).','⚠');
   document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
   document.getElementById('nu-linked').value='';
-  renderUserList();showToast('Benutzer angelegt.');
+  renderUserList();if(!fErr) showToast('Benutzer angelegt — muss beim ersten Login ein neues Passwort setzen. ✓');
 }
 async function delUser(id){
   const name = M.users.find(u=>u.id===id)?.username || '';
