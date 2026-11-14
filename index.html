@@ -1139,6 +1139,24 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .t-d{transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease}
 .t-d:hover{transform:scale(1.14)}
 .t-d.on{box-shadow:0 0 0 3px var(--paper2), 0 0 0 5px var(--sage), 0 4px 12px -2px color-mix(in srgb, var(--sage) 60%, transparent)}
+
+/* ── Besteller-Konto / Registrierung ── */
+.auth-switch{background:none;border:none;color:var(--sage-deep);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:6px 8px;margin:14px auto 0;display:block;text-decoration:underline;text-underline-offset:3px}
+.auth-switch:hover{color:var(--sage)}
+.b-besteller{background:var(--kunde-bg);color:var(--kunde-deep)}
+.bs-group{background:var(--paper2);border:1px solid var(--line2);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:14px}
+.bs-group-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px}
+.bs-group-date{font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
+.bs-group-items{font-size:13px;font-weight:600}
+.bs-group-note{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.bs-rcpt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);margin-top:8px;font-size:12px}
+.bs-rcpt b{color:var(--lieferant-deep)}
+.bs-pick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:var(--r);margin-bottom:8px;cursor:pointer;font-size:13px}
+.bs-pick input{width:auto;margin:0}
+.bs-pick.sel{border-color:var(--sage);background:var(--sage-bg)}
+.bs-pick.dis{opacity:.45;cursor:not-allowed}
+.bs-counter{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink-soft)}
+.bs-counter.full{color:var(--sage-deep);font-weight:700}
 </style>
 </head>
 <body>
@@ -1239,13 +1257,22 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <div class="sub" data-i18n="app.tagline">Bestand · Bestellungen · Dosierung</div>
     </div>
     <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg><span data-i18n="login.access">ZUGANG</span></i><span></span></div>
-    <div class="login-card">
+    <div class="login-card" id="login-card-login">
       <div class="fw"><label class="fl" data-i18n="login.username">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username" oninput="clearFieldError('inp-user')"/><div class="field-err" id="inp-user-err"></div></div>
       <div class="fw"><label class="fl" data-i18n="login.password">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" oninput="clearFieldError('inp-pw')" onkeydown="if(event.key==='Enter')doLogin()"/><div class="field-err" id="inp-pw-err"></div></div>
       <button class="primary-btn" onclick="doLogin()" data-i18n="login.submit">Anmelden →</button>
       <div class="login-err" id="login-err">Falscher Benutzername oder Passwort.</div>
     </div>
-    <div class="login-hint"><span data-i18n="login.hint-prefix">Standard:</span> <b>admin / 1234</b></div>
+    <div class="login-card" id="login-card-register" style="display:none">
+      <div class="fw"><label class="fl" data-i18n="reg.username">Benutzername wählen</label><input id="reg-user" placeholder="z.B. max.muster" autocomplete="username" autocapitalize="off" oninput="clearFieldError('reg-user')"/><div class="field-err" id="reg-user-err"></div></div>
+      <div class="fw"><label class="fl" data-i18n="login.password">Passwort</label><input type="password" id="reg-pw" placeholder="mind. 6 Zeichen" autocomplete="new-password" oninput="clearFieldError('reg-pw')"/><div class="field-err" id="reg-pw-err"></div></div>
+      <div class="fw"><label class="fl" data-i18n="reg.password2">Passwort wiederholen</label><input type="password" id="reg-pw2" placeholder="••••••••" autocomplete="new-password" oninput="clearFieldError('reg-pw2')" onkeydown="if(event.key==='Enter')doRegister()"/><div class="field-err" id="reg-pw2-err"></div></div>
+      <button class="primary-btn" id="reg-btn" onclick="doRegister()" data-i18n="reg.submit">Registrieren →</button>
+      <div class="login-err" id="reg-err"></div>
+      <div class="ps" style="margin-top:12px;text-align:center" data-i18n="reg.info">Mit einem Besteller-Konto kannst du Bestellungen aufgeben, die an mehrere Lieferanten gehen.</div>
+    </div>
+    <button type="button" class="auth-switch" id="auth-switch-btn" onclick="setAuthMode(authMode==='login'?'register':'login')" data-i18n="reg.switch-to-register">Neu hier? Als Besteller registrieren</button>
+    <div class="login-hint" id="login-hint-line"><span data-i18n="login.hint-prefix">Standard:</span> <b>admin / 1234</b></div>
     <div class="tab-group lang-switch" style="margin:18px auto 0;justify-content:center">
       <button type="button" class="tab-btn active" data-lang="de" onclick="setLang('de')">Deutsch</button>
       <button type="button" class="tab-btn" data-lang="en" onclick="setLang('en')">English</button>
@@ -1285,6 +1312,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span><span data-i18n="nav.eigenverbrauch">Eigenverbrauch</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" id="nav-besteller-tick" style="display:none" onclick="nav('besteller');closeSidebar()"><span class="tk-n">10</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span>Meine Bestellungen</span></div>
       </nav>
       <div class="sb-footer">
         <div class="tb-user">
@@ -1737,7 +1765,7 @@ alter table profiles add column if not exists adresse text;</pre>
               <div class="sr-label" style="margin-bottom:9px">Neuer Benutzer</div>
               <div class="mr2" style="margin-bottom:8px"><input id="nu-name" placeholder="Benutzername"/><input type="password" id="nu-pw" placeholder="Passwort"/></div>
               <div style="margin-bottom:10px"><label class="fl" style="margin-bottom:5px">Rolle</label>
-                <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option></select>
+                <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option><option value="besteller">Besteller</option></select>
               </div>
               <div style="margin-bottom:10px" id="nu-linked-wrap"><label class="fl" style="margin-bottom:5px;color:var(--lieferant-deep)">◆ Verknüpft mit (Spezial-Konto)</label>
                 <select id="nu-linked"><option value="">Keine Verknüpfung</option></select>
@@ -1788,6 +1816,29 @@ alter table profiles add column if not exists adresse text;</pre>
           <button class="btn btn-danger btn-sm" onclick="clearOrders()">Alle Bestellungen löschen</button>
           <button class="btn btn-danger btn-sm" onclick="clearAll()">Alles zurücksetzen</button>
         </div>
+      </div>
+    </div>
+
+    <!-- BESTELLER -->
+    <div class="page" id="page-besteller">
+      <div class="ph">
+        <div><div class="ph-eyebrow">Besteller</div><div class="pt">Meine Bestellungen</div><div class="ps" id="bs-sub">Gib Bestellungen auf — sie gehen an die Lieferanten, die du auswählst.</div></div>
+        <div class="pa">
+          <button class="btn btn-ghost" onclick="reloadBesteller()">↻ Aktualisieren</button>
+          <button class="btn btn-primary" onclick="openBsModal()">＋ Neue Bestellung</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;padding:16px 18px;border-color:var(--sage)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:22px">📨</span>
+          <div><div style="font-weight:700;font-size:13px" id="bs-limit-text"></div><div class="ps" style="margin:2px 0 0">Jeder ausgewählte Lieferant erhält deine Bestellung und bearbeitet sie getrennt.</div></div>
+        </div>
+      </div>
+      <div id="bs-list"></div>
+      <div class="ec" id="bs-empty" style="display:none">
+        <div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div>
+        <div class="ec-t">Noch keine Bestellungen</div>
+        <div class="ec-s">Lege oben deine erste Bestellung an.</div>
       </div>
     </div>
 
@@ -1954,6 +2005,35 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('bestellung')" data-i18n="common.cancel">Abbrechen</button>
       <button class="btn btn-primary" onclick="addBestellung()" data-i18n="order.create-btn">Bestellung anlegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Besteller-Bestellung -->
+<div class="modal-bg" id="modal-bsbestellung">
+  <div class="modal wide">
+    <div class="modal-head"><h3><svg class="h-ic"><use href="#ic-truck"/></svg>Neue Bestellung</h3><button class="modal-close" onclick="closeModal('bsbestellung')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body">
+      <label class="fl" style="margin-bottom:8px">Produkte</label>
+      <div id="bs-order-items"></div>
+      <button class="add-item-btn" onclick="addBsItem()">＋ Produkt hinzufügen</button>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label class="fl" style="margin:0">An welche Lieferanten?</label>
+          <span class="bs-counter" id="bs-counter"></span>
+        </div>
+        <div id="bs-suppliers"></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
+        <label class="fl" style="margin-bottom:6px">Bestellhinweis (optional)</label>
+        <textarea id="bs-notiz" rows="2" placeholder="z.B. Lieferadresse, Wunschtermin, Bemerkung…" style="width:100%;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('bsbestellung')">Abbrechen</button>
+      <button class="btn btn-primary" id="bs-submit-btn" onclick="submitBsBestellung()">📨 Bestellung absenden</button>
     </div>
   </div>
 </div>
@@ -2291,6 +2371,12 @@ const I18N = {
     'login.password':'Passwort',
     'login.submit':'Anmelden →',
     'login.hint-prefix':'Standard:',
+    'reg.username':'Benutzername wählen',
+    'reg.password2':'Passwort wiederholen',
+    'reg.submit':'Registrieren →',
+    'reg.info':'Mit einem Besteller-Konto kannst du Bestellungen aufgeben, die an mehrere Lieferanten gehen.',
+    'reg.switch-to-register':'Neu hier? Als Besteller registrieren',
+    'reg.switch-to-login':'Schon ein Konto? Zur Anmeldung',
     'nav.dashboard':'Übersicht',
     'nav.bestellungen':'Bestellungen',
     'nav.lieferant':'Lieferant & Schulden',
@@ -2426,6 +2512,12 @@ const I18N = {
     'login.password':'Password',
     'login.submit':'Log in →',
     'login.hint-prefix':'Default:',
+    'reg.username':'Choose a username',
+    'reg.password2':'Repeat password',
+    'reg.submit':'Register →',
+    'reg.info':'With a buyer account you can place orders that are sent to several suppliers.',
+    'reg.switch-to-register':'New here? Register as buyer',
+    'reg.switch-to-login':'Already have an account? Log in',
     'nav.dashboard':'Overview',
     'nav.bestellungen':'Orders',
     'nav.lieferant':'Supplier & Debts',
@@ -2575,7 +2667,7 @@ function setLang(lang){
   // Ein paar Stellen (Statuslabels/Tabs) werden dynamisch aus JS heraus neu gerendert statt
   // per data-i18n direkt im HTML gepflegt — die also nach einem Sprachwechsel neu zeichnen,
   // damit sie nicht in der alten Sprache "hängen bleiben".
-  if(typeof renderBestellungen==='function' && document.getElementById('b-tbody')) renderBestellungen();
+  if(typeof renderBestellungen==='function' && document.getElementById('b-tbody') && !(M && M.profile && M.profile.role==='besteller')) renderBestellungen();
   if(typeof renderSettings==='function' && document.getElementById('page-einstellungen')?.classList.contains('active')) renderSettings();
   saveVis();
 }
@@ -2831,6 +2923,7 @@ function restAmount(b){
 // ══════════════════════════════════════════════
 function currentRole(){ return M.profile ? M.profile.role : 'user'; }
 function allowedPages(role){
+  if(role==='besteller') return ['besteller','einstellungen'];
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
   return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
@@ -2891,7 +2984,7 @@ async function onLoggedIn(authUser, displayName){
   applyLiquidGlass(VS.liquidGlass!==false);
   setLang(VS.lang||'de');
   applyRoleUI();
-  checkServiceDue();
+  if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
   // Benutzer und Spezial-Konten bekommen beim ersten Login automatisch die
@@ -2911,6 +3004,7 @@ async function doLogout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('inp-pw').value='';
   currentUser=null; currentUserId=null; M.profile=null;
+  setAuthMode('login');
 }
 
 // ══════════════════════════════════════════════
@@ -2922,7 +3016,8 @@ function mapBestellung(b){
     discountType:b.discount_type, discountValue:b.discount_value?Number(b.discount_value):0,
     total:Number(b.total), paid:b.paid, delivered:!!b.delivered, fuerLieferant:!!b.fuer_lieferant, date:b.bestelldatum, paidAt:b.bezahlt_am||null, deliveredAt:b.angekommen_am||null, notiz:b.notiz||null, userId:b.user_id, deletedAt:b.deleted_at||null, abholcode:b.abholcode||null, trackingToken:b.tracking_token||null,
     vorauszahlung: b.vorauszahlung!=null ? Number(b.vorauszahlung) : 0,
-    unterschrift: b.unterschrift||null, unterschriftAm: b.unterschrift_am||null
+    unterschrift: b.unterschrift||null, unterschriftAm: b.unterschrift_am||null,
+    lieferantId: b.lieferant_id||null, sammelId: b.sammel_id||null
   };
 }
 let trashLoaded = false;
@@ -3041,8 +3136,8 @@ function closeSidebar(){
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
-const PAGE_NAMES={dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service'];
+const PAGE_NAMES={besteller:'Meine Bestellungen',dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
+const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service','besteller'];
 function nav(id){
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
@@ -3052,6 +3147,7 @@ function nav(id){
   document.querySelectorAll('.scale-tick')[NAV_IDS.indexOf(id)]?.classList.add('active');
   if(id==='einstellungen'){ renderSettings(); loadTrash(); }
   if(id==='service') renderService();
+  if(id==='besteller') renderBesteller();
   if(id==='lieferant') renderLieferantSeite();
   if(id==='lieferantenkunden') renderLieferantenkundenSeite();
   if(id==='lagerbestand') renderLagerbestand();
@@ -3070,12 +3166,193 @@ window.addEventListener('online', updateOfflineBanner);
 window.addEventListener('offline', updateOfflineBanner);
 updateOfflineBanner();
 
+
+// ══════════════════════════════════════════════
+// REGISTRIERUNG (Besteller-Konto)
+// Besteller registrieren sich selbst. Danach können sie NUR Bestellungen aufgeben, die an eine
+// begrenzte Anzahl ausgewählter Lieferanten (Spezial-Konten) gehen. Die serverseitigen Funktionen
+// register_besteller / besteller_bestellen (siehe besteller_setup.sql) erzwingen das auch dann,
+// wenn jemand die App-Oberfläche umgeht.
+// ══════════════════════════════════════════════
+let authMode='login';
+const BESTELLER_DEFAULT_MAX = 3;
+function setAuthMode(mode){
+  authMode = mode==='register' ? 'register' : 'login';
+  const reg = authMode==='register';
+  document.getElementById('login-card-login').style.display = reg ? 'none' : '';
+  document.getElementById('login-card-register').style.display = reg ? '' : 'none';
+  const hint=document.getElementById('login-hint-line'); if(hint) hint.style.display = reg ? 'none' : '';
+  const sw=document.getElementById('auth-switch-btn');
+  if(sw){ sw.setAttribute('data-i18n', reg ? 'reg.switch-to-login' : 'reg.switch-to-register'); sw.textContent=t(reg ? 'reg.switch-to-login' : 'reg.switch-to-register'); }
+  ['reg-user','reg-pw','reg-pw2'].forEach(clearFieldError);
+  document.getElementById('reg-err').style.display='none';
+  document.getElementById('login-err').style.display='none';
+}
+async function doRegister(){
+  const u = document.getElementById('reg-user').value.trim();
+  const p1 = document.getElementById('reg-pw').value;
+  const p2 = document.getElementById('reg-pw2').value;
+  const errBox = document.getElementById('reg-err');
+  errBox.style.display='none';
+  ['reg-user','reg-pw','reg-pw2'].forEach(clearFieldError);
+  let bad=false;
+  if(!/^[A-Za-z0-9._-]{3,30}$/.test(u)){ setFieldError('reg-user','3–30 Zeichen: Buchstaben, Zahlen, Punkt, Binde- und Unterstrich.'); bad=true; }
+  if(p1.length<6){ setFieldError('reg-pw','Mindestens 6 Zeichen.'); bad=true; }
+  if(p2!==p1){ setFieldError('reg-pw2','Die Passwörter stimmen nicht überein.'); bad=true; }
+  if(bad) return;
+  const btn=document.getElementById('reg-btn'); btn.disabled=true; btn.style.opacity=.6;
+  const name=u.toLowerCase();
+  const fail=(msg)=>{ btn.disabled=false; btn.style.opacity=1; errBox.textContent=msg; errBox.style.display='block'; };
+  const { data, error } = await sb.auth.signUp({ email: toEmail(name), password: p1 });
+  if(error){
+    fail(/registered|exists|already/i.test(error.message||'') ? 'Dieser Benutzername ist bereits vergeben.' : (error.message||'Registrierung fehlgeschlagen.'));
+    return;
+  }
+  if(!data.session){
+    // Supabase verlangt noch eine E-Mail-Bestätigung (oder der Name ist vergeben).
+    console.warn('signUp lieferte keine Session — in Supabase unter Authentication → Providers → Email "Confirm email" deaktivieren.');
+    fail('Registrierung derzeit nicht möglich. Bitte wende dich an einen Administrator.');
+    return;
+  }
+  const { error: rErr } = await sb.rpc('register_besteller', { p_username: name });
+  if(rErr){ await sb.auth.signOut(); fail(rErr.message||'Konto konnte nicht eingerichtet werden.'); return; }
+  btn.disabled=false; btn.style.opacity=1;
+  document.getElementById('reg-pw').value=''; document.getElementById('reg-pw2').value='';
+  await onLoggedIn(data.user, name);
+  showToast('Willkommen! Dein Besteller-Konto ist bereit. ✓');
+}
+
+// ══════════════════════════════════════════════
+// BESTELLER: Bestellungen an mehrere Lieferanten
+// ══════════════════════════════════════════════
+let bsItems=[];
+let bsSelected=new Set();
+function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
+function bsSuppliers(){ return M.users.filter(u=>u.role==='special').sort((a,b)=>a.username.localeCompare(b.username,'de')); }
+async function reloadBesteller(){
+  await loadAllData();
+  renderBesteller();
+  showToast('Aktualisiert. ✓');
+}
+function bsStatus(b){
+  if(b.paid) return '<span class="badge b-bezahlt">Bezahlt</span>';
+  if(b.delivered) return '<span class="badge b-bezahlt">Bestätigt / angekommen</span>';
+  return '<span class="badge b-offen">Gesendet</span>';
+}
+function renderBesteller(){
+  const lt=document.getElementById('bs-limit-text');
+  if(lt) lt.textContent = `Jede Bestellung kannst du an bis zu ${bsMax()} Lieferanten senden.`;
+  const list=document.getElementById('bs-list'), em=document.getElementById('bs-empty');
+  if(!list) return;
+  const mine=S.bestellungen.filter(b=>b.userId===currentUserId && b.fuerLieferant);
+  // Zeilen einer Sammelbestellung (ein Absenden = eine Zeile je Lieferant) wieder zusammenfassen.
+  const groups=new Map();
+  mine.forEach(b=>{
+    const key=b.sammelId || ('single-'+b.id);
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(b);
+  });
+  const arr=[...groups.values()].sort((a,b)=>Math.max(...b.map(x=>x.id))-Math.max(...a.map(x=>x.id)));
+  em.style.display = arr.length ? 'none' : 'block';
+  list.innerHTML = arr.map(g=>{
+    const first=g[0];
+    const prods=(first.items||[]).map(it=>`${PROD_MAP[it.prod]?.icon||''} ${it.stueck}× ${escapeHtml(prodLabel(it))}`).join(' &nbsp;·&nbsp; ');
+    const rcpts=g.slice().sort((a,b)=>usernameOf(a.lieferantId).localeCompare(usernameOf(b.lieferantId),'de')).map(b=>
+      `<div class="bs-rcpt"><span>◆ <b>${escapeHtml(usernameOf(b.lieferantId))}</b></span>${bsStatus(b)}</div>`).join('');
+    return `<div class="bs-group">
+      <div class="bs-group-head"><div class="bs-group-items">${prods}</div><div class="bs-group-date">${fmtDate(first.date)} · ${g.length} Lieferant${g.length===1?'':'en'}</div></div>
+      ${first.notiz?`<div class="bs-group-note">📝 ${escapeHtml(first.notiz)}</div>`:''}
+      ${rcpts}
+    </div>`;
+  }).join('');
+}
+function addBsItem(){
+  bsItems.push({uid:Date.now()+Math.random(), prod:PRODUCTS[0].id, stueck:1, wunsch:''});
+  renderBsItems();
+}
+function removeBsItem(uid){
+  bsItems=bsItems.filter(x=>x.uid!==uid);
+  if(!bsItems.length) addBsItem(); else renderBsItems();
+}
+function updateBsItem(uid, field, val){
+  const it=bsItems.find(x=>x.uid===uid); if(!it) return;
+  if(field==='stueck') it.stueck=Math.max(1, Math.min(1000, parseInt(val)||1));
+  else it[field]=val;
+  if(field==='prod') renderBsItems();
+}
+function renderBsItems(){
+  const wrap=document.getElementById('bs-order-items'); if(!wrap) return;
+  wrap.innerHTML=bsItems.map(it=>{
+    const p=PROD_MAP[it.prod];
+    return `<div class="oi">
+      <select onchange="updateBsItem(${it.uid},'prod',this.value)">
+        ${PRODUCTS.map(x=>`<option value="${x.id}"${x.id===it.prod?' selected':''}>${x.icon} ${x.name}</option>`).join('')}
+      </select>
+      <input type="number" min="1" max="1000" value="${it.stueck}" onchange="updateBsItem(${it.uid},'stueck',this.value)" style="max-width:90px"/>
+      <button class="ic-btn oi-rm" onclick="removeBsItem(${it.uid})" title="Position entfernen" aria-label="Position entfernen">✕</button>
+      ${p && p.variantLabel ? `<input type="text" maxlength="60" value="${escapeAttr(it.wunsch)}" placeholder="${escapeAttr(p.variantLabel)} (optional, z.B. ${escapeAttr(p.variantExample)})" oninput="updateBsItem(${it.uid},'wunsch',this.value)" style="flex:1 1 100%"/>` : ''}
+    </div>`;
+  }).join('');
+}
+function renderBsSuppliers(){
+  const wrap=document.getElementById('bs-suppliers'); if(!wrap) return;
+  const max=bsMax(), sup=bsSuppliers();
+  const full=bsSelected.size>=max;
+  const c=document.getElementById('bs-counter');
+  if(c){ c.textContent=`${bsSelected.size} von max. ${max} gewählt`; c.classList.toggle('full', full); }
+  if(!sup.length){ wrap.innerHTML='<div class="ps">Es sind noch keine Lieferanten verfügbar.</div>'; return; }
+  wrap.innerHTML=sup.map(u=>{
+    const on=bsSelected.has(u.id);
+    const dis=!on && full;
+    return `<label class="bs-pick${on?' sel':''}${dis?' dis':''}">
+      <input type="checkbox" ${on?'checked':''} ${dis?'disabled':''} onchange="toggleBsSupplier('${u.id}', this.checked)"/>
+      <span>◆ ${escapeHtml(u.username)}</span>
+    </label>`;
+  }).join('');
+}
+function toggleBsSupplier(id, on){
+  if(on){ if(bsSelected.size>=bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); renderBsSuppliers(); return; } bsSelected.add(id); }
+  else bsSelected.delete(id);
+  renderBsSuppliers();
+}
+function openBsModal(){
+  if(!bsSuppliers().length){ showToast('Es sind noch keine Lieferanten verfügbar.','⚠'); return; }
+  bsItems=[]; bsSelected=new Set(); addBsItem();
+  document.getElementById('bs-notiz').value='';
+  renderBsSuppliers();
+  openModal('bsbestellung');
+}
+async function submitBsBestellung(){
+  if(!bsItems.length){ showToast('Mindestens ein Produkt hinzufügen.','⚠'); return; }
+  if(!bsSelected.size){ showToast('Bitte mindestens einen Lieferanten auswählen.','⚠'); return; }
+  if(bsSelected.size>bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); return; }
+  const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
+  const items=bsItems.map(it=>({prod:it.prod, stueck:it.stueck||1, wunsch:(it.wunsch||'').trim()}));
+  const notiz=document.getElementById('bs-notiz').value.trim()||null;
+  const { data, error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
+  btn.disabled=false; btn.style.opacity=1;
+  if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
+  const n=bsSelected.size;
+  closeModal('bsbestellung');
+  await loadAllData();
+  renderBesteller();
+  showToast(`Bestellung an ${n} Lieferant${n===1?'':'en'} gesendet. ✓`);
+}
+async function setMaxLieferanten(userId, val){
+  const n=Math.max(1, Math.min(50, parseInt(val)||BESTELLER_DEFAULT_MAX));
+  const { error } = await sb.rpc('set_max_lieferanten', { p_user_id:userId, p_max:n });
+  if(error){ showToast(error.message || 'Konnte nicht gespeichert werden.','⚠'); renderUserList(); return; }
+  const u=M.users.find(x=>x.id===userId); if(u) u.max_lieferanten=n;
+  showToast('Lieferanten-Limit gespeichert. ✓');
+  renderUserList();
+}
+
 // ══════════════════════════════════════════════
 // ROLLEN-UI
 // ══════════════════════════════════════════════
 function applyRoleUI(){
   const role=currentRole();
-  document.getElementById('tb-role').textContent=role==='service'?'Service-Account':role==='admin'?'Administrator':'Benutzer';
+  document.getElementById('tb-role').textContent=role==='service'?'Service-Account':role==='admin'?'Administrator':role==='besteller'?'Besteller':'Benutzer';
   const allowed=allowedPages(role);
   document.querySelectorAll('.scale-tick').forEach((el,i)=>{
     el.style.display = allowed.includes(NAV_IDS[i]) ? 'flex' : 'none';
@@ -3909,7 +4186,7 @@ function renderLieferantenkundenSeite(){
   const g=document.getElementById('lieferantenkunden-grid'), em=document.getElementById('lieferantenkunden-empty');
   if(!g)return;
   const searchTerm=(document.getElementById('lieferantenkunden-search')?.value||'').trim().toLowerCase();
-  let lkUsers = M.users.filter(u=>u.id!==currentUserId && u.linked_to===currentUserId);
+  let lkUsers = M.users.filter(u=>u.id!==currentUserId && (u.linked_to===currentUserId || S.bestellungen.some(b=>b.fuerLieferant && b.userId===u.id && b.lieferantId===currentUserId)));
   if(searchTerm) lkUsers = lkUsers.filter(u=>u.username.toLowerCase().includes(searchTerm));
   lkUsers.sort((a,b)=>a.username.localeCompare(b.username,'de'));
   if(!lkUsers.length){
@@ -6605,17 +6882,21 @@ function renderSettings(){
       sel.value = M.profile?.linked_to || '';
     }
   }
+  const isBesteller = role==='besteller';
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
+  if(isBesteller){
+    ['set-card-backup','set-card-danger'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  }
   const userCard=document.getElementById('set-card-benutzer');
   if(userCard) userCard.style.display = isAdmin ? '' : 'none';
 }
 function roleLabel(r){
-  return r==='service'?'Service':r==='admin'?'Admin':r==='special'?'Spezial-Konto':'Benutzer';
+  return r==='service'?'Service':r==='admin'?'Admin':r==='special'?'Spezial-Konto':r==='besteller'?'Besteller':'Benutzer';
 }
 function roleBadgeClass(r){
-  return r==='service'?'b-service':r==='admin'?'b-admin':r==='special'?'b-special':'b-user';
+  return r==='service'?'b-service':r==='admin'?'b-admin':r==='special'?'b-special':r==='besteller'?'b-besteller':'b-user';
 }
 function fillLinkedUsersSelect(){
   const specials = M.users.filter(u=>u.role==='special');
@@ -6634,7 +6915,10 @@ function renderUserList(){
   const specials = M.users.filter(u=>u.role==='special');
   el.innerHTML=M.users.map(u=>{
     const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${escapeHtml(s.username)}</option>`).join('');
-    const linkSelect = `
+    const linkSelect = u.role==='besteller'
+      ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)" title="Maximale Anzahl Lieferanten pro Bestellung">Max. Lieferanten
+          <input type="number" min="1" max="50" value="${u.max_lieferanten||3}" style="width:62px;font-size:11px;padding:5px 8px" onchange="setMaxLieferanten('${u.id}', this.value)"/></label>`
+      : `
       <select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)">
         <option value="">Keine Verknüpfung</option>${linkOpts}
       </select>`;
@@ -6860,6 +7144,7 @@ function markLkSeen(){
   updateLkBadge();
 }
 function refresh(){
+  if(currentRole()==='besteller'){ renderBesteller(); return; }
   fillSelects();renderPrices();renderKunden();renderLieferantenkundenSeite();renderBestellungen();renderDashboard();renderTrash();updateLkBadge();renderEigeneSchulden();renderLagerbestand();renderEigenverbrauch();
 }
 
