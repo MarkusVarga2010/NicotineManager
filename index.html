@@ -1764,7 +1764,7 @@ create policy "eigenverbrauch eigener user"
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
               <label class="fl" style="margin-bottom:8px">🔒 Passwort ändern</label>
               <div style="margin-bottom:8px"><input type="password" id="pwc-old" placeholder="Aktuelles Passwort" autocomplete="current-password" oninput="clearFieldError('pwc-old')"/><div class="field-err" id="pwc-old-err"></div></div>
-              <div style="margin-bottom:8px"><input type="password" id="pwc-new" placeholder="Neues Passwort (mind. 6 Zeichen)" autocomplete="new-password" oninput="clearFieldError('pwc-new')"/><div class="field-err" id="pwc-new-err"></div></div>
+              <div style="margin-bottom:8px"><input type="password" id="pwc-new" placeholder="Neues Passwort" autocomplete="new-password" oninput="clearFieldError('pwc-new')"/><div class="field-err" id="pwc-new-err"></div></div>
               <div style="margin-bottom:10px"><input type="password" id="pwc-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password" oninput="clearFieldError('pwc-new2')" onkeydown="if(event.key==='Enter')changeOwnPassword()"/><div class="field-err" id="pwc-new2-err"></div></div>
               <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="changeOwnPassword()">Passwort ändern</button></div>
             </div>
@@ -1786,6 +1786,11 @@ alter table profiles add column if not exists adresse text;</pre>
               <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="saveOwnLink()">Lieferant speichern</button></div>
             </div>
           </div>
+        </div>
+        <div class="set-card" id="set-card-push">
+          <div class="sch"><div class="sch-ic">🔔</div><div><h3>Push-Nachrichten</h3><p>Neue Bestellungen aufs Handy</p></div></div>
+          <div class="ps" id="push-status" style="margin-bottom:12px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="push-on" onclick="enablePush()">🔔 Aktivieren</button><button class="btn btn-ghost btn-sm" id="push-off" onclick="disablePush()" style="display:none">Deaktivieren</button></div>
         </div>
         <div class="set-card" id="set-card-anzeige">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3 data-i18n="set.card.anzeige.title">Anzeige</h3><p data-i18n="set.card.anzeige.sub">Design anpassen</p></div></div>
@@ -1820,6 +1825,7 @@ alter table profiles add column if not exists adresse text;</pre>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
               <div class="sr-label" style="margin-bottom:9px">Neuer Benutzer</div>
               <div class="mr2" style="margin-bottom:8px"><input id="nu-name" placeholder="Benutzername"/><input type="password" id="nu-pw" placeholder="Passwort"/></div>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:10px;cursor:pointer"><input type="checkbox" id="nu-relaxed" style="width:auto;margin:0"/> Kurzes Passwort erlauben (beliebig wenige Zeichen)</label>
               <div style="margin-bottom:10px"><label class="fl" style="margin-bottom:5px">Rolle</label>
                 <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option><option value="besteller">Besteller</option></select>
               </div>
@@ -2110,7 +2116,7 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-head"><h3><span style="margin-right:8px">🔒</span>Neues Passwort festlegen</h3></div>
     <div class="modal-body">
       <div class="ps" style="margin-bottom:14px">Dein Konto wurde mit einem vorläufigen Passwort eingerichtet. Bitte lege jetzt ein eigenes Passwort fest, um fortzufahren.</div>
-      <div class="fw"><label class="fl">Neues Passwort</label><input type="password" id="fpw-new" placeholder="mind. 6 Zeichen" autocomplete="new-password" oninput="clearFieldError('fpw-new')"/><div class="field-err" id="fpw-new-err"></div></div>
+      <div class="fw"><label class="fl">Neues Passwort</label><input type="password" id="fpw-new" placeholder="Neues Passwort" autocomplete="new-password" oninput="clearFieldError('fpw-new')"/><div class="field-err" id="fpw-new-err"></div></div>
       <div class="fw"><label class="fl">Passwort wiederholen</label><input type="password" id="fpw-new2" placeholder="••••••••" autocomplete="new-password" oninput="clearFieldError('fpw-new2')" onkeydown="if(event.key==='Enter')submitForcedPassword()"/><div class="field-err" id="fpw-new2-err"></div></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="doLogout()">Abmelden</button><button class="btn btn-primary" id="fpw-btn" onclick="submitForcedPassword()">Passwort speichern</button></div>
@@ -2131,6 +2137,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div style="border-top:1px solid var(--line);padding-top:14px">
         <label class="fl" style="margin-bottom:6px">🔑 Neues Passwort setzen (optional)</label>
         <input type="password" id="eu-pw" placeholder="Leer lassen = Passwort bleibt" autocomplete="new-password"/>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:8px;cursor:pointer"><input type="checkbox" id="eu-relaxed" style="width:auto;margin:0"/> Kurzes Passwort erlauben (beliebig wenige Zeichen)</label>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:8px;cursor:pointer"><input type="checkbox" id="eu-force" checked style="width:auto;margin:0"/> Benutzer muss es beim nächsten Login ändern</label>
       </div>
     </div>
@@ -3090,6 +3097,7 @@ async function onLoggedIn(authUser, displayName){
   if(bootLoading) bootLoading.style.display='none';
   // Beim ersten Login (first_login) muss ein eigenes Passwort festgelegt werden. Erst danach
   // geht es weiter — bei Benutzer/Spezial-Konten mit der Einführungstour.
+  startRealtime(); syncPushSubscription();
   if(prof.first_login){
     forcePasswordChange().then(()=>{
       if(prof.role==='user' || prof.role==='special') startTour(); else checkWhatsNew();
@@ -3099,7 +3107,7 @@ async function onLoggedIn(authUser, displayName){
   }
 }
 async function doLogout(){
-  closeModal('pwforce');
+  closeModal('pwforce'); stopRealtime();
   await sb.auth.signOut();
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -3550,19 +3558,52 @@ function renderOdSendung(b){
     const opts=[['bestaetigt','✅ Bestätigt'],['bereit','📦 Bereit zur Übergabe'],['unterwegs','🚗 Bin unterwegs zum Kunden'],['uebergeben','🤝 Persönlich übergeben']].filter(o=>!doneKeys.has(o[0]));
     if(opts.length) html+=`<div class="trk-form"><div class="sr-label" style="margin-bottom:9px">Status aktualisieren</div>
       <div class="mr2"><select id="odst-status" onchange="onOdstChange()">${opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select><input id="odst-notiz" maxlength="200" placeholder="Hinweis für den Besteller (optional)"/></div>
-      <div class="mr2" style="display:${NEED_TERMIN.includes(opts[0][0])?'':'none'}" id="odst-termin"><input id="odst-termin-in" maxlength="100" placeholder="Übergabetermin / Treffpunkt (z.B. Sa 15:00, Bahnhof)"/></div>
+      <div id="odst-termin" style="display:${NEED_TERMIN.includes(opts[0][0])?'':'none'}">
+        <div class="sr-label" style="margin:2px 0 6px">🗓 Liefertermin (optional)</div>
+        <div class="mr2"><input type="date" id="odst-date" oninput="odstClearErr()"/><input type="time" id="odst-time" oninput="odstClearErr()"/><select id="odst-dur" onchange="odstClearErr()"><option value="15">15 Min.</option><option value="30" selected>30 Min.</option><option value="45">45 Min.</option><option value="60">1 Std.</option><option value="90">1,5 Std.</option><option value="120">2 Std.</option></select></div>
+        <div class="mr2"><input id="odst-ort" maxlength="80" placeholder="Treffpunkt (optional, z.B. Bahnhof)"/></div>
+        <div class="field-err" id="odst-err" style="display:none;margin:0 0 8px"></div></div>
       <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="saveSendungStatus(${b.id})">Status speichern</button></div></div>`;
   }
   el.innerHTML=`<div style="margin:6px 0 18px">${html}</div>`;
 }
+function odstClearErr(){ const e=document.getElementById('odst-err'); if(e) e.style.display='none'; }
+function odstShowErr(msg){ const e=document.getElementById('odst-err'); if(e){ e.textContent=msg; e.style.display='block'; } showToast(msg,'⚠'); }
+const fmtSlot=(a,b)=>{ const d=new Date(a), e=new Date(b); const t=x=>x.toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});
+  return `${d.toLocaleDateString('de-AT',{weekday:'short',day:'2-digit',month:'2-digit'})} ${t(d)}–${t(e)}`; };
+// Überschneidungs-Prüfung: aktuell geplante Termine (je Bestellung der jeweils letzte), die noch nicht übergeben sind.
+function findTerminConflict(excludeId, start, end){
+  for(const [bid,logs] of Object.entries(S.statusLog||{})){
+    const id=+bid; if(id===excludeId) continue;
+    const o=S.bestellungen.find(x=>x.id===id); if(!o || o.delivered) continue;
+    const l=[...logs].reverse().find(x=>x.termin_start && x.created_by===currentUserId); if(!l) continue;
+    const s2=new Date(l.termin_start), e2=new Date(l.termin_ende);
+    if(s2<end && e2>start) return { id, who:usernameOf(o.userId), slot:fmtSlot(s2,e2) };
+  }
+  return null;
+}
 async function saveSendungStatus(id){
   const b=S.bestellungen.find(x=>x.id===id); if(!b) return;
+  odstClearErr();
   const status=document.getElementById('odst-status').value;
   const notiz=document.getElementById('odst-notiz').value.trim()||null;
-  const termin=NEED_TERMIN.includes(status) ? (document.getElementById('odst-termin-in').value.trim()||null) : null;
-  const { error } = await sb.rpc('set_bestell_status', { p_bestellung_id:id, p_status:status, p_notiz:notiz, p_termin:termin });
-  if(error){ showToast(error.message||'Status konnte nicht gespeichert werden.','⚠'); return; }
-  (S.statusLog[id]=S.statusLog[id]||[]).push({bestellung_id:id,status,notiz,termin,created_at:new Date().toISOString()});
+  let start=null, end=null, termin=null;
+  if(NEED_TERMIN.includes(status)){
+    const d=document.getElementById('odst-date').value, t=document.getElementById('odst-time').value;
+    const ort=document.getElementById('odst-ort').value.trim();
+    if(d||t){
+      if(!d||!t){ odstShowErr('Bitte Datum und Uhrzeit des Liefertermins angeben.'); return; }
+      start=new Date(`${d}T${t}`); end=new Date(start.getTime()+parseInt(document.getElementById('odst-dur').value)*60000);
+      if(isNaN(start)){ odstShowErr('Ungültiger Liefertermin.'); return; }
+      const c=findTerminConflict(id,start,end);
+      if(c){ odstShowErr(`Terminüberschneidung: ${c.slot} ist bereits für Bestellung #${c.id} (${c.who}) eingeplant.`); return; }
+      termin=fmtSlot(start,end)+(ort?` · ${ort}`:'');
+    } else if(ort){ termin=ort; }
+  }
+  const { error } = await sb.rpc('set_bestell_status', { p_bestellung_id:id, p_status:status, p_notiz:notiz, p_termin:termin,
+      p_start:start?start.toISOString():null, p_ende:end?end.toISOString():null });
+  if(error){ if(/überschneid/i.test(error.message||'')) odstShowErr(error.message); else showToast(error.message||'Status konnte nicht gespeichert werden.','⚠'); return; }
+  (S.statusLog[id]=S.statusLog[id]||[]).push({bestellung_id:id,status,notiz,termin,termin_start:start?start.toISOString():null,termin_ende:end?end.toISOString():null,created_by:currentUserId,created_at:new Date().toISOString()});
   if(status==='uebergeben' && !b.delivered) await setDelivered(id,true);
   renderOdSendung(b); renderBestellungen();
   showToast('Status gespeichert. ✓');
@@ -3571,8 +3612,13 @@ async function saveSendungStatus(id){
 // ══════════════════════════════════════════════
 // PASSWORT ÄNDERN (selbst) + ERSTER LOGIN + ADMIN: BENUTZER BEARBEITEN
 // ══════════════════════════════════════════════
+function pwMinSelf(){ return M.profile?.pw_relaxed ? 1 : 6; }
+function pwShortMsg(){ return pwMinSelf()===1 ? 'Bitte ein Passwort eingeben.' : 'Mindestens 6 Zeichen.'; }
 async function applyNewPassword(pw){
-  const { error } = await sb.auth.updateUser({ password: pw });
+  // Konten mit "kurzes Passwort erlaubt" umgehen die Mindestlänge von Supabase Auth über eine Server-Funktion.
+  const { error } = M.profile?.pw_relaxed
+    ? await sb.rpc('set_own_password', { p_password: pw })
+    : await sb.auth.updateUser({ password: pw });
   if(error) return error;
   await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
   if(M.profile) M.profile.first_login=false;
@@ -3590,7 +3636,7 @@ async function changeOwnPassword(){
   ['pwc-old','pwc-new','pwc-new2'].forEach(clearFieldError);
   let bad=false;
   if(!old){ setFieldError('pwc-old','Bitte aktuelles Passwort eingeben.'); bad=true; }
-  if(n1.length<6){ setFieldError('pwc-new','Mindestens 6 Zeichen.'); bad=true; }
+  if(n1.length<pwMinSelf()){ setFieldError('pwc-new',pwShortMsg()); bad=true; }
   if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
   const { error: vErr } = await sb.auth.signInWithPassword({ email: toEmail(currentUser), password: old });
@@ -3612,7 +3658,7 @@ async function submitForcedPassword(){
   ['fpw-new','fpw-new2'].forEach(clearFieldError);
   const temp=document.getElementById('inp-pw')?.value||'';
   let bad=false;
-  if(n1.length<6){ setFieldError('fpw-new','Mindestens 6 Zeichen.'); bad=true; }
+  if(n1.length<pwMinSelf()){ setFieldError('fpw-new',pwShortMsg()); bad=true; }
   else if(temp && n1===temp){ setFieldError('fpw-new','Bitte wähle ein anderes Passwort als das vorläufige.'); bad=true; }
   if(n2!==n1){ setFieldError('fpw-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
@@ -3642,7 +3688,7 @@ function openEditUser(id){
   document.getElementById('eu-max').value=u.max_lieferanten||BESTELLER_DEFAULT_MAX;
   document.getElementById('eu-telefon').value=u.telefon||'';
   document.getElementById('eu-adresse').value=u.adresse||'';
-  document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true;
+  document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true; document.getElementById('eu-relaxed').checked=!!u.pw_relaxed;
   onEuRoleChange();
   openModal('edituser');
 }
@@ -3655,9 +3701,15 @@ async function saveEditUser(){
   const telefon=document.getElementById('eu-telefon').value.trim(), adresse=document.getElementById('eu-adresse').value.trim();
   const pw=document.getElementById('eu-pw').value, force=document.getElementById('eu-force').checked;
   if(name.toLowerCase()!==String(u.username).toLowerCase() && !/^[A-Za-z0-9._-]{3,30}$/.test(name)){ showToast('Benutzername: 3–30 Zeichen (Buchstaben, Zahlen, . _ -).','⚠'); return; }
-  if(pw && pw.length<6){ showToast('Neues Passwort: mindestens 6 Zeichen.','⚠'); return; }
+  const relaxed=document.getElementById('eu-relaxed').checked;
+  if(pw && pw.length<(relaxed?1:6)){ showToast('Neues Passwort: mindestens 6 Zeichen (oder „Kurzes Passwort erlauben“ aktivieren).','⚠'); return; }
   const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:linked||null, p_max:max });
   if(error){ showToast(error.message||'Speichern fehlgeschlagen.','⚠'); return; }
+  if(relaxed!==!!u.pw_relaxed){
+    const { error: rE } = await sb.rpc('admin_set_pw_relaxed', { p_user_id:id, p_relaxed:relaxed });
+    if(rE){ showToast(rE.message||'Einstellung konnte nicht gespeichert werden.','⚠'); return; }
+    u.pw_relaxed=relaxed;
+  }
   if(pw){
     const { error: pErr } = await sb.rpc('admin_set_password', { p_user_id:id, p_password:pw, p_force:force });
     if(pErr){ showToast(pErr.message||'Passwort konnte nicht gesetzt werden.','⚠'); }
@@ -3668,6 +3720,73 @@ async function saveEditUser(){
   closeModal('edituser'); renderUserList();
   showToast('Benutzer gespeichert. ✓');
 }
+
+
+// ══════════════════════════════════════════════
+// PUSH-NACHRICHTEN + LIVE-UPDATES
+// Hintergrund-Push: Service Worker (push-sw.js, in sw.js importieren) + Supabase Edge Function
+// "send-push". Live-Updates bei geöffneter App: Supabase Realtime (siehe erweiterungen_setup.sql).
+// ══════════════════════════════════════════════
+const VAPID_PUBLIC_KEY = '';   // ← öffentlichen VAPID-Schlüssel hier eintragen (siehe push_anleitung.md)
+function b64ToU8(b){ const p='='.repeat((4-b.length%4)%4); const r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...r].map(c=>c.charCodeAt(0))); }
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+function pushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+async function currentPushSub(){ try{ const reg=await navigator.serviceWorker.ready; return await reg.pushManager.getSubscription(); }catch(e){ return null; } }
+async function updatePushUI(){
+  const st=document.getElementById('push-status'), on=document.getElementById('push-on'), off=document.getElementById('push-off'); if(!st) return;
+  on.style.display=''; off.style.display='none'; on.disabled=false;
+  if(!pushSupported()){
+    st.textContent = isIOS() && !isStandalone() ? 'Auf dem iPhone: Seite in Safari über „Teilen → Zum Home-Bildschirm“ hinzufügen und die App von dort öffnen, dann hier aktivieren.' : 'Dieser Browser unterstützt keine Push-Nachrichten.';
+    on.style.display='none'; return;
+  }
+  if(!VAPID_PUBLIC_KEY){ st.textContent='Push ist noch nicht eingerichtet (VAPID-Schlüssel fehlt, siehe push_anleitung.md).'; on.disabled=true; return; }
+  if(Notification.permission==='denied'){ st.textContent='Benachrichtigungen sind im Browser/Handy blockiert. Bitte in den Einstellungen der Seite erlauben.'; on.style.display='none'; return; }
+  const sub=await currentPushSub();
+  if(sub && Notification.permission==='granted'){ st.textContent='✓ Aktiv — du bekommst Nachrichten, auch wenn die App geschlossen ist.'; on.style.display='none'; off.style.display=''; }
+  else st.textContent = currentRole()==='besteller' ? 'Erhalte eine Nachricht, wenn sich der Status deiner Bestellung ändert.' : 'Erhalte sofort eine Nachricht, wenn eine neue Bestellung eingeht.';
+}
+async function savePushSub(sub){
+  const j=sub.toJSON();
+  return sb.from('push_subscriptions').upsert({ user_id:currentUserId, endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth, user_agent:navigator.userAgent.slice(0,200) }, { onConflict:'endpoint' });
+}
+async function enablePush(){
+  try{
+    if(isIOS() && !isStandalone()){ showToast('Bitte zuerst zum Home-Bildschirm hinzufügen und von dort öffnen.','⚠'); return; }
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ showToast('Benachrichtigungen wurden nicht erlaubt.','⚠'); updatePushUI(); return; }
+    const reg=await navigator.serviceWorker.ready;
+    const sub=(await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64ToU8(VAPID_PUBLIC_KEY) });
+    const { error }=await savePushSub(sub);
+    if(error){ showToast('Konnte nicht gespeichert werden (erweiterungen_setup.sql ausführen).','⚠'); return; }
+    showToast('Push-Nachrichten aktiviert. ✓');
+  }catch(e){ console.warn(e); showToast('Push konnte nicht aktiviert werden.','⚠'); }
+  updatePushUI();
+}
+async function disablePush(){
+  try{ const sub=await currentPushSub(); if(sub){ await sb.from('push_subscriptions').delete().eq('endpoint',sub.endpoint); await sub.unsubscribe(); } }catch(e){ console.warn(e); }
+  showToast('Push-Nachrichten deaktiviert.'); updatePushUI();
+}
+async function syncPushSubscription(){   // Abo nach dem Login still dem Konto zuordnen
+  try{ if(!pushSupported()||!VAPID_PUBLIC_KEY||Notification.permission!=='granted') return; const sub=await currentPushSub(); if(sub) await savePushSub(sub); }catch(e){}
+}
+let _rt=null, _rtTimer=null;
+function startRealtime(){
+  stopRealtime();
+  try{
+    const onChange=(kind)=>async(payload)=>{
+      const r=payload.new||{};
+      if(kind==='order'){ if(!r.fuer_lieferant || r.user_id===currentUserId) return; showToast('🔔 Neue Bestellung eingegangen!'); }
+      else { showToast('📍 Neuer Bestellstatus: '+(({bestaetigt:'Bestätigt',bereit:'Bereit zur Übergabe',unterwegs:'Lieferant ist unterwegs',uebergeben:'Persönlich übergeben'})[r.status]||r.status)); }
+      clearTimeout(_rtTimer); _rtTimer=setTimeout(async()=>{ await loadAllData(); refresh(); if(currentRole()==='besteller' && document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack(); },400);
+    };
+    _rt=sb.channel('nf-live')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'bestellungen'},onChange('order'))
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'bestell_status_log'},onChange('status'))
+      .subscribe();
+  }catch(e){ console.warn('Realtime nicht verfügbar',e); }
+}
+function stopRealtime(){ try{ if(_rt){ sb.removeChannel(_rt); _rt=null; } }catch(e){} }
 
 // ══════════════════════════════════════════════
 // ROLLEN-UI
@@ -7207,6 +7326,7 @@ function renderSettings(){
     }
   }
   const isBesteller = role==='besteller';
+  { const pc=document.getElementById('set-card-push'); if(pc) pc.style.display = isAdmin ? 'none' : ''; if(!isAdmin) updatePushUI(); }
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
@@ -7269,14 +7389,16 @@ async function addUser(){
   const p=document.getElementById('nu-pw').value;
   const r=document.getElementById('nu-role').value;
   const linked=document.getElementById('nu-linked')?.value||'';
-  if(!n||p.length<6){showToast('Name + vorläufiges Passwort (≥6 Zeichen) eingeben.','⚠');return;}
+  const relaxedNu=!!document.getElementById('nu-relaxed')?.checked;
+  if(!n||p.length<(relaxedNu?1:6)){showToast(relaxedNu?'Name + Passwort eingeben.':'Name + vorläufiges Passwort (≥6 Zeichen) eingeben.','⚠');return;}
   const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
   if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
   // Neu angelegte Konten müssen beim ersten Login ein eigenes Passwort setzen.
+  if(relaxedNu) await sb.rpc('admin_set_pw_relaxed', { p_user_id:data, p_relaxed:true });
   const { error: fErr } = await sb.rpc('admin_set_password', { p_user_id:data, p_password:p, p_force:true });
-  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null) });
+  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null), pw_relaxed:relaxedNu });
   if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (benutzerverwaltung_setup.sql ausführen).','⚠');
-  document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';
+  document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';{const c=document.getElementById('nu-relaxed'); if(c) c.checked=false;}
   document.getElementById('nu-linked').value='';
   renderUserList();if(!fErr) showToast('Benutzer angelegt — muss beim ersten Login ein neues Passwort setzen. ✓');
 }
