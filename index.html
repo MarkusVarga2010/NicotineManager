@@ -1325,6 +1325,35 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
   font:600 8px 'JetBrains Mono',monospace;letter-spacing:.34em;color:rgba(255,255,255,.38)}
 .kk-name{font-size:21px;font-weight:800;letter-spacing:-.02em}
 .kk-bc{border-radius:12px 12px 16px 16px;background:#fff}
+
+/* ══ Karte: Foto & Geburtsdatum ═══════════════════════════════ */
+.kk-photo{position:absolute;right:22px;top:-6px;width:56px;z-index:2;cursor:pointer}
+.kk-photo .kp-img{width:56px;height:70px;border-radius:9px;background:#15151b center/cover no-repeat;box-shadow:0 0 0 1.5px #FF9A52,0 6px 14px -4px rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35)}
+.kk-photo .kp-img .svg-ic{width:26px;height:26px}
+.kk-photo .kp-img.empty{box-shadow:0 0 0 1.5px rgba(255,154,82,.55);background-image:none;border:1px dashed rgba(255,255,255,.25)}
+.kk-photo .kp-cap{font:700 7px 'JetBrains Mono',monospace;letter-spacing:.1em;text-align:center;margin-top:5px;color:rgba(255,255,255,.62);white-space:nowrap}
+.kk-photo .kp-cap.warn{color:#FFCB3D}
+.kk-card.has-photo .kk-name{max-width:calc(100% - 76px)}
+.kk-edit-btn{display:flex;align-items:center;gap:9px;width:100%;margin-top:16px;padding:12px 14px;border:1px solid var(--line2);border-radius:var(--r);background:var(--paper2);color:var(--ink);font:600 12px inherit;font-family:inherit;cursor:pointer}
+.kk-edit-btn:hover{border-color:var(--sage)}
+.kk-edit-btn .svg-ic{width:17px;height:17px;color:var(--sage)}
+.kk-edit-btn span{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.kk-edit-btn span.ok{background:var(--success-bg);color:var(--success-deep)}
+.kk-edit-btn span.no{background:var(--amber-bg);color:var(--amber-deep)}
+.kk-edit{border:1px solid var(--line2);border-radius:var(--r);padding:14px;margin-top:8px;background:var(--paper2)}
+.kk-ed-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.kk-ed-ph{flex:none;width:92px;height:116px;border-radius:12px;border:1.5px dashed var(--line2);background:var(--paper3) center/cover no-repeat;color:var(--ink-faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 10px inherit;font-family:inherit;cursor:pointer}
+.kk-ed-ph .svg-ic{width:26px;height:26px}
+.kk-ed-ph.has{border-style:solid;border-color:var(--sage);color:transparent}
+.kk-ed-f{flex:1;min-width:0}
+.kk-ed-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+/* Übergabe: Abgleich Foto + Alter */
+.cs-av.has-photo{width:68px;height:86px;border-radius:12px;background-size:cover;background-position:center;color:transparent;box-shadow:0 0 0 2px var(--sage)}
+.cs-age{display:inline-flex;align-items:center;gap:6px;margin-top:7px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.cs-age:empty{display:none}
+.cs-age.ok{background:var(--success-bg);color:var(--success-deep)}
+.cs-age.warn{background:var(--amber-bg);color:var(--amber-deep)}
+.cs-age.no{background:var(--rust-bg);color:var(--rust)}
 .kk-full{position:fixed;inset:0;z-index:3000;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:28px;cursor:zoom-out;animation:kkIn .2s ease-out}
 .kk-full-brand{position:absolute;top:22px;left:24px;display:flex;align-items:center;gap:10px;font:800 15px system-ui,sans-serif;letter-spacing:.04em;color:#14121F}
 .kk-full-brand .kk-mark{width:30px;height:30px}
@@ -1423,6 +1452,34 @@ tbody tr:hover{background:var(--paper3)}
 .scale-tick.active{color:var(--ink);background:color-mix(in srgb,var(--sage) 14%,var(--paper2));box-shadow:none}
 .scale-tick.active::before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--sage)}
 .scale-tick.active .tk-ic{background:var(--sage);color:var(--on-accent)}
+
+/* ══ Kartensprache für die ganze App ════════════════════════════
+   Kupfer-Folienkanten, Wellenband in Kopfzeilen/Login, Kupfer-Buttons. */
+:root{--foil:linear-gradient(135deg,#FFB27A,#FF7A29 55%,#E8610F);--edge:linear-gradient(135deg,rgba(255,154,82,.5),var(--line2) 38%,var(--line2) 68%,rgba(41,217,179,.3))}
+html[data-mode="light"]{--edge:linear-gradient(135deg,rgba(217,96,14,.45),var(--line2) 40%,var(--line2) 70%,rgba(12,154,124,.3))}
+.card,.bento-dash .stat-cell,.bento-dash [data-bento]{
+  border:1px solid transparent;
+  background:linear-gradient(var(--paper2),var(--paper2)) padding-box,var(--edge) border-box}
+.modal{border:1px solid transparent;background:linear-gradient(var(--paper),var(--paper)) padding-box,var(--edge) border-box}
+.ph{border-bottom:1px solid var(--line);isolation:isolate}
+.ph::before{content:'';position:absolute;right:0;top:-18px;bottom:0;width:64%;z-index:-1;pointer-events:none;
+  background:var(--wave-art,none) right center/cover no-repeat;opacity:.5;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 75%);mask-image:linear-gradient(90deg,transparent,#000 75%)}
+.ph::after{height:2px;width:84px;background:var(--foil);border-radius:2px}
+.ph-eyebrow{color:var(--sage);letter-spacing:.2em}
+.pt{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.btn-primary{background:var(--foil);color:#1a0d03;font-weight:800;border:0}
+html[data-mode="light"] .btn-primary{color:#fff;background:linear-gradient(135deg,#F0792B,#D9600E 60%,#B94D08)}
+.sb-brand{position:relative;isolation:isolate;overflow:hidden}
+.sb-brand::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--wave-art,none) center/cover no-repeat;opacity:.28;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent);mask-image:linear-gradient(180deg,#000,transparent)}
+th{font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+#login-screen{background-color:var(--paper);background-image:linear-gradient(rgba(9,9,12,.68),rgba(9,9,12,.82)),var(--wave-art,none);background-size:cover;background-position:center}
+html[data-mode="light"] #login-screen{background-image:linear-gradient(rgba(245,242,236,.8),rgba(245,242,236,.9)),var(--wave-art,none)}
+.primary-btn{background:var(--foil)!important;color:#1a0d03!important;font-weight:800;box-shadow:0 10px 24px -10px rgba(255,122,41,.6)!important}
+html[data-mode="light"] .primary-btn{background:linear-gradient(135deg,#F0792B,#D9600E 60%,#B94D08)!important;color:#fff!important}
+.login-wrap{position:relative}
+.scale-tick.active .tk-ic{background:var(--foil)}
 /* Dashboard: gleichmäßiges Raster */
 .stat-strip.bento-dash,.stat-strip.bento-dash.has-lieferant{
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));grid-template-areas:none;gap:12px;margin-bottom:20px}
@@ -2400,8 +2457,22 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="kk-art" id="kk-art" aria-hidden="true"></div>
         <div class="kk-sn" id="kk-sn" aria-hidden="true"></div>
         <div class="kk-top"><div class="kk-logo"><span class="kk-mark"><svg class="svg-ic "><use href="#ic-wave"/></svg></span><span class="kk-brand">NicoFlow</span></div><span class="kk-pill">KUNDENKARTE</span></div>
-        <div class="kk-mid"><span class="kk-chip-g" aria-hidden="true"></span><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div>
+        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><span class="kk-chip-g" aria-hidden="true"></span><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div>
         <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div>
+      </div>
+      <button type="button" class="kk-edit-btn" onclick="toggleKkEdit()"><svg class="svg-ic"><use href="#ic-card"/></svg>Foto &amp; Geburtsdatum <span id="kk-edit-state"></span></button>
+      <div class="kk-edit" id="kk-edit" style="display:none">
+        <div class="kk-ed-row">
+          <button type="button" class="kk-ed-ph" id="kk-ed-ph" onclick="document.getElementById('kk-file').click()" aria-label="Foto aufnehmen oder wählen"></button>
+          <div class="kk-ed-f">
+            <label class="fl" for="kk-dob">Geburtsdatum</label>
+            <input type="date" id="kk-dob" min="1900-01-01"/>
+            <input type="file" id="kk-file" accept="image/*" capture="user" hidden onchange="kkPickPhoto(this)"/>
+            <div class="kk-ed-btns"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('kk-file').click()">Foto aufnehmen / wählen</button><button type="button" class="btn btn-ghost btn-sm" onclick="kkClearPhoto()">Entfernen</button></div>
+          </div>
+        </div>
+        <div class="ps" style="margin:2px 0 12px">Das Foto dient der Übergabe als Abgleich mit der Person. Das Geburtsdatum wird für die Altersprüfung (18+) genutzt.</div>
+        <button type="button" class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveKkProfile()">Speichern</button>
       </div>
       <div class="kk-actions">
         <button type="button" class="kk-act" onclick="showKkFullscreen()"><svg class="svg-ic "><use href="#ic-expand"/></svg>Vollbild</button>
@@ -2566,7 +2637,7 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal" style="max-width:420px">
     <div class="modal-head"><h3><svg class="svg-ic h-ic"><use href="#ic-scan"/></svg>Übergabe bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <div class="cs-who"><div class="cs-av" id="ac-who-av"></div><div class="cs-who-t"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div></div></div>
+      <div class="cs-who"><div class="cs-av" id="ac-who-av"></div><div class="cs-who-t"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div><div class="cs-age" id="ac-age"></div></div></div>
       <div style="margin:-4px 0 12px"><button class="btn btn-ghost btn-sm" id="ac-show-card" onclick="showHolderCard()" style="width:100%;justify-content:center">Karte des Inhabers ansehen / senden / drucken</button></div>
       <div class="cs-steps"><div class="cs-step"><i>1</i>Karte vorzeigen lassen</div><div class="cs-step"><i>2</i>Strichcode in den Rahmen halten</div><div class="cs-step"><i>3</i>Übergabe wird bestätigt</div></div>
       <div class="ac-scan-wrap">
@@ -5976,7 +6047,11 @@ function openCardScan(ids,mode,onDone){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   _cs={ids,mode,onDone,holder:orderHolderName(b)};
   document.getElementById('ac-who').textContent=_cs.holder;
-  document.getElementById('ac-who-av').textContent=String(_cs.holder||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const hc=cardOfHolder(b), av=document.getElementById('ac-who-av'), ag=document.getElementById('ac-age');
+  av.textContent=String(_cs.holder||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  av.classList.toggle('has-photo',!!(hc&&hc.foto)); av.style.backgroundImage=(hc&&hc.foto)?`url('${hc.foto}')`:'';
+  if(hc&&hc.foto) av.textContent='';
+  const ab=ageBadge(hc); ag.className='cs-age '+ab.cls; ag.textContent=ab.txt;
   document.getElementById('ac-who-sub').textContent = mode==='batch' ? `${ids.length} Bestellungen werden abgeschlossen` : `Bestellung #${b.id}`;
   document.getElementById('ac-result').style.display='none';
   document.getElementById('ac-input').value=''; document.getElementById('ac-reason').value='';
@@ -6009,8 +6084,10 @@ async function verifyCardCode(raw){
   const { data, error }=await sb.rpc('verify_kundenkarte',{ p_code:code, p_order_id:_cs.ids[0] });
   if(error){ showCardResult('err', /does not exist|function/i.test(error.message||'') ? 'Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).' : escapeHtml(error.message||'Prüfung fehlgeschlagen.')); return; }
   if(data && data.ok){
-    showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b></span>`);
-    setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),700);
+    const hc=cardOfHolder(S.bestellungen.find(x=>x.id===_cs.ids[0])), ag=ageOf(hc&&hc.geburtsdatum);
+    if(ag!==null && ag<18){ showCardResult('err',`<b class="cs-t">Unter 18 – keine Übergabe</b><span>${escapeHtml(data.name||_cs.holder)} ist laut Karte ${ag} Jahre alt (geb. ${fmtDob(hc.geburtsdatum)}).</span>`); return; }
+    showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b> · bitte Foto abgleichen</span>`);
+    setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),1800);
   } else if(data && data.reason==='wrong_person'){
     showCardResult('err',`<b class="cs-t">Falsche Karte</b><span>Diese Karte gehört zu <b>${escapeHtml(data.holder||'einer anderen Person')}</b> — die Bestellung ist für <b>${escapeHtml(_cs.holder)}</b>.</span>`+_retryBtn);
   } else showCardResult('err','<b class="cs-t">Karte ungültig</b><span>Unbekannt oder gesperrt.</span>'+_retryBtn);
@@ -6019,6 +6096,8 @@ function _submitAbholcodeConfirm(){ verifyCardCode(document.getElementById('ac-i
 function confirmWithoutCard(){
   const r=document.getElementById('ac-reason').value.trim();
   if(r.length<3){ showToast('Bitte einen Grund angeben.','⚠'); return; }
+  const hc=cardOfHolder(S.bestellungen.find(x=>x.id===_cs.ids[0])), ag=ageOf(hc&&hc.geburtsdatum);
+  if(ag!==null && ag<18){ showToast('Unter 18 – keine Übergabe möglich.','⚠'); return; }
   finishCardHandover('Ohne Kundenkarte übergeben: '+r);
 }
 async function finishCardHandover(note){
@@ -6052,7 +6131,8 @@ async function openKundenkarte(type,id){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
   const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
-  _kk={ type, id, code:c.code, rowId:c.id, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
+  _kk={ type, id, code:c.code, rowId:c.id, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
+  const ed=document.getElementById('kk-edit'); if(ed) ed.style.display='none';
   renderKk(); openModal('kundenkarte');
 }
 // ── Strichcode (Code 128, Subset B) ──────────────────────────────────────────
@@ -6100,6 +6180,66 @@ function kkArtSvg(code,W,H){
   const paths=kkWaves(code,W,H).map(l=>`<path d="M${l.pts.map(q=>q[0]+' '+q[1].toFixed(1)).join('L')}" stroke-opacity="${Math.max(.04,l.o).toFixed(2)}"/>`).join('');
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="kkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A52"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><g fill="none" stroke="url(#kkg)" stroke-width="1.1">${paths}</g></svg>`;
 }
+
+// ── Foto & Geburtsdatum ──────────────────────────────────────
+let _kkDraft={foto:null,dob:''};
+function ageOf(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||''); if(!m) return null;
+  const n=new Date(); let a=n.getFullYear()-(+m[1]); const dm=(n.getMonth()+1)-(+m[2]);
+  if(dm<0||(dm===0&&n.getDate()<(+m[3]))) a--; return a;
+}
+function fmtDob(iso){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||''); return m?`${m[3]}.${m[2]}.${m[1]}`:''; }
+function cardOfHolder(b){ const h=b&&holderRef(b); return h ? S.karten[cardKey(h.type,h.id)] : null; }
+function ageBadge(card){
+  const dob=card&&card.geburtsdatum, a=ageOf(dob);
+  if(a===null) return {cls:'warn',txt:'Geburtsdatum fehlt – Ausweis prüfen'};
+  return a>=18 ? {cls:'ok',txt:`${fmtDob(dob)} · ${a} J. · 18+ ✓`} : {cls:'no',txt:`${fmtDob(dob)} · ${a} J. · unter 18`};
+}
+function renderKkPhoto(){
+  const el=document.getElementById('kk-photo'); if(!el||!_kk) return;
+  const a=ageOf(_kk.dob);
+  el.innerHTML=(_kk.foto?`<div class="kp-img" style="background-image:url('${_kk.foto}')"></div>`:'<div class="kp-img empty"><svg class="svg-ic"><use href="#ic-card"/></svg></div>')
+    +`<div class="kp-cap${_kk.dob?'':' warn'}">${_kk.dob?('GEB. '+fmtDob(_kk.dob)):'FOTO / GEB. FEHLT'}</div>`;
+  document.querySelector('.kk-card')?.classList.toggle('has-photo',true);
+  const st=document.getElementById('kk-edit-state');
+  if(st){ const full=_kk.foto&&_kk.dob; st.className=full?'ok':'no'; st.textContent=full?'✓ vollständig':'unvollständig'; }
+}
+function toggleKkEdit(open){
+  const el=document.getElementById('kk-edit'); if(!el) return;
+  const show = open===true ? true : el.style.display==='none';
+  el.style.display=show?'block':'none';
+  if(show){ _kkDraft={foto:_kk.foto||null,dob:_kk.dob||''}; document.getElementById('kk-dob').value=_kkDraft.dob; document.getElementById('kk-dob').max=new Date().toISOString().slice(0,10); paintKkDraft(); el.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+}
+function paintKkDraft(){
+  const b=document.getElementById('kk-ed-ph'); if(!b) return;
+  if(_kkDraft.foto){ b.style.backgroundImage=`url('${_kkDraft.foto}')`; b.classList.add('has'); b.innerHTML=''; }
+  else { b.style.backgroundImage=''; b.classList.remove('has'); b.innerHTML='<svg class="svg-ic"><use href="#ic-card"/></svg>Foto'; }
+}
+function kkClearPhoto(){ _kkDraft.foto=null; paintKkDraft(); }
+function kkPickPhoto(inp){
+  const f=inp.files&&inp.files[0]; inp.value=''; if(!f) return;
+  const img=new Image(), url=URL.createObjectURL(f);
+  img.onload=()=>{
+    URL.revokeObjectURL(url);
+    const W=240,H=300, c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+    const sc=Math.max(W/img.width,H/img.height), sw=W/sc, sh=H/sc;
+    x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+    x.drawImage(img,(img.width-sw)/2,(img.height-sh)*.35,sw,sh,0,0,W,H);   // Gesicht liegt meist im oberen Drittel
+    _kkDraft.foto=c.toDataURL('image/jpeg',.74); paintKkDraft();
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); showToast('Das Bild konnte nicht gelesen werden.','⚠'); };
+  img.src=url;
+}
+async function saveKkProfile(){
+  if(!_kk) return;
+  const dob=document.getElementById('kk-dob').value||'';
+  if(dob){ const a=ageOf(dob); if(a===null||a<0||a>120){ showToast('Bitte ein gültiges Geburtsdatum eingeben.','⚠'); return; } }
+  const { error }=await sb.rpc('kundenkarte_profil_setzen',{ p_card_id:String(_kk.rowId), p_foto:_kkDraft.foto||null, p_geburtsdatum:dob||null });
+  if(error){ showToast(/does not exist|function|schema cache/i.test(error.message||'') ? 'Bitte zuerst kundenkarte_foto_geburtsdatum.sql ausführen.' : (error.message||'Speichern fehlgeschlagen.'),'⚠'); return; }
+  _kk.foto=_kkDraft.foto||null; _kk.dob=dob||null;
+  const c=S.karten[cardKey(_kk.type,_kk.id)]; if(c){ c.foto=_kk.foto; c.geburtsdatum=_kk.dob; }
+  renderKkPhoto(); document.getElementById('kk-edit').style.display='none'; showToast('Gespeichert. ✓');
+}
 const KK_WAVE='<svg class="svg-ic"><use href="#ic-wave"/></svg>';
 function renderKk(){
   document.getElementById('kk-name').textContent=_kk.name;
@@ -6107,6 +6247,7 @@ function renderKk(){
   document.getElementById('kk-bc').innerHTML=barcodeSvg(_kk.code,'#000');
   const art=document.getElementById('kk-art'); if(art) art.innerHTML=kkArtSvg(_kk.code);
   const sn=document.getElementById('kk-sn'); if(sn) sn.textContent='Nº '+kkSerial(_kk.code);
+  renderKkPhoto();
 }
 function showKkFullscreen(){
   if(!_kk) return;
@@ -6126,7 +6267,9 @@ async function reissueCard(){
   if(error){ showToast('Konnte die alte Karte nicht sperren.','⚠'); return; }
   delete S.karten[cardKey(_kk.type,_kk.id)];
   const c=await issueCard(_kk.type,_kk.id); if(!c) return;
-  _kk.code=c.code; _kk.rowId=c.id; renderKk(); showToast('Neue Karte ausgestellt. ✓');
+  _kk.code=c.code; _kk.rowId=c.id;
+  if(_kk.foto||_kk.dob){ const r=await sb.rpc('kundenkarte_profil_setzen',{ p_card_id:String(c.id), p_foto:_kk.foto||null, p_geburtsdatum:_kk.dob||null }); if(!r.error){ c.foto=_kk.foto; c.geburtsdatum=_kk.dob; } }
+  renderKk(); showToast('Neue Karte ausgestellt. ✓');
 }
 function printKk(){
   if(!_kk) return;
@@ -6134,18 +6277,19 @@ function printKk(){
   w.document.write(`<!doctype html><meta charset="utf-8"><title>Kundenkarte · ${escapeHtml(_kk.name)}</title><style>
 @page{size:auto;margin:10mm}*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:0;padding:24px;display:flex;justify-content:center}
 .c{position:relative;width:85.6mm;height:54mm;border-radius:3.6mm;color:#fff;padding:4.2mm 4.4mm 3.8mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
- background:#09090C;-webkit-print-color-adjust:exact;print-color-adjust:exact}.art{position:absolute;inset:0;z-index:0}.art svg{width:100%;height:100%;display:block}.c>*:not(.art){position:relative;z-index:1}.c>.sn{position:absolute;right:2mm;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font:4.6pt ui-monospace,Menlo,monospace;letter-spacing:.34em;color:rgba(255,255,255,.4)}.p{background:linear-gradient(135deg,#FFC999,#FF8A3D 55%,#E8610F);color:#1a0d03;border:0!important}.chip{width:8.4mm;height:6.2mm;border-radius:1.5mm;margin-bottom:2mm;background:linear-gradient(90deg,transparent 33%,rgba(60,35,5,.55) 33% 35%,transparent 35% 65%,rgba(60,35,5,.55) 65% 67%,transparent 67%),linear-gradient(0deg,transparent 45%,rgba(60,35,5,.55) 45% 55%,transparent 55%),linear-gradient(135deg,#F7DDA0,#C9973F 55%,#EBC77A)}
+ background:#09090C;-webkit-print-color-adjust:exact;print-color-adjust:exact}.art{position:absolute;inset:0;z-index:0}.art svg{width:100%;height:100%;display:block}.c>*:not(.art){position:relative;z-index:1}.c>.sn{position:absolute;right:2mm;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font:4.6pt ui-monospace,Menlo,monospace;letter-spacing:.34em;color:rgba(255,255,255,.4)}.c>.ph2{position:absolute;right:6mm;top:13mm;width:14mm;text-align:center}.ph2 img{width:14mm;height:17.5mm;object-fit:cover;border-radius:1.6mm;box-shadow:0 0 0 .35mm #FF9A52;display:block}.ph2 span{font:4pt ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(255,255,255,.7);display:block;margin-top:.8mm}.p{background:linear-gradient(135deg,#FFC999,#FF8A3D 55%,#E8610F);color:#1a0d03;border:0!important}.chip{width:8.4mm;height:6.2mm;border-radius:1.5mm;margin-bottom:2mm;background:linear-gradient(90deg,transparent 33%,rgba(60,35,5,.55) 33% 35%,transparent 35% 65%,rgba(60,35,5,.55) 65% 67%,transparent 67%),linear-gradient(0deg,transparent 45%,rgba(60,35,5,.55) 45% 55%,transparent 55%),linear-gradient(135deg,#F7DDA0,#C9973F 55%,#EBC77A)}
 .t{display:flex;justify-content:space-between;align-items:center}.l{display:flex;align-items:center;gap:2.2mm}
 .m{width:6.6mm;height:6.6mm;border-radius:2.1mm;background:linear-gradient(135deg,#FF7A29,#29D9B3);display:flex;align-items:center;justify-content:center}.m svg{width:4mm;height:4mm}
 .b{font-weight:800;letter-spacing:.04em;font-size:10.5pt}.p{font-size:5.4pt;font-weight:700;letter-spacing:.24em;padding:1.1mm 2.4mm 1.1mm 2.8mm;border:.25mm solid rgba(255,255,255,.4);border-radius:9mm}
 .k{font-size:5.4pt;letter-spacing:.26em;opacity:.6;margin-bottom:.8mm}.n{font-size:12.5pt;font-weight:700;letter-spacing:-.01em;line-height:1.15}.r{font:6.4pt ui-monospace,Menlo,monospace;letter-spacing:.16em;opacity:.75;margin-top:1.1mm}
 .bc{background:#fff;border-radius:2.4mm;padding:2mm 2.6mm 1.6mm;line-height:0}.bc svg{width:100%;height:10.5mm;display:block}
-</style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div><div class="sn">Nº ${kkSerial(_kk.code)}</div><div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
+</style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div><div class="sn">Nº ${kkSerial(_kk.code)}</div>${_kk.foto?`<div class="ph2"><img src="${_kk.foto}"/><span>${_kk.dob?'GEB. '+fmtDob(_kk.dob):''}</span></div>`:''}<div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
 <div><div class="chip"></div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div><div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
   w.document.close();
 }
-function saveKkImage(){
+async function saveKkImage(){
   if(!_kk) return;
+  let pimg=null; if(_kk.foto){ pimg=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=_kk.foto; }); }
   const W=1011,H=638,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   const rr=(a,b,w,h,r)=>{ x.beginPath(); if(x.roundRect) x.roundRect(a,b,w,h,r); else x.rect(a,b,w,h); };
   const sp=(t,gap)=>String(t).split('').join(gap||' ');
@@ -6174,8 +6318,14 @@ function saveKkImage(){
   x.globalAlpha=.9; x.fillStyle='#fff'; x.fillText(pt,W-56-pw+27,87); x.globalAlpha=1;
   // Inhaber
   x.globalAlpha=.55; x.font='600 17px system-ui,sans-serif'; x.fillText(sp('INHABER','\u2009'),56,226); x.globalAlpha=1;
-  x.font='700 50px system-ui,-apple-system,sans-serif'; let nm=_kk.name; while(x.measureText(nm).width>W-112 && nm.length>3) nm=nm.slice(0,-2); if(nm!==_kk.name) nm+='…'; x.fillText(nm,56,282);
+  x.font='700 50px system-ui,-apple-system,sans-serif'; let nm=_kk.name; while(x.measureText(nm).width>W-112-(pimg?190:0) && nm.length>3) nm=nm.slice(0,-2); if(nm!==_kk.name) nm+='…'; x.fillText(nm,56,282);
   x.globalAlpha=.72; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),56,322); x.globalAlpha=1;
+  if(pimg){
+    const px=W-56-140, py=112;
+    x.save(); rr(px,py,140,176,14); x.clip(); x.drawImage(pimg,px,py,140,176); x.restore();
+    x.strokeStyle='#FF9A52'; x.lineWidth=3; rr(px,py,140,176,14); x.stroke();
+    if(_kk.dob){ x.globalAlpha=.75; x.fillStyle='#fff'; x.font='600 17px ui-monospace,Menlo,monospace'; x.textAlign='center'; x.fillText('GEB. '+fmtDob(_kk.dob),px+70,py+204); x.textAlign='left'; x.globalAlpha=1; }
+  }
   // Strichcode-Panel
   x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,352,W-80,242,26); x.fill(); x.restore();
   drawBarcode(x,_kk.code,60,378,W-120,190);
@@ -8103,6 +8253,7 @@ applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-
 applyMode(VS.mode||'dark'); // Hell/Dunkel ebenfalls schon vor Login anwenden
 applyFontSize(VS.fontSize||'md'); // Schriftgröße ebenfalls schon vor Login anwenden
 applyLiquidGlass(false); // Liquid Glass ebenfalls schon vor Login anwenden
+try{ document.documentElement.style.setProperty('--wave-art',`url("data:image/svg+xml,${encodeURIComponent(kkArtSvg('NICOFLOW-APP',1000,260))}")`); }catch(e){}
 setLang(VS.lang||'de'); // Sprache ebenfalls schon vor Login anwenden (Login-Bildschirm)
 
 // ══════════════════════════════════════════════
