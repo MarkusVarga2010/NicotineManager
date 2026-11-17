@@ -2471,7 +2471,7 @@ alter table profiles add column if not exists adresse text;</pre>
             <div class="kk-ed-btns"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('kk-file').click()">Foto aufnehmen / wählen</button><button type="button" class="btn btn-ghost btn-sm" onclick="kkClearPhoto()">Entfernen</button></div>
           </div>
         </div>
-        <div class="ps" style="margin:2px 0 12px">Das Foto dient der Übergabe als Abgleich mit der Person. Das Geburtsdatum wird für die Altersprüfung (18+) genutzt.</div>
+        <div class="ps" style="margin:2px 0 12px">Das Foto dient der Übergabe als Abgleich mit der Person. Das Geburtsdatum ergänzt die Karte (nur zur Vollständigkeit).</div>
         <button type="button" class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveKkProfile()">Speichern</button>
       </div>
       <div class="kk-actions">
@@ -6084,8 +6084,6 @@ async function verifyCardCode(raw){
   const { data, error }=await sb.rpc('verify_kundenkarte',{ p_code:code, p_order_id:_cs.ids[0] });
   if(error){ showCardResult('err', /does not exist|function/i.test(error.message||'') ? 'Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).' : escapeHtml(error.message||'Prüfung fehlgeschlagen.')); return; }
   if(data && data.ok){
-    const hc=cardOfHolder(S.bestellungen.find(x=>x.id===_cs.ids[0])), ag=ageOf(hc&&hc.geburtsdatum);
-    if(ag!==null && ag<18){ showCardResult('err',`<b class="cs-t">Unter 18 – keine Übergabe</b><span>${escapeHtml(data.name||_cs.holder)} ist laut Karte ${ag} Jahre alt (geb. ${fmtDob(hc.geburtsdatum)}).</span>`); return; }
     showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b> · bitte Foto abgleichen</span>`);
     setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),1800);
   } else if(data && data.reason==='wrong_person'){
@@ -6096,8 +6094,6 @@ function _submitAbholcodeConfirm(){ verifyCardCode(document.getElementById('ac-i
 function confirmWithoutCard(){
   const r=document.getElementById('ac-reason').value.trim();
   if(r.length<3){ showToast('Bitte einen Grund angeben.','⚠'); return; }
-  const hc=cardOfHolder(S.bestellungen.find(x=>x.id===_cs.ids[0])), ag=ageOf(hc&&hc.geburtsdatum);
-  if(ag!==null && ag<18){ showToast('Unter 18 – keine Übergabe möglich.','⚠'); return; }
   finishCardHandover('Ohne Kundenkarte übergeben: '+r);
 }
 async function finishCardHandover(note){
@@ -6191,9 +6187,8 @@ function ageOf(iso){
 function fmtDob(iso){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||''); return m?`${m[3]}.${m[2]}.${m[1]}`:''; }
 function cardOfHolder(b){ const h=b&&holderRef(b); return h ? S.karten[cardKey(h.type,h.id)] : null; }
 function ageBadge(card){
-  const dob=card&&card.geburtsdatum, a=ageOf(dob);
-  if(a===null) return {cls:'warn',txt:'Geburtsdatum fehlt – Ausweis prüfen'};
-  return a>=18 ? {cls:'ok',txt:`${fmtDob(dob)} · ${a} J. · 18+ ✓`} : {cls:'no',txt:`${fmtDob(dob)} · ${a} J. · unter 18`};
+  const dob=card&&card.geburtsdatum;
+  return dob ? {cls:'ok',txt:'Geb. '+fmtDob(dob)} : {cls:'',txt:''};   // nur Information, keine Prüfung
 }
 function renderKkPhoto(){
   const el=document.getElementById('kk-photo'); if(!el||!_kk) return;
