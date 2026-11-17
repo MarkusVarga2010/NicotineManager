@@ -1298,6 +1298,33 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .kk-act:hover{border-color:var(--sage);background:color-mix(in srgb,var(--sage) 7%,var(--paper2));transform:translateY(-1px)}
 .kk-act .svg-ic{width:19px;height:19px;color:var(--sage)}
 .kk-ghost-d{color:var(--ink-soft)}
+
+/* ══ Kundenkarte · Signatur-Design "Flow-Band" ═════════════════
+   Jede Karte trägt ein einzigartiges, aus ihrem Code berechnetes Wellenband
+   (gleicher Code = gleiches Muster), Kupfer-Folienrand, Kontaktlos-Chip und
+   Seriennummer. Der Strichcode bleibt auf Weiß. */
+.kk-card{background:#09090C;border-radius:22px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.07) inset,0 30px 54px -20px rgba(0,0,0,.7),0 0 0 1px #000}
+.kk-card::before{inset:0;z-index:0;padding:1.5px;border-radius:inherit;
+  background:linear-gradient(135deg,#FFB27A,#FF7A29 30%,rgba(255,122,41,.05) 52%,rgba(41,217,179,.15) 75%,#29D9B3);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.kk-card::after{z-index:0;background:linear-gradient(112deg,transparent 40%,rgba(255,255,255,.06) 50%,transparent 60%);pointer-events:none}
+.kk-art{position:absolute;inset:0;border-radius:inherit;overflow:hidden;z-index:-1}
+.kk-art svg{width:100%;height:100%;display:block}
+.kk-top,.kk-mid,.kk-bc{position:relative;z-index:1}
+.kk-pill{border:0;padding:5px 10px 5px 12px;color:#1a0d03;opacity:1;font-weight:800;
+  background:linear-gradient(135deg,#FFC999,#FF8A3D 55%,#E8610F)}
+.kk-chip-g{display:block;width:34px;height:25px;border-radius:6px;margin-bottom:9px;
+  background:
+   linear-gradient(90deg,transparent 33%,rgba(60,35,5,.55) 33% 35%,transparent 35% 65%,rgba(60,35,5,.55) 65% 67%,transparent 67%),
+   linear-gradient(0deg,transparent 45%,rgba(60,35,5,.55) 45% 55%,transparent 55%),
+   linear-gradient(135deg,#F7DDA0,#C9973F 55%,#EBC77A);
+  box-shadow:0 0 0 1px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5)}
+.kk-sn{position:absolute;right:9px;top:50%;z-index:1;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
+  font:600 8px 'JetBrains Mono',monospace;letter-spacing:.34em;color:rgba(255,255,255,.38)}
+.kk-name{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.kk-bc{border-radius:12px 12px 16px 16px;background:#fff}
 .kk-full{position:fixed;inset:0;z-index:3000;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:28px;cursor:zoom-out;animation:kkIn .2s ease-out}
 .kk-full-brand{position:absolute;top:22px;left:24px;display:flex;align-items:center;gap:10px;font:800 15px system-ui,sans-serif;letter-spacing:.04em;color:#14121F}
 .kk-full-brand .kk-mark{width:30px;height:30px}
@@ -2370,8 +2397,10 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-head"><h3><svg class="svg-ic h-ic"><use href="#ic-card"/></svg>Kundenkarte</h3><button class="modal-close" onclick="closeModal('kundenkarte')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="kk-card">
+        <div class="kk-art" id="kk-art" aria-hidden="true"></div>
+        <div class="kk-sn" id="kk-sn" aria-hidden="true"></div>
         <div class="kk-top"><div class="kk-logo"><span class="kk-mark"><svg class="svg-ic "><use href="#ic-wave"/></svg></span><span class="kk-brand">NicoFlow</span></div><span class="kk-pill">KUNDENKARTE</span></div>
-        <div class="kk-mid"><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div>
+        <div class="kk-mid"><span class="kk-chip-g" aria-hidden="true"></span><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div>
         <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div>
       </div>
       <div class="kk-actions">
@@ -6047,11 +6076,37 @@ function drawBarcode(ctx,text,x,y,w,h){
   ctx.fillStyle='#000';
   for(let i=0;i<m.length;i++) if(m[i]==='1') ctx.fillRect(ox+(BC_QUIET+i)*mw,y,mw,h);
 }
+
+// ── Einzigartiges Wellenband je Karte (deterministisch aus dem Code) ──
+function kkSeed(str){ let h=2166136261>>>0; for(const ch of String(str)){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
+function kkRng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+function kkSerial(code){ return kkSeed(code).toString(16).toUpperCase().padStart(8,'0').replace(/^(.{4})(.{4})$/,'$1·$2'); }
+function kkWaves(code,W,H){
+  const r=kkRng(kkSeed(code)), n=22;
+  const f1=.004+r()*.018, f2=.010+r()*.030, a1=H*(.07+r()*.24), a2=H*(.03+r()*.05), p1=r()*6.28, p2=r()*6.28, tilt=(r()-.5)*.35, drift=.10+r()*.14;
+  const y0=H*(.05+r()*.12), gap=H*(.045+r()*.02), lines=[];
+  for(let i=0;i<n;i++){
+    const pts=[], k=i/(n-1);
+    for(let x=0;x<=W;x+=6){
+      const y=y0+i*gap + tilt*x*.4 + Math.sin(x*f1+p1+i*drift)*a1*(.5+k) + Math.sin(x*f2+p2-i*drift*1.7)*a2;
+      pts.push([x,y]);
+    }
+    lines.push({pts,o:.10+.5*Math.pow(Math.max(0,1-Math.abs(k-.35)*1.4),2)});
+  }
+  return lines;
+}
+function kkArtSvg(code,W,H){
+  W=W||400; H=H||252;
+  const paths=kkWaves(code,W,H).map(l=>`<path d="M${l.pts.map(q=>q[0]+' '+q[1].toFixed(1)).join('L')}" stroke-opacity="${Math.max(.04,l.o).toFixed(2)}"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="kkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A52"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><g fill="none" stroke="url(#kkg)" stroke-width="1.1">${paths}</g></svg>`;
+}
 const KK_WAVE='<svg class="svg-ic"><use href="#ic-wave"/></svg>';
 function renderKk(){
   document.getElementById('kk-name').textContent=_kk.name;
   document.getElementById('kk-nr').textContent=fmtCard(_kk.code);
   document.getElementById('kk-bc').innerHTML=barcodeSvg(_kk.code,'#000');
+  const art=document.getElementById('kk-art'); if(art) art.innerHTML=kkArtSvg(_kk.code);
+  const sn=document.getElementById('kk-sn'); if(sn) sn.textContent='Nº '+kkSerial(_kk.code);
 }
 function showKkFullscreen(){
   if(!_kk) return;
@@ -6079,14 +6134,14 @@ function printKk(){
   w.document.write(`<!doctype html><meta charset="utf-8"><title>Kundenkarte · ${escapeHtml(_kk.name)}</title><style>
 @page{size:auto;margin:10mm}*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:0;padding:24px;display:flex;justify-content:center}
 .c{position:relative;width:85.6mm;height:54mm;border-radius:3.6mm;color:#fff;padding:4.2mm 4.4mm 3.8mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
- background:radial-gradient(120% 90% at 100% 0%,rgba(255,122,41,.42),transparent 56%),radial-gradient(100% 80% at 0% 100%,rgba(41,217,179,.26),transparent 56%),linear-gradient(145deg,#1d1a27,#0d0c13);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ background:#09090C;-webkit-print-color-adjust:exact;print-color-adjust:exact}.art{position:absolute;inset:0;z-index:0}.art svg{width:100%;height:100%;display:block}.c>*:not(.art){position:relative;z-index:1}.c>.sn{position:absolute;right:2mm;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font:4.6pt ui-monospace,Menlo,monospace;letter-spacing:.34em;color:rgba(255,255,255,.4)}.p{background:linear-gradient(135deg,#FFC999,#FF8A3D 55%,#E8610F);color:#1a0d03;border:0!important}.chip{width:8.4mm;height:6.2mm;border-radius:1.5mm;margin-bottom:2mm;background:linear-gradient(90deg,transparent 33%,rgba(60,35,5,.55) 33% 35%,transparent 35% 65%,rgba(60,35,5,.55) 65% 67%,transparent 67%),linear-gradient(0deg,transparent 45%,rgba(60,35,5,.55) 45% 55%,transparent 55%),linear-gradient(135deg,#F7DDA0,#C9973F 55%,#EBC77A)}
 .t{display:flex;justify-content:space-between;align-items:center}.l{display:flex;align-items:center;gap:2.2mm}
 .m{width:6.6mm;height:6.6mm;border-radius:2.1mm;background:linear-gradient(135deg,#FF7A29,#29D9B3);display:flex;align-items:center;justify-content:center}.m svg{width:4mm;height:4mm}
 .b{font-weight:800;letter-spacing:.04em;font-size:10.5pt}.p{font-size:5.4pt;font-weight:700;letter-spacing:.24em;padding:1.1mm 2.4mm 1.1mm 2.8mm;border:.25mm solid rgba(255,255,255,.4);border-radius:9mm}
 .k{font-size:5.4pt;letter-spacing:.26em;opacity:.6;margin-bottom:.8mm}.n{font-size:12.5pt;font-weight:700;letter-spacing:-.01em;line-height:1.15}.r{font:6.4pt ui-monospace,Menlo,monospace;letter-spacing:.16em;opacity:.75;margin-top:1.1mm}
 .bc{background:#fff;border-radius:2.4mm;padding:2mm 2.6mm 1.6mm;line-height:0}.bc svg{width:100%;height:10.5mm;display:block}
-</style><div class="c"><div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
-<div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div><div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
+</style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div><div class="sn">Nº ${kkSerial(_kk.code)}</div><div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
+<div><div class="chip"></div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div><div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
   w.document.close();
 }
 function saveKkImage(){
@@ -6094,14 +6149,20 @@ function saveKkImage(){
   const W=1011,H=638,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   const rr=(a,b,w,h,r)=>{ x.beginPath(); if(x.roundRect) x.roundRect(a,b,w,h,r); else x.rect(a,b,w,h); };
   const sp=(t,gap)=>String(t).split('').join(gap||' ');
-  // Hintergrund
-  x.save(); rr(0,0,W,H,40); x.clip();
-  let g=x.createLinearGradient(0,0,W*.6,H); g.addColorStop(0,'#1d1a27'); g.addColorStop(1,'#0d0c13'); x.fillStyle=g; x.fillRect(0,0,W,H);
-  g=x.createRadialGradient(W,0,0,W,0,560); g.addColorStop(0,'rgba(255,122,41,.42)'); g.addColorStop(1,'rgba(255,122,41,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
-  g=x.createRadialGradient(0,H,0,0,H,520); g.addColorStop(0,'rgba(41,217,179,.26)'); g.addColorStop(1,'rgba(41,217,179,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
-  g=x.createLinearGradient(0,0,W,H); g.addColorStop(.42,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,.06)'); g.addColorStop(.58,'rgba(255,255,255,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
-  x.restore();
-  x.strokeStyle='rgba(255,255,255,.1)'; x.lineWidth=2; rr(1,1,W-2,H-2,40); x.stroke();
+  // Hintergrund + einzigartiges Wellenband
+  x.save(); rr(0,0,W,H,44); x.clip();
+  x.fillStyle='#09090C'; x.fillRect(0,0,W,H);
+  const wg=x.createLinearGradient(0,0,W,H); wg.addColorStop(0,'#FF9A52'); wg.addColorStop(.55,'#FF7A29'); wg.addColorStop(1,'#29D9B3');
+  x.strokeStyle=wg; x.lineWidth=2.6; x.lineJoin='round';
+  kkWaves(_kk.code,W,H).forEach(l=>{ x.globalAlpha=Math.max(.04,l.o); x.beginPath(); l.pts.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])); x.stroke(); });
+  x.globalAlpha=1; x.restore();
+  // Folienrand
+  const eg=x.createLinearGradient(0,0,W,H); eg.addColorStop(0,'#FFB27A'); eg.addColorStop(.3,'#FF7A29'); eg.addColorStop(.52,'rgba(255,122,41,.06)'); eg.addColorStop(1,'#29D9B3');
+  x.strokeStyle=eg; x.lineWidth=4; rr(2,2,W-4,H-4,44); x.stroke();
+  // Chip + Seriennummer
+  g=x.createLinearGradient(56,128,140,190); g.addColorStop(0,'#F7DDA0'); g.addColorStop(.55,'#C9973F'); g.addColorStop(1,'#EBC77A'); x.fillStyle=g; rr(56,128,84,62,14); x.fill();
+  x.strokeStyle='rgba(60,35,5,.55)'; x.lineWidth=3; x.beginPath(); x.moveTo(84,128); x.lineTo(84,190); x.moveTo(112,128); x.lineTo(112,190); x.moveTo(56,159); x.lineTo(140,159); x.stroke();
+  x.save(); x.translate(W-26,H/2); x.rotate(Math.PI/2); x.fillStyle='rgba(255,255,255,.38)'; x.font='600 18px ui-monospace,Menlo,monospace'; x.textAlign='center'; x.fillText(sp('Nº '+kkSerial(_kk.code),'\u2009'),0,0); x.restore();
   // Logo
   g=x.createLinearGradient(56,52,112,108); g.addColorStop(0,'#FF7A29'); g.addColorStop(1,'#29D9B3'); x.fillStyle=g; rr(56,52,56,56,17); x.fill();
   x.strokeStyle='#fff'; x.lineWidth=4.6; x.lineCap='round'; x.lineJoin='round'; x.beginPath();
@@ -6112,12 +6173,12 @@ function saveKkImage(){
   x.strokeStyle='rgba(255,255,255,.4)'; x.lineWidth=2; rr(W-56-pw,58,pw,44,22); x.stroke();
   x.globalAlpha=.9; x.fillStyle='#fff'; x.fillText(pt,W-56-pw+27,87); x.globalAlpha=1;
   // Inhaber
-  x.globalAlpha=.55; x.font='600 17px system-ui,sans-serif'; x.fillText(sp('INHABER','\u2009'),56,196); x.globalAlpha=1;
-  x.font='700 50px system-ui,-apple-system,sans-serif'; let nm=_kk.name; while(x.measureText(nm).width>W-112 && nm.length>3) nm=nm.slice(0,-2); if(nm!==_kk.name) nm+='…'; x.fillText(nm,56,254);
-  x.globalAlpha=.72; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),56,300); x.globalAlpha=1;
+  x.globalAlpha=.55; x.font='600 17px system-ui,sans-serif'; x.fillText(sp('INHABER','\u2009'),56,226); x.globalAlpha=1;
+  x.font='700 50px system-ui,-apple-system,sans-serif'; let nm=_kk.name; while(x.measureText(nm).width>W-112 && nm.length>3) nm=nm.slice(0,-2); if(nm!==_kk.name) nm+='…'; x.fillText(nm,56,282);
+  x.globalAlpha=.72; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),56,322); x.globalAlpha=1;
   // Strichcode-Panel
-  x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,342,W-80,252,26); x.fill(); x.restore();
-  drawBarcode(x,_kk.code,60,372,W-120,190);
+  x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,352,W-80,242,26); x.fill(); x.restore();
+  drawBarcode(x,_kk.code,60,378,W-120,190);
   c.toBlob(async blob=>{
     const f=new File([blob],'kundenkarte.png',{type:'image/png'});
     if(navigator.canShare?.({files:[f]})){ try{ await navigator.share({files:[f]}); return; }catch(e){ if(e.name==='AbortError') return; } }
