@@ -23,6 +23,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <style>
@@ -629,7 +630,7 @@ button{font-family:inherit;cursor:pointer}
 .ac-scan-video-wrap{position:relative;border-radius:var(--r);overflow:hidden;background:#000;display:none}
 .ac-scan-video-wrap.show{display:block}
 .ac-scan-video-wrap video{width:100%;display:block;max-height:260px;object-fit:cover}
-.ac-scan-frame{position:absolute;inset:14%;border:2px solid var(--accent2);border-radius:var(--r);pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.ac-scan-frame{position:absolute;inset:30% 6%;border:2px solid var(--accent2);border-radius:var(--r);pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
 .ac-scan-torch{position:absolute;bottom:10px;right:10px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
 .ac-scan-torch.active{background:var(--accent2);color:#0A0B14}
 .ac-scan-status{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px;line-height:1.4}
@@ -1270,6 +1271,32 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .trk-mini-row b{color:var(--ink)}
 @media (max-width:520px){.trk2-hero{padding:14px;gap:12px}.trk2-ic{width:48px;height:48px;font-size:23px}.trk2-t{font-size:16px}.trk2-no{display:none}.trk2-dot{width:32px;height:32px;font-size:14px}.trk2-rail{top:16px}.trk2-s{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.trk2-hero:not(.done) .trk2-ic{animation:none}.trk2-rail span,.trk-mini-bar span{transition:none}}
+
+/* ── Kundenkarte ── */
+.kk-card{aspect-ratio:1.586;border-radius:18px;padding:20px;color:#fff;background:linear-gradient(135deg,#14121F,#2b2540 70%,#3d3560);display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 10px 30px rgba(20,18,31,.35);position:relative;overflow:hidden}
+.kk-card::after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%)}
+.kk-l{display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-width:0;flex:1;z-index:1}
+.kk-brand{font-weight:800;letter-spacing:.06em;font-size:16px}
+.kk-tag{font-size:9px;letter-spacing:.2em;opacity:.7;margin-top:2px}
+.kk-name{font-size:17px;font-weight:700;word-break:break-word}
+.kk-nr{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.8;margin-top:4px}
+.kk-bc{background:#fff;border-radius:10px;padding:8px 8px 5px;z-index:1;line-height:0;cursor:zoom-in}
+.kk-bc svg{width:100%;height:54px;display:block}
+.kk-bc-num{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#14121F;text-align:center;margin-top:4px}
+.kk-full{position:fixed;inset:0;z-index:3000;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;cursor:zoom-out}
+.kk-full svg{width:100%;max-width:920px;height:34vh;display:block}
+.kk-full-n{font:700 20px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#14121F}
+.kk-full-h{font-size:12px;color:#6b6880}
+.cs-who{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1px solid var(--line2);border-radius:var(--r);background:var(--paper2);margin-bottom:12px}
+.cs-who-k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+.cs-who-v{font-size:17px;font-weight:700}
+.cs-who-s{font-size:11px;color:var(--ink-soft)}
+.cs-result{margin-top:12px;padding:12px 14px;border-radius:var(--r);font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:8px}
+.cs-result.ok{background:var(--success-bg);color:var(--success-deep);border:1px solid var(--success)}
+.cs-result.err{background:var(--rust-bg);color:var(--rust);border:1px solid var(--rust)}
+.cs-result.wait{background:var(--paper3);color:var(--ink-soft)}
+.cs-more{margin-top:12px;font-size:12px}
+.cs-more summary{cursor:pointer;color:var(--ink-soft);font-weight:600}
 </style>
 </head>
 <body>
@@ -1855,6 +1882,11 @@ alter table profiles add column if not exists adresse text;</pre>
             </div>
           </div>
         </div>
+        <div class="set-card" id="set-card-karte">
+          <div class="sch"><div class="sch-ic">🪪</div><div><h3>Meine Kundenkarte</h3><p>Zum Scannen bei der Übergabe</p></div></div>
+          <div class="scb"><div class="ps" style="margin-bottom:12px">Zeig diese Karte bei der Übergabe vor. Dein Lieferant scannt den Strichcode — so landet die Ware sicher bei dir.</div>
+          <button class="btn btn-primary btn-sm" onclick="openKundenkarte('user',currentUserId)">🪪 Karte anzeigen</button></div>
+        </div>
         <div class="set-card" id="set-card-anzeige">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3 data-i18n="set.card.anzeige.title">Anzeige</h3><p data-i18n="set.card.anzeige.sub">Design anpassen</p></div></div>
           <div class="scb">
@@ -2213,6 +2245,17 @@ alter table profiles add column if not exists adresse text;</pre>
   </div>
 </div>
 
+<div class="modal-bg" id="modal-kundenkarte">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head"><h3><span style="margin-right:8px">🪪</span>Kundenkarte</h3><button class="modal-close" onclick="closeModal('kundenkarte')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body">
+      <div class="kk-card"><div class="kk-l"><div><div class="kk-brand">NicoFlow</div><div class="kk-tag">KUNDENKARTE</div></div><div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen: Vollbild"></div></div>
+      <p class="ps" style="margin-top:12px">Bei der Übergabe wird dieser Strichcode gescannt — statt Abholcode und Unterschrift. Tipp: Strichcode antippen für Vollbild (Display-Helligkeit hochdrehen), ausdrucken oder als Bild aufs Handy speichern.</p>
+    </div>
+    <div class="modal-foot" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="reissueCard()">↺ Neu ausstellen</button><button class="btn btn-ghost btn-sm" onclick="showKkFullscreen()">⤢ Vollbild</button><button class="btn btn-ghost btn-sm" onclick="saveKkImage()">🖼 Bild</button><button class="btn btn-ghost btn-sm" onclick="printKk()">🖨 Drucken</button><button class="btn btn-primary btn-sm" onclick="closeModal('kundenkarte')">Fertig</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Neue Bestellung beim Lieferanten -->
 <div class="modal-bg" id="modal-lbbestellung">
   <div class="modal wide">
@@ -2358,48 +2401,31 @@ alter table profiles add column if not exists adresse text;</pre>
      hier eingegeben werden, bevor die Bestellung als abgeholt markiert werden kann. Beim
      Bezahlen wird kein Code mehr verlangt.) -->
 <div class="modal-bg" id="modal-abholcode-confirm">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-head"><h3>Abholcode bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><h3><span style="margin-right:8px">🪪</span>Kundenkarte scannen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <p id="ac-hint" style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px">Lass dir vom Kunden den Abholcode nennen und gib ihn hier ein, bevor die Bestellung als abgeholt markiert wird.</p>
-      <div id="ac-code-section">
-        <label class="fl">Abholcode</label>
-        <input type="text" id="ac-input" maxlength="4" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center" placeholder="XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()">
-        <p id="ac-error" style="display:none;color:var(--rust);font-size:12px;margin-top:8px">Code stimmt nicht überein. Bitte erneut versuchen.</p>
-        <div id="ac-lockout" class="ac-lockout" style="display:none"></div>
-        <div class="ac-scan-wrap">
-          <button class="btn btn-ghost btn-sm" id="ac-scan-toggle-btn" onclick="toggleAbholcodeScanner()" style="width:100%;justify-content:center">📷 QR-Code stattdessen scannen</button>
-          <div class="ac-scan-video-wrap" id="ac-scan-video-wrap">
-            <video id="ac-scan-video" playsinline muted></video>
-            <div class="ac-scan-frame"></div>
-            <button type="button" class="ac-scan-torch" id="ac-scan-torch-btn" onclick="toggleAbholcodeTorch()" style="display:none" title="Blitzlicht ein/aus" aria-label="Blitzlicht ein/aus">🔦</button>
-          </div>
-          <p id="ac-scan-status" class="ac-scan-status" style="display:none"></p>
-          <canvas id="ac-scan-canvas" style="display:none"></canvas>
+      <div class="cs-who"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div></div>
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:12px">Lass die Kundenkarte vorzeigen und scanne den Strichcode. So ist sichergestellt, dass die Ware bei der richtigen Person landet.</p>
+      <div class="ac-scan-wrap">
+        <button class="btn btn-ghost btn-sm" id="ac-scan-toggle-btn" onclick="toggleAbholcodeScanner()" style="width:100%;justify-content:center">📷 Scanner starten</button>
+        <div class="ac-scan-video-wrap" id="ac-scan-video-wrap">
+          <video id="ac-scan-video" playsinline muted></video>
+          <div class="ac-scan-frame"></div>
+          <button type="button" class="ac-scan-torch" id="ac-scan-torch-btn" onclick="toggleAbholcodeTorch()" style="display:none" title="Blitzlicht ein/aus" aria-label="Blitzlicht ein/aus">🔦</button>
         </div>
+        <p id="ac-scan-status" class="ac-scan-status" style="display:none"></p>
+        <canvas id="ac-scan-canvas" style="display:none"></canvas>
       </div>
-      <div style="margin-top:14px">
-        <label class="fl">Wer holt ab? (optional)</label>
-        <input type="text" id="ac-abholer" placeholder="z.B. Name des Abholers, falls nicht der Kunde selbst" autocomplete="off"/>
-      </div>
-      <div class="sig-pad-wrap">
-        <label class="fl">Unterschrift <span style="color:var(--rust)">*</span></label>
-        <canvas id="ac-sig-canvas" class="sig-pad-canvas"></canvas>
-        <div class="sig-pad-actions">
-          <span class="sig-pad-hint">Mit Finger/Maus/Stift unterschreiben — Pflichtfeld bei Abholung.</span>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="clearSignaturePad('ac-sig-canvas')">↺ Löschen</button>
-        </div>
-        <p id="ac-sig-error" style="display:none;color:var(--rust);font-size:12px;margin-top:6px">Bitte unterschreiben, bevor die Abholung bestätigt wird.</p>
-      </div>
+      <div id="ac-result" class="cs-result" style="display:none"></div>
+      <details class="cs-more"><summary>Kartennummer eintippen</summary>
+        <div style="display:flex;gap:8px;margin-top:8px"><input id="ac-input" placeholder="NFK-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform:uppercase;font-family:'JetBrains Mono',monospace" onkeydown="if(event.key==='Enter')_submitAbholcodeConfirm()"/><button class="btn btn-ghost btn-sm" onclick="_submitAbholcodeConfirm()">Prüfen</button></div></details>
+      <details class="cs-more"><summary>Karte nicht dabei?</summary>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="ac-reason" maxlength="120" placeholder="Grund (z.B. Karte vergessen)" style="flex:1;min-width:160px"/><button class="btn btn-ghost btn-sm" onclick="confirmWithoutCard()">Ohne Karte bestätigen</button></div></details>
     </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('abholcode-confirm')">Abbrechen</button>
-      <button class="btn btn-primary" id="ac-submit-btn" onclick="_submitAbholcodeConfirm()">✓ Bestätigen &amp; abgeholt markieren</button>
-    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('abholcode-confirm')">Abbrechen</button></div>
   </div>
 </div>
 
-<!-- SCHNELLANSICHT: Code direkt aus der Tabelle heraus zeigen, ohne erst das volle Bestell-Detail zu öffnen -->
 <div class="modal-bg" id="modal-quick-code">
   <div class="modal" style="max-width:340px">
     <div class="modal-head"><h3>Abholcode</h3><button class="modal-close" onclick="closeModal('quick-code')" aria-label="Schließen">✕</button></div>
@@ -2427,16 +2453,7 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--ink-soft);margin-bottom:12px" id="bp-hint"></p>
       <div id="bp-list"></div>
-      <div class="sig-pad-wrap">
-        <label class="fl">Unterschrift <span style="color:var(--rust)">*</span></label>
-        <canvas id="bp-sig-canvas" class="sig-pad-canvas"></canvas>
-        <div class="sig-pad-actions">
-          <span class="sig-pad-hint">Eine Unterschrift gilt für alle markierten Bestellungen.</span>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="clearSignaturePad('bp-sig-canvas')">↺ Löschen</button>
-        </div>
-        <p id="bp-sig-error" style="display:none;color:var(--rust);font-size:12px;margin-top:6px">Bitte unterschreiben, bevor alle als abgeholt markiert werden.</p>
       </div>
-    </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('batch-pickup')">Schließen</button>
       <button class="btn btn-primary" id="bp-complete-btn" onclick="batchCompleteAll()">✓ Alle auf einmal bezahlt/abgeholt</button>
@@ -2619,7 +2636,7 @@ const I18N = {
     'best.action.abholen':'✓ Abholen',
     'best.action.bezahlt':'✓ Bezahlt',
     'best.search-placeholder':'Kunde oder Produkt suchen…',
-    'best.hint.bestellt':'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Abholen", sobald der Kunde da ist — ist ein Abholcode hinterlegt, wird er dabei abgefragt.',
+    'best.hint.bestellt':'Bestellungen, die noch abgeholt/geliefert werden müssen. Klick auf „Abholen", sobald der Kunde da ist — dabei wird die Kundenkarte des Kunden gescannt.',
     'best.hint.bezahlt':'Bestellungen mit offenem Betrag. Klick auf „Bezahlt", sobald bezahlt wurde — dabei wird automatisch eine Rechnung erstellt.',
     'best.hint.offen':'Bestellungen, die noch nicht bezahlt und/oder abgeholt sind. Bezahlt und Abgeholt lassen sich unabhängig voneinander markieren.',
     'best.hint.historie':'Abgeschlossene Bestellungen (geliefert & bezahlt) mit Zeitstempel — wann bestellt und wann bezahlt wurde.',
@@ -2760,7 +2777,7 @@ const I18N = {
     'best.action.abholen':'✓ Pick up',
     'best.action.bezahlt':'✓ Paid',
     'best.search-placeholder':'Search customer or product…',
-    'best.hint.bestellt':'Orders that still need to be picked up/delivered. Click "Pick up" once the customer is there — if a pickup code is set, it will be requested.',
+    'best.hint.bestellt':'Orders that still need to be picked up/delivered. Click "Pick up" once the customer is there — the customer card is scanned.',
     'best.hint.bezahlt':'Orders with an open amount. Click "Paid" once it has been paid — an invoice is created automatically.',
     'best.hint.offen':'Orders that are not yet paid and/or picked up. Paid and Picked up can be marked independently of each other.',
     'best.hint.historie':'Completed orders (delivered & paid) with timestamps — when ordered and when paid.',
@@ -3237,6 +3254,10 @@ async function loadAllData(){
   statusLogMissing = !!logRes.error;
   S.statusLog = {};
   (logRes.data||[]).forEach(r=>{ (S.statusLog[r.bestellung_id]=S.statusLog[r.bestellung_id]||[]).push(r); });
+  const kRes = await sb.from('kundenkarten').select('*').is('revoked_at',null);
+  kartenMissing = !!kRes.error;
+  S.karten = {};
+  (kRes.data||[]).forEach(c=>{ S.karten[cardKey(c.subject_type,c.subject_id)]=c; });
   M.users = usersRes.data||[];
   if(svcStatusRes.data){
     M.service.lastDate = svcStatusRes.data.last_date;
@@ -4685,7 +4706,7 @@ function renderKunden(){
     const foreign = k.userId!==currentUserId;
     const nameTag = foreign ? ` <span class="badge b-lieferant" style="font-size:9px;margin-left:4px">↳ ${escapeHtml(usernameOf(k.userId))}</span>` : '';
     return `<div class="kcard" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="cursor:pointer" onclick="openKundeDetail(${k.id})">
-      <div class="kc-top"><div class="kc-name">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})" title="Kunde löschen" aria-label="Kunde löschen">🗑</button>`}</div>
+      <div class="kc-top"><div class="kc-name">${escapeHtml(k.vorname)} ${escapeHtml(k.nachname)}${nameTag}</div>${foreign?'':`<button class="ic-btn" onclick="event.stopPropagation();openKundenkarte('kunde',${k.id})" title="Kundenkarte" aria-label="Kundenkarte">🪪</button><button class="ic-btn" onclick="event.stopPropagation();delKunde(${k.id})" title="Kunde löschen" aria-label="Kunde löschen">🗑</button>`}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${cnt}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
@@ -5631,16 +5652,13 @@ async function setDelivered(id, newVal){
   // Lieferanten-Bestellungen (b.fuerLieferant): sobald die Ware als angekommen markiert wird,
   // bekommt der Kunde automatisch einen Abholcode. Anders als früher wird dieser Code beim
   // Bezahlen NICHT mehr abgefragt — er dient nur noch als optionaler, manueller Übergabe-Nachweis.
-  if(newVal && b.fuerLieferant && !b.abholcode){
-    patch.abholcode = genAbholcode(activeAbholcodes());
-  }
   const { error } = await sb.from('bestellungen').update(patch).eq('id', id);
   if(error){ showToast('Status konnte nicht geändert werden.','⚠'); return; }
   b.delivered=newVal; b.deliveredAt=patch.angekommen_am;
   if(patch.abholcode) b.abholcode=patch.abholcode;
   renderBestellungen();renderLbHistory();renderLieferantenkundenSeite();
   showToast(newVal
-    ? (patch.abholcode ? `Als angekommen markiert · Abholcode ${patch.abholcode}` : 'Als erhalten/bestellt markiert. ✓')
+    ? 'Als erhalten/bestellt markiert. ✓'
     : 'Als unterwegs markiert.');
 }
 // Abholen einer Bestellung mit Abholcode: statt direkt setDelivered aufzurufen, wird zuerst
@@ -5734,98 +5752,148 @@ async function saveUnterschrift(id, dataUrl){
   const b=S.bestellungen.find(x=>x.id===id);
   if(b){ b.unterschrift=dataUrl; b.unterschriftAm=nowIso; }
 }
-let _abholcodeConfirmOrderId=null;
-let _abholcodeFailCount=0;
-let _abholcodeLockUntil=0;
-let _abholcodeLockTimer=null;
-const ABHOLCODE_MAX_FAILS = 5;
-const ABHOLCODE_LOCK_SECONDS = 30;
-function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id); }
-function _openAbholcodeConfirm(id){
-  const b=S.bestellungen.find(x=>x.id===id);
-  if(!b) return;
-  if(b.abholcode && isCodeExpired(b)){
-    showToast('Dieser Abholcode ist abgelaufen — bitte im Bestell-Detail einen neuen erzeugen.','⚠');
-    return;
-  }
-  _abholcodeConfirmOrderId=id;
-  _abholcodeFailCount=0;
-  _abholcodeLockUntil=0;
-  const hasCode = !!b.abholcode;
-  const label = b.fuerLieferant ? 'deinem Lieferantenkunden' : 'deinem Kunden';
-  document.getElementById('ac-code-section').style.display = hasCode ? 'block' : 'none';
-  document.getElementById('ac-hint').textContent = hasCode
-    ? `Lass dir von ${label} den Abholcode nennen und gib ihn hier ein, und lass dir die Abholung unterschreiben, bevor die Bestellung als abgeholt markiert wird.`
-    : `Lass dir die Abholung von ${label} unterschreiben, bevor die Bestellung als abgeholt markiert wird.`;
-  document.getElementById('ac-submit-btn').textContent = '✓ Bestätigen & abgeholt markieren';
-  const input=document.getElementById('ac-input');
-  input.value=''; input.disabled=false;
-  document.getElementById('ac-abholer').value='';
-  document.getElementById('ac-error').style.display='none';
-  document.getElementById('ac-error').textContent='Code stimmt nicht überein. Bitte erneut versuchen.';
-  document.getElementById('ac-lockout').style.display='none';
-  document.getElementById('ac-sig-error').style.display='none';
-  document.getElementById('ac-submit-btn').disabled=false;
+// ══════════════════════════════════════════════
+// KUNDENKARTE: Übergabe per Kartenscan (ersetzt Abholcode + Unterschrift)
+// Jeder Kunde bzw. jedes Konto bekommt eine Karte mit Strichcode (Code 128). Bei der Übergabe wird sie gescannt;
+// der Server (verify_kundenkarte) prüft, ob sie zur Person der Bestellung gehört.
+// ══════════════════════════════════════════════
+let kartenMissing=false, _cs=null, _kk=null;
+const CARD_ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const cardKey=(t,id)=>t+':'+id;
+function normCard(v){ return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+function fmtCard(n){ return normCard(n).replace(/^(NFK)(.{4})(.{4})(.{4})$/,'$1-$2-$3-$4'); }
+function newCardCode(){ return 'NFK'+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(x=>CARD_ALPHA[x%32]).join(''); }
+function orderHolderName(b){
+  if(b.fuerLieferant) return usernameOf(b.userId);
+  const k=S.kunden.find(x=>x.id===b.kId); return k?`${k.vorname} ${k.nachname}`:'Kunde';
+}
+function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id); }   // Name bleibt: bestehende Buttons rufen ihn auf
+function _openAbholcodeConfirm(id){ openCardScan([id],'single'); }
+function openCardScan(ids,mode){
+  const b=S.bestellungen.find(x=>x.id===ids[0]); if(!b) return;
+  if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
+  _cs={ids,mode,holder:orderHolderName(b)};
+  document.getElementById('ac-who').textContent=_cs.holder;
+  document.getElementById('ac-who-sub').textContent = mode==='batch' ? `${ids.length} Bestellungen werden abgeschlossen` : `Bestellung #${b.id}`;
+  document.getElementById('ac-result').style.display='none';
+  document.getElementById('ac-input').value=''; document.getElementById('ac-reason').value='';
   openModal('abholcode-confirm');
-  initSignaturePad('ac-sig-canvas');
-  if(hasCode) setTimeout(()=>input.focus(),50);
+  setTimeout(()=>{ if(_cs) toggleAbholcodeScanner(); },250);
 }
-// ── Echte Sperre statt nur Warnung nach Fehlversuchen ───────────────────────
-// Ab ABHOLCODE_MAX_FAILS Fehlversuchen gibt es einen kurzen Cooldown, statt beliebig oft
-// weiter raten zu können (bei 4 Zeichen aus 32 ist die Trefferchance zwar gering, aber nicht null).
-function _startAbholcodeLockout(){
-  _abholcodeLockUntil = Date.now() + ABHOLCODE_LOCK_SECONDS*1000;
-  document.getElementById('ac-input').disabled=true;
-  document.getElementById('ac-submit-btn').disabled=true;
-  const lockEl=document.getElementById('ac-lockout');
-  lockEl.style.display='block';
-  clearInterval(_abholcodeLockTimer);
-  _abholcodeLockTimer=setInterval(()=>{
-    const remaining=Math.ceil((_abholcodeLockUntil-Date.now())/1000);
-    if(remaining<=0){
-      clearInterval(_abholcodeLockTimer);
-      lockEl.style.display='none';
-      document.getElementById('ac-input').disabled=false;
-      document.getElementById('ac-submit-btn').disabled=false;
-      _abholcodeFailCount=0;
-      document.getElementById('ac-input').focus();
-    } else {
-      lockEl.textContent = `Zu viele Fehlversuche — bitte warte ${remaining}s, bevor du es erneut versuchst.`;
-    }
-  }, 250);
+function showCardResult(kind,html){
+  const el=document.getElementById('ac-result'); el.className='cs-result '+kind; el.innerHTML=html; el.style.display='flex';
 }
-function _submitAbholcodeConfirm(){
-  if(Date.now() < _abholcodeLockUntil) return; // gesperrt
-  const b=S.bestellungen.find(x=>x.id===_abholcodeConfirmOrderId);
-  if(!b) return;
-  if(b.abholcode){
-    const val=(document.getElementById('ac-input').value||'').trim().toUpperCase();
-    if(!val || val!==b.abholcode){
-      _abholcodeFailCount++;
-      const errEl=document.getElementById('ac-error');
-      if(_abholcodeFailCount>=ABHOLCODE_MAX_FAILS){
-        errEl.style.display='none';
-        _startAbholcodeLockout();
-        return;
-      }
-      errEl.textContent = _abholcodeFailCount>=3
-        ? 'Code stimmt immer noch nicht überein. Sicher, dass es die richtige Bestellung ist?'
-        : 'Code stimmt nicht überein. Bitte erneut versuchen.';
-      errEl.style.display='block';
-      return;
-    }
-  }
-  if(isSignaturePadEmpty('ac-sig-canvas')){
-    document.getElementById('ac-sig-error').style.display='block';
-    return;
-  }
-  const signatureDataUrl = getSignatureDataUrl('ac-sig-canvas');
-  stopAbholcodeScanner();
+function retryCardScan(){ document.getElementById('ac-result').style.display='none'; stopAbholcodeScanner(); toggleAbholcodeScanner(); }
+const _retryBtn='<button class="btn btn-ghost btn-sm" onclick="retryCardScan()">📷 Erneut scannen</button>';
+async function verifyCardCode(raw){
+  if(!_cs) return;
+  const code=normCard(raw);
+  if(!/^NFK[A-Z0-9]{12}$/.test(code)){ showCardResult('err','✗ Das ist keine gültige Kundenkarte.'+_retryBtn); return; }
+  showCardResult('wait','Karte wird geprüft …');
+  const { data, error }=await sb.rpc('verify_kundenkarte',{ p_code:code, p_order_id:_cs.ids[0] });
+  if(error){ showCardResult('err', /does not exist|function/i.test(error.message||'') ? 'Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).' : escapeHtml(error.message||'Prüfung fehlgeschlagen.')); return; }
+  if(data && data.ok){
+    showCardResult('ok',`✓ Karte von <b>${escapeHtml(data.name||_cs.holder)}</b> bestätigt`);
+    setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),700);
+  } else if(data && data.reason==='wrong_person'){
+    showCardResult('err',`✗ Diese Karte gehört zu <b>${escapeHtml(data.holder||'einer anderen Person')}</b> — die Bestellung ist für <b>${escapeHtml(_cs.holder)}</b>.`+_retryBtn);
+  } else showCardResult('err','✗ Karte unbekannt oder gesperrt.'+_retryBtn);
+}
+function _submitAbholcodeConfirm(){ verifyCardCode(document.getElementById('ac-input').value); }
+function confirmWithoutCard(){
+  const r=document.getElementById('ac-reason').value.trim();
+  if(r.length<3){ showToast('Bitte einen Grund angeben.','⚠'); return; }
+  finishCardHandover('Ohne Kundenkarte übergeben: '+r);
+}
+async function finishCardHandover(note){
+  const cs=_cs; if(!cs) return; _cs=null;
   closeModal('abholcode-confirm');
-  const abholerName=(document.getElementById('ac-abholer').value||'').trim();
-  setDelivered(b.id,true);
-  saveUnterschrift(b.id, signatureDataUrl);
-  if(abholerName) appendNotiz(b.id, `Abgeholt von: ${abholerName}`);
+  for(const id of cs.ids){
+    const b=S.bestellungen.find(x=>x.id===id); if(!b) continue;
+    if(!b.delivered) await setDelivered(id,true);
+    if(cs.mode==='batch' && !b.paid) await setPaid(id,true);
+    await appendNotiz(id,note);
+  }
+  showToast(cs.mode==='batch' ? `${cs.ids.length} Bestellungen abgeschlossen. ✓` : 'Übergabe bestätigt. ✓');
+}
+// ── Karte anzeigen / ausstellen / drucken ──
+async function issueCard(type,id){
+  const { data, error }=await sb.from('kundenkarten').insert({ subject_type:type, subject_id:String(id), code:newCardCode() }).select().single();
+  if(error){ showToast('Karte konnte nicht erstellt werden.','⚠'); return null; }
+  S.karten[cardKey(type,id)]=data; return data;
+}
+async function openKundenkarte(type,id){
+  if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
+  let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
+  const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
+  _kk={ type, id, code:c.code, rowId:c.id, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
+  renderKk(); openModal('kundenkarte');
+}
+// ── Strichcode (Code 128, Subset B) ──────────────────────────────────────────
+// Eigener, kleiner Encoder — keine Bibliothek nötig. Gegen ZXing getestet (Round-Trip).
+const C128_BARS = [11011001100,11001101100,11001100110,10010011000,10010001100,10001001100,10011001000,10011000100,10001100100,11001001000,11001000100,11000100100,10110011100,10011011100,10011001110,10111001100,10011101100,10011100110,11001110010,11001011100,11001001110,11011100100,11001110100,11101101110,11101001100,11100101100,11100100110,11101100100,11100110100,11100110010,11011011000,11011000110,11000110110,10100011000,10001011000,10001000110,10110001000,10001101000,10001100010,11010001000,11000101000,11000100010,10110111000,10110001110,10001101110,10111011000,10111000110,10001110110,11101110110,11010001110,11000101110,11011101000,11011100010,11011101110,11101011000,11101000110,11100010110,11101101000,11101100010,11100011010,11101111010,11001000010,11110001010,10100110000,10100001100,10010110000,10010000110,10000101100,10000100110,10110010000,10110000100,10011010000,10011000010,10000110100,10000110010,11000010010,11001010000,11110111010,11000010100,10001111010,10100111100,10010111100,10010011110,10111100100,10011110100,10011110010,11110100100,11110010100,11110010010,11011011110,11011110110,11110110110,10101111000,10100011110,10001011110,10111101000,10111100010,11110101000,11110100010,10111011110,10111101110,11101011110,11110101110,11010000100,11010010000,11010011100,1100011101011];
+function code128Modules(text){
+  const t=String(text); let sum=104; const codes=[104];
+  for(let i=0;i<t.length;i++){ const v=t.charCodeAt(i)-32; if(v<0||v>95) throw new Error('Zeichen nicht darstellbar'); codes.push(v); sum+=v*(i+1); }
+  codes.push(sum%103); codes.push(106);
+  return codes.map(c=>C128_BARS[c]).join('');
+}
+const BC_QUIET=10;   // Ruhezone links/rechts in Modulbreiten (Pflicht für zuverlässiges Scannen)
+function barcodeSvg(text,color){
+  const m=code128Modules(text), W=m.length+BC_QUIET*2; let d='';
+  for(let i=0;i<m.length;){ if(m[i]!=='1'){ i++; continue; } let j=i; while(j<m.length&&m[j]==='1') j++; d+=`M${BC_QUIET+i} 0h${j-i}v1h-${j-i}z`; i=j; }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} 1" preserveAspectRatio="none" shape-rendering="crispEdges" role="img" aria-label="Strichcode"><path d="${d}" fill="${color||'#000'}"/></svg>`;
+}
+// Zeichnet den Strichcode auf ein Canvas (ganzzahlige Modulbreite = gestochen scharf)
+function drawBarcode(ctx,text,x,y,w,h){
+  const m=code128Modules(text), total=m.length+BC_QUIET*2, mw=Math.max(1,Math.floor(w/total)), ox=x+Math.floor((w-total*mw)/2);
+  ctx.fillStyle='#000';
+  for(let i=0;i<m.length;i++) if(m[i]==='1') ctx.fillRect(ox+(BC_QUIET+i)*mw,y,mw,h);
+}
+function renderKk(){
+  document.getElementById('kk-name').textContent=_kk.name;
+  document.getElementById('kk-nr').textContent=fmtCard(_kk.code);
+  document.getElementById('kk-bc').innerHTML=barcodeSvg(_kk.code,'#000');
+}
+function showKkFullscreen(){
+  if(!_kk) return;
+  const o=document.createElement('div'); o.className='kk-full';
+  o.innerHTML=barcodeSvg(_kk.code,'#000')+`<div class="kk-full-n">${escapeHtml(fmtCard(_kk.code))}</div><div class="kk-full-h">${escapeHtml(_kk.name)} · zum Schließen antippen</div>`;
+  o.onclick=()=>o.remove(); document.body.appendChild(o);
+}
+async function reissueCard(){
+  if(!_kk) return;
+  if(!(await confirmDialog('Die bisherige Karte wird ungültig. Eine neue Karte mit neuem Strichcode wird ausgestellt.',{title:'Neue Karte ausstellen?',confirmText:'Neu ausstellen',danger:true}))) return;
+  const { error }=await sb.from('kundenkarten').update({ revoked_at:new Date().toISOString() }).eq('id',_kk.rowId);
+  if(error){ showToast('Konnte die alte Karte nicht sperren.','⚠'); return; }
+  delete S.karten[cardKey(_kk.type,_kk.id)];
+  const c=await issueCard(_kk.type,_kk.id); if(!c) return;
+  _kk.code=c.code; _kk.rowId=c.id; renderKk(); showToast('Neue Karte ausgestellt. ✓');
+}
+function printKk(){
+  if(!_kk) return;
+  const w=window.open('','_blank'); if(!w){ showToast('Pop-up wurde blockiert.','⚠'); return; }
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Kundenkarte</title><style>@page{size:auto;margin:10mm}body{font-family:system-ui,sans-serif;margin:0;padding:20px;display:flex;justify-content:center}.c{width:85.6mm;height:54mm;border-radius:4mm;background:#14121F;color:#fff;padding:5mm;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact}.t{display:flex;justify-content:space-between;align-items:flex-start}.b{font-weight:800;letter-spacing:.08em}.s{font-size:7pt;opacity:.7;letter-spacing:.14em}.n{font-size:13pt;font-weight:700}.m{font:8pt monospace;opacity:.8}.bc{background:#fff;border-radius:2mm;padding:2mm 2mm 1mm;line-height:0}.bc svg{width:100%;height:14mm;display:block}.bn{font:6.5pt monospace;color:#14121F;text-align:center;letter-spacing:.18em;margin-top:.8mm;line-height:1}</style><div class="c"><div class="t"><div><div class="b">NicoFlow</div><div class="s">KUNDENKARTE</div></div></div><div><div class="n">${escapeHtml(_kk.name)}</div><div class="m">${fmtCard(_kk.code)}</div></div><div class="bc">${barcodeSvg(_kk.code,'#000')}<div class="bn">${fmtCard(_kk.code)}</div></div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
+  w.document.close();
+}
+function saveKkImage(){
+  if(!_kk) return;
+  const W=1011,H=638,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const rr=(a,b,w,h,r)=>{ x.beginPath(); if(x.roundRect) x.roundRect(a,b,w,h,r); else x.rect(a,b,w,h); };
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#14121F'); g.addColorStop(1,'#3d3560');
+  x.fillStyle=g; rr(0,0,W,H,36); x.fill();
+  x.fillStyle='#fff'; x.font='800 46px system-ui,sans-serif'; x.fillText('NicoFlow',56,92);
+  x.globalAlpha=.7; x.font='600 22px system-ui,sans-serif'; x.fillText('KUNDENKARTE',58,128);
+  x.globalAlpha=1; x.font='700 46px system-ui,sans-serif'; x.fillText(_kk.name,56,244);
+  x.globalAlpha=.8; x.font='500 26px monospace'; x.fillText(fmtCard(_kk.code),56,290); x.globalAlpha=1;
+  x.fillStyle='#fff'; rr(36,330,W-72,274,24); x.fill();
+  drawBarcode(x,_kk.code,56,352,W-112,176);
+  x.fillStyle='#14121F'; x.font='600 24px monospace'; x.textAlign='center'; x.fillText(fmtCard(_kk.code).split('').join(' '),W/2,572); x.textAlign='left';
+  c.toBlob(async blob=>{
+    const f=new File([blob],'kundenkarte.png',{type:'image/png'});
+    if(navigator.canShare?.({files:[f]})){ try{ await navigator.share({files:[f]}); return; }catch(e){ if(e.name==='AbortError') return; } }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`kundenkarte-${_kk.name.replace(/\W+/g,'-')}.png`; a.click();
+  });
 }
 // ── "Wer holt ab?" ───────────────────────────────────────────────────────────
 // Optionales Notizfeld beim Abholcode-Dialog, falls nicht der Kunde selbst abholt — landet
@@ -5856,6 +5924,7 @@ let _acScanCtx=null;
 let _acScanTrack=null;
 let _acScanTorchOn=false;
 let _acScanStartTime=0;
+let _acLastWarn=0;
 
 function setScanStatus(text){
   const el=document.getElementById('ac-scan-status');
@@ -5871,8 +5940,8 @@ async function toggleAbholcodeScanner(){
     showToast('Kamera-Zugriff wird von diesem Browser nicht unterstützt.','⚠');
     return;
   }
-  if(!window.jsQR){
-    showToast('QR-Erkennung konnte nicht geladen werden (Internetverbindung prüfen). Code bitte manuell eingeben.','⚠');
+  if(!('BarcodeDetector' in window) && !window.ZXing && !window.jsQR){
+    showToast('Strichcode-Erkennung konnte nicht geladen werden (Internetverbindung prüfen). Nummer bitte manuell eingeben.','⚠');
     return;
   }
   if(!window.isSecureContext){
@@ -5885,8 +5954,8 @@ async function toggleAbholcodeScanner(){
   // Bevorzugt mit Autofokus (hilft bei kleinen/nahen QR-Codes) — manche Browser/Geräte
   // unterstützen focusMode aber nicht und würden die ganze Anfrage sonst ablehnen
   // (OverconstrainedError), deshalb hier ein Fallback ohne diese Option.
-  const constraintsWithFocus = { video:{ facingMode:{ideal:'environment'}, width:{ideal:960,max:1280}, height:{ideal:720,max:960}, advanced:[{focusMode:'continuous'}] } };
-  const constraintsFallback  = { video:{ facingMode:{ideal:'environment'}, width:{ideal:960,max:1280}, height:{ideal:720,max:960} } };
+  const constraintsWithFocus = { video:{ facingMode:{ideal:'environment'}, width:{ideal:1280,max:1920}, height:{ideal:720,max:1080}, advanced:[{focusMode:'continuous'}] } };
+  const constraintsFallback  = { video:{ facingMode:{ideal:'environment'}, width:{ideal:1280,max:1920}, height:{ideal:720,max:1080} } };
   try{
     try{
       _acScanStream = await navigator.mediaDevices.getUserMedia(constraintsWithFocus);
@@ -5919,7 +5988,7 @@ async function toggleAbholcodeScanner(){
   _acScanCtx=canvas.getContext('2d', { willReadFrequently:true });
   _acScanTrack=_acScanStream.getVideoTracks()[0]||null;
   setupTorchButton();
-  setScanStatus('Halte den QR-Code ruhig vor die Kamera…');
+  setScanStatus('Halte den Strichcode quer und ruhig in den Rahmen…'); _bcInit();
   _acScanStartTime=Date.now();
   _acScanLoop();
 }
@@ -5960,37 +6029,73 @@ function stopAbholcodeScanner(){
   if(torchBtn){ torchBtn.style.display='none'; torchBtn.classList.remove('active'); }
   setScanStatus(null);
   const btn=document.getElementById('ac-scan-toggle-btn');
-  if(btn){ btn.disabled=false; btn.textContent='📷 QR-Code stattdessen scannen'; }
+  if(btn){ btn.disabled=false; btn.textContent='📷 Scanner starten'; }
 }
 // Kamera nie unbemerkt im Hintergrund weiterlaufen lassen (App-Wechsel, Tab verlassen etc.)
 // — schont Akku/Privatsphäre, falls das Modal aus irgendeinem Grund offen bleibt.
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='hidden' && _acScanStream) stopAbholcodeScanner();
 });
-function _acScanLoop(){
+// Erkennung: native BarcodeDetector (Chrome/Android/Edge) → ZXing (iPhone/Safari/Firefox) → jsQR
+// nur noch für früher ausgegebene QR-Karten.
+let _bcDet=null, _zxReader=null, _bcBusy=false, _bcFrame=0;
+function _bcInit(){
+  _bcFrame=0; _bcBusy=false;
+  try{ if(!_bcDet && 'BarcodeDetector' in window) _bcDet=new BarcodeDetector({ formats:['code_128','qr_code'] }); }catch(e){ _bcDet=null; }
+  try{
+    if(!_zxReader && window.ZXing){
+      const h=new Map(); h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.CODE_128]); h.set(ZXing.DecodeHintType.TRY_HARDER,true);
+      _zxReader=new ZXing.MultiFormatReader(); _zxReader.setHints(h);
+    }
+  }catch(e){ _zxReader=null; }
+}
+function _zxDecode(img,w,h){
+  if(!_zxReader) return null;
+  // nur den mittleren Streifen (Rahmen) auswerten — schneller und weniger Fehltreffer
+  const y0=Math.floor(h*.25), y1=Math.floor(h*.75), x0=Math.floor(w*.03), x1=Math.floor(w*.97), cw=x1-x0, ch=y1-y0;
+  const lum=new Uint8ClampedArray(cw*ch), d=img.data;
+  for(let y=0;y<ch;y++){ let si=((y+y0)*w+x0)*4, di=y*cw; for(let x=0;x<cw;x++,si+=4) lum[di+x]=(d[si]*299+d[si+1]*587+d[si+2]*114)/1000; }
+  try{ return _zxReader.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.RGBLuminanceSource(lum,cw,ch)))).getText(); }
+  catch(e){ return null; }
+}
+function _bcHandle(raw){
+  const code=String(raw||'').trim(); if(!code) return false;
+  if(/^NFK[-A-Za-z0-9]{12,}$/.test(code)){
+    navigator.vibrate?.(80);
+    stopAbholcodeScanner(); setScanStatus(null); verifyCardCode(code); return true;
+  }
+  if(Date.now()-_acLastWarn>2500){ _acLastWarn=Date.now(); setScanStatus('Das ist keine NicoFlow-Kundenkarte.'); }
+  return false;
+}
+async function _acScanLoop(){
   const video=document.getElementById('ac-scan-video');
   const canvas=document.getElementById('ac-scan-canvas');
-  if(!video || !canvas || !_acScanCtx || video.readyState!==video.HAVE_ENOUGH_DATA || !window.jsQR){
+  if(!_acScanStream) return;
+  if(!video || !canvas || !_acScanCtx || video.readyState!==video.HAVE_ENOUGH_DATA || _bcBusy){
     _acScanRAF=requestAnimationFrame(_acScanLoop);
     return;
   }
-  if(canvas.width!==video.videoWidth) canvas.width=video.videoWidth;
-  if(canvas.height!==video.videoHeight) canvas.height=video.videoHeight;
-  _acScanCtx.drawImage(video,0,0,canvas.width,canvas.height);
-  const img=_acScanCtx.getImageData(0,0,canvas.width,canvas.height);
-  const result=jsQR(img.data, img.width, img.height, { inversionAttempts:'attemptBoth' });
-  if(result && result.data){
-    const code=result.data.trim().toUpperCase();
-    if(code.length>=4){
-      setScanStatus('Code erkannt ✓');
-      document.getElementById('ac-input').value=code.slice(0,4);
-      stopAbholcodeScanner();
-      _submitAbholcodeConfirm();
-      return;
+  _bcBusy=true;
+  try{
+    if(canvas.width!==video.videoWidth) canvas.width=video.videoWidth;
+    if(canvas.height!==video.videoHeight) canvas.height=video.videoHeight;
+    _acScanCtx.drawImage(video,0,0,canvas.width,canvas.height);
+    _bcFrame++;
+    let found=null;
+    if(_bcDet){
+      try{ const r=await _bcDet.detect(canvas); if(r&&r.length) found=r[0].rawValue; }catch(e){ _bcDet=null; }
+    } else if(_zxReader && _bcFrame%2===0){
+      found=_zxDecode(_acScanCtx.getImageData(0,0,canvas.width,canvas.height),canvas.width,canvas.height);
     }
-  }
+    if(!found && window.jsQR && _bcFrame%4===0){
+      const img=_acScanCtx.getImageData(0,0,canvas.width,canvas.height);
+      const q=jsQR(img.data,img.width,img.height,{ inversionAttempts:'dontInvert' }); if(q&&q.data) found=q.data;
+    }
+    if(found && _bcHandle(found)){ _bcBusy=false; return; }
+  } finally { _bcBusy=false; }
+  if(!_acScanStream) return;
   if(_acScanStartTime && (Date.now()-_acScanStartTime)>6000){
-    setScanStatus('Noch kein Code erkannt — näher heran, ruhig halten oder mehr Licht.');
+    setScanStatus('Noch nichts erkannt — Karte quer halten, Abstand ändern, ruhig halten oder mehr Licht.');
   }
   _acScanRAF=requestAnimationFrame(_acScanLoop);
 }
@@ -6802,14 +6907,12 @@ function countOpenPickupsFor(b){ return openPickupsFor(b).length; }
 let _batchPickupList=[];
 function _openBatchPickupList(list, label){
   _batchPickupList = list;
-  document.getElementById('bp-hint').textContent = `${list.length} offene Bestellungen von ${label}. Ein Klick markiert alle auf einmal als bezahlt/abgeholt.`;
+  document.getElementById('bp-hint').textContent = `${list.length} offene Bestellungen von ${label}. Zum Abschließen wird die Kundenkarte gescannt.`;
   document.getElementById('bp-list').innerHTML = list.map(x=>{
     const prods=x.items.map(it=>{const p=PROD_MAP[it.prod];return p?`${p.icon} ${it.stueck}×`:''}).join(' ');
     return `<div class="batch-item"><div class="bi-main">#${String(x.id).padStart(5,'0')} · ${fmtDate(x.date)} · ${prods}</div><div class="mono" style="font-weight:700">${fmt(displayTotal(x))}</div></div>`;
   }).join('') || '<div class="ps">Keine weiteren offenen Bestellungen.</div>';
-  document.getElementById('bp-sig-error').style.display='none';
   openModal('batch-pickup');
-  initSignaturePad('bp-sig-canvas');
 }
 function openBatchPickup(){
   const b=S.bestellungen.find(x=>x.id===currentDetailOrderId);
@@ -6827,21 +6930,14 @@ function openBatchPickupForLieferant(){
   _openBatchPickupList(list, 'deinem Lieferanten');
 }
 async function batchCompleteAll(){
-  const list=_batchPickupList;
-  if(!list.length) return;
-  if(isSignaturePadEmpty('bp-sig-canvas')){
-    document.getElementById('bp-sig-error').style.display='block';
-    return;
+  const list=_batchPickupList; if(!list.length) return;
+  // Eigene Bestellungen beim Lieferanten (ich bin der Empfänger): keine Karte nötig, nur bestätigen.
+  if(list.every(x=>x.fuerLieferant && x.userId===currentUserId)){
+    if(!(await confirmDialog(`${list.length} Bestellungen werden auf einmal als angekommen UND bezahlt markiert.`,{title:'Alle abschließen?',confirmText:'Alle abschließen',danger:false}))) return;
+    for(const x of list){ if(!x.delivered) await setDelivered(x.id,true); if(!x.paid) await setPaid(x.id,true); }
+    closeModal('batch-pickup'); showToast(`${list.length} Bestellungen abgeschlossen. ✓`); return;
   }
-  const signatureDataUrl = getSignatureDataUrl('bp-sig-canvas');
-  if(!(await confirmDialog(`${list.length} Bestellungen werden auf einmal als angekommen/abgeholt UND bezahlt markiert.`, {title:'Alle abschließen?', confirmText:'Alle abschließen', danger:false})))return;
-  for(const x of list){
-    if(!x.delivered) await setDelivered(x.id, true);
-    if(!x.paid) await setPaid(x.id, true);
-    await saveUnterschrift(x.id, signatureDataUrl);
-  }
-  closeModal('batch-pickup');
-  showToast(`${list.length} Bestellungen abgeschlossen. ✓`);
+  closeModal('batch-pickup'); openCardScan(list.map(x=>x.id),'batch');
 }
 // ── Abholstatistik ───────────────────────────────────────────────────────────
 // Durchschnittliche Zeit zwischen "angekommen/bestellt" und "abgeholt/bezahlt" — zeigt, ob
@@ -7395,6 +7491,7 @@ function renderSettings(){
   }
   const isBesteller = role==='besteller';
   ['pwc-old','pwc-new','pwc-new2'].forEach(id=>applyModusToInput(document.getElementById(id), selfModus(), id==='pwc-old'));
+  { const kc=document.getElementById('set-card-karte'); if(kc) kc.style.display=(role==='user'||role==='besteller')?'':'none'; }
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
