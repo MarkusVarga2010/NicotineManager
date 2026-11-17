@@ -1208,6 +1208,25 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .trk-n{font-size:12px;color:var(--ink-soft);margin-top:4px}
 .trk-form{border:1px solid var(--line2);border-radius:var(--r);padding:14px;margin:14px 0;background:var(--paper2)}
 .trk-form .mr2{margin-bottom:8px}
+
+/* ── Struktur: Menü-Bereiche, Kontotypen ── */
+.nav-group{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;padding:16px 14px 6px}
+#scalebar .nav-group:first-child{padding-top:6px}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:16px}
+.role-card{border:1px solid var(--line2);border-radius:var(--r-lg);padding:12px;background:var(--paper2);display:flex;flex-direction:column;gap:6px}
+.role-card-top{display:flex;justify-content:space-between;align-items:center}
+.role-ic{font-size:20px}
+.role-count{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;background:var(--sage-bg);color:var(--sage-deep);padding:2px 9px;border-radius:12px}
+.role-name{font-weight:700;font-size:13px}
+.role-desc{font-size:11px;color:var(--ink-soft);line-height:1.45;flex:1}
+.ul-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line2);background:var(--paper2);color:var(--ink-soft);border-radius:20px;padding:4px 11px;font-size:11px;cursor:pointer;font-family:inherit}
+.chip.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.ul-group{margin-top:12px}
+.ul-group-head{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);padding:6px 0;border-bottom:2px solid var(--line2);display:flex;gap:8px;align-items:center}
+.ul-group-head span{font-family:'JetBrains Mono',monospace;color:var(--ink-faint);font-weight:400}
+.ul-meta{font-size:10px;color:var(--ink-faint);margin-left:8px}
 </style>
 </head>
 <body>
@@ -1316,6 +1335,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
     </div>
     <div class="login-card" id="login-card-register" style="display:none">
       <div class="fw"><label class="fl" data-i18n="reg.username">Benutzername wählen</label><input id="reg-user" placeholder="z.B. max.muster" autocomplete="username" autocapitalize="off" oninput="clearFieldError('reg-user')"/><div class="field-err" id="reg-user-err"></div></div>
+      <div class="fw"><label class="fl">Anmeldung per</label><select id="reg-modus" onchange="regModusChanged()"><option value="passwort">🔑 Passwort</option><option value="pin">🔢 PIN (nur Ziffern)</option></select></div>
       <div class="fw"><label class="fl" data-i18n="login.password">Passwort</label><input type="password" id="reg-pw" placeholder="mind. 6 Zeichen" autocomplete="new-password" oninput="clearFieldError('reg-pw')"/><div class="field-err" id="reg-pw-err"></div></div>
       <div class="fw"><label class="fl" data-i18n="reg.password2">Passwort wiederholen</label><input type="password" id="reg-pw2" placeholder="••••••••" autocomplete="new-password" oninput="clearFieldError('reg-pw2')" onkeydown="if(event.key==='Enter')doRegister()"/><div class="field-err" id="reg-pw2-err"></div></div>
       <button class="primary-btn" id="reg-btn" onclick="doRegister()" data-i18n="reg.submit">Registrieren →</button>
@@ -1353,17 +1373,22 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       </div>
 
       <nav class="scalebar" id="scalebar">
+        <div class="nav-group">Shop</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" id="nav-besteller-tick" style="display:none" onclick="nav('besteller');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span>Meine Bestellungen</span></div>
+        <div class="nav-group">Übersicht</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span><span data-i18n="nav.dashboard">Übersicht</span></div>
+        <div class="nav-group">Verkauf</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span><span data-i18n="nav.bestellungen">Bestellungen</span><span class="tk-dot" id="tk-dot-bestellungen"></span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span data-i18n="nav.lieferant">Lieferant &amp; Schulden</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span><span data-i18n="nav.kunden">Kunden</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span><span data-i18n="nav.lieferantenkunden">Lieferantenkunden</span></div>
+        <div class="nav-group">Lager &amp; Preise</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('preise');closeSidebar()"><span class="tk-n">05</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-tag"/></svg></span><span data-i18n="nav.preise">Preise</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span><span data-i18n="nav.lagerbestand">Lagerbestand</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span><span data-i18n="nav.eigenverbrauch">Eigenverbrauch</span></div>
+        <div class="nav-group">Konto &amp; System</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" id="nav-besteller-tick" style="display:none" onclick="nav('besteller');closeSidebar()"><span class="tk-n">10</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span>Meine Bestellungen</span></div>
       </nav>
       <div class="sb-footer">
         <div class="tb-user">
@@ -1762,11 +1787,11 @@ create policy "eigenverbrauch eigener user"
           <div class="scb">
             <div style="margin-bottom:12px"><label class="fl">Benutzername</label><input id="set-user" disabled style="opacity:.6;cursor:not-allowed"/></div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
-              <label class="fl" style="margin-bottom:8px">🔒 Passwort ändern</label>
+              <label class="fl" style="margin-bottom:8px">🔒 Passwort / PIN ändern</label>
               <div style="margin-bottom:8px"><input type="password" id="pwc-old" placeholder="Aktuelles Passwort" autocomplete="current-password" oninput="clearFieldError('pwc-old')"/><div class="field-err" id="pwc-old-err"></div></div>
               <div style="margin-bottom:8px"><input type="password" id="pwc-new" placeholder="Neues Passwort" autocomplete="new-password" oninput="clearFieldError('pwc-new')"/><div class="field-err" id="pwc-new-err"></div></div>
               <div style="margin-bottom:10px"><input type="password" id="pwc-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password" oninput="clearFieldError('pwc-new2')" onkeydown="if(event.key==='Enter')changeOwnPassword()"/><div class="field-err" id="pwc-new2-err"></div></div>
-              <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="changeOwnPassword()">Passwort ändern</button></div>
+              <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="changeOwnPassword()">Speichern</button></div>
             </div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
               <label class="fl" style="margin-bottom:5px">📞 Telefon &amp; Adresse (optional)</label>
@@ -1786,11 +1811,6 @@ alter table profiles add column if not exists adresse text;</pre>
               <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="saveOwnLink()">Lieferant speichern</button></div>
             </div>
           </div>
-        </div>
-        <div class="set-card" id="set-card-push">
-          <div class="sch"><div class="sch-ic">🔔</div><div><h3>Push-Nachrichten</h3><p>Neue Bestellungen aufs Handy</p></div></div>
-          <div class="ps" id="push-status" style="margin-bottom:12px"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="push-on" onclick="enablePush()">🔔 Aktivieren</button><button class="btn btn-ghost btn-sm" id="push-off" onclick="disablePush()" style="display:none">Deaktivieren</button></div>
         </div>
         <div class="set-card" id="set-card-anzeige">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-palette"/></svg></div><div><h3 data-i18n="set.card.anzeige.title">Anzeige</h3><p data-i18n="set.card.anzeige.sub">Design anpassen</p></div></div>
@@ -1821,19 +1841,24 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="set-card" id="set-card-benutzer">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></div><div><h3>Benutzer</h3><p>Zugänge verwalten</p></div></div>
           <div class="scb">
+            <div class="role-grid" id="role-grid"></div>
+            <div class="ul-tools"><input type="search" id="ul-search" placeholder="🔍 Benutzer suchen…" oninput="renderUserList()"/><div class="chips" id="ul-chips"></div></div>
             <div id="user-list"></div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:8px">
-              <div class="sr-label" style="margin-bottom:9px">Neuer Benutzer</div>
-              <div class="mr2" style="margin-bottom:8px"><input id="nu-name" placeholder="Benutzername"/><input type="password" id="nu-pw" placeholder="Passwort"/></div>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:10px;cursor:pointer"><input type="checkbox" id="nu-relaxed" style="width:auto;margin:0"/> Kurzes Passwort erlauben (beliebig wenige Zeichen)</label>
-              <div style="margin-bottom:10px"><label class="fl" style="margin-bottom:5px">Rolle</label>
-                <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="service">Service-Account</option><option value="special">Spezial-Konto</option><option value="besteller">Besteller</option></select>
+              <div class="sr-label" style="margin-bottom:9px">Neuen Account anlegen</div>
+              <div class="mr2" style="margin-bottom:6px">
+                <div><label class="fl" style="margin-bottom:5px">Kontotyp</label>
+                  <select id="nu-role" onchange="onNuRoleChange()"><option value="user">Benutzer</option><option value="special">Spezial-Konto (Lieferant)</option><option value="besteller">Besteller</option><option value="admin">Administrator</option><option value="service">Service-Account</option></select></div>
+                <div><label class="fl" style="margin-bottom:5px">Anmeldung per</label>
+                  <select id="nu-modus" onchange="onNuRoleChange()"><option value="passwort">🔑 Passwort</option><option value="pin">🔢 PIN</option></select></div>
               </div>
+              <div class="ps" id="nu-role-desc" style="margin-bottom:10px"></div>
+              <div class="mr2" style="margin-bottom:10px"><input id="nu-name" placeholder="Benutzername" autocapitalize="off"/><input type="password" id="nu-pw" placeholder="Vorläufiges Passwort"/></div>
               <div style="margin-bottom:10px" id="nu-linked-wrap"><label class="fl" style="margin-bottom:5px;color:var(--lieferant-deep)">◆ Verknüpft mit (Spezial-Konto)</label>
                 <select id="nu-linked"><option value="">Keine Verknüpfung</option></select>
                 <div class="ps" style="margin-top:5px">Der Benutzer kann Bestellungen dann wahlweise an dieses Spezial-Konto übermitteln.</div>
               </div>
-              <button class="btn btn-ghost btn-sm" onclick="addUser()" style="width:100%;justify-content:center">＋ Benutzer anlegen</button>
+              <button class="btn btn-ghost btn-sm" onclick="addUser()" style="width:100%;justify-content:center">＋ Account anlegen</button>
             </div>
           </div>
         </div>
@@ -2113,7 +2138,7 @@ alter table profiles add column if not exists adresse text;</pre>
 
 <div class="modal-bg" id="modal-pwforce">
   <div class="modal">
-    <div class="modal-head"><h3><span style="margin-right:8px">🔒</span>Neues Passwort festlegen</h3></div>
+    <div class="modal-head"><h3><span style="margin-right:8px">🔒</span>Neues Passwort / neue PIN festlegen</h3></div>
     <div class="modal-body">
       <div class="ps" style="margin-bottom:14px">Dein Konto wurde mit einem vorläufigen Passwort eingerichtet. Bitte lege jetzt ein eigenes Passwort fest, um fortzufahren.</div>
       <div class="fw"><label class="fl">Neues Passwort</label><input type="password" id="fpw-new" placeholder="Neues Passwort" autocomplete="new-password" oninput="clearFieldError('fpw-new')"/><div class="field-err" id="fpw-new-err"></div></div>
@@ -2135,9 +2160,9 @@ alter table profiles add column if not exists adresse text;</pre>
       </div>
       <div class="mr2" style="margin-bottom:12px"><div><label class="fl">Telefon</label><input id="eu-telefon" maxlength="40"/></div><div><label class="fl">Adresse</label><input id="eu-adresse" maxlength="120"/></div></div>
       <div style="border-top:1px solid var(--line);padding-top:14px">
-        <label class="fl" style="margin-bottom:6px">🔑 Neues Passwort setzen (optional)</label>
+        <label class="fl" style="margin-bottom:6px">🔑 Zugangsdaten</label>
         <input type="password" id="eu-pw" placeholder="Leer lassen = Passwort bleibt" autocomplete="new-password"/>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:8px;cursor:pointer"><input type="checkbox" id="eu-relaxed" style="width:auto;margin:0"/> Kurzes Passwort erlauben (beliebig wenige Zeichen)</label>
+        <div style="margin-top:8px"><label class="fl" style="margin-bottom:5px">Anmeldung per</label><select id="eu-modus" onchange="applyModusToInput(document.getElementById('eu-pw'),this.value,false,true)"><option value="passwort">🔑 Passwort (mind. 6 Zeichen)</option><option value="pin">🔢 PIN (4–8 Ziffern)</option></select></div>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:8px;cursor:pointer"><input type="checkbox" id="eu-force" checked style="width:auto;margin:0"/> Benutzer muss es beim nächsten Login ändern</label>
       </div>
     </div>
@@ -2476,7 +2501,7 @@ const I18N = {
     'app.tagline':'Bestand · Bestellungen · Dosierung',
     'login.access':'ZUGANG',
     'login.username':'Benutzername',
-    'login.password':'Passwort',
+    'login.password':'Passwort / PIN',
     'login.submit':'Anmelden →',
     'login.hint-prefix':'Standard:',
     'reg.username':'Benutzername wählen',
@@ -2617,7 +2642,7 @@ const I18N = {
     'app.tagline':'Stock · Orders · Dosing',
     'login.access':'ACCESS',
     'login.username':'Username',
-    'login.password':'Password',
+    'login.password':'Password / PIN',
     'login.submit':'Log in →',
     'login.hint-prefix':'Default:',
     'reg.username':'Choose a username',
@@ -3097,7 +3122,6 @@ async function onLoggedIn(authUser, displayName){
   if(bootLoading) bootLoading.style.display='none';
   // Beim ersten Login (first_login) muss ein eigenes Passwort festgelegt werden. Erst danach
   // geht es weiter — bei Benutzer/Spezial-Konten mit der Einführungstour.
-  startRealtime(); syncPushSubscription();
   if(prof.first_login){
     forcePasswordChange().then(()=>{
       if(prof.role==='user' || prof.role==='special') startTour(); else checkWhatsNew();
@@ -3107,7 +3131,7 @@ async function onLoggedIn(authUser, displayName){
   }
 }
 async function doLogout(){
-  closeModal('pwforce'); stopRealtime();
+  closeModal('pwforce');
   await sb.auth.signOut();
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -3250,7 +3274,7 @@ function closeSidebar(){
 // NAVIGATION
 // ══════════════════════════════════════════════
 const PAGE_NAMES={besteller:'Meine Bestellungen',dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service','besteller'];
+const NAV_IDS=['besteller','dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service'];
 function nav(id){
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
@@ -3300,23 +3324,26 @@ function setAuthMode(mode){
   ['reg-user','reg-pw','reg-pw2'].forEach(clearFieldError);
   document.getElementById('reg-err').style.display='none';
   document.getElementById('login-err').style.display='none';
+  regModusChanged();
 }
+function regModusChanged(){ const m=document.getElementById('reg-modus').value; applyModusToInput(document.getElementById('reg-pw'),m); applyModusToInput(document.getElementById('reg-pw2'),m,true); }
 async function doRegister(){
   const u = document.getElementById('reg-user').value.trim();
   const p1 = document.getElementById('reg-pw').value;
   const p2 = document.getElementById('reg-pw2').value;
+  const modus = document.getElementById('reg-modus').value;
   const errBox = document.getElementById('reg-err');
   errBox.style.display='none';
   ['reg-user','reg-pw','reg-pw2'].forEach(clearFieldError);
   let bad=false;
   if(!/^[A-Za-z0-9._-]{3,30}$/.test(u)){ setFieldError('reg-user','3–30 Zeichen: Buchstaben, Zahlen, Punkt, Binde- und Unterstrich.'); bad=true; }
-  if(p1.length<6){ setFieldError('reg-pw','Mindestens 6 Zeichen.'); bad=true; }
+  { const e=checkSecret(modus,p1); if(e){ setFieldError('reg-pw',e); bad=true; } }
   if(p2!==p1){ setFieldError('reg-pw2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
   const btn=document.getElementById('reg-btn'); btn.disabled=true; btn.style.opacity=.6;
   const name=u.toLowerCase();
   const fail=(msg)=>{ btn.disabled=false; btn.style.opacity=1; errBox.textContent=msg; errBox.style.display='block'; };
-  const { data, error } = await sb.auth.signUp({ email: toEmail(name), password: p1 });
+  const { data, error } = await sb.auth.signUp({ email: toEmail(name), password: modus==='pin' ? randomPw() : p1 });
   if(error){
     fail(/registered|exists|already/i.test(error.message||'') ? 'Dieser Benutzername ist bereits vergeben.' : (error.message||'Registrierung fehlgeschlagen.'));
     return;
@@ -3327,7 +3354,7 @@ async function doRegister(){
     fail('Registrierung derzeit nicht möglich. Bitte wende dich an einen Administrator.');
     return;
   }
-  const { error: rErr } = await sb.rpc('register_besteller', { p_username: name });
+  const { error: rErr } = await sb.rpc('register_besteller', { p_username: name, p_modus: modus, p_secret: p1 });
   if(rErr){ await sb.auth.signOut(); fail(rErr.message||'Konto konnte nicht eingerichtet werden.'); return; }
   btn.disabled=false; btn.style.opacity=1;
   document.getElementById('reg-pw').value=''; document.getElementById('reg-pw2').value='';
@@ -3612,13 +3639,18 @@ async function saveSendungStatus(id){
 // ══════════════════════════════════════════════
 // PASSWORT ÄNDERN (selbst) + ERSTER LOGIN + ADMIN: BENUTZER BEARBEITEN
 // ══════════════════════════════════════════════
-function pwMinSelf(){ return M.profile?.pw_relaxed ? 1 : 6; }
-function pwShortMsg(){ return pwMinSelf()===1 ? 'Bitte ein Passwort eingeben.' : 'Mindestens 6 Zeichen.'; }
+// Anmeldeart je Konto: 'passwort' (mind. 6 Zeichen) oder 'pin' (4–8 Ziffern)
+const AUTH_MODI={ passwort:{re:/^.{6,72}$/, err:'Mindestens 6 Zeichen.', ph:'Passwort (mind. 6 Zeichen)'}, pin:{re:/^[0-9]{4,8}$/, err:'PIN: 4–8 Ziffern.', ph:'PIN (4–8 Ziffern)'} };
+function checkSecret(modus,v){ const m=AUTH_MODI[modus]||AUTH_MODI.passwort; return m.re.test(v||'') ? '' : m.err; }
+function selfModus(){ return M.profile?.auth_modus||'passwort'; }
+function randomPw(){ return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(36)).join('')+'Aa1!'; }
+function applyModusToInput(el, modus, keepPlaceholder, temp){
+  if(!el) return;
+  el.setAttribute('inputmode', modus==='pin' ? 'numeric' : 'text');
+  if(!keepPlaceholder) el.placeholder = temp ? (modus==='pin' ? 'Vorläufige PIN (4–8 Ziffern)' : 'Vorläufiges Passwort (mind. 6 Zeichen)') : AUTH_MODI[modus].ph;
+}
 async function applyNewPassword(pw){
-  // Konten mit "kurzes Passwort erlaubt" umgehen die Mindestlänge von Supabase Auth über eine Server-Funktion.
-  const { error } = M.profile?.pw_relaxed
-    ? await sb.rpc('set_own_password', { p_password: pw })
-    : await sb.auth.updateUser({ password: pw });
+  const { error } = await sb.rpc('set_own_secret', { p_secret: pw });
   if(error) return error;
   await sb.from('profiles').update({ first_login:false }).eq('id', currentUserId);
   if(M.profile) M.profile.first_login=false;
@@ -3636,7 +3668,7 @@ async function changeOwnPassword(){
   ['pwc-old','pwc-new','pwc-new2'].forEach(clearFieldError);
   let bad=false;
   if(!old){ setFieldError('pwc-old','Bitte aktuelles Passwort eingeben.'); bad=true; }
-  if(n1.length<pwMinSelf()){ setFieldError('pwc-new',pwShortMsg()); bad=true; }
+  { const e=checkSecret(selfModus(),n1); if(e){ setFieldError('pwc-new',e); bad=true; } }
   if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
   const { error: vErr } = await sb.auth.signInWithPassword({ email: toEmail(currentUser), password: old });
@@ -3649,6 +3681,7 @@ async function changeOwnPassword(){
 let _pwForceResolve=null;
 function forcePasswordChange(){
   document.getElementById('fpw-new').value=''; document.getElementById('fpw-new2').value='';
+  applyModusToInput(document.getElementById('fpw-new'), selfModus()); applyModusToInput(document.getElementById('fpw-new2'), selfModus(), true);
   openModal('pwforce');
   setTimeout(()=>document.getElementById('fpw-new')?.focus(),100);
   return new Promise(res=>{ _pwForceResolve=res; });
@@ -3658,7 +3691,8 @@ async function submitForcedPassword(){
   ['fpw-new','fpw-new2'].forEach(clearFieldError);
   const temp=document.getElementById('inp-pw')?.value||'';
   let bad=false;
-  if(n1.length<pwMinSelf()){ setFieldError('fpw-new',pwShortMsg()); bad=true; }
+  const eS=checkSecret(selfModus(),n1);
+  if(eS){ setFieldError('fpw-new',eS); bad=true; }
   else if(temp && n1===temp){ setFieldError('fpw-new','Bitte wähle ein anderes Passwort als das vorläufige.'); bad=true; }
   if(n2!==n1){ setFieldError('fpw-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
@@ -3688,7 +3722,7 @@ function openEditUser(id){
   document.getElementById('eu-max').value=u.max_lieferanten||BESTELLER_DEFAULT_MAX;
   document.getElementById('eu-telefon').value=u.telefon||'';
   document.getElementById('eu-adresse').value=u.adresse||'';
-  document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true; document.getElementById('eu-relaxed').checked=!!u.pw_relaxed;
+  document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true; document.getElementById('eu-modus').value=u.auth_modus||'passwort'; applyModusToInput(document.getElementById('eu-pw'), u.auth_modus||'passwort', false, true); document.getElementById('eu-pw').placeholder='Leer lassen = bleibt unverändert';
   onEuRoleChange();
   openModal('edituser');
 }
@@ -3701,19 +3735,15 @@ async function saveEditUser(){
   const telefon=document.getElementById('eu-telefon').value.trim(), adresse=document.getElementById('eu-adresse').value.trim();
   const pw=document.getElementById('eu-pw').value, force=document.getElementById('eu-force').checked;
   if(name.toLowerCase()!==String(u.username).toLowerCase() && !/^[A-Za-z0-9._-]{3,30}$/.test(name)){ showToast('Benutzername: 3–30 Zeichen (Buchstaben, Zahlen, . _ -).','⚠'); return; }
-  const relaxed=document.getElementById('eu-relaxed').checked;
-  if(pw && pw.length<(relaxed?1:6)){ showToast('Neues Passwort: mindestens 6 Zeichen (oder „Kurzes Passwort erlauben“ aktivieren).','⚠'); return; }
+  const modus=document.getElementById('eu-modus').value, modusChanged=modus!==(u.auth_modus||'passwort');
+  if(modusChanged && !pw){ showToast('Anmeldeart geändert: bitte neue '+(modus==='pin'?'PIN':'neues Passwort')+' setzen.','⚠'); return; }
+  if(pw){ const e=checkSecret(modus,pw); if(e){ showToast(e,'⚠'); return; } }
   const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:linked||null, p_max:max });
   if(error){ showToast(error.message||'Speichern fehlgeschlagen.','⚠'); return; }
-  if(relaxed!==!!u.pw_relaxed){
-    const { error: rE } = await sb.rpc('admin_set_pw_relaxed', { p_user_id:id, p_relaxed:relaxed });
-    if(rE){ showToast(rE.message||'Einstellung konnte nicht gespeichert werden.','⚠'); return; }
-    u.pw_relaxed=relaxed;
-  }
   if(pw){
-    const { error: pErr } = await sb.rpc('admin_set_password', { p_user_id:id, p_password:pw, p_force:force });
-    if(pErr){ showToast(pErr.message||'Passwort konnte nicht gesetzt werden.','⚠'); }
-    else u.first_login=force;
+    const { error: pErr } = await sb.rpc('admin_set_credentials', { p_user_id:id, p_modus:modus, p_secret:pw, p_force:force });
+    if(pErr){ showToast(pErr.message||'Zugangsdaten konnten nicht gesetzt werden.','⚠'); }
+    else { u.first_login=force; u.auth_modus=modus; }
   }
   if(name.toLowerCase()!==String(u.username).toLowerCase()) u.username=name.toLowerCase();
   Object.assign(u,{ role, linked_to:linked||null, telefon:telefon||null, adresse:adresse||null, max_lieferanten:max||u.max_lieferanten });
@@ -3721,72 +3751,6 @@ async function saveEditUser(){
   showToast('Benutzer gespeichert. ✓');
 }
 
-
-// ══════════════════════════════════════════════
-// PUSH-NACHRICHTEN + LIVE-UPDATES
-// Hintergrund-Push: Service Worker (push-sw.js, in sw.js importieren) + Supabase Edge Function
-// "send-push". Live-Updates bei geöffneter App: Supabase Realtime (siehe erweiterungen_setup.sql).
-// ══════════════════════════════════════════════
-const VAPID_PUBLIC_KEY = '';   // ← öffentlichen VAPID-Schlüssel hier eintragen (siehe push_anleitung.md)
-function b64ToU8(b){ const p='='.repeat((4-b.length%4)%4); const r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...r].map(c=>c.charCodeAt(0))); }
-const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
-const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
-function pushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
-async function currentPushSub(){ try{ const reg=await navigator.serviceWorker.ready; return await reg.pushManager.getSubscription(); }catch(e){ return null; } }
-async function updatePushUI(){
-  const st=document.getElementById('push-status'), on=document.getElementById('push-on'), off=document.getElementById('push-off'); if(!st) return;
-  on.style.display=''; off.style.display='none'; on.disabled=false;
-  if(!pushSupported()){
-    st.textContent = isIOS() && !isStandalone() ? 'Auf dem iPhone: Seite in Safari über „Teilen → Zum Home-Bildschirm“ hinzufügen und die App von dort öffnen, dann hier aktivieren.' : 'Dieser Browser unterstützt keine Push-Nachrichten.';
-    on.style.display='none'; return;
-  }
-  if(!VAPID_PUBLIC_KEY){ st.textContent='Push ist noch nicht eingerichtet (VAPID-Schlüssel fehlt, siehe push_anleitung.md).'; on.disabled=true; return; }
-  if(Notification.permission==='denied'){ st.textContent='Benachrichtigungen sind im Browser/Handy blockiert. Bitte in den Einstellungen der Seite erlauben.'; on.style.display='none'; return; }
-  const sub=await currentPushSub();
-  if(sub && Notification.permission==='granted'){ st.textContent='✓ Aktiv — du bekommst Nachrichten, auch wenn die App geschlossen ist.'; on.style.display='none'; off.style.display=''; }
-  else st.textContent = currentRole()==='besteller' ? 'Erhalte eine Nachricht, wenn sich der Status deiner Bestellung ändert.' : 'Erhalte sofort eine Nachricht, wenn eine neue Bestellung eingeht.';
-}
-async function savePushSub(sub){
-  const j=sub.toJSON();
-  return sb.from('push_subscriptions').upsert({ user_id:currentUserId, endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth, user_agent:navigator.userAgent.slice(0,200) }, { onConflict:'endpoint' });
-}
-async function enablePush(){
-  try{
-    if(isIOS() && !isStandalone()){ showToast('Bitte zuerst zum Home-Bildschirm hinzufügen und von dort öffnen.','⚠'); return; }
-    const perm=await Notification.requestPermission();
-    if(perm!=='granted'){ showToast('Benachrichtigungen wurden nicht erlaubt.','⚠'); updatePushUI(); return; }
-    const reg=await navigator.serviceWorker.ready;
-    const sub=(await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64ToU8(VAPID_PUBLIC_KEY) });
-    const { error }=await savePushSub(sub);
-    if(error){ showToast('Konnte nicht gespeichert werden (erweiterungen_setup.sql ausführen).','⚠'); return; }
-    showToast('Push-Nachrichten aktiviert. ✓');
-  }catch(e){ console.warn(e); showToast('Push konnte nicht aktiviert werden.','⚠'); }
-  updatePushUI();
-}
-async function disablePush(){
-  try{ const sub=await currentPushSub(); if(sub){ await sb.from('push_subscriptions').delete().eq('endpoint',sub.endpoint); await sub.unsubscribe(); } }catch(e){ console.warn(e); }
-  showToast('Push-Nachrichten deaktiviert.'); updatePushUI();
-}
-async function syncPushSubscription(){   // Abo nach dem Login still dem Konto zuordnen
-  try{ if(!pushSupported()||!VAPID_PUBLIC_KEY||Notification.permission!=='granted') return; const sub=await currentPushSub(); if(sub) await savePushSub(sub); }catch(e){}
-}
-let _rt=null, _rtTimer=null;
-function startRealtime(){
-  stopRealtime();
-  try{
-    const onChange=(kind)=>async(payload)=>{
-      const r=payload.new||{};
-      if(kind==='order'){ if(!r.fuer_lieferant || r.user_id===currentUserId) return; showToast('🔔 Neue Bestellung eingegangen!'); }
-      else { showToast('📍 Neuer Bestellstatus: '+(({bestaetigt:'Bestätigt',bereit:'Bereit zur Übergabe',unterwegs:'Lieferant ist unterwegs',uebergeben:'Persönlich übergeben'})[r.status]||r.status)); }
-      clearTimeout(_rtTimer); _rtTimer=setTimeout(async()=>{ await loadAllData(); refresh(); if(currentRole()==='besteller' && document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack(); },400);
-    };
-    _rt=sb.channel('nf-live')
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'bestellungen'},onChange('order'))
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'bestell_status_log'},onChange('status'))
-      .subscribe();
-  }catch(e){ console.warn('Realtime nicht verfügbar',e); }
-}
-function stopRealtime(){ try{ if(_rt){ sb.removeChannel(_rt); _rt=null; } }catch(e){} }
 
 // ══════════════════════════════════════════════
 // ROLLEN-UI
@@ -3806,6 +3770,12 @@ function applyRoleUI(){
   const isSpecial = role==='special';
   const lkTick=document.getElementById('nav-lieferantenkunden-tick');
   if(lkTick) lkTick.style.display = (allowed.includes('lieferantenkunden') && isSpecial) ? 'flex' : 'none';
+  // Bereichs-Überschriften nur zeigen, wenn mindestens ein Menüpunkt darunter sichtbar ist
+  document.querySelectorAll('#scalebar .nav-group').forEach(h=>{
+    let n=h.nextElementSibling, any=false;
+    while(n && !n.classList.contains('nav-group')){ if(n.classList.contains('scale-tick') && n.style.display!=='none') any=true; n=n.nextElementSibling; }
+    h.style.display = any ? '' : 'none';
+  });
 }
 
 // ══════════════════════════════════════════════
@@ -7326,7 +7296,7 @@ function renderSettings(){
     }
   }
   const isBesteller = role==='besteller';
-  { const pc=document.getElementById('set-card-push'); if(pc) pc.style.display = isAdmin ? 'none' : ''; if(!isAdmin) updatePushUI(); }
+  ['pwc-old','pwc-new','pwc-new2'].forEach(id=>applyModusToInput(document.getElementById(id), selfModus(), id==='pwc-old'));
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
@@ -7348,33 +7318,59 @@ function fillLinkedUsersSelect(){
   const nu=document.getElementById('nu-linked');
   if(nu) nu.innerHTML='<option value="">Keine Verknüpfung</option>'+opts;
 }
+const ROLE_INFO={
+  admin:{icon:'🛡️',label:'Administrator',desc:'Verwaltet Konten, Rollen und Zugangsdaten.'},
+  special:{icon:'◆',label:'Spezial-Konto (Lieferant)',desc:'Beliefert Kunden: sieht Bestellungen verknüpfter Benutzer und Besteller, setzt Status und Liefertermine.'},
+  user:{icon:'👤',label:'Benutzer',desc:'Verwaltet Kunden, Preise und Lager und bestellt beim verknüpften Lieferanten.'},
+  besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop bei mehreren Lieferanten und verfolgt den Status.'},
+  service:{icon:'🔧',label:'Service-Account',desc:'Zugang für Wartung und Service-Bereich.'}
+};
+const ROLE_ORDER=['admin','special','user','besteller','service'];
+let ulFilter='all';
+function setUlFilter(f){ ulFilter=f; renderUserList(); }
+function presetNewUser(role){
+  document.getElementById('nu-role').value=role; onNuRoleChange();
+  const n=document.getElementById('nu-name'); n.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>n.focus(),300);
+}
 function onNuRoleChange(){
-  const r=document.getElementById('nu-role').value;
-  const wrap=document.getElementById('nu-linked-wrap');
-  if(wrap) wrap.style.display = '';
+  const r=document.getElementById('nu-role').value, m=document.getElementById('nu-modus').value;
+  document.getElementById('nu-linked-wrap').style.display = r==='user' ? '' : 'none';
+  document.getElementById('nu-role-desc').textContent = ROLE_INFO[r]?.desc||'';
+  applyModusToInput(document.getElementById('nu-pw'), m, false, true);
 }
 function renderUserList(){
-  const el=document.getElementById('user-list');if(!el)return;
+  const el=document.getElementById('user-list'); if(!el) return;
   fillLinkedUsersSelect();
-  const specials = M.users.filter(u=>u.role==='special');
-  el.innerHTML=M.users.map(u=>{
-    const linkOpts = specials.filter(s=>s.id!==u.id).map(s=>`<option value="${s.id}" ${u.linked_to===s.id?'selected':''}>${escapeHtml(s.username)}</option>`).join('');
-    const linkSelect = u.role==='besteller'
+  const counts={}; ROLE_ORDER.forEach(r=>counts[r]=M.users.filter(u=>u.role===r).length);
+  const grid=document.getElementById('role-grid');
+  if(grid) grid.innerHTML=ROLE_ORDER.map(r=>{ const i=ROLE_INFO[r]; return `<div class="role-card"><div class="role-card-top"><span class="role-ic">${i.icon}</span><span class="role-count">${counts[r]}</span></div><div class="role-name">${i.label}</div><div class="role-desc">${i.desc}</div><button class="btn btn-ghost btn-sm" onclick="presetNewUser('${r}')">＋ Anlegen</button></div>`; }).join('');
+  const chips=document.getElementById('ul-chips');
+  if(chips) chips.innerHTML=[['all','Alle',M.users.length],...ROLE_ORDER.map(r=>[r,ROLE_INFO[r].label.split(' ')[0],counts[r]])]
+    .map(([k,l,n])=>`<button type="button" class="chip${ulFilter===k?' on':''}" onclick="setUlFilter('${k}')">${l} <b>${n}</b></button>`).join('');
+  const q=(document.getElementById('ul-search')?.value||'').trim().toLowerCase();
+  const specials=M.users.filter(u=>u.role==='special');
+  const row=u=>{
+    const linkOpts=specials.filter(s2=>s2.id!==u.id).map(s2=>`<option value="${s2.id}" ${u.linked_to===s2.id?'selected':''}>${escapeHtml(s2.username)}</option>`).join('');
+    const ctrl = u.role==='besteller'
       ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)" title="Maximale Anzahl Lieferanten pro Bestellung">Max. Lieferanten
           <input type="number" min="1" max="50" value="${u.max_lieferanten||3}" style="width:62px;font-size:11px;padding:5px 8px" onchange="setMaxLieferanten('${u.id}', this.value)"/></label>`
-      : `
-      <select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)">
-        <option value="">Keine Verknüpfung</option>${linkOpts}
-      </select>`;
-    return `
-    <div class="ul-item">
+      : u.role==='user'
+      ? `<select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)"><option value="">Keine Verknüpfung</option>${linkOpts}</select>` : '';
+    return `<div class="ul-item">
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
-      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div><div class="ul-role"><span class="badge ${roleBadgeClass(u.role)}">${roleLabel(u.role)}</span></div></div>
-      ${linkSelect}
+      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div>
+        <div class="ul-role">${u.auth_modus==='pin'?'🔢 PIN':'🔑 Passwort'}${u.first_login?'<span class="ul-meta">⏳ Wechsel beim nächsten Login</span>':''}</div></div>
+      ${ctrl}
       <button class="ic-btn" onclick="openEditUser('${u.id}')" title="Benutzer bearbeiten" aria-label="Benutzer bearbeiten">✏️</button>
       ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
     </div>`;
+  };
+  const groups=ROLE_ORDER.filter(r=>ulFilter==='all'||ulFilter===r).map(r=>{
+    const us=M.users.filter(u=>u.role===r && (!q||String(u.username).toLowerCase().includes(q))).sort((a,b)=>String(a.username).localeCompare(String(b.username),'de'));
+    if(!us.length) return '';
+    return `<div class="ul-group"><div class="ul-group-head">${ROLE_INFO[r].icon} ${ROLE_INFO[r].label} <span>${us.length}</span></div>${us.map(row).join('')}</div>`;
   }).join('');
+  el.innerHTML=groups||'<div class="ps" style="padding:12px 0">Keine Benutzer gefunden.</div>';
 }
 async function setUserLink(userId, linkedTo){
   const { error } = await sb.rpc('set_user_link', { p_user_id:userId, p_linked_to: linkedTo || null });
@@ -7389,16 +7385,18 @@ async function addUser(){
   const p=document.getElementById('nu-pw').value;
   const r=document.getElementById('nu-role').value;
   const linked=document.getElementById('nu-linked')?.value||'';
-  const relaxedNu=!!document.getElementById('nu-relaxed')?.checked;
-  if(!n||p.length<(relaxedNu?1:6)){showToast(relaxedNu?'Name + Passwort eingeben.':'Name + vorläufiges Passwort (≥6 Zeichen) eingeben.','⚠');return;}
-  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:p, p_role:r, p_linked_to: (linked||null) });
+  const modusNu=document.getElementById('nu-modus')?.value||'passwort';
+  const eNu=checkSecret(modusNu,p);
+  if(!n){ showToast('Bitte Benutzernamen eingeben.','⚠'); return; }
+  if(eNu){ showToast(eNu,'⚠'); return; }
+  // Konto mit zufälligem Start-Passwort anlegen, danach PIN/Passwort + Anmeldeart serverseitig setzen
+  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:randomPw(), p_role:r, p_linked_to: (linked||null) });
   if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
-  // Neu angelegte Konten müssen beim ersten Login ein eigenes Passwort setzen.
-  if(relaxedNu) await sb.rpc('admin_set_pw_relaxed', { p_user_id:data, p_relaxed:true });
-  const { error: fErr } = await sb.rpc('admin_set_password', { p_user_id:data, p_password:p, p_force:true });
-  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null), pw_relaxed:relaxedNu });
-  if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (benutzerverwaltung_setup.sql ausführen).','⚠');
-  document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';{const c=document.getElementById('nu-relaxed'); if(c) c.checked=false;}
+  // Neu angelegte Konten müssen beim ersten Login ihre Zugangsdaten selbst festlegen.
+  const { error: fErr } = await sb.rpc('admin_set_credentials', { p_user_id:data, p_modus:modusNu, p_secret:p, p_force:true });
+  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null), auth_modus:modusNu });
+  if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (app_struktur_setup.sql ausführen).','⚠');
+  document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';onNuRoleChange();
   document.getElementById('nu-linked').value='';
   renderUserList();if(!fErr) showToast('Benutzer angelegt — muss beim ersten Login ein neues Passwort setzen. ✓');
 }
