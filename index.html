@@ -2261,7 +2261,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div id="bs-order-items"></div>
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label class="fl" style="margin:0">2 · An welche Lieferanten?</label>
+          <label class="fl" style="margin:0">2 · Empfänger (fest vorgegeben)</label>
           <span class="bs-counter" id="bs-counter"></span>
         </div>
         <div id="bs-suppliers"></div>
@@ -3248,6 +3248,15 @@ async function onLoggedIn(authUser, displayName){
     await sb.auth.signOut();
     return;
   }
+  if(prof.gesperrt){
+    await sb.auth.signOut();
+    currentUserId=null;
+    const le=document.getElementById('login-err');
+    le.textContent='Dieses Konto wurde gesperrt. Bitte wende dich an einen Administrator.';
+    le.style.display='block';
+    document.getElementById('inp-pw').value='';
+    return;
+  }
   M.profile = prof;
   currentUser = prof.username || displayName || authUser.email.split('@')[0];
 
@@ -3279,6 +3288,13 @@ async function onLoggedIn(authUser, displayName){
   } else {
     checkWhatsNew();
   }
+}
+async function forceLockedLogout(){
+  if(!currentUserId) return;
+  await doLogout();
+  const le=document.getElementById('login-err');
+  le.textContent='Dieses Konto wurde gesperrt. Bitte wende dich an einen Administrator.';
+  le.style.display='block';
 }
 async function doLogout(){
   closeModal('pwforce');
@@ -3350,6 +3366,13 @@ async function loadAllData(){
   (kRes.data||[]).forEach(c=>{ S.karten[cardKey(c.subject_type,c.subject_id)]=c; });
   ensureOwnCard();
   M.users = usersRes.data||[];
+  // Feste Empfänger für Besteller-Bestellungen (Tabelle besteller_empfaenger, nur lesbar).
+  const empRes = await sb.from('besteller_empfaenger').select('user_id');
+  bsEmpfaengerMissing = !!empRes.error;
+  bsEmpfaengerIds = empRes.error ? [] : (empRes.data||[]).map(r=>r.user_id);
+  // Gesperrtes Konto während einer laufenden Sitzung: sofort abmelden.
+  const meNow = M.users.find(u=>u.id===currentUserId);
+  if(meNow && meNow.gesperrt){ forceLockedLogout(); }
   if(svcStatusRes.data){
     M.service.lastDate = svcStatusRes.data.last_date;
     M.service.nextDue = svcStatusRes.data.next_due;
@@ -3523,8 +3546,13 @@ async function doRegister(){
 let bsCart=[];
 let bsSelected=new Set();
 let bsFresh=null;
-function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
-function bsSuppliers(){ return M.users.filter(u=>u.role==='special').sort((a,b)=>a.username.localeCompare(b.username,'de')); }
+// Empfänger sind fest in der Datenbank hinterlegt (Tabelle besteller_empfaenger) und
+// können weder von Bestellern noch von Admins über die App geändert werden.
+let bsEmpfaengerIds=[];
+let bsEmpfaengerMissing=false;
+function bsMax(){ return Math.max(1, bsEmpfaengerIds.length); }
+function bsSuppliers(){ return bsEmpfaengerIds.map(id=>M.users.find(u=>u.id===id)||{id, username:'Empfänger'}).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
+function isFixedRecipient(id){ return bsEmpfaengerIds.includes(id); }
 function bsCartQty(){ return bsCart.reduce((n,l)=>n+l.stueck,0); }
 async function reloadBesteller(){ await loadAllData(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 function setBsTab(tab){
@@ -3535,7 +3563,7 @@ function setBsTab(tab){
 }
 function renderBesteller(){
   const sub=document.getElementById('bs-sub');
-  if(sub) sub.textContent=`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`;
+  if(sub) sub.textContent='Wähle deine Artikel — deine Bestellung geht automatisch an die festgelegten Empfänger.';
   renderBsShop(); renderBsOrders(); updateBsCartBadge();
 }
 function updateBsCartBadge(){
@@ -3616,21 +3644,17 @@ function renderBsCart(){
 }
 function renderBsSuppliers(){
   const wrap=document.getElementById('bs-suppliers'); if(!wrap) return;
-  const max=bsMax(), sup=bsSuppliers(), full=bsSelected.size>=max;
+  const sup=bsSuppliers();
   const c=document.getElementById('bs-counter');
-  if(c){ c.textContent=`${bsSelected.size} von max. ${max} gewählt`; c.classList.toggle('full', full); }
+  if(c){ c.textContent='🔒 nicht änderbar'; c.classList.add('full'); }
   const sm=document.getElementById('bs-summary');
-  if(sm) sm.textContent=`${bsCartQty()} Artikel · ${bsSelected.size} Lieferant${bsSelected.size===1?'':'en'}`;
-  if(!sup.length){ wrap.innerHTML='<div class="ps">Es sind noch keine Lieferanten verfügbar.</div>'; return; }
-  wrap.innerHTML=sup.map(u=>{
-    const on=bsSelected.has(u.id), dis=!on && full;
-    return `<label class="bs-pick${on?' sel':''}${dis?' dis':''}"><input type="checkbox" ${on?'checked':''} ${dis?'disabled':''} onchange="toggleBsSupplier('${u.id}', this.checked)"/><span>◆ ${escapeHtml(u.username)}</span></label>`;
-  }).join('');
-}
-function toggleBsSupplier(id,on){
-  if(on){ if(bsSelected.size>=bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); renderBsSuppliers(); return; } bsSelected.add(id); }
-  else bsSelected.delete(id);
-  renderBsSuppliers();
+  if(sm) sm.textContent=`${bsCartQty()} Artikel · ${sup.length} Empfänger`;
+  if(bsEmpfaengerMissing || !sup.length){
+    wrap.innerHTML='<div class="ps">Empfänger sind noch nicht eingerichtet (SQL-Datei besteller_feste_empfaenger.sql ausführen). Bestellen ist bis dahin nicht möglich.</div>';
+    return;
+  }
+  wrap.innerHTML=sup.map(u=>`<div class="bs-pick sel" style="cursor:default"><span>🔒 ◆ ${escapeHtml(u.username)}</span></div>`).join('')
+    + '<div class="ps" style="margin-top:6px">Deine Bestellung wird automatisch an beide Empfänger gesendet.</div>';
 }
 function openBsModal(){
   renderBsCart();
@@ -3638,15 +3662,15 @@ function openBsModal(){
 }
 async function submitBsBestellung(){
   if(!bsCart.length){ showToast('Dein Warenkorb ist leer.','⚠'); return; }
-  if(!bsSelected.size){ showToast('Bitte mindestens einen Lieferanten auswählen.','⚠'); return; }
-  if(bsSelected.size>bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); return; }
+  if(bsEmpfaengerMissing || !bsEmpfaengerIds.length){ showToast('Empfänger sind noch nicht eingerichtet.','⚠'); return; }
   const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
   const items=bsCart.map(l=>({prod:l.prod, stueck:l.stueck, wunsch:l.wunsch}));
   const notiz=document.getElementById('bs-notiz').value.trim()||null;
-  const { error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
+  // Empfänger werden bewusst NICHT vom Client mitgegeben — der Server setzt sie selbst.
+  const { error } = await sb.rpc('besteller_bestellen_fest', { p_items:items, p_notiz:notiz });
   btn.disabled=false; btn.style.opacity=1;
   if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
-  const n=bsSelected.size;
+  const n=bsEmpfaengerIds.length;
   bsCart=[]; bsSelected=new Set(); document.getElementById('bs-notiz').value='';
   closeModal('bsbestellung');
   await loadAllData();
@@ -3949,6 +3973,7 @@ async function saveEditUser(){
   const id=editUserId, u=M.users.find(x=>x.id===id); if(!u) return;
   const name=document.getElementById('eu-name').value.trim();
   const role=document.getElementById('eu-role').value;
+  if(isFixedRecipient(id) && role!=='special'){ showToast('Feste Empfänger müssen Spezial-Konten bleiben.','⚠'); return; }
   const linked=role==='besteller' ? '' : document.getElementById('eu-linked').value;
   const max=role==='besteller' ? Math.max(1,Math.min(50,parseInt(document.getElementById('eu-max').value)||BESTELLER_DEFAULT_MAX)) : null;
   const telefon=document.getElementById('eu-telefon').value.trim(), adresse=document.getElementById('eu-adresse').value.trim();
@@ -7672,7 +7697,7 @@ const ROLE_INFO={
   admin:{icon:'🛡️',label:'Administrator',desc:'Verwaltet Konten, Rollen und Zugangsdaten.'},
   special:{icon:'◆',label:'Spezial-Konto (Lieferant)',desc:'Beliefert Kunden: sieht Bestellungen verknüpfter Benutzer und Besteller, setzt Status und Liefertermine.'},
   user:{icon:'👤',label:'Benutzer',desc:'Verwaltet Kunden, Preise und Lager und bestellt beim verknüpften Lieferanten.'},
-  besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop bei mehreren Lieferanten und verfolgt den Status.'},
+  besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop — Bestellungen gehen automatisch an die zwei festgelegten Empfänger — und verfolgt den Status.'},
   service:{icon:'🔧',label:'Service-Account',desc:'Zugang für Wartung und Service-Bereich.'}
 };
 const ROLE_ORDER=['admin','special','user','besteller','service'];
@@ -7701,18 +7726,25 @@ function renderUserList(){
   const specials=M.users.filter(u=>u.role==='special');
   const row=u=>{
     const linkOpts=specials.filter(s2=>s2.id!==u.id).map(s2=>`<option value="${s2.id}" ${u.linked_to===s2.id?'selected':''}>${escapeHtml(s2.username)}</option>`).join('');
+    const fixed = isFixedRecipient(u.id);
     const ctrl = u.role==='besteller'
-      ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)" title="Maximale Anzahl Lieferanten pro Bestellung">Max. Lieferanten
-          <input type="number" min="1" max="50" value="${u.max_lieferanten||3}" style="width:62px;font-size:11px;padding:5px 8px" onchange="setMaxLieferanten('${u.id}', this.value)"/></label>`
+      ? ''
       : u.role==='user'
       ? `<select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)"><option value="">Keine Verknüpfung</option>${linkOpts}</select>` : '';
-    return `<div class="ul-item">
+    const canLock = u.id!==currentUserId && !fixed;
+    const lockBtn = canLock
+      ? `<button class="ic-btn" onclick="toggleLockUser('${u.id}', ${u.gesperrt?'false':'true'})" title="${u.gesperrt?'Konto entsperren':'Konto sperren'}" aria-label="${u.gesperrt?'Konto entsperren':'Konto sperren'}">${u.gesperrt?'🔓':'🔒'}</button>` : '';
+    const delBtn = (u.id!==currentUserId && !fixed)
+      ? `<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`
+      : (fixed ? '<span class="badge b-special" title="Fester Bestell-Empfänger — kann nicht gesperrt oder gelöscht werden">🔒 fester Empfänger</span>' : '<span style="font-size:10px;color:var(--success)">●</span>');
+    return `<div class="ul-item"${u.gesperrt?' style="opacity:.6"':''}>
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
-      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}</div>
+      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}${u.gesperrt?' <span class="badge b-offen" style="margin-left:6px">Gesperrt</span>':''}</div>
         <div class="ul-role">${u.auth_modus==='pin'?'🔢 PIN':'🔑 Passwort'}${u.first_login?'<span class="ul-meta">⏳ Wechsel beim nächsten Login</span>':''}</div></div>
       ${ctrl}
       <button class="ic-btn" onclick="openEditUser('${u.id}')" title="Benutzer bearbeiten" aria-label="Benutzer bearbeiten">✏️</button>
-      ${u.id!==currentUserId?`<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`:'<span style="font-size:10px;color:var(--success)">●</span>'}
+      ${lockBtn}
+      ${delBtn}
     </div>`;
   };
   const groups=ROLE_ORDER.filter(r=>ulFilter==='all'||ulFilter===r).map(r=>{
@@ -7750,7 +7782,19 @@ async function addUser(){
   document.getElementById('nu-linked').value='';
   renderUserList();if(!fErr) showToast('Benutzer angelegt — muss beim ersten Login ein neues Passwort setzen. ✓');
 }
+async function toggleLockUser(id, lock){
+  const u=M.users.find(x=>x.id===id); if(!u) return;
+  if(id===currentUserId){ showToast('Du kannst dein eigenes Konto nicht sperren.','⚠'); return; }
+  if(isFixedRecipient(id)){ showToast('Feste Empfänger können nicht gesperrt werden.','⚠'); return; }
+  if(lock && !(await confirmDialog(`„${u.username}“ wird sofort abgemeldet und kann sich nicht mehr anmelden, bis das Konto wieder entsperrt wird.`, {title:`Konto „${u.username}“ sperren?`, confirmText:'Sperren'}))) return;
+  const { error } = await sb.rpc('admin_set_gesperrt', { p_user_id:id, p_gesperrt:lock });
+  if(error){ showToast(/function|does not exist/i.test(error.message||'') ? 'Sperr-Funktion fehlt in Supabase (SQL-Datei konto_sperren.sql ausführen).' : (error.message||'Konnte nicht geändert werden.'),'⚠'); return; }
+  u.gesperrt=lock;
+  renderUserList();
+  showToast(lock?'Konto gesperrt. 🔒':'Konto entsperrt. 🔓');
+}
 async function delUser(id){
+  if(isFixedRecipient(id)){ showToast('Feste Empfänger können nicht gelöscht werden.','⚠'); return; }
   const name = M.users.find(u=>u.id===id)?.username || '';
   if(!(await confirmDialog(`Benutzer "${name}" wird endgültig entfernt.`, {title:`Benutzer "${name}" löschen?`})))return;
   const { error } = await sb.rpc('delete_app_user', { p_user_id:id });
