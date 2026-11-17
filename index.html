@@ -1281,6 +1281,9 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .kk-name{font-size:17px;font-weight:700;word-break:break-word}
 .kk-nr{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.8;margin-top:4px}
 .kk-bc{background:#fff;border-radius:10px;padding:8px 8px 5px;z-index:1;line-height:0;cursor:zoom-in}
+.kk-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.kk-chip.ok{background:var(--success-bg);color:var(--success-deep)}
+.kk-chip.no{background:var(--rust-bg);color:var(--rust)}
 .kk-bc svg{width:100%;height:54px;display:block}
 .kk-bc-num{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#14121F;text-align:center;margin-top:4px}
 .kk-full{position:fixed;inset:0;z-index:3000;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;cursor:zoom-out}
@@ -1625,6 +1628,7 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
       <div class="ph">
         <div><div class="ph-eyebrow">Einkauf</div><div class="pt">Beim Lieferanten bestellen</div><div class="ps" id="lb-supplier-sub">Bestellung wird direkt an deinen Lieferanten übermittelt.</div></div>
         <div class="pa">
+          <button class="btn btn-ghost" onclick="openKundenkarte('user',currentUserId)" title="Meine Kundenkarte">🪪 Meine Karte</button>
           <button class="btn btn-ghost" onclick="delAllLbBestellungen()">🗑 Alle löschen</button>
           <button class="btn btn-primary" onclick="openLbModal()">＋ Neue Bestellung</button>
         </div>
@@ -1986,6 +1990,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="ph">
         <div><div class="ph-eyebrow">Shop</div><div class="pt">Bestellen</div><div class="ps" id="bs-sub"></div></div>
         <div class="pa">
+          <button class="btn btn-ghost" onclick="openKundenkarte('user',currentUserId)" title="Meine Kundenkarte">🪪 Meine Karte</button>
           <button class="btn btn-ghost" onclick="reloadBesteller()" title="Aktualisieren">↻</button>
           <button class="btn btn-primary" onclick="openBsModal()">🛒 Warenkorb<span class="bs-badge zero" id="bs-cart-count">0</span></button>
         </div>
@@ -2103,6 +2108,7 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal wide">
     <div class="modal-head"><h3 id="lkd-name">◆ Lieferantenkunde</h3><button class="modal-close" onclick="closeModal('lieferantenkundendetail')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
+      <div id="lkd-karte" class="ps" style="display:none;margin:0 0 12px"></div>
       <div class="tab-group" style="width:100%;margin-bottom:16px">
         <button type="button" class="tab-btn active" id="lkd-tab-bestellungen" onclick="switchLkdTab('bestellungen')" style="flex:1;justify-content:center">Bestellungen</button>
         <button type="button" class="tab-btn" id="lkd-tab-statistik" onclick="switchLkdTab('statistik')" style="flex:1;justify-content:center">Statistik</button>
@@ -2207,7 +2213,7 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal">
     <div class="modal-head"><h3><span style="margin-right:8px">📍</span>Bestellstatus</h3><button class="modal-close" onclick="closeModal('bstrack')" aria-label="Schließen">✕</button></div>
     <div class="modal-body" id="bstrack-body"></div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="reloadBsTrack()">↻ Aktualisieren</button><button class="btn btn-primary" onclick="closeModal('bstrack')">Schließen</button></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="openKundenkarte('user',currentUserId)">🪪 Meine Karte</button><button class="btn btn-ghost" onclick="reloadBsTrack()">↻ Aktualisieren</button><button class="btn btn-primary" onclick="closeModal('bstrack')">Schließen</button></div>
   </div>
 </div>
 
@@ -3258,6 +3264,7 @@ async function loadAllData(){
   kartenMissing = !!kRes.error;
   S.karten = {};
   (kRes.data||[]).forEach(c=>{ S.karten[cardKey(c.subject_type,c.subject_id)]=c; });
+  ensureOwnCard();
   M.users = usersRes.data||[];
   if(svcStatusRes.data){
     M.service.lastDate = svcStatusRes.data.last_date;
@@ -3735,7 +3742,7 @@ function findTerminConflict(excludeId, start, end){
   }
   return null;
 }
-async function saveSendungStatus(id){
+async function saveSendungStatus(id,cardOk){
   const b=S.bestellungen.find(x=>x.id===id); if(!b) return;
   odstClearErr();
   const status=document.getElementById('odst-status').value;
@@ -3753,6 +3760,7 @@ async function saveSendungStatus(id){
       termin=fmtSlot(start,end)+(ort?` · ${ort}`:'');
     } else if(ort){ termin=ort; }
   }
+  if(status==='uebergeben' && !b.delivered && !cardOk && !kartenMissing){ openCardScan([id],'status',()=>saveSendungStatus(id,true)); return; }
   const { error } = await sb.rpc('set_bestell_status', { p_bestellung_id:id, p_status:status, p_notiz:notiz, p_termin:termin,
       p_start:start?start.toISOString():null, p_ende:end?end.toISOString():null });
   if(error){ if(/überschneid/i.test(error.message||'')) odstShowErr(error.message); else showToast(error.message||'Status konnte nicht gespeichert werden.','⚠'); return; }
@@ -4737,19 +4745,36 @@ function renderLieferantenkundenSeite(){
     const orders = S.bestellungen.filter(b=>b.fuerLieferant && b.userId===u.id);
     const debt = orders.filter(b=>!b.paid).reduce((s,b)=>s+displayTotal(b),0);
     return `<div class="kcard" tabindex="0" role="button" onkeydown="onKeyActivate(event)" style="cursor:pointer" onclick="openLieferantenkundeDetail('${u.id}')">
-      <div class="kc-top"><div class="kc-name">◆ ${escapeHtml(u.username)}</div></div>
+      <div class="kc-top"><div class="kc-name">◆ ${escapeHtml(u.username)}</div>${lkCardChip(u.id)}</div>
       <div class="kc-stats">
         <div><div class="kc-stat-lab">Bestellungen</div><div class="kc-stat-v mono">${orders.length}</div></div>
         <div><div class="kc-stat-lab">Offen</div><div class="kc-stat-v mono ${debt>0?'debt':''}">${fmt(debt)}</div></div>
       </div>
     </div>`;
   }).join('');
+  loadLkCards(lkUsers.map(u=>u.id));
+}
+// Kartenstatus der Lieferantenkunden (nur Ja/Nein über kundenkarte_status — den Code sieht der Lieferant nie)
+const lkCard={}, _lkCardPend=new Set();
+function lkCardChip(id){ const v=lkCard[id]; return v===true?'<span class="kk-chip ok">🪪 Karte</span>':v===false?'<span class="kk-chip no">🪪 keine Karte</span>':''; }
+async function loadLkCards(ids){
+  const todo=ids.filter(id=>!(id in lkCard)&&!_lkCardPend.has(id)); if(!todo.length) return;
+  todo.forEach(i=>_lkCardPend.add(i));
+  await Promise.all(todo.map(async id=>{ const {data,error}=await sb.rpc('kundenkarte_status',{p_user_id:id}); lkCard[id]=error?null:!!data; _lkCardPend.delete(id); }));
+  renderLieferantenkundenSeite(); updateLkdKarte();
+}
+function updateLkdKarte(){
+  const el=document.getElementById('lkd-karte'); if(!el) return;
+  const v=lkCard[currentLkdUserId];
+  if(v===true){ el.style.display=''; el.innerHTML='🪪 Kundenkarte vorhanden — bei der Übergabe den Strichcode scannen.'; }
+  else if(v===false){ el.style.display=''; el.innerHTML='⚠ Noch keine Kundenkarte — wird automatisch erstellt, sobald sich der Kunde das nächste Mal anmeldet. Bis dahin: Übergabe „Ohne Karte“ mit Grund.'; }
+  else el.style.display='none';
 }
 let currentLkdUserId=null;
 function openLieferantenkundeDetail(userId){
   const u=M.users.find(x=>String(x.id)===String(userId));
   if(!u)return;
-  currentLkdUserId=u.id;
+  currentLkdUserId=u.id; delete lkCard[u.id]; updateLkdKarte(); loadLkCards([u.id]);
   document.getElementById('lkd-name').textContent = `◆ ${u.username}`;
   switchLkdTab('bestellungen');
   openModal('lieferantenkundendetail');
@@ -5769,10 +5794,10 @@ function orderHolderName(b){
 }
 function confirmDeliveredWithAbholcode(id){ _openAbholcodeConfirm(id); }   // Name bleibt: bestehende Buttons rufen ihn auf
 function _openAbholcodeConfirm(id){ openCardScan([id],'single'); }
-function openCardScan(ids,mode){
+function openCardScan(ids,mode,onDone){
   const b=S.bestellungen.find(x=>x.id===ids[0]); if(!b) return;
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
-  _cs={ids,mode,holder:orderHolderName(b)};
+  _cs={ids,mode,onDone,holder:orderHolderName(b)};
   document.getElementById('ac-who').textContent=_cs.holder;
   document.getElementById('ac-who-sub').textContent = mode==='batch' ? `${ids.length} Bestellungen werden abgeschlossen` : `Bestellung #${b.id}`;
   document.getElementById('ac-result').style.display='none';
@@ -5810,16 +5835,26 @@ async function finishCardHandover(note){
   closeModal('abholcode-confirm');
   for(const id of cs.ids){
     const b=S.bestellungen.find(x=>x.id===id); if(!b) continue;
-    if(!b.delivered) await setDelivered(id,true);
+    if(cs.mode!=='status' && !b.delivered) await setDelivered(id,true);
     if(cs.mode==='batch' && !b.paid) await setPaid(id,true);
     await appendNotiz(id,note);
   }
+  if(cs.onDone) await cs.onDone();
   showToast(cs.mode==='batch' ? `${cs.ids.length} Bestellungen abgeschlossen. ✓` : 'Übergabe bestätigt. ✓');
 }
 // ── Karte anzeigen / ausstellen / drucken ──
-async function issueCard(type,id){
+let _ownCardFor=null;
+// Jedes Konto (Besteller, Lieferantenkunde, Lieferant, Benutzer) bekommt beim Anmelden automatisch seine eigene Karte
+async function ensureOwnCard(){
+  if(kartenMissing || !currentUserId || _ownCardFor===currentUserId) return;
+  const r=currentRole(); if(r==='admin'||r==='service') return;
+  _ownCardFor=currentUserId;
+  if(S.karten[cardKey('user',currentUserId)]) return;
+  await issueCard('user',currentUserId,true);
+}
+async function issueCard(type,id,silent){
   const { data, error }=await sb.from('kundenkarten').insert({ subject_type:type, subject_id:String(id), code:newCardCode() }).select().single();
-  if(error){ showToast('Karte konnte nicht erstellt werden.','⚠'); return null; }
+  if(error){ if(!silent) showToast('Karte konnte nicht erstellt werden.','⚠'); return null; }
   S.karten[cardKey(type,id)]=data; return data;
 }
 async function openKundenkarte(type,id){
@@ -7491,7 +7526,7 @@ function renderSettings(){
   }
   const isBesteller = role==='besteller';
   ['pwc-old','pwc-new','pwc-new2'].forEach(id=>applyModusToInput(document.getElementById(id), selfModus(), id==='pwc-old'));
-  { const kc=document.getElementById('set-card-karte'); if(kc) kc.style.display=(role==='user'||role==='besteller')?'':'none'; }
+  { const kc=document.getElementById('set-card-karte'); if(kc) kc.style.display=(role==='admin'||role==='service')?'none':''; }
   ['set-card-anzeige','set-card-backup','set-card-about','set-card-danger'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display = isAdmin ? 'none' : '';
   });
