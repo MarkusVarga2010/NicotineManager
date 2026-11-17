@@ -1358,6 +1358,51 @@ tbody tr:hover{background:color-mix(in srgb, var(--paper3) 65%, transparent);box
 .kk-chip.no{background:var(--rust-bg);color:var(--rust)}
 .cs-more{margin-top:12px;font-size:12px}
 .cs-more summary{cursor:pointer;color:var(--ink-soft);font-weight:600}
+/* ══════════════════════════════════════════════════════════════
+   STRUKTUR-PASS — ruhige, einheitliche Oberfläche
+   Feste Flächen statt Glas/Verläufe, einheitliche Radien, Abstände,
+   Tabellen, Navigation und ein gleichmäßiges Dashboard-Raster.
+   (Steht bewusst am Ende, damit es die älteren Regeln überschreibt.)
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --paper2:#14171C; --paper3:#1B1F26;
+  --line:#242932; --line2:#303744;
+  --r:10px; --r-lg:14px; --on-accent:#111;
+}
+html[data-mode="light"]{
+  --paper2:#FFFFFF; --paper3:#F4F1EA;
+  --line:#E6E0D2; --line2:#D6CDB8; --on-accent:#fff;
+}
+*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.modal-bg.show{background:rgba(0,0,0,.62)}
+#modal-kundenkarte{z-index:70}
+#login-screen{background-image:none;animation:none}
+.pt{background:none;-webkit-text-fill-color:currentColor;color:var(--ink);font-size:24px;letter-spacing:-.01em}
+.card{border-radius:var(--r-lg);box-shadow:none;margin-bottom:16px}
+.card-head{padding:14px 18px;background:var(--paper2)}
+.card-head::before{display:none}
+.card-head h3{font-size:13px;font-weight:700;letter-spacing:.01em}
+th{padding:10px 18px;font-size:10px;background:var(--paper3);color:var(--ink-soft)}
+td{padding:12px 18px;vertical-align:middle}
+tbody tr,tbody tr:hover{box-shadow:none}
+tbody tr:hover{background:var(--paper3)}
+.btn{border-radius:var(--r);padding:9px 14px;box-shadow:none}
+.btn-ghost{background:var(--paper2);box-shadow:none}
+.btn-primary{background:var(--sage);color:var(--on-accent);box-shadow:none;border-radius:var(--r);padding:9px 16px}
+.btn-primary:hover{filter:brightness(1.08);transform:none;box-shadow:none}
+.btn-danger{border-radius:var(--r)}
+.scale-tick{border-radius:var(--r);position:relative}
+.scale-tick:hover{transform:none}
+.scale-tick.active{color:var(--ink);background:color-mix(in srgb,var(--sage) 14%,var(--paper2));box-shadow:none}
+.scale-tick.active::before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--sage)}
+.scale-tick.active .tk-ic{background:var(--sage);color:var(--on-accent)}
+/* Dashboard: gleichmäßiges Raster */
+.stat-strip.bento-dash,.stat-strip.bento-dash.has-lieferant{
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));grid-template-areas:none;gap:12px;margin-bottom:20px}
+.bento-dash .stat-cell,.bento-dash [data-bento]{grid-area:auto!important;background:var(--paper2);box-shadow:none;border-radius:var(--r-lg);padding:18px}
+.bento-dash [data-bento="debt"],.bento-dash [data-bento="profit"],.bento-dash [data-bento="lief"]{background:var(--paper2)}
+.bento-dash .stat-cell:hover{transform:none;box-shadow:none;border-color:var(--sage)}
+.bento-dash [data-bento="debt"] .sc-v,.bento-dash [data-bento="profit"] .sc-v{font-size:26px}
 </style>
 </head>
 <body>
@@ -1967,7 +2012,6 @@ alter table profiles add column if not exists adresse text;</pre>
             <div class="sr"><div><div class="sr-label" data-i18n="set.lightmode.label">Helles Design</div><div class="sr-sub" data-i18n="set.lightmode.sub">Statt des dunklen Standard-Designs</div></div><label class="toggle"><input type="checkbox" id="set-lightmode" onchange="applyMode(this.checked?'light':'dark')"><div class="tt"></div></label></div>
             <div class="sr"><div><div class="sr-label" data-i18n="set.anim.label">Animationen</div><div class="sr-sub" data-i18n="set.anim.sub">Seitenübergänge</div></div><label class="toggle"><input type="checkbox" id="set-anim" checked onchange="applyViz()"><div class="tt"></div></label></div>
             <div class="sr"><div><div class="sr-label" data-i18n="set.compact.label">Kompakte Ansicht</div><div class="sr-sub" data-i18n="set.compact.sub">Weniger Abstände</div></div><label class="toggle"><input type="checkbox" id="set-compact" onchange="applyViz()"><div class="tt"></div></label></div>
-            <div class="sr"><div><div class="sr-label" data-i18n="set.liquidglass.label">Liquid Glass</div><div class="sr-sub" data-i18n="set.liquidglass.sub">Milchglas-Effekt auf Karten &amp; Leisten</div></div><label class="toggle"><input type="checkbox" id="set-liquidglass" checked onchange="applyLiquidGlass(this.checked)"><div class="tt"></div></label></div>
             <div style="padding-top:12px"><div class="sr-label" style="margin-bottom:9px" data-i18n="set.accent.label">Akzentfarbe</div><div class="theme-grid" id="theme-grid"></div></div>
             <div style="padding-top:16px"><div class="sr-label" style="margin-bottom:9px" data-i18n="set.fontsize.label">Schriftgröße</div>
               <div class="tab-group" id="fontsize-group">
@@ -2261,7 +2305,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div id="bs-order-items"></div>
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label class="fl" style="margin:0">2 · Empfänger (fest vorgegeben)</label>
+          <label class="fl" style="margin:0">2 · An welche Lieferanten?</label>
           <span class="bs-counter" id="bs-counter"></span>
         </div>
         <div id="bs-suppliers"></div>
@@ -2494,6 +2538,7 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-head"><h3><svg class="svg-ic h-ic"><use href="#ic-scan"/></svg>Übergabe bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
       <div class="cs-who"><div class="cs-av" id="ac-who-av"></div><div class="cs-who-t"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div></div></div>
+      <div style="margin:-4px 0 12px"><button class="btn btn-ghost btn-sm" id="ac-show-card" onclick="showHolderCard()" style="width:100%;justify-content:center">Karte des Inhabers ansehen / senden / drucken</button></div>
       <div class="cs-steps"><div class="cs-step"><i>1</i>Karte vorzeigen lassen</div><div class="cs-step"><i>2</i>Strichcode in den Rahmen halten</div><div class="cs-step"><i>3</i>Übergabe wird bestätigt</div></div>
       <div class="ac-scan-wrap">
         <button class="btn btn-primary btn-sm" id="ac-scan-toggle-btn" onclick="toggleAbholcodeScanner()" style="width:100%;justify-content:center">Scanner starten</button>
@@ -3273,7 +3318,7 @@ async function onLoggedIn(authUser, displayName){
   applyTheme(VS.themeIdx);
   applyMode(VS.mode||'dark');
   applyFontSize(VS.fontSize||'md');
-  applyLiquidGlass(VS.liquidGlass!==false);
+  applyLiquidGlass(false);
   setLang(VS.lang||'de');
   applyRoleUI();
   if(currentRole()!=='besteller') checkServiceDue();
@@ -3366,10 +3411,6 @@ async function loadAllData(){
   (kRes.data||[]).forEach(c=>{ S.karten[cardKey(c.subject_type,c.subject_id)]=c; });
   ensureOwnCard();
   M.users = usersRes.data||[];
-  // Feste Empfänger für Besteller-Bestellungen (Tabelle besteller_empfaenger, nur lesbar).
-  const empRes = await sb.from('besteller_empfaenger').select('user_id');
-  bsEmpfaengerMissing = !!empRes.error;
-  bsEmpfaengerIds = empRes.error ? [] : (empRes.data||[]).map(r=>r.user_id);
   // Gesperrtes Konto während einer laufenden Sitzung: sofort abmelden.
   const meNow = M.users.find(u=>u.id===currentUserId);
   if(meNow && meNow.gesperrt){ forceLockedLogout(); }
@@ -3546,13 +3587,8 @@ async function doRegister(){
 let bsCart=[];
 let bsSelected=new Set();
 let bsFresh=null;
-// Empfänger sind fest in der Datenbank hinterlegt (Tabelle besteller_empfaenger) und
-// können weder von Bestellern noch von Admins über die App geändert werden.
-let bsEmpfaengerIds=[];
-let bsEmpfaengerMissing=false;
-function bsMax(){ return Math.max(1, bsEmpfaengerIds.length); }
-function bsSuppliers(){ return bsEmpfaengerIds.map(id=>M.users.find(u=>u.id===id)||{id, username:'Empfänger'}).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
-function isFixedRecipient(id){ return bsEmpfaengerIds.includes(id); }
+function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
+function bsSuppliers(){ return M.users.filter(u=>u.role==='special' && !u.gesperrt).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
 function bsCartQty(){ return bsCart.reduce((n,l)=>n+l.stueck,0); }
 async function reloadBesteller(){ await loadAllData(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 function setBsTab(tab){
@@ -3563,7 +3599,7 @@ function setBsTab(tab){
 }
 function renderBesteller(){
   const sub=document.getElementById('bs-sub');
-  if(sub) sub.textContent='Wähle deine Artikel — deine Bestellung geht automatisch an die festgelegten Empfänger.';
+  if(sub) sub.textContent=`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`;
   renderBsShop(); renderBsOrders(); updateBsCartBadge();
 }
 function updateBsCartBadge(){
@@ -3644,17 +3680,21 @@ function renderBsCart(){
 }
 function renderBsSuppliers(){
   const wrap=document.getElementById('bs-suppliers'); if(!wrap) return;
-  const sup=bsSuppliers();
+  const max=bsMax(), sup=bsSuppliers(), full=bsSelected.size>=max;
   const c=document.getElementById('bs-counter');
-  if(c){ c.textContent='🔒 nicht änderbar'; c.classList.add('full'); }
+  if(c){ c.textContent=`${bsSelected.size} von max. ${max} gewählt`; c.classList.toggle('full', full); }
   const sm=document.getElementById('bs-summary');
-  if(sm) sm.textContent=`${bsCartQty()} Artikel · ${sup.length} Empfänger`;
-  if(bsEmpfaengerMissing || !sup.length){
-    wrap.innerHTML='<div class="ps">Empfänger sind noch nicht eingerichtet (SQL-Datei besteller_feste_empfaenger.sql ausführen). Bestellen ist bis dahin nicht möglich.</div>';
-    return;
-  }
-  wrap.innerHTML=sup.map(u=>`<div class="bs-pick sel" style="cursor:default"><span>🔒 ◆ ${escapeHtml(u.username)}</span></div>`).join('')
-    + '<div class="ps" style="margin-top:6px">Deine Bestellung wird automatisch an beide Empfänger gesendet.</div>';
+  if(sm) sm.textContent=`${bsCartQty()} Artikel · ${bsSelected.size} Lieferant${bsSelected.size===1?'':'en'}`;
+  if(!sup.length){ wrap.innerHTML='<div class="ps">Es sind noch keine Lieferanten verfügbar.</div>'; return; }
+  wrap.innerHTML=sup.map(u=>{
+    const on=bsSelected.has(u.id), dis=!on && full;
+    return `<label class="bs-pick${on?' sel':''}${dis?' dis':''}"><input type="checkbox" ${on?'checked':''} ${dis?'disabled':''} onchange="toggleBsSupplier('${u.id}', this.checked)"/><span>◆ ${escapeHtml(u.username)}</span></label>`;
+  }).join('');
+}
+function toggleBsSupplier(id,on){
+  if(on){ if(bsSelected.size>=bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); renderBsSuppliers(); return; } bsSelected.add(id); }
+  else bsSelected.delete(id);
+  renderBsSuppliers();
 }
 function openBsModal(){
   renderBsCart();
@@ -3662,15 +3702,15 @@ function openBsModal(){
 }
 async function submitBsBestellung(){
   if(!bsCart.length){ showToast('Dein Warenkorb ist leer.','⚠'); return; }
-  if(bsEmpfaengerMissing || !bsEmpfaengerIds.length){ showToast('Empfänger sind noch nicht eingerichtet.','⚠'); return; }
+  if(!bsSelected.size){ showToast('Bitte mindestens einen Lieferanten auswählen.','⚠'); return; }
+  if(bsSelected.size>bsMax()){ showToast(`Maximal ${bsMax()} Lieferanten pro Bestellung.`,'⚠'); return; }
   const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
   const items=bsCart.map(l=>({prod:l.prod, stueck:l.stueck, wunsch:l.wunsch}));
   const notiz=document.getElementById('bs-notiz').value.trim()||null;
-  // Empfänger werden bewusst NICHT vom Client mitgegeben — der Server setzt sie selbst.
-  const { error } = await sb.rpc('besteller_bestellen_fest', { p_items:items, p_notiz:notiz });
+  const { error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
   btn.disabled=false; btn.style.opacity=1;
   if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
-  const n=bsEmpfaengerIds.length;
+  const n=bsSelected.size;
   bsCart=[]; bsSelected=new Set(); document.getElementById('bs-notiz').value='';
   closeModal('bsbestellung');
   await loadAllData();
@@ -3973,7 +4013,6 @@ async function saveEditUser(){
   const id=editUserId, u=M.users.find(x=>x.id===id); if(!u) return;
   const name=document.getElementById('eu-name').value.trim();
   const role=document.getElementById('eu-role').value;
-  if(isFixedRecipient(id) && role!=='special'){ showToast('Feste Empfänger müssen Spezial-Konten bleiben.','⚠'); return; }
   const linked=role==='besteller' ? '' : document.getElementById('eu-linked').value;
   const max=role==='besteller' ? Math.max(1,Math.min(50,parseInt(document.getElementById('eu-max').value)||BESTELLER_DEFAULT_MAX)) : null;
   const telefon=document.getElementById('eu-telefon').value.trim(), adresse=document.getElementById('eu-adresse').value.trim();
@@ -5913,7 +5952,18 @@ function openCardScan(ids,mode,onDone){
   document.getElementById('ac-result').style.display='none';
   document.getElementById('ac-input').value=''; document.getElementById('ac-reason').value='';
   openModal('abholcode-confirm');
+  // Karte des Inhabers bei Bedarf automatisch anlegen, damit sie sofort vorgezeigt/gesendet werden kann
+  const h=holderRef(b);
+  if(h && !S.karten[cardKey(h.type,h.id)]) issueCard(h.type,h.id,true);
   setTimeout(()=>{ if(_cs) toggleAbholcodeScanner(); },250);
+}
+function holderRef(b){ return b.fuerLieferant ? {type:'user',id:b.userId} : (b.kId ? {type:'kunde',id:b.kId} : null); }
+function showHolderCard(){
+  if(!_cs) return;
+  const b=S.bestellungen.find(x=>x.id===_cs.ids[0]); const h=b&&holderRef(b);
+  if(!h){ showToast('Für diese Bestellung gibt es keinen Karteninhaber.','⚠'); return; }
+  stopAbholcodeScanner();
+  openKundenkarte(h.type,h.id);
 }
 const CS_ICON={ ok:'<svg class="svg-ic"><use href="#ic-checkc"/></svg>', err:'<svg class="svg-ic"><use href="#ic-xc"/></svg>', wait:'<svg class="svg-ic"><use href="#ic-spin"/></svg>' };
 function showCardResult(kind,html){
@@ -5960,9 +6010,9 @@ let _ownCardFor=null;
 async function ensureOwnCard(){
   if(kartenMissing || !currentUserId || _ownCardFor===currentUserId) return;
   const r=currentRole(); if(r==='admin'||r==='service') return;
-  _ownCardFor=currentUserId;
-  if(S.karten[cardKey('user',currentUserId)]) return;
-  await issueCard('user',currentUserId,true);
+  if(S.karten[cardKey('user',currentUserId)]){ _ownCardFor=currentUserId; return; }
+  const c=await issueCard('user',currentUserId,true);
+  if(c) _ownCardFor=currentUserId;   // bei Fehler beim nächsten Laden erneut versuchen
 }
 async function issueCard(type,id,silent){
   const { data, error }=await sb.from('kundenkarten').insert({ subject_type:type, subject_id:String(id), code:newCardCode() }).select().single();
@@ -7697,7 +7747,7 @@ const ROLE_INFO={
   admin:{icon:'🛡️',label:'Administrator',desc:'Verwaltet Konten, Rollen und Zugangsdaten.'},
   special:{icon:'◆',label:'Spezial-Konto (Lieferant)',desc:'Beliefert Kunden: sieht Bestellungen verknüpfter Benutzer und Besteller, setzt Status und Liefertermine.'},
   user:{icon:'👤',label:'Benutzer',desc:'Verwaltet Kunden, Preise und Lager und bestellt beim verknüpften Lieferanten.'},
-  besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop — Bestellungen gehen automatisch an die zwei festgelegten Empfänger — und verfolgt den Status.'},
+  besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop bei mehreren Lieferanten und verfolgt den Status.'},
   service:{icon:'🔧',label:'Service-Account',desc:'Zugang für Wartung und Service-Bereich.'}
 };
 const ROLE_ORDER=['admin','special','user','besteller','service'];
@@ -7726,17 +7776,17 @@ function renderUserList(){
   const specials=M.users.filter(u=>u.role==='special');
   const row=u=>{
     const linkOpts=specials.filter(s2=>s2.id!==u.id).map(s2=>`<option value="${s2.id}" ${u.linked_to===s2.id?'selected':''}>${escapeHtml(s2.username)}</option>`).join('');
-    const fixed = isFixedRecipient(u.id);
     const ctrl = u.role==='besteller'
-      ? ''
+      ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)" title="Maximale Anzahl Lieferanten pro Bestellung">Max. Lieferanten
+          <input type="number" min="1" max="50" value="${u.max_lieferanten||3}" style="width:62px;font-size:11px;padding:5px 8px" onchange="setMaxLieferanten('${u.id}', this.value)"/></label>`
       : u.role==='user'
       ? `<select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)"><option value="">Keine Verknüpfung</option>${linkOpts}</select>` : '';
-    const canLock = u.id!==currentUserId && !fixed;
+    const canLock = u.id!==currentUserId;
     const lockBtn = canLock
       ? `<button class="ic-btn" onclick="toggleLockUser('${u.id}', ${u.gesperrt?'false':'true'})" title="${u.gesperrt?'Konto entsperren':'Konto sperren'}" aria-label="${u.gesperrt?'Konto entsperren':'Konto sperren'}">${u.gesperrt?'🔓':'🔒'}</button>` : '';
-    const delBtn = (u.id!==currentUserId && !fixed)
+    const delBtn = u.id!==currentUserId
       ? `<button class="ic-btn" onclick="delUser('${u.id}')" title="Benutzer löschen" aria-label="Benutzer löschen">🗑</button>`
-      : (fixed ? '<span class="badge b-special" title="Fester Bestell-Empfänger — kann nicht gesperrt oder gelöscht werden">🔒 fester Empfänger</span>' : '<span style="font-size:10px;color:var(--success)">●</span>');
+      : '<span style="font-size:10px;color:var(--success)">●</span>';
     return `<div class="ul-item"${u.gesperrt?' style="opacity:.6"':''}>
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
       <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}${u.gesperrt?' <span class="badge b-offen" style="margin-left:6px">Gesperrt</span>':''}</div>
@@ -7785,7 +7835,6 @@ async function addUser(){
 async function toggleLockUser(id, lock){
   const u=M.users.find(x=>x.id===id); if(!u) return;
   if(id===currentUserId){ showToast('Du kannst dein eigenes Konto nicht sperren.','⚠'); return; }
-  if(isFixedRecipient(id)){ showToast('Feste Empfänger können nicht gesperrt werden.','⚠'); return; }
   if(lock && !(await confirmDialog(`„${u.username}“ wird sofort abgemeldet und kann sich nicht mehr anmelden, bis das Konto wieder entsperrt wird.`, {title:`Konto „${u.username}“ sperren?`, confirmText:'Sperren'}))) return;
   const { error } = await sb.rpc('admin_set_gesperrt', { p_user_id:id, p_gesperrt:lock });
   if(error){ showToast(/function|does not exist/i.test(error.message||'') ? 'Sperr-Funktion fehlt in Supabase (SQL-Datei konto_sperren.sql ausführen).' : (error.message||'Konnte nicht geändert werden.'),'⚠'); return; }
@@ -7794,7 +7843,6 @@ async function toggleLockUser(id, lock){
   showToast(lock?'Konto gesperrt. 🔒':'Konto entsperrt. 🔓');
 }
 async function delUser(id){
-  if(isFixedRecipient(id)){ showToast('Feste Empfänger können nicht gelöscht werden.','⚠'); return; }
   const name = M.users.find(u=>u.id===id)?.username || '';
   if(!(await confirmDialog(`Benutzer "${name}" wird endgültig entfernt.`, {title:`Benutzer "${name}" löschen?`})))return;
   const { error } = await sb.rpc('delete_app_user', { p_user_id:id });
@@ -7993,7 +8041,7 @@ function refresh(){
 applyTheme(VS.themeIdx); // Theme schon vor Login anwenden (z.B. für die Login-Seite selbst)
 applyMode(VS.mode||'dark'); // Hell/Dunkel ebenfalls schon vor Login anwenden
 applyFontSize(VS.fontSize||'md'); // Schriftgröße ebenfalls schon vor Login anwenden
-applyLiquidGlass(VS.liquidGlass!==false); // Liquid Glass ebenfalls schon vor Login anwenden
+applyLiquidGlass(false); // Liquid Glass ebenfalls schon vor Login anwenden
 setLang(VS.lang||'de'); // Sprache ebenfalls schon vor Login anwenden (Login-Bildschirm)
 
 // ══════════════════════════════════════════════
