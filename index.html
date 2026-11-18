@@ -1567,6 +1567,52 @@ html[data-mode="light"] .primary-btn{background:linear-gradient(135deg,#F0792B,#
 .bento-dash [data-bento="debt"],.bento-dash [data-bento="profit"],.bento-dash [data-bento="lief"]{background:var(--paper2)}
 .bento-dash .stat-cell:hover{transform:none;box-shadow:none;border-color:var(--sage)}
 .bento-dash [data-bento="debt"] .sc-v,.bento-dash [data-bento="profit"] .sc-v{font-size:26px}
+
+/* ══ v16 · SMOOTH PASS ══════════════════════════════════════ */
+:root{--ease:cubic-bezier(.22,.9,.3,1);--r:12px;--r-lg:18px;--soft:0 12px 32px -20px rgba(0,0,0,.5)}
+html{scroll-behavior:smooth}
+.main{padding:32px 36px 72px}
+.page.active{animation:fade .35s var(--ease) both}
+.ph{margin-bottom:24px}
+.card,.set-card,.kcard,.pc,.lager-pc,.vshop-card,.modal,.bs-group,.shop-card{border-radius:var(--r-lg);box-shadow:var(--soft);transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .2s ease}
+.card:hover,.kcard:hover,.pc:hover,.lager-pc:hover,.vshop-card:hover,.shop-card:hover{transform:translateY(-1px);box-shadow:0 16px 36px -22px rgba(0,0,0,.55)}
+.btn,.btn-primary,.btn-danger,.status-btn{border-radius:999px;transition:all .2s var(--ease)!important}
+.btn-primary{padding:10px 18px}
+.scale-tick{border-radius:12px;transition:background .2s var(--ease),color .2s var(--ease)}
+.scale-tick.active::before{display:none}
+.scale-tick.active{background:color-mix(in srgb,var(--sage) 16%,var(--paper2))}
+input,select,textarea{border-radius:var(--r);transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+td{padding:14px 18px}
+th{padding:11px 18px}
+tbody tr{transition:background .2s var(--ease)}
+.modal{transition:transform .32s var(--ease),opacity .22s ease}
+.stat-strip.bento-dash{gap:14px}
+.stat-cell{border-radius:var(--r-lg)}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
+
+/* ══ v16 · NEUE KUNDENKARTE ═════════════════════════════════ */
+.kk-card{aspect-ratio:auto;gap:16px;padding:22px;border-radius:24px;overflow:hidden;
+  background:linear-gradient(135deg,#FF8A3D 0%,#F0612A 48%,#1FB89A 130%);
+  box-shadow:0 24px 50px -22px rgba(240,97,42,.65),0 2px 0 rgba(255,255,255,.25) inset}
+.kk-card::before{display:none}
+.kk-card::after{background:radial-gradient(120% 80% at 0% 0%,rgba(255,255,255,.28),transparent 55%)}
+.kk-art{opacity:.22;mix-blend-mode:soft-light}
+.kk-sn,.kk-chip-g,.kk-lab{display:none}
+.kk-brand{font-size:16px;letter-spacing:.02em}
+.kk-mark{background:rgba(255,255,255,.22);box-shadow:none}
+.kk-pill{background:rgba(255,255,255,.2);color:#fff;font-weight:700;letter-spacing:.2em;border:1px solid rgba(255,255,255,.35)}
+.kk-mid{display:flex;align-items:center;gap:14px;min-height:78px}
+.kk-photo{position:static;order:-1;flex:none;width:64px}
+.kk-photo .kp-img{width:64px;height:80px;border-radius:14px;box-shadow:0 0 0 3px rgba(255,255,255,.9),0 8px 18px -8px rgba(0,0,0,.5)}
+.kk-photo .kp-cap{color:rgba(255,255,255,.9)}
+.kk-card.has-photo .kk-name{max-width:none}
+.kk-name{font-size:22px;font-weight:800;white-space:normal;line-height:1.15;text-shadow:0 1px 8px rgba(0,0,0,.18)}
+.kk-nr{font-size:11px;opacity:.85;letter-spacing:.14em}
+.kk-bc{border-radius:16px;padding:12px 14px 10px;box-shadow:0 10px 24px -10px rgba(0,0,0,.45)}
+.kk-actions{gap:10px}
+.kk-act{border-radius:14px;padding:14px 6px 12px}
+.kk-info{gap:12px;margin-top:20px}
 </style>
 </head>
 <body>
@@ -2237,9 +2283,10 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">15.7.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">16.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
+          <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
         </div>
       </div>
@@ -3253,8 +3300,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '8.9.0';
+const CURRENT_UI_VERSION = '16.0.0';
 const WHATS_NEW = {
+  '16.0.0': [
+    'Ganze App ruhiger und geschmeidiger: weichere Übergänge, einheitliche Rundungen, sanftere Schatten und mehr Luft zwischen den Elementen.',
+    'Neue Kundenkarte: klares Layout mit Foto links, großem Namen, Kartennummer und gut lesbarem Strichcode unten — im frischen Orange-Türkis-Verlauf.',
+    'Neu: „Was ist neu“ zeigt nach jedem Update alle Neuerungen seit deinem letzten Besuch und lässt sich jederzeit unter Einstellungen → Über die App öffnen.'
+  ],
   '4.0.0': [
     'Neues Design für die ganze App — neue Farben, neues Logo, neuer Login-Bildschirm.',
     'Lieferanten-Bestellungen stehen jetzt direkt unter "Bestellt" und "Bezahlt" — genau wie alle anderen Bestellungen.',
@@ -8488,6 +8540,25 @@ async function checkForUpdates(){
 function applyUpdate(){
   if(waitingWorker) waitingWorker.postMessage('SKIP_WAITING');
   document.getElementById('update-banner').classList.remove('show');
+}
+
+// ── v16: Neuerungen seit dem letzten Besuch anzeigen ──
+function _vcmp(a,b){const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<3;i++){const d=(x[i]||0)-(y[i]||0);if(d)return d;}return 0;}
+function showWhatsNewModal(since){
+  const el=document.getElementById('wn-list'); if(!el) return;
+  let vs=Object.keys(WHATS_NEW).filter(v=>_vcmp(v,CURRENT_UI_VERSION)<=0 && (since?_vcmp(v,since)>0:v===CURRENT_UI_VERSION)).sort((a,b)=>_vcmp(b,a));
+  if(!vs.length) vs=[CURRENT_UI_VERSION];
+  el.style.cssText='list-style:none;padding:0;margin:0';
+  el.innerHTML=vs.map(v=>`<div style="margin-bottom:16px"><div class="mono" style="font-size:11px;font-weight:700;color:var(--sage);letter-spacing:.1em;margin-bottom:6px">VERSION ${v}</div><ul style="margin:0;padding-left:20px;line-height:1.65">${(WHATS_NEW[v]||[]).map(t=>`<li style="margin-bottom:6px">${t}</li>`).join('')}</ul></div>`).join('');
+  openModal('whatsnew');
+}
+function checkWhatsNew(){
+  try{
+    const seen=localStorage.getItem('nm_seen_version');
+    if(seen===CURRENT_UI_VERSION) return;
+    if(seen) showWhatsNewModal(seen);
+    localStorage.setItem('nm_seen_version',CURRENT_UI_VERSION);
+  }catch(e){}
 }
 </script>
 
