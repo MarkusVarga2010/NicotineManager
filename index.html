@@ -1613,6 +1613,30 @@ tbody tr{transition:background .2s var(--ease)}
 .kk-actions{gap:10px}
 .kk-act{border-radius:14px;padding:14px 6px 12px}
 .kk-info{gap:12px;margin-top:20px}
+
+/* ══ v16.1 · KUNDENKARTE PREMIUM ═══════════════════════════ */
+.kk-card{gap:14px;padding:22px 22px 18px;
+  background:radial-gradient(110% 80% at 100% 0%,rgba(255,138,61,.24),transparent 55%),radial-gradient(90% 70% at 0% 100%,rgba(31,184,154,.14),transparent 60%),linear-gradient(150deg,#1c1c24,#09090c);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 30px 54px -22px rgba(0,0,0,.75)}
+.kk-card::before{display:block;content:'';position:absolute;inset:0;z-index:0;padding:1.5px;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(135deg,#FFD9A8,#C9973F 28%,rgba(201,151,63,.08) 52%,rgba(31,184,154,.2) 78%,#29D9B3);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude}
+.kk-card::after{background:linear-gradient(112deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 60%)}
+.kk-art{opacity:.6;mix-blend-mode:normal}
+.kk-sn,.kk-lab{display:block}
+.kk-chip-g{display:block;margin:0 0 10px}
+.kk-mark{background:linear-gradient(135deg,#FF7A29,#29D9B3)}
+.kk-pill{background:linear-gradient(135deg,#FFE2B0,#D9A441 55%,#B8832A);color:#2a1a05;border:0}
+.kk-mid{display:flex;align-items:flex-end;gap:16px}
+.kk-txt{min-width:0;flex:1}
+.kk-photo .kp-img{box-shadow:0 0 0 2px #D9A441,0 0 0 5px rgba(217,164,65,.25),0 10px 20px -8px rgba(0,0,0,.7)}
+.kk-photo .kp-cap:not(.warn){display:none}
+.kk-name{font-size:21px;font-weight:700;letter-spacing:.01em;text-shadow:none;white-space:nowrap}
+.kk-nr{color:#EBC77A;opacity:1;letter-spacing:.2em}
+.kk-meta{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
+.kk-meta i{display:block;font:600 7.5px 'JetBrains Mono',monospace;letter-spacing:.22em;font-style:normal;color:rgba(255,255,255,.45);margin-bottom:3px}
+.kk-meta b{font-size:12px;font-weight:600;color:#fff}
 </style>
 </head>
 <body>
@@ -2283,7 +2307,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">16.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">16.1.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -2584,7 +2608,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="kk-art" id="kk-art" aria-hidden="true"></div>
         <div class="kk-sn" id="kk-sn" aria-hidden="true"></div>
         <div class="kk-top"><div class="kk-logo"><span class="kk-mark"><svg class="svg-ic "><use href="#ic-wave"/></svg></span><span class="kk-brand">NicoFlow</span></div><span class="kk-pill">KUNDENKARTE</span></div>
-        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><span class="kk-chip-g" aria-hidden="true"></span><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div>
+        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><div class="kk-txt"><span class="kk-chip-g" aria-hidden="true"></span><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-meta"><div><i>KUNDE SEIT</i><b id="kk-since">—</b></div><div><i>GEBURTSDATUM</i><b id="kk-dobv">—</b></div><div><i>TYP</i><b id="kk-typ">—</b></div></div>
         <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div>
       </div>
       <button type="button" class="kk-edit-btn" onclick="toggleKkEdit()"><svg class="svg-ic"><use href="#ic-card"/></svg>Foto &amp; Geburtsdatum <span id="kk-edit-state"></span></button>
@@ -3300,8 +3324,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '16.0.0';
+const CURRENT_UI_VERSION = '16.1.0';
 const WHATS_NEW = {
+  '16.1.0': [
+    'Kundenkarte komplett veredelt: tiefschwarze Karte mit feiner Gold-Kupfer-Kante, Goldchip, Wellenmuster und Goldrahmen ums Foto.',
+    'Mehr Infos auf der Karte: Name, Kartennummer, „Kunde seit“, Geburtsdatum und Kartentyp — übersichtlich in einer Zeile unter dem Namen.',
+    '„Als Bild“ und „Drucken“ erzeugen die Karte jetzt im selben neuen Design wie auf dem Bildschirm.'
+  ],
   '16.0.0': [
     'Ganze App ruhiger und geschmeidiger: weichere Übergänge, einheitliche Rundungen, sanftere Schatten und mehr Luft zwischen den Elementen.',
     'Neue Kundenkarte: klares Layout mit Foto links, großem Namen, Kartennummer und gut lesbarem Strichcode unten — im frischen Orange-Türkis-Verlauf.',
@@ -6259,7 +6288,7 @@ async function openKundenkarte(type,id){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
   const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
-  _kk={ type, id, code:c.code, rowId:c.id, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
+  _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
   const ed=document.getElementById('kk-edit'); if(ed) ed.style.display='none';
   renderKk(); openModal('kundenkarte');
 }
@@ -6327,7 +6356,7 @@ function renderKkPhoto(){
   const a=ageOf(_kk.dob);
   el.innerHTML=(_kk.foto?`<div class="kp-img" style="background-image:url('${_kk.foto}')"></div>`:'<div class="kp-img empty"><svg class="svg-ic"><use href="#ic-card"/></svg></div>')
     +`<div class="kp-cap${_kk.dob?'':' warn'}">${_kk.dob?('GEB. '+fmtDob(_kk.dob)):'FOTO / GEB. FEHLT'}</div>`;
-  document.querySelector('.kk-card')?.classList.toggle('has-photo',true);
+  document.querySelector('.kk-card')?.classList.toggle('has-photo',true); kkMeta();
   const st=document.getElementById('kk-edit-state');
   if(st){ const full=_kk.foto&&_kk.dob; st.className=full?'ok':'no'; st.textContent=full?'✓ vollständig':'unvollständig'; }
 }
@@ -6394,7 +6423,7 @@ async function reissueCard(){
   if(error){ showToast('Konnte die alte Karte nicht sperren.','⚠'); return; }
   delete S.karten[cardKey(_kk.type,_kk.id)];
   const c=await issueCard(_kk.type,_kk.id); if(!c) return;
-  _kk.code=c.code; _kk.rowId=c.id;
+  _kk.code=c.code; _kk.rowId=c.id; _kk.since=c.created_at||_kk.since;
   if(_kk.foto||_kk.dob){ const r=await sb.rpc('kundenkarte_profil_setzen',{ p_card_id:String(c.id), p_foto:_kk.foto||null, p_geburtsdatum:_kk.dob||null }); if(!r.error){ c.foto=_kk.foto; c.geburtsdatum=_kk.dob; } }
   renderKk(); showToast('Neue Karte ausgestellt. ✓');
 }
@@ -8559,6 +8588,78 @@ function checkWhatsNew(){
     if(seen) showWhatsNewModal(seen);
     localStorage.setItem('nm_seen_version',CURRENT_UI_VERSION);
   }catch(e){}
+}
+
+// ── v16.1: Premium-Kundenkarte ──
+function kkMeta(){
+  if(!_kk) return;
+  const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+  set('kk-since',_kk.since?fmtDate(_kk.since):'—'); set('kk-dobv',_kk.dob?fmtDob(_kk.dob):'—'); set('kk-typ',_kk.type==='kunde'?'Kunde':'Konto');
+}
+function printKk(){
+  if(!_kk) return;
+  const w=window.open('','_blank'); if(!w){ showToast('Pop-up wurde blockiert.','⚠'); return; }
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Kundenkarte · ${escapeHtml(_kk.name)}</title><style>
+@page{size:auto;margin:10mm}*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:0;padding:24px;display:flex;justify-content:center}
+.c{position:relative;width:85.6mm;height:54mm;border-radius:3.6mm;color:#fff;padding:3.8mm 4.2mm 3.4mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:linear-gradient(150deg,#1c1c24,#09090c);box-shadow:0 0 0 .35mm #C9973F inset;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.art{position:absolute;inset:0;opacity:.6}.art svg{width:100%;height:100%;display:block}.c>*:not(.art){position:relative;z-index:1}
+.t{display:flex;justify-content:space-between;align-items:center}.l{display:flex;align-items:center;gap:2mm}
+.m{width:6mm;height:6mm;border-radius:1.9mm;background:linear-gradient(135deg,#FF7A29,#29D9B3);display:flex;align-items:center;justify-content:center}.m svg{width:3.6mm;height:3.6mm}
+.b{font-weight:800;letter-spacing:.04em;font-size:10pt}.p{font-size:5pt;font-weight:800;letter-spacing:.24em;padding:1mm 2.4mm 1mm 2.8mm;border-radius:9mm;background:linear-gradient(135deg,#FFE2B0,#D9A441 55%,#B8832A);color:#2a1a05}
+.mid{display:flex;align-items:flex-end;gap:3.4mm}.ph2 img{width:13mm;height:16.5mm;object-fit:cover;border-radius:1.6mm;box-shadow:0 0 0 .35mm #D9A441;display:block}
+.k{font-size:4.8pt;letter-spacing:.26em;opacity:.55;margin-bottom:.6mm}.n{font-size:11.5pt;font-weight:700;line-height:1.1}.r{font:6pt ui-monospace,Menlo,monospace;letter-spacing:.2em;color:#EBC77A;margin-top:.8mm}
+.me{display:flex;justify-content:space-between;border-top:.2mm solid rgba(255,255,255,.18);padding-top:1.2mm}.me i{display:block;font:normal 4pt ui-monospace,Menlo,monospace;letter-spacing:.22em;opacity:.5}.me b{font-size:6.4pt}
+.bc{background:#fff;border-radius:2mm;padding:1.4mm 2.4mm 1.1mm;line-height:0}.bc svg{width:100%;height:8.6mm;display:block}
+</style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div>
+<div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
+<div class="mid">${_kk.foto?`<div class="ph2"><img src="${_kk.foto}"/></div>`:''}<div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div></div>
+<div class="me"><div><i>KUNDE SEIT</i><b>${_kk.since?fmtDate(_kk.since):'—'}</b></div><div><i>GEBURTSDATUM</i><b>${_kk.dob?fmtDob(_kk.dob):'—'}</b></div><div><i>TYP</i><b>${_kk.type==='kunde'?'Kunde':'Konto'}</b></div></div>
+<div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
+  w.document.close();
+}
+async function saveKkImage(){
+  if(!_kk) return;
+  let pimg=null; if(_kk.foto){ pimg=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=_kk.foto; }); }
+  const W=1011,H=638,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const rr=(a,b,w,h,r)=>{ x.beginPath(); if(x.roundRect) x.roundRect(a,b,w,h,r); else x.rect(a,b,w,h); };
+  const sp=(t,gp)=>String(t).split('').join(gp||' ');
+  const gold=(a,b,c2,d)=>{ const q=x.createLinearGradient(a,b,c2,d); q.addColorStop(0,'#FFE2B0'); q.addColorStop(.55,'#D9A441'); q.addColorStop(1,'#B8832A'); return q; };
+  x.save(); rr(0,0,W,H,44); x.clip();
+  let g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#1c1c24'); g.addColorStop(1,'#09090c'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  g=x.createRadialGradient(W,0,0,W,0,620); g.addColorStop(0,'rgba(255,138,61,.26)'); g.addColorStop(1,'rgba(255,138,61,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#FF9A52'); g.addColorStop(.55,'#FF7A29'); g.addColorStop(1,'#29D9B3');
+  x.strokeStyle=g; x.lineWidth=2.4; x.lineJoin='round';
+  kkWaves(_kk.code,W,H).forEach(l=>{ x.globalAlpha=Math.max(.03,l.o*.8); x.beginPath(); l.pts.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])); x.stroke(); });
+  x.globalAlpha=1; x.restore();
+  g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#FFD9A8'); g.addColorStop(.3,'#C9973F'); g.addColorStop(.55,'rgba(201,151,63,.1)'); g.addColorStop(1,'#29D9B3');
+  x.strokeStyle=g; x.lineWidth=4; rr(2,2,W-4,H-4,44); x.stroke();
+  // Logo + Pill
+  g=x.createLinearGradient(56,52,112,108); g.addColorStop(0,'#FF7A29'); g.addColorStop(1,'#29D9B3'); x.fillStyle=g; rr(56,52,56,56,17); x.fill();
+  x.strokeStyle='#fff'; x.lineWidth=4.6; x.lineCap='round'; x.beginPath(); x.moveTo(67,82); x.bezierCurveTo(72,70,77,94,84,82); x.bezierCurveTo(90,70,95,94,101,82); x.stroke();
+  x.fillStyle='#fff'; x.textAlign='left'; x.font='800 38px system-ui,-apple-system,sans-serif'; x.fillText('NicoFlow',128,94);
+  x.font='800 17px system-ui,sans-serif'; const pt=sp('KUNDENKARTE','\u200A'), pw=Math.ceil(x.measureText(pt).width)+54;
+  x.fillStyle=gold(W-56-pw,58,W-56,102); rr(W-56-pw,58,pw,44,22); x.fill(); x.fillStyle='#2a1a05'; x.fillText(pt,W-56-pw+27,87);
+  // Chip rechts
+  x.fillStyle=gold(W-140,132,W-56,194); rr(W-140,132,84,62,14); x.fill();
+  x.strokeStyle='rgba(60,35,5,.55)'; x.lineWidth=3; x.beginPath(); x.moveTo(W-112,132); x.lineTo(W-112,194); x.moveTo(W-84,132); x.lineTo(W-84,194); x.moveTo(W-140,163); x.lineTo(W-56,163); x.stroke();
+  // Foto + Name
+  const tx=pimg?240:56;
+  if(pimg){ x.save(); rr(56,132,150,188,16); x.clip(); x.drawImage(pimg,56,132,150,188); x.restore(); x.strokeStyle='#D9A441'; x.lineWidth=4; rr(56,132,150,188,16); x.stroke(); }
+  x.fillStyle='#fff'; x.globalAlpha=.55; x.font='600 16px system-ui,sans-serif'; x.fillText(sp('INHABER','\u2009'),tx,168); x.globalAlpha=1;
+  x.font='700 50px system-ui,-apple-system,sans-serif'; let nm=_kk.name; const maxW=W-tx-170; while(x.measureText(nm).width>maxW && nm.length>3) nm=nm.slice(0,-2); if(nm!==_kk.name) nm+='…'; x.fillText(nm,tx,226);
+  x.fillStyle='#EBC77A'; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),tx,272);
+  // Meta
+  x.strokeStyle='rgba(255,255,255,.14)'; x.lineWidth=1.5; x.beginPath(); x.moveTo(56,338); x.lineTo(W-56,338); x.stroke();
+  const meta=[['KUNDE SEIT',_kk.since?fmtDate(_kk.since):'—'],['GEBURTSDATUM',_kk.dob?fmtDob(_kk.dob):'—'],['TYP',_kk.type==='kunde'?'Kunde':'Konto']];
+  meta.forEach((m,i)=>{ const mx=56+i*300; x.fillStyle='rgba(255,255,255,.5)'; x.font='600 14px ui-monospace,Menlo,monospace'; x.fillText(sp(m[0],'\u2009'),mx,366); x.fillStyle='#fff'; x.font='700 24px system-ui,sans-serif'; x.fillText(m[1],mx,396); });
+  // Strichcode
+  x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,420,W-80,188,26); x.fill(); x.restore();
+  drawBarcode(x,_kk.code,60,438,W-120,152);
+  c.toBlob(async blob=>{
+    const f=new File([blob],'kundenkarte.png',{type:'image/png'});
+    if(navigator.canShare?.({files:[f]})){ try{ await navigator.share({files:[f]}); return; }catch(e){ if(e.name==='AbortError') return; } }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`kundenkarte-${_kk.name.replace(/\W+/g,'-')}.png`; a.click();
+  });
 }
 </script>
 
