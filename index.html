@@ -2414,7 +2414,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">19.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">19.1.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -3459,8 +3459,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '19.0.0';
+const CURRENT_UI_VERSION = '19.1.0';
 const WHATS_NEW = {
+  '19.1.0': [
+    'Neu: Lieferanten (Spezial-Konten) können jetzt selbst mit einem anderen Lieferanten verbunden werden — so entstehen Lieferketten: Du belieferst deine Kunden und bestellst gleichzeitig bei deinem eigenen Lieferanten.',
+    'Verknüpfen geht beim Anlegen eines Accounts, unter „Benutzer bearbeiten“, in der Benutzerliste und in den eigenen Einstellungen („Mein Lieferant“).',
+    'Zirkuläre Verknüpfungen (A → B → A) werden automatisch verhindert.'
+  ],
   '19.0.0': [
     'Neuer Menüpunkt „Sendungen“: alle Lieferungen und Abholungen auf einen Blick — mit Live-Kennzahlen (aktiv, bereit/unterwegs, heute, überfällig), „Nächste Termine“, Filter, Suche und Fortschrittsbalken pro Sendung.',
     'Sendung öffnen: vollständige Verfolgung mit Verlauf, Termin (Kalender & Karte), Status setzen, Verfolgungslink teilen, Abholcode, Erinnerung, Übergabe bestätigen und Bezahlt-Markierung direkt an einem Ort. Aktualisiert sich automatisch jede Minute.',
@@ -4420,7 +4425,7 @@ function openEditUser(id){
   document.getElementById('eu-name').value=u.username||'';
   const roleSel=document.getElementById('eu-role'); roleSel.value=u.role||'user';
   roleSel.disabled = id===currentUserId; // eigene Rolle nicht änderbar (Aussperr-Schutz)
-  document.getElementById('eu-linked').innerHTML='<option value="">Keine Verknüpfung</option>'+M.users.filter(x=>x.role==='special' && x.id!==id).map(x=>`<option value="${x.id}">${escapeHtml(x.username)}</option>`).join('');
+  document.getElementById('eu-linked').innerHTML='<option value="">Keine Verknüpfung</option>'+M.users.filter(x=>x.role==='special' && x.id!==id && !linkCycle(id,x.id)).map(x=>`<option value="${x.id}">${escapeHtml(x.username)}</option>`).join('');
   document.getElementById('eu-linked').value=u.linked_to||'';
   document.getElementById('eu-max').value=u.max_lieferanten||BESTELLER_DEFAULT_MAX;
   document.getElementById('eu-telefon').value=u.telefon||'';
@@ -4441,8 +4446,13 @@ async function saveEditUser(){
   const modus=document.getElementById('eu-modus').value, modusChanged=modus!==(u.auth_modus||'passwort');
   if(modusChanged && !pw){ showToast('Anmeldeart geändert: bitte neue '+(modus==='pin'?'PIN':'neues Passwort')+' setzen.','⚠'); return; }
   if(pw){ const e=checkSecret(modus,pw); if(e){ showToast(e,'⚠'); return; } }
-  const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:linked||null, p_max:max });
+  if(linked && linkCycle(id,linked)){ showToast('Zirkuläre Verknüpfung nicht möglich.','⚠'); return; }
+  const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:null, p_max:max });
   if(error){ showToast(error.message||'Speichern fehlgeschlagen.','⚠'); return; }
+  if(linked && (role==='user'||role==='special')){
+    const { error: lErr } = await sb.rpc('set_user_link', { p_user_id:id, p_linked_to:linked });
+    if(lErr){ showToast(rpcErrText(lErr,'Verknüpfung konnte nicht gespeichert werden.'),'⚠'); u.linked_to=null; return; }
+  }
   if(pw){
     const { error: pErr } = await sb.rpc('admin_set_credentials', { p_user_id:id, p_modus:modus, p_secret:pw, p_force:force });
     if(pErr){ showToast(pErr.message||'Zugangsdaten konnten nicht gesetzt werden.','⚠'); }
@@ -8239,7 +8249,7 @@ function renderSettings(){
     const showLieferant = role==='user' || role==='service' || role==='special';
     lieferantWrap.style.display = showLieferant ? '' : 'none';
     if(showLieferant){
-      const specials = M.users.filter(u=>u.role==='special' && u.id!==currentUserId);
+      const specials = M.users.filter(u=>u.role==='special' && u.id!==currentUserId && !linkCycle(currentUserId,u.id));
       const sel=document.getElementById('set-lieferant');
       sel.innerHTML='<option value="">Keinen Lieferanten auswählen</option>'+specials.map(u=>`<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
       sel.value = M.profile?.linked_to || '';
@@ -8271,7 +8281,7 @@ function fillLinkedUsersSelect(){
 }
 const ROLE_INFO={
   admin:{icon:'🛡️',label:'Administrator',desc:'Verwaltet Konten, Rollen und Zugangsdaten.'},
-  special:{icon:'◆',label:'Spezial-Konto (Lieferant)',desc:'Beliefert Kunden: sieht Bestellungen verknüpfter Benutzer und Besteller, setzt Status und Liefertermine.'},
+  special:{icon:'◆',label:'Spezial-Konto (Lieferant)',desc:'Beliefert Kunden, setzt Status und Liefertermine — und kann selbst bei einem übergeordneten Lieferanten bestellen.'},
   user:{icon:'👤',label:'Benutzer',desc:'Verwaltet Kunden, Preise und Lager und bestellt beim verknüpften Lieferanten.'},
   besteller:{icon:'🛒',label:'Besteller',desc:'Registriert sich selbst, bestellt im Shop bei mehreren Lieferanten und verfolgt den Status.'},
   service:{icon:'🔧',label:'Service-Account',desc:'Zugang für Wartung und Service-Bereich.'}
@@ -8285,7 +8295,7 @@ function presetNewUser(role){
 }
 function onNuRoleChange(){
   const r=document.getElementById('nu-role').value, m=document.getElementById('nu-modus').value;
-  document.getElementById('nu-linked-wrap').style.display = r==='user' ? '' : 'none';
+  document.getElementById('nu-linked-wrap').style.display = (r==='user'||r==='special') ? '' : 'none';
   document.getElementById('nu-role-desc').textContent = ROLE_INFO[r]?.desc||'';
   applyModusToInput(document.getElementById('nu-pw'), m, false, true);
 }
@@ -8301,11 +8311,11 @@ function renderUserList(){
   const q=(document.getElementById('ul-search')?.value||'').trim().toLowerCase();
   const specials=M.users.filter(u=>u.role==='special');
   const row=u=>{
-    const linkOpts=specials.filter(s2=>s2.id!==u.id).map(s2=>`<option value="${s2.id}" ${u.linked_to===s2.id?'selected':''}>${escapeHtml(s2.username)}</option>`).join('');
+    const linkOpts=specials.filter(s2=>s2.id!==u.id && !linkCycle(u.id,s2.id)).map(s2=>`<option value="${s2.id}" ${u.linked_to===s2.id?'selected':''}>${escapeHtml(s2.username)}</option>`).join('');
     const ctrl = u.role==='besteller'
       ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)" title="Maximale Anzahl Lieferanten pro Bestellung">Max. Lieferanten
           <input type="number" min="1" max="50" value="${u.max_lieferanten||3}" style="width:62px;font-size:11px;padding:5px 8px" onchange="setMaxLieferanten('${u.id}', this.value)"/></label>`
-      : u.role==='user'
+      : (u.role==='user'||u.role==='special')
       ? `<select style="width:auto;min-width:130px;font-size:11px;padding:5px 8px" onchange="setUserLink('${u.id}', this.value)"><option value="">Keine Verknüpfung</option>${linkOpts}</select>` : '';
     const canLock = u.id!==currentUserId;
     const lockBtn = canLock
@@ -8348,11 +8358,16 @@ async function addUser(){
   if(!n){ showToast('Bitte Benutzernamen eingeben.','⚠'); return; }
   if(eNu){ showToast(eNu,'⚠'); return; }
   // Konto mit zufälligem Start-Passwort anlegen, danach PIN/Passwort + Anmeldeart serverseitig setzen
-  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:randomPw(), p_role:r, p_linked_to: (linked||null) });
+  const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:randomPw(), p_role:r, p_linked_to: null });
   if(error){ console.error('create_app_user',error); showToast(rpcErrText(error,'Benutzer konnte nicht angelegt werden.'), '⚠'); return; }
   // Neu angelegte Konten müssen beim ersten Login ihre Zugangsdaten selbst festlegen.
+  let linkOk=true;
+  if(linked && (r==='user'||r==='special')){
+    const { error: lErr } = await sb.rpc('set_user_link', { p_user_id:data, p_linked_to:linked });
+    if(lErr){ linkOk=false; showToast(rpcErrText(lErr,'Verknüpfung konnte nicht gesetzt werden.'),'⚠'); }
+  }
   const { error: fErr } = await sb.rpc('admin_set_credentials', { p_user_id:data, p_modus:modusNu, p_secret:p, p_force:true });
-  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null), auth_modus:modusNu });
+  M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: linkOk?(linked||null):null, auth_modus:modusNu });
   if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (app_struktur_setup.sql ausführen).','⚠');
   document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';onNuRoleChange();
   document.getElementById('nu-linked').value='';
@@ -8378,6 +8393,7 @@ async function delUser(id){
 
 async function saveOwnLink(){
   const val=document.getElementById('set-lieferant')?.value||'';
+  if(val && linkCycle(currentUserId,val)){ showToast('Zirkuläre Verknüpfung nicht möglich.','⚠'); return; }
   const { error } = await sb.rpc('set_own_link', { p_linked_to: val || null });
   if(error){ showToast(error.message || 'Lieferant konnte nicht gespeichert werden.', '⚠'); return; }
   if(M.profile) M.profile.linked_to = val || null;
@@ -8958,6 +8974,13 @@ function openPalette(){
   inp.focus();
 }
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){ e.preventDefault(); openPalette(); } });
+
+// ── v19.1: Lieferketten (Lieferant ↔ Lieferant) ──
+function linkCycle(userId,targetId){
+  let t=targetId,i=0;
+  while(t && i<20){ if(t===userId) return true; t=(M.users.find(x=>x.id===t)||{}).linked_to||null; i++; }
+  return false;
+}
 </script>
 
 </body>
