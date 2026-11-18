@@ -30,6 +30,86 @@
 /* ════════════════════════════════════════════════════════
    TOKENS
    ════════════════════════════════════════════════════════ */
+   /* ══════════ UPDATE 15.8.0 · GESCHMEIDIGES DESIGN ══════════ */
+:root{
+  --ease:cubic-bezier(.22,.9,.3,1);
+  --r:12px; --r-lg:18px;
+  --shadow-soft:0 1px 2px rgba(0,0,0,.18),0 12px 28px -16px rgba(0,0,0,.45);
+}
+html{scroll-behavior:smooth}
+body{font-feature-settings:"tnum" 1,"cv11" 1;text-rendering:optimizeLegibility}
+.mono,.sc-v,td.mono{font-variant-numeric:tabular-nums}
+.card,.set-card,.pc,.kcard,.dose-card,.bs-group,.shop-card{
+  box-shadow:var(--shadow-soft);border-radius:var(--r-lg);
+  transition:transform .28s var(--ease),box-shadow .28s var(--ease),border-color .2s ease}
+.card:hover,.kcard:hover,.pc:hover,.shop-card:hover{
+  transform:translateY(-2px);box-shadow:0 2px 4px rgba(0,0,0,.2),0 22px 40px -22px rgba(0,0,0,.55)}
+.card{margin-bottom:20px}
+.card-head{padding:16px 22px}
+td{padding:14px 20px} th{padding:11px 20px}
+tbody tr{transition:background .18s ease}
+.page.active{animation:pgIn .38s var(--ease) both}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.main{padding:40px 36px 72px}
+.ph{margin-bottom:28px;padding-bottom:20px}
+.pt{font-size:26px}
+.btn,.status-btn,.tab-btn,.ic-btn,.scale-tick{transition:all .2s var(--ease)!important}
+.btn:active,.status-btn:active{transform:scale(.96)}
+.btn-primary{border-radius:999px;padding:10px 20px}
+.btn-ghost,.btn-danger{border-radius:999px}
+:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:8px}
+.scale-tick{border-radius:999px;padding:10px 14px}
+.scale-tick:hover{background:var(--paper3);transform:none}
+.scale-tick.active{background:color-mix(in srgb,var(--sage) 16%,var(--paper2))}
+.scale-tick.active::before{display:none}
+.nav-group{padding:18px 16px 6px;letter-spacing:.14em}
+input,select,textarea{border-radius:var(--r);transition:border-color .2s,box-shadow .2s,background .2s}
+.modal{border-radius:22px;box-shadow:0 40px 80px -24px rgba(0,0,0,.7)}
+.modal-bg{transition:opacity .25s ease}
+.modal-head{padding:20px 24px} .modal-body{padding:24px} .modal-foot{padding:16px 24px}
+#toast{border-radius:999px;box-shadow:0 18px 40px -12px rgba(0,0,0,.6)}
+.bento-dash .stat-cell{border-radius:var(--r-lg);transition:transform .25s var(--ease),border-color .2s}
+.bento-dash .stat-cell:hover{transform:translateY(-3px)}
+.rev-bar-fill{transition:height .6s var(--ease)}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .page.active{animation:none}
+  .card:hover,.kcard:hover,.pc:hover,.shop-card:hover,.bento-dash .stat-cell:hover{transform:none}
+}
+
+/* ══════════ NEUE KUNDENKARTE · "AURORA" ══════════ */
+.kk-card{
+  border-radius:26px;padding:24px 24px 20px;gap:16px;
+  background:
+    radial-gradient(90% 70% at 100% 0%,rgba(255,122,41,.34),transparent 62%),
+    radial-gradient(80% 70% at 0% 100%,rgba(41,217,179,.24),transparent 62%),
+    #0D0E13;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 36px 60px -26px rgba(0,0,0,.75),0 12px 22px -14px rgba(255,122,41,.35)}
+.kk-card::before{
+  padding:1px;border-radius:inherit;
+  background:linear-gradient(150deg,rgba(255,255,255,.5),rgba(255,255,255,.05) 38%,rgba(255,255,255,.05) 62%,rgba(255,154,82,.6))}
+.kk-card::after{background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.08) 50%,transparent 65%)}
+.kk-art{opacity:.45;mix-blend-mode:screen}
+.kk-mark{width:30px;height:30px;border-radius:10px}
+.kk-brand{font-size:15px;letter-spacing:.02em}
+.kk-pill{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28)!important;font-weight:700;letter-spacing:.2em;padding:6px 12px}
+.kk-chip-g{width:38px;height:28px;border-radius:7px;margin-bottom:12px}
+.kk-lab{font-size:9px;letter-spacing:.28em;opacity:.5;margin-bottom:5px}
+.kk-name{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
+.kk-nr{font-size:12px;letter-spacing:.2em;opacity:.65;margin-top:7px}
+.kk-card.has-photo .kk-name{max-width:calc(100% - 84px)}
+.kk-photo{right:0;top:-2px;width:64px}
+.kk-photo .kp-img{width:64px;height:64px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 5px rgba(255,122,41,.45),0 10px 20px -6px rgba(0,0,0,.7)}
+.kk-photo .kp-cap{margin-top:8px;font-size:7.5px;letter-spacing:.12em}
+.kk-bc{border-radius:16px;padding:12px 16px 10px;box-shadow:0 14px 28px -10px rgba(0,0,0,.6)}
+.kk-bc svg{height:50px}
+.kk-actions{gap:10px;margin-top:20px}
+.kk-act{border-radius:16px;padding:14px 6px 12px;background:var(--paper2);transition:transform .2s var(--ease),border-color .2s,background .2s}
+.kk-act:hover{transform:translateY(-2px)}
+.kk-info{gap:12px;margin-top:20px}
+.kk-info-i{border-radius:12px;width:34px;height:34px}
+.kk-edit-btn{border-radius:14px}
+.kk-edit{border-radius:16px}
 :root{
   --ui-zoom:1;
   --paper:#0B0D10;
