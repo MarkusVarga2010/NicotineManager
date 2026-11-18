@@ -2307,7 +2307,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">17.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">17.0.1</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -3324,8 +3324,12 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '17.0.0';
+const CURRENT_UI_VERSION = '17.0.1';
 const WHATS_NEW = {
+  '17.0.1': [
+    'Fehler behoben: beim Passwort-Ändern hieß es fälschlich „aktuelles Passwort ist falsch“ — die Prüfung nutzt jetzt die echte Anmelde-Adresse deines Kontos (auch nach Umbenennung).',
+    'Beim Anlegen von Accounts zeigt die App jetzt eine klare Fehlermeldung, falls die Server-Funktion (pgcrypto/„gen_salt“) nicht läuft, statt nur still zu scheitern.'
+  ],
   '17.0.0': [
     'Neues Logo: ein klar konstruiertes „N“ aus drei Linien in Kupfer-Türkis auf Graphit mit Goldrand — in Login, Menü, Browser-Tab, Kundenkarte und PDF-Exporten.',
     'Persönliche Begrüßung auf der Übersicht mit Tageszeit und Datum.',
@@ -4221,7 +4225,8 @@ async function changeOwnPassword(){
   { const e=checkSecret(selfModus(),n1); if(e){ setFieldError('pwc-new',e); bad=true; } }
   if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
-  const { error: vErr } = await sb.auth.signInWithPassword({ email: toEmail(currentUser), password: old });
+  const { data: _su } = await sb.auth.getUser();
+  const { error: vErr } = await sb.auth.signInWithPassword({ email: (_su&&_su.user&&_su.user.email) || toEmail(currentUser), password: old });
   if(vErr){ setFieldError('pwc-old','Aktuelles Passwort ist falsch.'); return; }
   const err=await applyNewPassword(n1);
   if(err){ setFieldError('pwc-new', pwErrText(err)); return; }
@@ -8196,7 +8201,7 @@ async function addUser(){
   if(eNu){ showToast(eNu,'⚠'); return; }
   // Konto mit zufälligem Start-Passwort anlegen, danach PIN/Passwort + Anmeldeart serverseitig setzen
   const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:randomPw(), p_role:r, p_linked_to: (linked||null) });
-  if(error){ showToast(error.message || 'Benutzer konnte nicht angelegt werden.', '⚠'); return; }
+  if(error){ console.error('create_app_user',error); showToast(rpcErrText(error,'Benutzer konnte nicht angelegt werden.'), '⚠'); return; }
   // Neu angelegte Konten müssen beim ersten Login ihre Zugangsdaten selbst festlegen.
   const { error: fErr } = await sb.rpc('admin_set_credentials', { p_user_id:data, p_modus:modusNu, p_secret:p, p_force:true });
   M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: (linked||null), auth_modus:modusNu });
@@ -8678,6 +8683,12 @@ function dashGreeting(){
   el.textContent=`${g}, ${cap(currentUser)} · ${d}`;
 }
 const _rdOrig=renderDashboard; renderDashboard=function(){ _rdOrig.apply(this,arguments); dashGreeting(); };
+
+function rpcErrText(e,fb){
+  const m=(e&&e.message)||'';
+  if(/gen_salt|crypt|pgcrypto|search_path|does not exist/i.test(m)) return 'Server-Funktion defekt (pgcrypto/search_path). Bitte admin_fix.sql in Supabase ausführen. Details: '+m;
+  return m||fb;
+}
 </script>
 
 </body>
