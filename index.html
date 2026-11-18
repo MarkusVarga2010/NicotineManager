@@ -1709,10 +1709,69 @@ th{font-size:9.5px;letter-spacing:.14em}
 .kk-meta{gap:8px}.kk-meta b{font-size:11.5px;white-space:nowrap}
 .kk-foot{position:relative;z-index:1;display:flex;justify-content:space-between;gap:8px;font:600 7.5px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(255,255,255,.5);margin-top:-4px}
 .kk-foot b{color:#34D399}
-.kk-foot.soon b{color:#FBBF24}.kk-foot.expired b{color:#F87171}.kk-foot.expired #kk-status{color:#F87171}.kk-foot.soon #kk-status{color:#FBBF24}
-.kk-card.expired .kk-bc{opacity:.35;filter:grayscale(1)}.kk-card.expired .kk-meta #kk-valid{color:#F87171}.kk-card.soon .kk-meta #kk-valid{color:#FBBF24}
-.kk-renew{display:none;width:100%;margin:10px 0 0;padding:11px;border-radius:12px;border:1px solid #F87171;background:rgba(248,113,113,.12);color:#F87171;font-weight:700}
 @media(prefers-reduced-motion:reduce){.kk-card{transition:none}}
+
+/* ══ v19 · FACELIFT 2 ══════════════════════════════════════ */
+.bento-dash .stat-cell .bento-ic-bg{top:16px;right:16px;width:40px;height:40px;padding:9px;border-radius:12px;background:color-mix(in srgb,currentColor 13%,transparent);opacity:1;stroke-width:1.8;color:var(--sage)}
+.bento-dash [data-bento="debt"] .bento-ic-bg{color:var(--rust)}
+.bento-dash [data-bento="profit"] .bento-ic-bg{color:var(--success)}
+.bento-dash [data-bento="lief"] .bento-ic-bg{color:var(--lieferant)}
+.card,.set-card,.dose-card{box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 18px 40px -26px rgba(0,0,0,.6)}
+.sidebar{background:linear-gradient(180deg,color-mix(in srgb,var(--sage) 5%,var(--paper2)),var(--paper2) 40%)}
+.btn-primary:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.btn:active{transform:scale(.97)}
+td,th{white-space:normal}
+.card-head h3{font-size:14px}
+.ps{line-height:1.55}
+.tab-group{padding:4px;background:var(--paper2)}
+.tab-btn{padding:9px 16px}
+
+/* ══ v19 · SENDUNGEN ═══════════════════════════════════════ */
+.sd-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:4px 0 16px}
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.sd-card{background:var(--paper2);border:1px solid var(--line2);border-radius:20px;padding:16px 18px;cursor:pointer;display:flex;flex-direction:column;gap:11px;transition:transform .25s var(--ease),border-color .2s ease,box-shadow .25s var(--ease)}
+.sd-card:hover{border-color:var(--sage);transform:translateY(-2px);box-shadow:0 18px 36px -22px rgba(0,0,0,.6)}
+.sd-card.is-fin{opacity:.7}
+.sd-card.is-late{border-color:var(--rust)}
+.sd-top{display:flex;align-items:center;gap:8px}
+.sd-id{font:700 11px 'JetBrains Mono',monospace;color:var(--ink-faint)}
+.sd-dir{font:700 9px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:color-mix(in srgb,var(--sage) 14%,transparent);color:var(--sage-deep)}
+.sd-when{margin-left:auto;font-size:11px;color:var(--ink-faint)}
+.sd-who{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-prods{font-size:12px;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sd-bar{height:6px;border-radius:99px;background:var(--line2);overflow:hidden}
+.sd-bar span{display:block;height:100%;border-radius:99px;background:var(--foil);transition:width .6s var(--ease)}
+.sd-dots{display:flex;justify-content:space-between;margin-top:-4px}
+.sd-dots i{width:8px;height:8px;border-radius:50%;background:var(--line2)}
+.sd-dots i.on{background:var(--success)}
+.sd-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+.sd-foot b{font-weight:700}
+.sd-eta{color:var(--sage-deep);font-weight:600}
+.sd-late-t{color:var(--rust);font-weight:700}
+.sd-next-row{display:flex;gap:14px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
+.sd-next-row:last-child{border-bottom:none}.sd-next-row:hover{background:var(--paper3)}
+.sd-next-row .sd-when{margin-left:auto}
+.sd-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.sd-info{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;padding:14px 16px;border:1px solid var(--line2);border-radius:var(--r);background:var(--paper2);margin-bottom:16px;font-size:12px;color:var(--ink-soft)}
+.sd-info b{display:block;color:var(--ink);font-size:14px;margin-top:2px}
+
+/* ══ v19 · KARTE SPRICHT DICH AN ═══════════════════════════ */
+.kk-hello{font-size:15px;color:var(--ink-soft);margin:-2px 0 14px;line-height:1.4}
+.kk-hello b{color:var(--ink);font-size:17px}
+.kk-card{background:radial-gradient(120% 90% at 100% 0%,rgba(255,122,41,.44),transparent 55%),radial-gradient(100% 80% at 0% 100%,rgba(41,217,179,.32),transparent 58%),radial-gradient(80% 60% at 55% 38%,rgba(245,82,122,.16),transparent 60%),linear-gradient(150deg,#1e1c29,#08080b)}
+.kk-lab{font-size:11px;letter-spacing:.14em;opacity:.8;font-weight:700;color:#FFD9A8}
+.kk-name{font-size:25px;letter-spacing:-.01em}
+.kk-foot b{animation:kkPulse 1.8s ease-in-out infinite}
+.kk-foot span:last-child{color:#FFD9A8;font-weight:700}
+@keyframes kkPulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.kk-foot b{animation:none}}
+
+/* ══ v19 · SCHNELLSUCHE ════════════════════════════════════ */
+#palette{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding-top:14vh}
+.pal-box{width:min(460px,92vw);background:var(--paper2);border:1px solid var(--line2);border-radius:20px;padding:12px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7)}
+.pal-box input{margin-bottom:8px}
+.pal-item{padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:600}
+.pal-item:hover,.pal-item.on{background:color-mix(in srgb,var(--sage) 16%,transparent)}
 </style>
 </head>
 <body>
@@ -1848,6 +1907,7 @@ th{font-size:9.5px;letter-spacing:.14em}
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary active" onclick="nav('dashboard');closeSidebar()"><span class="tk-n">00</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-grid"/></svg></span><span data-i18n="nav.dashboard">Übersicht</span></div>
         <div class="nav-group">Verkauf</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('bestellungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span><span data-i18n="nav.bestellungen">Bestellungen</span><span class="tk-dot" id="tk-dot-bestellungen"></span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('sendungen');closeSidebar()"><span class="tk-n">01</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span data-i18n="nav.sendungen">Sendungen</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferant-tick" style="display:none" onclick="nav('lieferant');closeSidebar()"><span class="tk-n">02</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></span><span data-i18n="nav.lieferant">Lieferant &amp; Schulden</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('kunden');closeSidebar()"><span class="tk-n">03</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></span><span data-i18n="nav.kunden">Kunden</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" id="nav-lieferantenkunden-tick" style="display:none" onclick="nav('lieferantenkunden');closeSidebar()"><span class="tk-n">04</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-store"/></svg></span><span data-i18n="nav.lieferantenkunden">Lieferantenkunden</span></div>
@@ -2354,7 +2414,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">18.1.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">19.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -2410,6 +2470,22 @@ alter table profiles add column if not exists adresse text;</pre>
       </div>
     </div>
 
+    <!-- SENDUNGEN -->
+    <div class="page" id="page-sendungen">
+      <div class="ph">
+        <div><div class="ph-eyebrow">Logistik · Live</div><div class="pt">Sendungen</div><div class="ps">Alle Lieferungen und Abholungen mit Live-Status</div></div>
+        <div class="pa"><button class="btn btn-ghost" onclick="reloadSendungen()">↻ Aktualisieren</button></div>
+      </div>
+      <div class="stat-strip" id="sd-kpis"></div>
+      <div class="card" id="sd-next-card" style="display:none"><div class="card-head"><h3>🗓 Nächste Termine</h3></div><div id="sd-next"></div></div>
+      <div class="sd-toolbar">
+        <div class="tab-group" id="sd-chips"></div>
+        <input type="search" id="sd-search" placeholder="🔍 Name, Produkt oder Nr. suchen…" oninput="renderSendungen()" style="width:auto;min-width:240px"/>
+      </div>
+      <div class="sd-grid" id="sd-grid"></div>
+      <div class="ec" id="sd-empty" style="display:none"><div class="ec-ic"><svg class="svg-ic"><use href="#ic-truck"/></svg></div><div class="ec-t">Keine Sendungen in dieser Ansicht</div><div class="ec-s">Neue Bestellungen erscheinen hier automatisch.</div></div>
+    </div>
+
     <!-- SERVICE -->
     <div class="page" id="page-service">
       <div class="ph"><div><div class="ph-eyebrow" data-i18n="page.service.eyebrow">Wartung</div><div class="pt" data-i18n="page.service.title">Service</div><div class="ps" data-i18n="page.service.sub">Jährlichen Service verwalten</div></div></div>
@@ -2437,6 +2513,15 @@ alter table profiles add column if not exists adresse text;</pre>
 
   </div>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: Sendung -->
+<div class="modal-bg" id="modal-sendung">
+  <div class="modal wide">
+    <div class="modal-head"><h3><span style="margin-right:8px">📍</span>Sendung <span class="mono" id="sd-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('sendung')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body"><div id="sd-info"></div><div id="sd-track"></div><div id="sd-form"></div><div class="sd-actions" id="sd-actions"></div></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('sendung')">Schließen</button></div>
   </div>
 </div>
 
@@ -2651,14 +2736,14 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal" style="max-width:440px">
     <div class="modal-head"><h3><svg class="svg-ic h-ic"><use href="#ic-card"/></svg>Kundenkarte</h3><button class="modal-close" onclick="closeModal('kundenkarte')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
+      <div class="kk-hello" id="kk-hello"></div>
       <div class="kk-card">
         <div class="kk-art" id="kk-art" aria-hidden="true"></div><div class="kk-wm" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="wmg" gradientUnits="userSpaceOnUse" x1="130" y1="110" x2="380" y2="400"><stop offset="0" stop-color="#FFB27A"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><g fill="none" stroke="url(#wmg)" stroke-width="56" stroke-linecap="round"><path d="M164 372V140"/><path d="M348 372V140"/><path d="M164 152L348 360"/></g></svg></div>
         <div class="kk-sn" id="kk-sn" aria-hidden="true"></div>
         <div class="kk-top"><div class="kk-logo"><span class="kk-mark"><svg class="svg-ic "><use href="#ic-wave"/></svg></span><span class="kk-brand">NicoFlow</span></div><span class="kk-pill">KUNDENKARTE</span></div>
-        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><div class="kk-txt"><div class="kk-chiprow"><span class="kk-chip-g" aria-hidden="true"></span><svg class="kk-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6c3 3.5 3 8.5 0 12"/><path d="M12 4c4.5 5 4.5 11 0 16"/><path d="M16 2c6 6.5 6 13.5 0 20"/></svg></div><div class="kk-lab">INHABER</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-meta"><div><i>KUNDE SEIT</i><b id="kk-since">—</b></div><div><i>GEBURTSDATUM</i><b id="kk-dobv">—</b></div><div><i>GÜLTIG BIS</i><b id="kk-valid">—</b></div><div><i>KARTEN-ID</i><b id="kk-id">—</b></div></div>
-        <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div><div class="kk-foot"><span id="kk-status"><b>●</b> AKTIV</span><span>NUR PERSÖNLICH · NICHT ÜBERTRAGBAR · VERLUST SOFORT MELDEN</span></div>
+        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><div class="kk-txt"><div class="kk-chiprow"><span class="kk-chip-g" aria-hidden="true"></span><svg class="kk-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6c3 3.5 3 8.5 0 12"/><path d="M12 4c4.5 5 4.5 11 0 16"/><path d="M16 2c6 6.5 6 13.5 0 20"/></svg></div><div class="kk-lab">HALLO,</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-meta"><div><i>KUNDE SEIT</i><b id="kk-since">—</b></div><div><i>GEBURTSDATUM</i><b id="kk-dobv">—</b></div><div><i>TYP</i><b id="kk-typ">—</b></div><div><i>KARTEN-ID</i><b id="kk-id">—</b></div></div>
+        <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div><div class="kk-foot"><span><b>●</b> AKTIV</span><span>ZUM SCANNEN VORZEIGEN · NUR PERSÖNLICH</span></div>
       </div>
-      <button type="button" class="kk-renew" id="kk-renew" onclick="reissueCard()">Karte erneuern (neue Karte ausstellen)</button>
       <button type="button" class="kk-edit-btn" onclick="toggleKkEdit()"><svg class="svg-ic"><use href="#ic-card"/></svg>Foto &amp; Geburtsdatum <span id="kk-edit-state"></span></button>
       <div class="kk-edit" id="kk-edit" style="display:none">
         <div class="kk-ed-row">
@@ -3014,6 +3099,7 @@ const I18N = {
     'nav.eigenverbrauch':'Eigenverbrauch',
     'nav.einstellungen':'Einstellungen',
     'nav.service':'Service',
+    'nav.sendungen':'Sendungen',
     'common.save':'Speichern',
     'common.cancel':'Abbrechen',
     'common.delete':'Löschen',
@@ -3155,6 +3241,7 @@ const I18N = {
     'nav.eigenverbrauch':'Own use',
     'nav.einstellungen':'Settings',
     'nav.service':'Service',
+    'nav.sendungen':'Shipments',
     'common.save':'Save',
     'common.cancel':'Cancel',
     'common.delete':'Delete',
@@ -3372,13 +3459,14 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '18.1.0';
+const CURRENT_UI_VERSION = '19.0.0';
 const WHATS_NEW = {
-  '18.1.0': [
-    'Kundenkarte: neues Feld „Gültig bis“ (3 Jahre ab Ausstellung) — auf der Karte, im Vollbild, bei „Als Bild“ und beim Drucken.',
-    'Statusanzeige: „Aktiv“, „Läuft bald ab“ (60 Tage vorher, gelb) und „Abgelaufen“ (rot, Strichcode ausgegraut) mit Knopf „Karte erneuern“.',
-    'Beim Scannen an der Übergabe werden abgelaufene Karten abgewiesen.',
-    'Sicherheitshinweis „Nicht übertragbar“ auf der Karte; „Typ“ ersetzt durch „Gültig bis“.'
+  '19.0.0': [
+    'Neuer Menüpunkt „Sendungen“: alle Lieferungen und Abholungen auf einen Blick — mit Live-Kennzahlen (aktiv, bereit/unterwegs, heute, überfällig), „Nächste Termine“, Filter, Suche und Fortschrittsbalken pro Sendung.',
+    'Sendung öffnen: vollständige Verfolgung mit Verlauf, Termin (Kalender & Karte), Status setzen, Verfolgungslink teilen, Abholcode, Erinnerung, Übergabe bestätigen und Bezahlt-Markierung direkt an einem Ort. Aktualisiert sich automatisch jede Minute.',
+    'Die Kundenkarte spricht dich jetzt persönlich an („Hallo, Name“), leuchtet in lebendigeren Farben und sagt klar, was zu tun ist: zum Scannen vorzeigen.',
+    'Facelifting: Kennzahlen-Kacheln mit Icon-Chips, noch ruhigere Flächen und Abstände, weichere Schatten.',
+    'Neu: Schnellsuche mit Strg/Cmd + K — springt sofort zu jeder Seite.'
   ],
   '18.0.0': [
     'Komplettes Facelifting: ruhigerer Hintergrund, größere Eingabefelder, weiche Einblend-Animationen beim Seitenwechsel, edlere Menü-Auswahl, Tabellen und Fenster mit Gold-Akzent.',
@@ -3585,7 +3673,7 @@ function allowedPages(role){
   if(role==='besteller') return ['besteller','einstellungen'];
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  return ['dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
+  return ['dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -3824,7 +3912,7 @@ function closeSidebar(){
 // NAVIGATION
 // ══════════════════════════════════════════════
 const PAGE_NAMES={besteller:'Meine Bestellungen',dashboard:'Übersicht',bestellungen:'Bestellungen',lieferant:'Beim Lieferanten',kunden:'Kunden',lieferantenkunden:'Lieferantenkunden',preise:'Preise',lagerbestand:'Lagerbestand',einstellungen:'Einstellungen',service:'Service'};
-const NAV_IDS=['besteller','dashboard','bestellungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service'];
+const NAV_IDS=['besteller','dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen','service'];
 function nav(id){
   if(id==='lieferantenkunden' && currentRole()!=='special') id=homePage();
   if(!canSeePage(id)) id=homePage();
@@ -4186,8 +4274,8 @@ function onOdstChange(){
   const v=document.getElementById('odst-status').value;
   document.getElementById('odst-termin').style.display = NEED_TERMIN.includes(v) ? '' : 'none';
 }
-function renderOdSendung(b){
-  const el=document.getElementById('od-sendung'); if(!el) return;
+function renderOdSendung(b,tid){
+  const el=document.getElementById(tid||'od-sendung'); if(!el) return;
   if(!b.fuerLieferant || b.userId===currentUserId){ el.innerHTML=''; return; }
   let html='';
   if(statusLogMissing){
@@ -4246,7 +4334,7 @@ async function saveSendungStatus(id,cardOk){
   (S.statusLog[id]=S.statusLog[id]||[]).push({bestellung_id:id,status,notiz,termin,termin_start:start?start.toISOString():null,termin_ende:end?end.toISOString():null,created_by:currentUserId,created_at:new Date().toISOString()});
   if(status==='uebergeben' && !b.delivered) await setDelivered(id,true);
   { const t=document.getElementById('od-timeline'); if(t) t.outerHTML=orderTimelineHtml(b); }
-  renderOdSendung(b); renderBestellungen();
+  renderOdSendung(b, (document.getElementById('sd-form')&&document.getElementById('sd-form').contains(document.getElementById('odst-status')))?'sd-form':null); renderBestellungen();
   showToast('Status gespeichert. ✓');
 }
 
@@ -6316,8 +6404,6 @@ async function verifyCardCode(raw){
   const { data, error }=await sb.rpc('verify_kundenkarte',{ p_code:code, p_order_id:_cs.ids[0] });
   if(error){ showCardResult('err', /does not exist|function/i.test(error.message||'') ? 'Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).' : escapeHtml(error.message||'Prüfung fehlgeschlagen.')); return; }
   if(data && data.ok){
-    try{ const r=await sb.from('kundenkarten').select('created_at').eq('code',code).maybeSingle();
-      if(r.data && r.data.created_at && kkState(r.data.created_at)==='expired'){ showCardResult('err',`<b class="cs-t">Karte abgelaufen</b><span>Gültig bis ${fmtDate(kkValidUntil(r.data.created_at))} — bitte neue Karte ausstellen.</span>`+_retryBtn); return; } }catch(e){}
     showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b> · bitte Foto abgleichen</span>`);
     setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),1800);
   } else if(data && data.reason==='wrong_person'){
@@ -6476,7 +6562,7 @@ function renderKk(){
   document.getElementById('kk-bc').innerHTML=barcodeSvg(_kk.code,'#000');
   const art=document.getElementById('kk-art'); if(art) art.innerHTML=kkArtSvg(_kk.code);
   const sn=document.getElementById('kk-sn'); if(sn) sn.textContent='Nº '+kkSerial(_kk.code);
-  renderKkPhoto(); kkMeta();
+  renderKkPhoto();
 }
 function showKkFullscreen(){
   if(!_kk) return;
@@ -6484,7 +6570,7 @@ function showKkFullscreen(){
   const close=()=>{ try{ wl&&wl.release&&wl.release(); }catch(e){} document.removeEventListener('keydown',esc); o.remove(); };
   const esc=e=>{ if(e.key==='Escape') close(); };
   o.innerHTML=`<div class="kk-full-brand"><span class="kk-mark">${KK_WAVE}</span>NicoFlow · Kundenkarte</div><button class="kk-full-x" aria-label="Schließen">✕</button>
-    <div class="kk-full-bc">${barcodeSvg(_kk.code,'#000')}</div><div class="kk-full-n">${escapeHtml(fmtCard(_kk.code))}</div><div class="kk-full-name">${escapeHtml(_kk.name)}</div><div class="kk-full-h" style="margin-top:2px">Gültig bis ${kkValidUntil(_kk.since)?fmtDate(kkValidUntil(_kk.since)):'—'}${kkState(_kk.since)==='expired'?' · ABGELAUFEN':''}</div>
+    <div class="kk-full-bc">${barcodeSvg(_kk.code,'#000')}</div><div class="kk-full-n">${escapeHtml(fmtCard(_kk.code))}</div><div class="kk-full-name">${escapeHtml(_kk.name)}</div>
     <div class="kk-full-h"><svg class="svg-ic"><use href="#ic-sun"/></svg>Für besseres Scannen die Display-Helligkeit erhöhen · Antippen zum Schließen</div>`;
   o.onclick=close; document.addEventListener('keydown',esc); document.body.appendChild(o);
   try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(x=>{ wl=x; }).catch(()=>{}); }catch(e){}
@@ -8664,26 +8750,10 @@ function checkWhatsNew(){
 }
 
 // ── v16.1: Premium-Kundenkarte ──
-const KK_YEARS=3;
-function kkValidUntil(since){
-  const d=since?new Date(since):new Date(); if(isNaN(d)) return null;
-  d.setFullYear(d.getFullYear()+KK_YEARS); return d;
-}
-function kkState(since){
-  const v=kkValidUntil(since); if(!v) return 'ok';
-  const left=v.getTime()-Date.now();
-  return left<0?'expired':(left<60*864e5?'soon':'ok');
-}
-function kkStatusText(st){ return st==='expired'?'ABGELAUFEN':(st==='soon'?'LÄUFT BALD AB':'AKTIV'); }
 function kkMeta(){
   if(!_kk) return;
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
-  const v=kkValidUntil(_kk.since), st=kkState(_kk.since);
-  set('kk-since',_kk.since?fmtDate(_kk.since):'—'); set('kk-dobv',_kk.dob?fmtDob(_kk.dob):'—'); set('kk-valid',v?fmtDate(v):'—'); set('kk-id',kkSerial(_kk.code));
-  const card=document.querySelector('.kk-card'); if(card){ card.classList.toggle('expired',st==='expired'); card.classList.toggle('soon',st==='soon'); }
-  const foot=document.querySelector('.kk-foot'); if(foot){ foot.classList.toggle('expired',st==='expired'); foot.classList.toggle('soon',st==='soon'); }
-  const stEl=document.getElementById('kk-status'); if(stEl) stEl.innerHTML='<b>●</b> '+kkStatusText(st);
-  const rb=document.getElementById('kk-renew'); if(rb) rb.style.display=st==='ok'?'none':'block';
+  set('kk-since',_kk.since?fmtDate(_kk.since):'—'); set('kk-dobv',_kk.dob?fmtDob(_kk.dob):'—'); set('kk-typ',_kk.type==='kunde'?'Kunde':'Konto'); set('kk-id',kkSerial(_kk.code));
 }
 function printKk(){
   if(!_kk) return;
@@ -8702,7 +8772,7 @@ function printKk(){
 </style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div><div class="art wm"><svg viewBox="0 0 512 512"><g fill="none" stroke="#FF7A29" stroke-width="56" stroke-linecap="round"><path d="M164 372V140"/><path d="M348 372V140"/><path d="M164 152L348 360"/></g></svg></div>
 <div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
 <div class="mid">${_kk.foto?`<div class="ph2"><img src="${_kk.foto}"/></div>`:''}<div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div></div>
-<div class="me"><div><i>KUNDE SEIT</i><b>${_kk.since?fmtDate(_kk.since):'—'}</b></div><div><i>GEBURTSDATUM</i><b>${_kk.dob?fmtDob(_kk.dob):'—'}</b></div><div><i>GÜLTIG BIS</i><b>${kkValidUntil(_kk.since)?fmtDate(kkValidUntil(_kk.since)):'—'}</b></div><div><i>KARTEN-ID</i><b>${kkSerial(_kk.code)}</b></div></div>
+<div class="me"><div><i>KUNDE SEIT</i><b>${_kk.since?fmtDate(_kk.since):'—'}</b></div><div><i>GEBURTSDATUM</i><b>${_kk.dob?fmtDob(_kk.dob):'—'}</b></div><div><i>TYP</i><b>${_kk.type==='kunde'?'Kunde':'Konto'}</b></div><div><i>KARTEN-ID</i><b>${kkSerial(_kk.code)}</b></div></div>
 <div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
   w.document.close();
 }
@@ -8740,12 +8810,12 @@ async function saveKkImage(){
   x.fillStyle='#EBC77A'; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),tx,272);
   // Meta
   x.strokeStyle='rgba(255,255,255,.14)'; x.lineWidth=1.5; x.beginPath(); x.moveTo(56,338); x.lineTo(W-56,338); x.stroke();
-  const meta=[['KUNDE SEIT',_kk.since?fmtDate(_kk.since):'—'],['GEBURTSDATUM',_kk.dob?fmtDob(_kk.dob):'—'],['GÜLTIG BIS',kkValidUntil(_kk.since)?fmtDate(kkValidUntil(_kk.since)):'—'],['KARTEN-ID',kkSerial(_kk.code)]];
+  const meta=[['KUNDE SEIT',_kk.since?fmtDate(_kk.since):'—'],['GEBURTSDATUM',_kk.dob?fmtDob(_kk.dob):'—'],['TYP',_kk.type==='kunde'?'Kunde':'Konto'],['KARTEN-ID',kkSerial(_kk.code)]];
   meta.forEach((m,i)=>{ const mx=56+i*240; x.fillStyle='rgba(255,255,255,.5)'; x.font='600 14px ui-monospace,Menlo,monospace'; x.fillText(sp(m[0],'\u2009'),mx,366); x.fillStyle='#fff'; x.font='700 24px system-ui,sans-serif'; x.fillText(m[1],mx,396); });
   // Strichcode
   x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,414,W-80,184,26); x.fill(); x.restore();
   drawBarcode(x,_kk.code,60,430,W-120,150);
-  x.fillStyle='rgba(255,255,255,.5)'; x.font='600 13px ui-monospace,Menlo,monospace'; x.fillText('●  '+kkStatusText(kkState(_kk.since))+'     ·     NUR PERSÖNLICH     ·     NICHT ÜBERTRAGBAR     ·     VERLUST MELDEN',56,624);
+  x.fillStyle='rgba(255,255,255,.5)'; x.font='600 13px ui-monospace,Menlo,monospace'; x.fillText('●  AKTIV     ·     NUR PERSÖNLICH     ·     VERLUST SOFORT MELDEN',56,624);
   x.strokeStyle='rgba(255,255,255,.65)'; x.lineWidth=4; x.lineCap='round'; [12,22,32].forEach(r=>{ x.beginPath(); x.arc(W-186,163,r,-.8,.8); x.stroke(); });
   c.toBlob(async blob=>{
     const f=new File([blob],'kundenkarte.png',{type:'image/png'});
@@ -8783,6 +8853,111 @@ function rpcErrText(e,fb){
     c.style.setProperty('--sx',((px+.5)*100).toFixed(0)+'%');
   });
 })();
+
+// ══ v19: SENDUNGEN ══
+I18N.de['nav.sendungen']=I18N.de['nav.sendungen']||'Sendungen';
+let sdFilter='aktiv', sdOpenId=null;
+const SD_DIR={in:'Eingang',out:'Ausgang',pick:'Abholung'};
+const SD_CHIPS=[['aktiv','Aktiv'],['bereit','Bereit / unterwegs'],['fertig','Abgeschlossen'],['alle','Alle']];
+function setSdFilter(f){ sdFilter=f; renderSendungen(); }
+function sdWho(b){
+  if(b.fuerLieferant) return '◆ '+(b.userId===currentUserId ? (usernameOf(b.lieferantId||M.profile?.linked_to)||'Lieferant') : usernameOf(b.userId));
+  const k=S.kunden.find(x=>x.id===b.kId); return k?`${k.vorname} ${k.nachname}`:'Kunde';
+}
+function sdAll(){
+  return S.bestellungen.filter(b=>!b.deletedAt).map(b=>{
+    const ss=shipSteps(b), d=ss.filter(x=>x.done), cur=d[d.length-1];
+    return { b, ss, cur, pct: ss.length>1?Math.round((d.length-1)/(ss.length-1)*100):100,
+      dir: b.fuerLieferant?(b.userId===currentUserId?'in':'out'):'pick', fin: !!(b.paid&&b.delivered), plan: trkPlan(b) };
+  });
+}
+function sdProds(b){ return (b.items||[]).map(it=>{const p=PROD_MAP[it.prod]; return p?`${p.icon} ${it.stueck}× ${escapeHtml(prodLabel(it))}`:'';}).filter(Boolean).join(' · '); }
+function sdLate(x){ return !x.fin && x.plan && x.plan.end && new Date(x.plan.end)<new Date(); }
+function renderSendungen(){
+  const grid=document.getElementById('sd-grid'); if(!grid) return;
+  const all=sdAll(), act=all.filter(x=>!x.fin), ready=act.filter(x=>['bereit','unterwegs'].includes(x.cur.k));
+  const late=act.filter(sdLate), today=act.filter(x=>x.plan&&x.plan.start&&new Date(x.plan.start).toDateString()===new Date().toDateString());
+  const kp=(l,v,sub,col)=>`<div class="stat-cell"><div class="sc-lab">${l}</div><div class="sc-v mono"${col?` style="color:${col}"`:''}>${v}</div><div class="sc-sub">${sub}</div></div>`;
+  document.getElementById('sd-kpis').innerHTML=kp('Aktiv',act.length,'noch nicht abgeschlossen')+kp('Bereit / unterwegs',ready.length,'zur Übergabe','var(--sage)')+kp('Heute',today.length,'Termine heute')+kp('Überfällig',late.length,'Termin überschritten',late.length?'var(--rust)':null);
+  const nxt=act.filter(x=>x.plan&&x.plan.start&&!sdLate(x)).sort((a,c)=>new Date(a.plan.start)-new Date(c.plan.start)).slice(0,5);
+  document.getElementById('sd-next-card').style.display=nxt.length?'':'none';
+  document.getElementById('sd-next').innerHTML=nxt.map(x=>`<div class="sd-next-row" tabindex="0" role="button" onkeydown="onKeyActivate(event)" onclick="openSendung(${x.b.id})"><span class="sd-id">#${String(x.b.id).padStart(5,'0')}</span><b>${escapeHtml(sdWho(x.b))}</b><span class="ps" style="margin:0">${escapeHtml(x.plan.label||'')}${x.plan.ort?' · 📍 '+escapeHtml(x.plan.ort):''}</span><span class="sd-when sd-eta" data-eta data-s="${x.plan.start}" data-e="${x.plan.end||x.plan.start}">${etaLabel(x.plan.start,x.plan.end)}</span></div>`).join('');
+  document.getElementById('sd-chips').innerHTML=SD_CHIPS.map(([k,l])=>`<button type="button" class="tab-btn${sdFilter===k?' active':''}" onclick="setSdFilter('${k}')">${l}</button>`).join('');
+  const q=(document.getElementById('sd-search')?.value||'').trim().toLowerCase();
+  let list=all.filter(x=>sdFilter==='alle'||(sdFilter==='aktiv'&&!x.fin)||(sdFilter==='bereit'&&!x.fin&&['bereit','unterwegs'].includes(x.cur.k))||(sdFilter==='fertig'&&x.fin));
+  if(q) list=list.filter(x=>(sdWho(x.b)+' '+sdProds(x.b)+' '+x.b.id).toLowerCase().includes(q));
+  list.sort((a,c)=>(a.fin-c.fin)||((a.plan&&a.plan.start?new Date(a.plan.start):Infinity)-(c.plan&&c.plan.start?new Date(c.plan.start):Infinity))||(c.b.id-a.b.id));
+  document.getElementById('sd-empty').style.display=list.length?'none':'block';
+  grid.innerHTML=list.map(x=>{
+    const late=sdLate(x);
+    return `<div class="sd-card${x.fin?' is-fin':''}${late?' is-late':''}" tabindex="0" role="button" onkeydown="onKeyActivate(event)" onclick="openSendung(${x.b.id})">
+      <div class="sd-top"><span class="sd-id">#${String(x.b.id).padStart(5,'0')}</span><span class="sd-dir">${SD_DIR[x.dir]}</span><span class="sd-when">${fmtDate(x.b.date)}</span></div>
+      <div class="sd-who">${escapeHtml(sdWho(x.b))}</div>
+      <div class="sd-prods">${sdProds(x.b)}</div>
+      <div class="sd-bar"><span style="width:${Math.max(x.pct,6)}%"></span></div>
+      <div class="sd-dots">${x.ss.map(y=>`<i class="${y.done?'on':''}" title="${escapeAttr(y.l)}"></i>`).join('')}</div>
+      <div class="sd-foot"><b>${x.cur.ic} ${x.cur.l}</b>${late?'<span class="sd-late-t">Termin überschritten</span>':(x.plan&&x.plan.start?`<span class="sd-eta" data-eta data-s="${x.plan.start}" data-e="${x.plan.end||x.plan.start}">${etaLabel(x.plan.start,x.plan.end)}</span>`:`<span style="color:var(--ink-faint)">${relTime(x.cur.at)}</span>`)}<span class="mono" style="font-weight:700">${fmt(displayTotal(x.b))}</span></div>
+    </div>`;}).join('');
+}
+function openSendung(id){
+  sdOpenId=id; currentDetailOrderId=id;
+  const od=document.getElementById('od-sendung'); if(od) od.innerHTML='';
+  sdRender(); openModal('sendung');
+}
+function sdRender(){
+  const b=S.bestellungen.find(x=>x.id===sdOpenId); if(!b) return;
+  document.getElementById('sd-id').textContent='#'+String(b.id).padStart(5,'0');
+  const me=currentUserId, seller=!(b.fuerLieferant&&b.userId===me);
+  let side='seller'; if(b.fuerLieferant&&b.userId===me) side='buyer';
+  const who=sdWho(b).replace(/^◆ /,'');
+  document.getElementById('sd-info').innerHTML=`<div class="sd-info"><div>${b.fuerLieferant?(side==='buyer'?'Lieferant':'Lieferantenkunde'):'Kunde'}<b>${escapeHtml(who)}</b></div><div>Bestellt am<b>${fmtDate(b.date)}</b></div><div>Betrag<b class="mono">${fmt(displayTotal(b))}</b></div><div style="flex-basis:100%">Produkte<b style="font-size:13px;font-weight:600">${sdProds(b)}</b></div>${b.notiz?`<div style="flex-basis:100%">Notiz<b style="font-size:13px;font-weight:600">${escapeHtml(b.notiz)}</b></div>`:''}</div>`;
+  document.getElementById('sd-track').innerHTML=trackHtml(b,{side,who});
+  const form=document.getElementById('sd-form'); form.innerHTML='';
+  if(b.fuerLieferant && b.userId!==me) renderOdSendung(b,'sd-form');
+  const A=[];
+  if(!b.paid||!b.delivered||true) A.push(`<button class="btn btn-ghost btn-sm" onclick="shareTrackingLink()">🚚 Verfolgungslink teilen</button>`);
+  if(b.abholcode&&!isCodeExpired(b)&&!b.paid) A.push(`<button class="btn btn-ghost btn-sm" onclick="quickShowAbholcode(${b.id})">▦ Abholcode</button>`);
+  if(isWaitingOrder(b)) A.push(`<button class="btn btn-ghost btn-sm" onclick="sendReminder(${b.id})">📲 Erinnerung senden</button>`);
+  if(seller&&!b.delivered) A.push(`<button class="btn btn-primary btn-sm" onclick="confirmDeliveredWithAbholcode(${b.id})">✓ Übergabe bestätigen</button>`);
+  if(seller&&!b.paid) A.push(`<button class="btn btn-primary btn-sm" onclick="sdPaid(${b.id})">💶 Als bezahlt markieren</button>`);
+  if(b.fuerLieferant) A.push(`<button class="btn btn-ghost btn-sm" onclick="printLieferschein(${b.id})">📦 Lieferschein</button>`);
+  A.push(`<button class="btn btn-ghost btn-sm" onclick="openOrderDetail(${b.id})">👁 Bestell-Details</button>`);
+  document.getElementById('sd-actions').innerHTML=A.join('');
+}
+async function sdPaid(id){ await setPaid(id,true); sdRender(); renderSendungen(); }
+function sdRefreshIfOpen(){
+  if(document.getElementById('modal-sendung')?.classList.contains('show')) sdRender();
+  if(document.getElementById('page-sendungen')?.classList.contains('active')) renderSendungen();
+}
+async function reloadSendungen(){ await loadAllData(); renderSendungen(); sdRefreshIfOpen(); showToast('Aktualisiert. ✓'); }
+const _rbOrig=renderBestellungen; renderBestellungen=function(){ _rbOrig.apply(this,arguments); try{ sdRefreshIfOpen(); }catch(e){} };
+const _rfOrig=refresh; refresh=function(){ _rfOrig.apply(this,arguments); try{ if(document.getElementById('page-sendungen')?.classList.contains('active')) renderSendungen(); }catch(e){} };
+setInterval(async()=>{
+  if(document.hidden||!currentUserId||!document.getElementById('page-sendungen')?.classList.contains('active')) return;
+  await loadAllData(); renderSendungen(); sdRefreshIfOpen();
+},60000);
+
+// ── Karte: persönliche Ansprache ──
+const _kkmOrig=kkMeta; kkMeta=function(){ _kkmOrig(); const h=document.getElementById('kk-hello'); if(h&&_kk) h.innerHTML=`Hallo <b>${escapeHtml(String(_kk.name).split(' ')[0])}</b> 👋 — das ist deine persönliche Karte. Einfach bei der Übergabe vorzeigen.`; };
+
+// ── Schnellsuche (Strg/Cmd + K) ──
+function openPalette(){
+  if(!currentUserId) return;
+  const ex=document.getElementById('palette'); if(ex){ ex.remove(); return; }
+  const o=document.createElement('div'); o.id='palette';
+  o.innerHTML='<div class="pal-box"><input id="pal-in" placeholder="Seite suchen … (Esc schließt)" autocomplete="off"><div id="pal-list"></div></div>';
+  document.body.appendChild(o);
+  const ticks=[...document.querySelectorAll('.scale-tick')].filter(t=>t.style.display!=='none');
+  const inp=o.querySelector('#pal-in'), list=o.querySelector('#pal-list');
+  const draw=()=>{ const q=inp.value.toLowerCase(); list.innerHTML='';
+    ticks.map(t=>({t,n:t.textContent.replace(/\s+/g,' ').trim().replace(/^\d+\s?/,'')})).filter(x=>x.n.toLowerCase().includes(q)).slice(0,8).forEach((x,i)=>{
+      const d=document.createElement('div'); d.className='pal-item'+(i?'':' on'); d.textContent=x.n; d.onclick=()=>{ o.remove(); x.t.click(); }; list.appendChild(d); }); };
+  draw(); inp.oninput=draw;
+  inp.onkeydown=e=>{ if(e.key==='Enter') list.querySelector('.pal-item')?.click(); if(e.key==='Escape') o.remove(); };
+  o.onclick=e=>{ if(e.target===o) o.remove(); };
+  inp.focus();
+}
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){ e.preventDefault(); openPalette(); } });
 </script>
 
 </body>
