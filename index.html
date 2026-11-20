@@ -9290,7 +9290,7 @@ async function handleLoginFail(u){
     showLoginMsg('Falscher Benutzername oder Passwort.'+(r<=2&&r>0?` Noch ${r} Versuch${r===1?'':'e'}, danach wird das Konto gesperrt.`:''),false);
   }
 }
-function lockedUsers(){ return M.users.filter(u=>u.gesperrt && u.gesperrt_grund==='fehlversuche'); }
+function lockedUsers(){ return M.users.filter(u=>u.gesperrt && u.gesperrt_grund!=='admin'); }
 function lockBanner(){
   const el=document.getElementById('ul-locked-banner'); if(!el) return;
   const l=lockedUsers(); el.style.display=l.length?'':'none';
