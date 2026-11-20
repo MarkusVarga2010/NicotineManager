@@ -1789,6 +1789,11 @@ td,th{white-space:normal}
 .lock-banner{border:1px solid var(--rust);background:var(--rust-bg);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:12px}
 .lock-banner>b{color:var(--rust);display:block;margin-bottom:8px}
 .lock-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid color-mix(in srgb,var(--rust) 25%,transparent)}
+
+.bell-n{display:none;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--rust);color:#fff;font:700 9px 'JetBrains Mono',monospace;align-items:center;justify-content:center;margin-left:8px}
+.bell-n.show{display:inline-flex}
+.hamburger{position:relative}
+#bell-btn-m .bell-n{position:absolute;top:-5px;right:-5px;margin:0}
 </style>
 </head>
 <body>
@@ -1923,6 +1928,7 @@ td,th{white-space:normal}
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
       </nav>
       <div class="sb-footer">
+        <button class="btn btn-ghost" id="bell-btn" style="display:none;width:100%;justify-content:center;margin-bottom:8px" onclick="closeSidebar();openNotifCenter()">🔔 Benachrichtigungen<span class="bell-n" id="bell-n"></span></button>
         <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:12px" onclick="closeSidebar();openPalette()">🔎 Schnellsuche <span class="mono" style="opacity:.55;margin-left:6px;font-size:10px">Strg K</span></button>
         <div class="tb-user">
           <div class="tb-av" id="tb-av">A</div>
@@ -1942,7 +1948,7 @@ td,th{white-space:normal}
           <div class="tb-mark" style="width:26px;height:26px"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="nbb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#25252e"/><stop offset="1" stop-color="#09090c"/></linearGradient><linearGradient id="nfb" gradientUnits="userSpaceOnUse" x1="130" y1="110" x2="380" y2="400"><stop offset="0" stop-color="#FFB27A"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient><linearGradient id="nrb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE2B0"/><stop offset=".5" stop-color="#C9973F"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#nbb)"/><rect x="5" y="5" width="502" height="502" rx="108" fill="none" stroke="url(#nrb)" stroke-width="6" opacity=".9"/><g fill="none" stroke="url(#nfb)" stroke-width="56" stroke-linecap="round"><path d="M164 372V140"/><path d="M348 372V140"/><path d="M164 152L348 360"/></g><path d="M150 436H362" stroke="#fff" stroke-opacity=".38" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 28"/></svg></div>
           <div class="tb-name" style="font-size:15px">Nico<span style="background:var(--success);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Flow</span></div>
         </div>
-        <button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer" aria-label="Menü öffnen">A</button>
+        <div style="display:flex;align-items:center;gap:10px"><button class="hamburger" id="bell-btn-m" style="display:none" onclick="openNotifCenter()" aria-label="Benachrichtigungen">🔔<span class="bell-n" id="bell-n-m"></span></button><button class="tb-av" id="tb-av-mobile" onclick="openSidebar()" style="border:none;cursor:pointer" aria-label="Menü öffnen">A</button></div>
       </div>
 
       <div class="main">
@@ -2421,7 +2427,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">21.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">21.1.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -2550,6 +2556,15 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="hb" id="hb-body"></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="printHandbuch()">🖨 Drucken / PDF</button><button class="btn btn-primary" onclick="closeModal('handbuch')">Schließen</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Benachrichtigungen -->
+<div class="modal-bg" id="modal-notif">
+  <div class="modal">
+    <div class="modal-head"><h3><span style="margin-right:8px">🔔</span>Benachrichtigungen</h3><button class="modal-close" onclick="closeModal('notif')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body"><div id="notif-perm" style="margin-bottom:14px"></div><div id="notif-list"></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('notif')">Schließen</button></div>
   </div>
 </div>
 
@@ -3016,6 +3031,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <li><b>Besteller</b> registrieren sich selbst auf dem Login-Bildschirm („Neu hier? Als Besteller registrieren“).</li>
 <li>Alle anderen Konten legt der <b>Administrator</b> unter Einstellungen → Benutzer → „Neuen Account anlegen“ an. Er vergibt ein vorläufiges Passwort. Beim ersten Login muss die Person ein eigenes festlegen.</li>
 <li>Der Administrator kann Konten <b>bearbeiten</b> (Name, Rolle, Telefon, Adresse, Zugangsdaten), <b>sperren</b> (die Person wird sofort abgemeldet) und <b>löschen</b>. Das eigene Konto lässt sich nicht sperren.</li>
+<li>Nach <b>5 falschen Anmeldeversuchen</b> wird ein Konto automatisch gesperrt. Der Administrator bekommt eine <b>Benachrichtigung</b> (🔔-Symbol, Zähler am Menüpunkt Einstellungen und, wenn erlaubt, eine Systembenachrichtigung) und schaltet das Konto in der Benutzerliste mit „Entsperren“ wieder frei.</li>
 </ul>
 <h2>Lieferanten und Lieferketten</h2>
 <p>Ein Benutzer wählt in den Einstellungen unter <b>„Mein Lieferant“</b> ein Spezial-Konto. Danach kann er bei diesem Lieferanten bestellen, und der Lieferant sieht den Benutzer unter <b>Lieferantenkunden</b>.</p>
@@ -3633,8 +3649,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '21.0.0';
+const CURRENT_UI_VERSION = '21.1.0';
 const WHATS_NEW = {
+  '21.1.0': [
+    'Administratoren bekommen jetzt echte Benachrichtigungen, sobald ein Konto nach zu vielen Fehlversuchen gesperrt wird: Meldung sofort in der App, 🔔-Symbol mit Zähler, und — wenn erlaubt — eine Systembenachrichtigung des Geräts.',
+    'Neues Benachrichtigungs-Fenster: zeigt alle gesperrten Konten mit Zeitpunkt und „Entsperren“-Knopf und aktiviert auf Wunsch die Systembenachrichtigungen.',
+    'Die Anzeige aktualisiert sich live (ohne Neuladen), solange NicoFlow geöffnet ist.'
+  ],
   '21.0.0': [
     'Anmelde-Schutz: Nach 5 falschen Versuchen wird das Konto gesperrt und der Nutzer sieht den Hinweis, dass ein Administrator es freischalten muss. Vorher warnt die Anmeldung, wie viele Versuche noch übrig sind (benötigt login_lock.sql).',
     'Administratoren sehen gesperrte Konten sofort: Zähler am Menüpunkt „Einstellungen“, Hinweis beim Öffnen und ein roter Kasten in der Benutzerliste mit „Entsperren“-Knopf.',
@@ -8993,6 +9014,67 @@ setInterval(async()=>{
   if(document.hidden||!currentUserId||currentRole()!=='admin') return;
   await loadAllData(); try{ renderUserList(); }catch(e){}
 },60000);
+
+// ══ v21.1: Admin-Benachrichtigungen ══
+function sysNotify(title,body,tag){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  try{
+    if(swReg&&swReg.showNotification) swReg.showNotification(title,{body,tag,icon:'icons/icon-192.png',badge:'icons/favicon.png'});
+    else new Notification(title,{body,tag,icon:'icons/icon-192.png'});
+  }catch(e){ try{ new Notification(title,{body}); }catch(_){} }
+}
+function checkNewLocks(){
+  const key='nm_lock_notified_'+currentUserId; let seen;
+  try{ seen=JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ seen=[]; }
+  const cur=lockedUsers().map(u=>u.id); seen=seen.filter(id=>cur.includes(id));
+  const fresh=lockedUsers().filter(u=>!seen.includes(u.id));
+  try{ localStorage.setItem(key,JSON.stringify([...seen,...fresh.map(u=>u.id)])); }catch(e){}
+  if(!fresh.length) return;
+  const names=fresh.map(u=>u.username).join(', ');
+  showToast(`Konto gesperrt: ${names} — Administrator muss freischalten.`,'🔒');
+  sysNotify('NicoFlow · Konto gesperrt',`${names}: zu viele fehlgeschlagene Anmeldeversuche. Bitte freischalten.`,'lock-'+fresh[0].id);
+}
+function updateNotifUI(n){
+  const adm=currentRole()==='admin';
+  ['bell-btn','bell-btn-m'].forEach(id=>{ const x=document.getElementById(id); if(x) x.style.display=adm?'':'none'; });
+  ['bell-n','bell-n-m'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=n||''; e.classList.toggle('show',n>0); } });
+  if(document.getElementById('modal-notif')?.classList.contains('show')) renderNotifCenter();
+}
+function updateLockBadge(){
+  const adm=currentRole()==='admin', n=adm?lockedUsers().length:0;
+  const el=document.getElementById('tk-dot-einstellungen');
+  if(el){ el.textContent=n>9?'9+':String(n); el.classList.toggle('show',n>0); }
+  updateNotifUI(n);
+  if(!adm) return;
+  checkNewLocks(); startLockRealtime();
+}
+function renderNotifCenter(){
+  const l=lockedUsers();
+  document.getElementById('notif-list').innerHTML=l.length?l.map(u=>`<div class="lock-row" style="align-items:flex-start;padding:12px 0"><div><b>🔒 Konto „${escapeHtml(u.username)}“ gesperrt</b><div class="ps" style="margin:2px 0 0">Zu viele fehlgeschlagene Anmeldeversuche${u.gesperrt_am?' · '+fmtDateTime(u.gesperrt_am):''}. Ein Administrator muss das Konto freischalten.</div></div><button class="btn btn-primary btn-sm" onclick="toggleLockUser('${u.id}',false)">Entsperren</button></div>`).join(''):'<div class="ec" style="padding:24px 0"><div class="ec-t">Keine neuen Benachrichtigungen</div><div class="ec-s">Gesperrte Konten erscheinen hier sofort.</div></div>';
+  const perm=document.getElementById('notif-perm'); if(!perm) return;
+  if(!('Notification' in window)) perm.innerHTML='<div class="ps">Dieser Browser unterstützt keine Systembenachrichtigungen. Meldungen erscheinen in der App.</div>';
+  else if(Notification.permission==='granted') perm.innerHTML='<div class="ps">✓ Systembenachrichtigungen sind aktiv (solange NicoFlow geöffnet ist).</div>';
+  else if(Notification.permission==='denied') perm.innerHTML='<div class="ps">Systembenachrichtigungen sind blockiert. Erlaube sie in den Browser-/Geräteeinstellungen für diese Seite.</div>';
+  else perm.innerHTML='<button class="btn btn-ghost btn-sm" onclick="enableSysNotif()">🔔 Systembenachrichtigungen aktivieren</button><div class="ps" style="margin-top:6px">Dann meldet dein Gerät eine Sperre auch, wenn NicoFlow im Hintergrund läuft.</div>';
+}
+function openNotifCenter(){ renderNotifCenter(); openModal('notif'); }
+async function enableSysNotif(){
+  if(!('Notification' in window)){ showToast('Dieser Browser unterstützt keine Systembenachrichtigungen.','⚠'); return; }
+  const r=await Notification.requestPermission(); renderNotifCenter();
+  if(r==='granted') sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test');
+}
+// Live-Aktualisierung: bei jeder Änderung an Profilen Daten neu laden
+let _lockT=null;
+function startLockRealtime(){
+  if(window._lockCh||currentRole()!=='admin') return;
+  try{
+    window._lockCh=sb.channel('lock-watch').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},()=>{
+      clearTimeout(_lockT); _lockT=setTimeout(async()=>{ await loadAllData(); try{ renderUserList(); }catch(e){} },1500);
+    }).subscribe();
+  }catch(e){}
+}
+const _dloOrig=doLogout;
+doLogout=async function(){ try{ if(window._lockCh){ sb.removeChannel(window._lockCh); window._lockCh=null; } }catch(e){} return _dloOrig.apply(this,arguments); };
 </script>
 
 </body>
