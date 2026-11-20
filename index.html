@@ -1772,6 +1772,23 @@ td,th{white-space:normal}
 .pal-box input{margin-bottom:8px}
 .pal-item{padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:600}
 .pal-item:hover,.pal-item.on{background:color-mix(in srgb,var(--sage) 16%,transparent)}
+
+/* ══ v21 · HANDBUCH & SPERRE ═══════════════════════════════ */
+.hb{font-size:14px;line-height:1.65}
+.hb h1{font:800 20px 'Space Grotesk',sans-serif;color:var(--sage-deep);margin:28px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hb section:first-child h1{margin-top:12px}
+.hb h2{font-size:15px;margin:20px 0 8px}
+.hb p{margin:0 0 10px;color:var(--ink-soft)}
+.hb ul,.hb ol{margin:0 0 12px;padding-left:22px;color:var(--ink-soft)}
+.hb li{margin-bottom:4px}
+.hb b{color:var(--ink)}
+.hb code{font:12px 'JetBrains Mono',monospace;background:var(--paper3);padding:1px 6px;border-radius:6px}
+.hb table{min-width:0;margin:6px 0 12px}
+.hb td,.hb th{padding:9px 12px;font-size:12.5px;white-space:normal}
+.login-err.is-lock{font-weight:700}
+.lock-banner{border:1px solid var(--rust);background:var(--rust-bg);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:12px}
+.lock-banner>b{color:var(--rust);display:block;margin-bottom:8px}
+.lock-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid color-mix(in srgb,var(--rust) 25%,transparent)}
 </style>
 </head>
 <body>
@@ -1902,7 +1919,7 @@ td,th{white-space:normal}
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('lagerbestand');closeSidebar()"><span class="tk-n">06</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-package"/></svg></span><span data-i18n="nav.lagerbestand">Lagerbestand</span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" onclick="nav('eigenverbrauch');closeSidebar()"><span class="tk-n">07</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-user-circle"/></svg></span><span data-i18n="nav.eigenverbrauch">Eigenverbrauch</span></div>
         <div class="nav-group">Konto &amp; System</div>
-        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span></div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span><span class="tk-dot" id="tk-dot-einstellungen"></span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
       </nav>
       <div class="sb-footer">
@@ -2364,6 +2381,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="set-card" id="set-card-benutzer">
           <div class="sch"><div class="sch-ic"><svg class="svg-ic"><use href="#ic-users"/></svg></div><div><h3>Benutzer</h3><p>Zugänge verwalten</p></div></div>
           <div class="scb">
+            <div id="ul-locked-banner" style="display:none"></div>
             <div class="role-grid" id="role-grid"></div>
             <div class="ul-tools"><input type="search" id="ul-search" placeholder="🔍 Benutzer suchen…" oninput="renderUserList()"/><div class="chips" id="ul-chips"></div></div>
             <div id="user-list"></div>
@@ -2403,11 +2421,19 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">20.1.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">21.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
           <div class="about-row"><span>Einführung</span><span><button class="btn btn-ghost btn-sm" onclick="startTour()">Tour erneut starten</button></span></div>
+        </div>
+      </div>
+      <div class="set-card sg full" style="margin-bottom:16px" id="set-card-handbuch">
+        <div class="sch"><div class="sch-ic">📘</div><div><h3>Systemhandbuch</h3><p>So funktioniert NicoFlow — zum Nachlesen</p></div></div>
+        <div class="scb">
+          <div class="ps" style="margin-bottom:12px">Alles Wichtige zu Konten, Bestellungen, Sendungen und der Kundenkarte. Tippe auf ein Kapitel, um direkt dorthin zu springen.</div>
+          <div class="chips"><button type="button" class="chip" onclick="openHandbuch(1)">1 · Das Wichtigste in 2 Minuten</button><button type="button" class="chip" onclick="openHandbuch(2)">2 · Konten und Rollen</button><button type="button" class="chip" onclick="openHandbuch(3)">3 · Die Seiten im Überblick</button><button type="button" class="chip" onclick="openHandbuch(4)">4 · Der Weg einer Bestellung</button><button type="button" class="chip" onclick="openHandbuch(5)">5 · Sendungsverfolgung</button><button type="button" class="chip" onclick="openHandbuch(6)">6 · Kundenkarte und Übergabe</button><button type="button" class="chip" onclick="openHandbuch(7)">7 · Wichtige Rechenregeln</button><button type="button" class="chip" onclick="openHandbuch(8)">8 · Einstellungen und Anzeige</button><button type="button" class="chip" onclick="openHandbuch(9)">9 · Häufige Fragen und Fehlerbehebung</button><button type="button" class="chip" onclick="openHandbuch(10)">10 · Glossar</button></div>
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" onclick="openHandbuch()">📘 Handbuch öffnen</button><button class="btn btn-ghost btn-sm" onclick="printHandbuch()">🖨 Drucken / PDF</button></div>
         </div>
       </div>
       <div class="set-card sg full" style="margin-bottom:16px" id="set-card-trash">
@@ -2511,6 +2537,19 @@ alter table profiles add column if not exists adresse text;</pre>
     <div class="modal-head"><h3><span style="margin-right:8px">📍</span>Sendung <span class="mono" id="sd-id" style="color:var(--ink-soft);font-size:13px"></span></h3><button class="modal-close" onclick="closeModal('sendung')" aria-label="Schließen">✕</button></div>
     <div class="modal-body"><div id="sd-info"></div><div id="sd-track"></div><div id="sd-form"></div><div class="sd-actions" id="sd-actions"></div></div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('sendung')">Schließen</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Handbuch -->
+<div class="modal-bg" id="modal-handbuch">
+  <div class="modal wide" style="max-width:780px">
+    <div class="modal-head"><h3><span style="margin-right:8px">📘</span>Systemhandbuch</h3><button class="modal-close" onclick="closeModal('handbuch')" aria-label="Schließen">✕</button></div>
+    <div class="modal-body">
+      <input type="search" id="hb-search" placeholder="🔍 Im Handbuch suchen …" oninput="hbFilter()" style="margin-bottom:6px"/>
+      <div class="ps" id="hb-none" style="display:none;margin:10px 0">Keine Treffer.</div>
+      <div class="hb" id="hb-body"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="printHandbuch()">🖨 Drucken / PDF</button><button class="btn btn-primary" onclick="closeModal('handbuch')">Schließen</button></div>
   </div>
 </div>
 
@@ -2945,6 +2984,203 @@ alter table profiles add column if not exists adresse text;</pre>
     </div>
   </div>
 </div>
+
+<template id="manual-tpl">
+<section class="hb-ch" id="hb-ch-1"><h1>1. Das Wichtigste in 2 Minuten</h1>
+<p>NicoFlow ist ein Verwaltungssystem für Verkauf, Einkauf, Lager und Lieferungen. Du legst Kunden und Preise an, nimmst Bestellungen auf, verfolgst jede Lieferung bis zur Übergabe und siehst jederzeit, wer dir noch Geld schuldet und wie viel du verdienst.</p>
+<p>Das System läuft im Browser und lässt sich wie eine App auf dem Handy installieren. Alle Daten werden online gespeichert. Dadurch sehen alle berechtigten Personen immer denselben aktuellen Stand.</p>
+<p><b>Die drei Grundideen:</b></p>
+<ul>
+<li><b>Jede Person hat ein Konto mit einer Rolle.</b> Die Rolle bestimmt, welche Menüpunkte sichtbar sind.</li>
+<li><b>Jede Bestellung hat zwei unabhängige Zustände:</b> abgeholt/übergeben und bezahlt. Beides wird getrennt abgehakt.</li>
+<li><b>Die Übergabe wird mit der Kundenkarte bestätigt.</b> Der Kunde zeigt seine Karte mit Strichcode, du scannst sie. Das ersetzt Codes und Unterschriften.</li>
+</ul>
+<h2>Erste Schritte für Neue (Checkliste)</h2>
+<ol>
+<li>Anmelden (Benutzername und Passwort oder PIN). Beim allerersten Login musst du ein eigenes Passwort festlegen.</li>
+<li>Unter <b>Preise</b> Einkaufs- und Verkaufspreise eintragen. Bei Produkten mit Geschmack oder Marke zuerst die Varianten anlegen.</li>
+<li>Unter <b>Kunden</b> deinen ersten Kunden anlegen.</li>
+<li>Unter <b>Bestellungen</b> eine neue Bestellung erfassen.</li>
+<li>Unter <b>Sendungen</b> den Status setzen: bestätigt, bereit, unterwegs.</li>
+<li>Bei der Übergabe die Kundenkarte scannen, danach als bezahlt markieren. Die Rechnung wird automatisch erstellt.</li>
+<li>Auf der <b>Übersicht</b> prüfen, wie sich Schulden und Gewinn verändert haben.</li>
+</ol>
+<p>Mit <b>Strg + K</b> (am Handy: Button „Schnellsuche“ im Menü) springst du von überall zu jeder Seite.</p>
+</section>
+<section class="hb-ch" id="hb-ch-2"><h1>2. Konten und Rollen</h1>
+<div class="tbl-wrap"><table><thead><tr><th>Rolle</th><th>Wofür</th><th>Sichtbare Bereiche</th></tr></thead><tbody><tr><td><b>Administrator</b></td><td>Verwaltet Konten</td><td>Nur Einstellungen (Benutzerverwaltung)</td></tr><tr><td><b>Benutzer</b></td><td>Der normale Händler</td><td>Übersicht, Bestellungen, Sendungen, Beim Lieferanten, Kunden, Preise, Lagerbestand, Eigenverbrauch, Einstellungen</td></tr><tr><td><b>Spezial-Konto (Lieferant)</b></td><td>Beliefert andere</td><td>Wie Benutzer, zusätzlich Lieferantenkunden</td></tr><tr><td><b>Besteller</b></td><td>Bestellt im Shop bei mehreren Lieferanten</td><td>Meine Bestellungen, Einstellungen</td></tr><tr><td><b>Service-Account</b></td><td>Wartung</td><td>Nur Service</td></tr></tbody></table></div>
+<h2>Anmeldung per Passwort oder PIN</h2>
+<p>Jedes Konto nutzt entweder ein <b>Passwort</b> (mindestens 6 Zeichen) oder eine <b>PIN</b> (4 bis 8 Ziffern). Die Art wird beim Anlegen festgelegt und kann vom Administrator geändert werden.</p>
+<h2>Neue Konten</h2>
+<ul>
+<li><b>Besteller</b> registrieren sich selbst auf dem Login-Bildschirm („Neu hier? Als Besteller registrieren“).</li>
+<li>Alle anderen Konten legt der <b>Administrator</b> unter Einstellungen → Benutzer → „Neuen Account anlegen“ an. Er vergibt ein vorläufiges Passwort. Beim ersten Login muss die Person ein eigenes festlegen.</li>
+<li>Der Administrator kann Konten <b>bearbeiten</b> (Name, Rolle, Telefon, Adresse, Zugangsdaten), <b>sperren</b> (die Person wird sofort abgemeldet) und <b>löschen</b>. Das eigene Konto lässt sich nicht sperren.</li>
+</ul>
+<h2>Lieferanten und Lieferketten</h2>
+<p>Ein Benutzer wählt in den Einstellungen unter <b>„Mein Lieferant“</b> ein Spezial-Konto. Danach kann er bei diesem Lieferanten bestellen, und der Lieferant sieht den Benutzer unter <b>Lieferantenkunden</b>.</p>
+<p>Auch Lieferanten können mit einem übergeordneten Lieferanten verbunden werden. So entsteht eine Kette: Du belieferst deine Kunden und bestellst selbst bei deinem Lieferanten. Kreisverknüpfungen (A → B → A) sind nicht möglich.</p>
+</section>
+<section class="hb-ch" id="hb-ch-3"><h1>3. Die Seiten im Überblick</h1>
+<h2>Übersicht</h2>
+<p>Begrüßung, Kennzahlen und Warnungen auf einen Blick:</p>
+<ul>
+<li><b>Offene Schulden:</b> Was dir andere noch schulden (offene Kundenbestellungen plus offene Bestellungen deiner Lieferantenkunden).</li>
+<li><b>Gesamtgewinn:</b> Verkaufspreis minus Einkaufspreis, jeweils zum Zeitpunkt der Bestellung, über alle Verkäufe. Eigene Nachbestellungen beim Lieferanten zählen nicht, denn das ist Einkauf.</li>
+<li><b>Bestellungen, Schuldner, Kunden:</b> Anzahlen.</li>
+<li><b>Eigene Schulden:</b> Was du selbst schuldest (offene Bestellungen beim Lieferanten plus sonstige Schulden).</li>
+<li><b>Offene Restbeträge:</b> Summe der Nachzahlungen bei Bestellungen mit Vorauszahlung.</li>
+<li><b>Größte Schuldner:</b> Balken mit dem Anteil der Top-Schuldner an der Gesamtschuld.</li>
+<li><b>Aktive Sendungen:</b> Die dringendsten Lieferungen mit Status und Countdown.</li>
+<li><b>Statistik:</b> Wochenumsatz der letzten 8 Wochen, Top-5-Produkte und Top-5-Kunden.</li>
+<li><b>Ø Abholzeit:</b> Durchschnittliche Zeit zwischen Bestellung und Übergabe.</li>
+<li><b>Lagerwarnung:</b> Erscheint, sobald ein Produkt niedrig oder leer ist.</li>
+<li><b>Service-Banner:</b> Erscheint, wenn der jährliche Service fällig ist.</li>
+</ul>
+<h2>Bestellungen</h2>
+<p>Hier erfasst und verwaltest du Verkäufe an Kunden und die Bestellungen deiner Lieferantenkunden.</p>
+<ul>
+<li><b>Tab „Offen“:</b> Alles, was noch nicht abgeholt oder noch nicht bezahlt ist.</li>
+<li><b>Tab „Historie“:</b> Abgeschlossene Bestellungen (abgeholt und bezahlt) mit Zeitstempeln.</li>
+<li><b>Suche und Kundenfilter</b> sowie „Mehr laden“ bei langen Listen.</li>
+<li><b>Aktionen pro Zeile:</b> Bezahlt, Abholen, Sendung (📍), Details, Papierkorb, in der Historie „Nochmal bestellen“.</li>
+<li><b>Exporte:</b> Offene Bestellungen als PDF, Historie als PDF, alle Bestellungen als CSV (für die Buchhaltung).</li>
+<li><b>Alle löschen:</b> Verschiebt alle Bestellungen der aktuellen Ansicht in den Papierkorb, mit „Rückgängig“-Knopf.</li>
+</ul>
+<h2>Sendungen</h2>
+<p>Die Zentrale für alle Lieferungen und Abholungen. Details im Kapitel 5.</p>
+<h2>Beim Lieferanten (Lieferant &amp; Schulden)</h2>
+<p>Deine <b>eigenen Einkäufe</b> bei deinem Lieferanten. Die Beträge folgen automatisch der aktuellen Preisliste des Lieferanten, bis du bezahlt hast. Danach wird der Betrag eingefroren.</p>
+<ul>
+<li>Banner „abholbereit“ mit Sammel-Button, sobald Ware angekommen ist.</li>
+<li>Kontaktkarte mit Anrufen und Route, wenn der Lieferant Telefon und Adresse hinterlegt hat.</li>
+<li>Abschnitt <b>Sonstige Schulden:</b> Geld, das du jemand anderem schuldest, unabhängig vom Lieferanten. Mit Notiz und „bezahlt“-Haken.</li>
+</ul>
+<h2>Kunden</h2>
+<p>Dein Kundenstamm. Ein Klick öffnet die Detailansicht mit vier Reitern:</p>
+<ul>
+<li><b>Infos:</b> Name, Anzahl Bestellungen, offener Betrag.</li>
+<li><b>Bestellungen:</b> Alle Bestellungen dieses Kunden.</li>
+<li><b>Statistik:</b> Umsatz, offener Betrag, Durchschnitt, Lieblingsprodukt.</li>
+<li><b>Preise:</b> Individuelle Preise nur für diesen Kunden. Leer bedeutet, es gilt der normale Preis.</li>
+</ul>
+<p>Über das Kartensymbol erreichst du die <b>Kundenkarte</b> des Kunden.</p>
+<h2>Lieferantenkunden (nur Spezial-Konten)</h2>
+<p>Andere Benutzer, die dich als Lieferanten eingetragen haben. Sie sind keine eigenen Kunden-Datensätze, sondern echte Konten. Du siehst ihre Bestellungen, Umsätze und offenen Beträge und pflegst Status und Bezahlung.</p>
+<h2>Preise</h2>
+<p>Einkauf und Verkauf je Produkt. Produkte: Pods, Snus, Vapes, Einweg Vape, Schupftabak, Zigaretten.</p>
+<ul>
+<li>Der <b>Gewinn pro Stück</b> wird sofort live angezeigt. Gespeichert wird automatisch beim Verlassen des Feldes.</li>
+<li>Bei Pods und Einweg Vape gibt es <b>Geschmäcker</b>, bei Snus, Schupftabak und Zigaretten <b>Marken</b>, bei Vapes <b>Farben</b>. Jede Variante hat eigene Preise und optional ein Foto (eigenes Foto hochladen oder einen kostenlosen Bildvorschlag wählen).</li>
+<li><b>Verlauf:</b> Jede Preisänderung wird protokolliert.</li>
+<li>Die <b>Preisübersicht</b> zeigt zusätzlich Preise für 10, 25, 50 und 100 Stück.</li>
+</ul>
+<h2>Lagerbestand</h2>
+<p>Du trägst ein, was du tatsächlich vorrätig hast, und eine <b>Warnschwelle</b> pro Produkt. Status: <i>Auf Lager</i>, <i>Niedrig</i> (Menge gleich oder unter der Schwelle) oder <i>Leer</i>. Kritische Produkte stehen oben in der Gruppe „Braucht Aufmerksamkeit“.</p>
+<h2>Eigenverbrauch</h2>
+<p>Was du selbst konsumierst und nicht verkaufst. Jede Buchung senkt den Lagerbestand automatisch. Beim Löschen eines Eintrags wird er wieder erhöht.</p>
+<h2>Einstellungen</h2>
+<p>Konto (Passwort ändern, Telefon, Adresse, Lieferant), Kundenkarte, Anzeige, Benutzerverwaltung (nur Administrator), Backup, Papierkorb, Gefahrenzone. Details im Kapitel 8.</p>
+<h2>Service</h2>
+<p>Nur für den Service-Account. Der jährliche Service wird dort dokumentiert (Datum, Notiz). Ist er fällig, sehen Benutzer ein Banner auf der Übersicht.</p>
+<h2>Meine Bestellungen (nur Besteller)</h2>
+<p>Der Shop: Produkte suchen, in den <b>Warenkorb</b> legen, bis zu einer festgelegten Anzahl Lieferanten auswählen (Standard 3), Hinweis eintragen und verbindlich bestellen. Unter „Meine Bestellungen“ verfolgt der Besteller jede Lieferung mit Status, Termin und Verlauf. Die Seite aktualisiert sich alle 45 Sekunden.</p>
+</section>
+<section class="hb-ch" id="hb-ch-4"><h1>4. Der Weg einer Bestellung</h1>
+<h2>4.1 Kundenbestellung (du erfasst sie für einen Kunden)</h2>
+<ol>
+<li><b>Bestellungen → ＋ Neue Bestellung.</b> Kunde wählen.</li>
+<li>Produkte hinzufügen. Bei Produkten mit Variante die passende <b>Bildkarte</b> antippen (Geschmack, Marke oder Farbe).</li>
+<li>Optional <b>Rabatt</b> (Prozent oder fester Betrag) und <b>Vorauszahlung</b>. Der <b>Restbetrag</b> (Nachzahlung) wird live berechnet.</li>
+<li>Mit „Bestellung anlegen“ speichern. Preise und Einkaufspreise werden <b>eingefroren</b>. Spätere Preisänderungen verändern diese Bestellung nicht.</li>
+<li>Status setzen (Kapitel 5), dann <b>Abholen</b> und <b>Bezahlt</b>. Beides ist unabhängig voneinander.</li>
+<li>Beim Klick auf <b>Bezahlt</b> wird automatisch eine <b>Rechnung als PDF</b> erstellt.</li>
+</ol>
+<p>Ist ein Kunde mit individuellen Preisen hinterlegt, gelten diese (in der Liste mit ★ markiert).</p>
+<h2>4.2 Bestellung beim Lieferanten (dein Einkauf)</h2>
+<ol>
+<li><b>Beim Lieferanten → ＋ Neue Bestellung.</b> Voraussetzung: In den Einstellungen ist ein Lieferant gewählt.</li>
+<li>Produkte wählen. Die Preise stammen aus der Preisliste des Lieferanten.</li>
+<li>Der Lieferant sieht die Bestellung unter <b>Bestellungen</b> (von dir als Lieferantenkunde) und pflegt den Status.</li>
+<li>Sobald die Ware angekommen ist, erscheint das Banner „abholbereit“. Du kannst einzeln oder gesammelt als angekommen und bezahlt markieren. Ein <b>Lieferschein</b> lässt sich als PDF laden.</li>
+</ol>
+<h2>4.3 Bestellung im Shop (Besteller)</h2>
+<p>Die Bestellung wird gleichzeitig an alle gewählten Lieferanten gesendet. Jeder Lieferant bearbeitet sie getrennt. Der Besteller sieht pro Lieferant einen eigenen Fortschritt.</p>
+<h2>4.4 Löschen und Wiederherstellen</h2>
+<p>Gelöschte Bestellungen landen im <b>Papierkorb</b> (Einstellungen). Dort bleiben sie <b>30 Tage</b> und lassen sich wiederherstellen. Danach werden sie endgültig entfernt.</p>
+</section>
+<section class="hb-ch" id="hb-ch-5"><h1>5. Sendungsverfolgung</h1>
+<h2>Die sechs Stationen</h2>
+<p><b>Bestellt → Bestätigt → Bereit → Unterwegs → Übergeben → Bezahlt</b></p>
+<p>Diese Stationen gelten für <b>alle</b> Bestellarten, auch für Bestellungen, die du für Dritte (deine Kunden) anlegst. „Bestellt“ und „Bezahlt“ ergeben sich aus der Bestellung selbst. Die Stationen dazwischen setzt der Verkäufer per Hand.</p>
+<h2>Status setzen</h2>
+<p>In der Sendung (Menü <b>Sendungen</b> oder 📍 in der Bestellliste) gibt es das Formular „Status aktualisieren“:</p>
+<ul>
+<li><b>Status:</b> Bestätigt, Bereit zur Übergabe, Bin unterwegs, Persönlich übergeben.</li>
+<li><b>Hinweis:</b> Freier Text, den der Kunde sieht.</li>
+<li><b>Liefertermin</b> (bei „Bereit“ und „Unterwegs“): Datum, Uhrzeit, Dauer und Treffpunkt. Das System <b>verhindert Terminüberschneidungen</b> mit deinen anderen Lieferungen.</li>
+<li><b>Persönlich übergeben</b> verlangt die Bestätigung per <b>Kundenkarte</b> (siehe Kapitel 6).</li>
+</ul>
+<h2>Die Seite „Sendungen“</h2>
+<ul>
+<li><b>Kennzahlen:</b> Aktiv, Bereit/unterwegs, Heute, Überfällig.</li>
+<li><b>Nächste Termine</b> mit Countdown.</li>
+<li><b>Filter:</b> Aktiv, Bereit/unterwegs, Abgeschlossen, Alle. Dazu eine Suche nach Name, Produkt oder Nummer.</li>
+<li><b>Karten</b> zeigen die Richtung (Eingang = du bestellst, Ausgang = Lieferantenkunde bestellt bei dir, Kunde = deine Kundenbestellung), Fortschrittsbalken, Stationen als Punkte und Termin.</li>
+<li>Ein roter Zähler am Menüpunkt zeigt Sendungen mit überschrittenem Termin.</li>
+<li>Die Seite lädt sich jede Minute selbst neu.</li>
+</ul>
+<h2>In der geöffneten Sendung</h2>
+<p>Verlauf mit Zeitstempeln, Termin mit <b>Kalender-Export</b> und <b>Karte</b>, Status setzen, <b>Verfolgungslink teilen</b>, Erinnerung senden, Übergabe bestätigen, als bezahlt markieren, Lieferschein, Bestell-Details.</p>
+<h2>Verfolgungslink für Kunden</h2>
+<p>Jede Bestellung hat einen geheimen Link (<code>?track=…</code>). Der Kunde öffnet ihn <b>ohne Anmeldung</b> und sieht Stationen, Hinweise und Termin. Die Ansicht aktualisiert sich jede Minute.</p>
+<h2>Erinnerung</h2>
+<p>Bei Bestellungen, die seit <b>3 Tagen oder mehr</b> auf Abholung oder Bezahlung warten, erscheint ein Badge „⏳ seit X T“. Ein Klick bereitet eine Nachricht mit Verfolgungslink vor (Teilen-Menü des Geräts oder WhatsApp).</p>
+</section>
+<section class="hb-ch" id="hb-ch-6"><h1>6. Kundenkarte und Übergabe</h1>
+<h2>Was ist die Kundenkarte?</h2>
+<p>Jeder Kunde und jedes Konto bekommt eine Karte mit einem <b>Strichcode</b> (Code 128, Nummer im Format <code>NFK-XXXX-XXXX-XXXX</code>). Die Karte zeigt Logo-Wasserzeichen, Name, Foto, „Kunde seit“, Geburtsdatum, Typ, Karten-ID und den Strichcode.</p>
+<ul>
+<li><b>Vollbild:</b> Der Strichcode wird groß auf weißem Grund angezeigt, damit er sich gut scannen lässt.</li>
+<li><b>Als Bild</b> speichern oder teilen, <b>Drucken</b> im Scheckkartenformat.</li>
+<li><b>Foto und Geburtsdatum</b> erfassen: Das Foto dient als Abgleich bei der Übergabe.</li>
+<li><b>Neu ausstellen:</b> Sperrt die alte Karte sofort, zum Beispiel bei Verlust.</li>
+<li>Konten (Besteller, Lieferantenkunden, Lieferanten) bekommen ihre Karte beim Anmelden automatisch. Für eigene Kunden wird sie beim ersten Öffnen erstellt.</li>
+</ul>
+<h2>Übergabe in 3 Schritten</h2>
+<ol>
+<li>Beim Klick auf <b>Abholen</b> oder <b>Persönlich übergeben</b> öffnet sich das Scan-Fenster. Oben siehst du Name, Foto und Geburtsdatum der Person, für die die Bestellung bestimmt ist.</li>
+<li>Die Person zeigt ihre Karte. Du hältst den Strichcode <b>quer und ruhig</b> in den Rahmen. Ein Blitzlicht-Knopf hilft bei wenig Licht.</li>
+<li>Das System prüft, ob die Karte zur Person der Bestellung gehört, und bestätigt die Übergabe. Eine falsche Karte wird mit dem Namen des echten Inhabers abgelehnt.</li>
+</ol>
+<p><b>Alternativen:</b> Die Kartennummer lässt sich eintippen. Wenn keine Karte dabei ist, wählst du <b>„Ohne Karte bestätigen“</b> und trägst einen Grund ein. Der Grund wird in der Bestellnotiz festgehalten.</p>
+<h2>Sammel-Abholung</h2>
+<p>Hat ein Kunde mehrere offene Bestellungen, schließt du alle mit <b>einem</b> Kartenscan ab (Bestell-Detail → „Alle offenen Bestellungen dieses Kunden“). Sie werden als abgeholt <b>und</b> bezahlt markiert.</p>
+</section>
+<section class="hb-ch" id="hb-ch-7"><h1>7. Wichtige Rechenregeln</h1>
+<div class="tbl-wrap"><table><thead><tr><th>Größe</th><th>So wird sie berechnet</th></tr></thead><tbody><tr><td>Zwischensumme</td><td>Summe aus Preis × Stück je Position</td></tr><tr><td>Rabatt</td><td>Prozent (0 bis 100) oder fester Betrag, nie höher als die Zwischensumme</td></tr><tr><td>Gesamtbetrag</td><td>Zwischensumme minus Rabatt</td></tr><tr><td>Restbetrag</td><td>Gesamtbetrag minus Vorauszahlung, nie negativ. Eine zu hohe Vorauszahlung wird auf den Gesamtbetrag begrenzt</td></tr><tr><td>Gewinn</td><td>(Verkaufspreis minus Einkaufspreis zum Bestellzeitpunkt) × Stück</td></tr><tr><td>Beträge beim Lieferanten</td><td>Live nach aktueller Lieferantenpreisliste, bis zur Bezahlung. Danach fest</td></tr></tbody></table></div>
+<p>Die <b>Vorauszahlung</b> lässt sich beim Anlegen oder später im Bestell-Detail oder per ✎ in der Liste eintragen. Sie wird auf der Rechnung mit ausgewiesen.</p>
+</section>
+<section class="hb-ch" id="hb-ch-8"><h1>8. Einstellungen und Anzeige</h1>
+<ul>
+<li><b>Passwort oder PIN ändern:</b> Das aktuelle Passwort wird zur Sicherheit abgefragt.</li>
+<li><b>Anzeige:</b> Helles oder dunkles Design, Animationen, kompakte Ansicht, 12 Akzentfarben, vier Schriftgrößen, Sprache Deutsch oder Englisch.</li>
+<li><b>Backup:</b> Deine Daten lassen sich als Datei herunterladen.</li>
+<li><b>Über die App:</b> Version, Update-Prüfung, <b>„Was ist neu“</b> (Neuerungen seit deinem letzten Besuch) und die Einführungstour.</li>
+<li><b>Gefahrenzone:</b> Alle Bestellungen löschen oder alles zurücksetzen. Betrifft alle Geräte und lässt sich nicht rückgängig machen.</li>
+</ul>
+<p><b>Updates erkennen:</b> Erscheint eine neue Version, zeigt die App unten das Banner „Update verfügbar“ mit dem Knopf „Jetzt aktualisieren“. Beim nächsten Start erklärt das Fenster „Was ist neu“, was sich geändert hat.</p>
+</section>
+<section class="hb-ch" id="hb-ch-9"><h1>9. Häufige Fragen und Fehlerbehebung</h1>
+<p><b>Der Scanner erkennt die Karte nicht.</b> Strichcode quer halten, Abstand verändern, Display-Helligkeit der Karte erhöhen (Vollbild nutzen), Blitzlicht-Knopf probieren. Der Kamerazugriff muss erlaubt sein. Notfalls die Kartennummer eintippen.</p>
+<p><b>Beim Lieferanten sehe ich keine Preise.</b> In den Einstellungen „Mein Lieferant“ wählen. Der Lieferant muss Preise (und Varianten) hinterlegt haben.</p>
+<p><b>Ein Produkt lässt sich nicht bestellen.</b> Bei Produkten mit Variante muss zuerst unter Preise mindestens ein Geschmack, eine Marke oder eine Farbe angelegt sein.</p>
+<p><b>Daten wirken veraltet.</b> Oben erscheint bei fehlender Verbindung ein Offline-Hinweis. Mit Verbindung die Seite neu laden oder den Aktualisieren-Knopf nutzen.</p>
+</section>
+<section class="hb-ch" id="hb-ch-10"><h1>10. Glossar</h1>
+<div class="tbl-wrap"><table><thead><tr><th>Begriff</th><th>Bedeutung</th></tr></thead><tbody><tr><td><b>Spezial-Konto</b></td><td>Konto eines Lieferanten</td></tr><tr><td><b>Lieferantenkunde</b></td><td>Ein Konto, das dich als Lieferanten eingetragen hat und bei dir bestellt</td></tr><tr><td><b>Besteller</b></td><td>Selbstregistriertes Konto, das im Shop bei mehreren Lieferanten bestellt</td></tr><tr><td><b>Eingang / Ausgang</b></td><td>Richtung einer Sendung: Eingang = du bestellst, Ausgang = jemand bestellt bei dir</td></tr><tr><td><b>Abholen / Übergeben</b></td><td>Die Ware ist beim Kunden angekommen, bestätigt per Kundenkarte</td></tr><tr><td><b>Vorauszahlung</b></td><td>Schon bezahlter Teilbetrag einer Bestellung</td></tr><tr><td><b>Restbetrag</b></td><td>Noch offener Betrag nach Vorauszahlung</td></tr><tr><td><b>Variante</b></td><td>Geschmack, Marke oder Farbe eines Produkts mit eigenem Preis</td></tr><tr><td><b>Warnschwelle</b></td><td>Menge, ab der ein Produkt als „Niedrig“ gilt</td></tr><tr><td><b>Papierkorb</b></td><td>Gelöschte Bestellungen, 30 Tage wiederherstellbar</td></tr></tbody></table></div>
+</section>
+</template>
 
 <div id="toast" role="status" aria-live="polite"><span id="t-icon">✓</span><span id="t-msg"></span><button id="t-action" class="btn btn-ghost btn-sm" style="display:none;margin-left:4px;padding:4px 10px" onclick="_toastActionClick()"></button></div>
 
@@ -3397,8 +3633,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '20.1.0';
+const CURRENT_UI_VERSION = '21.0.0';
 const WHATS_NEW = {
+  '21.0.0': [
+    'Anmelde-Schutz: Nach 5 falschen Versuchen wird das Konto gesperrt und der Nutzer sieht den Hinweis, dass ein Administrator es freischalten muss. Vorher warnt die Anmeldung, wie viele Versuche noch übrig sind (benötigt login_lock.sql).',
+    'Administratoren sehen gesperrte Konten sofort: Zähler am Menüpunkt „Einstellungen“, Hinweis beim Öffnen und ein roter Kasten in der Benutzerliste mit „Entsperren“-Knopf.',
+    'Neu in den Einstellungen: das komplette Systemhandbuch zum Nachlesen — mit Suche, Kapitel-Schnellwahl und Druck-/PDF-Funktion.'
+  ],
   '20.1.0': [
     'Der Verfolgungslink für Kunden zeigt jetzt den kompletten Verlauf: alle Stationen, deine Hinweise und den Liefertermin — und aktualisiert sich selbst jede Minute (benötigt tracking_fix.sql).',
     'Neue Übersichts-Karte „Aktive Sendungen“ auf der Startseite: die dringendsten Lieferungen mit Status und Countdown, ein Klick öffnet die Sendung.',
@@ -3646,18 +3887,16 @@ async function doLogin(){
   if(!u){ setFieldError('inp-user','Bitte Benutzername eingeben.'); hasError=true; }
   if(!p){ setFieldError('inp-pw','Bitte Passwort eingeben.'); hasError=true; }
   if(hasError) return;
+  { const cd=loginCooldownLeft(u); if(cd>0){ showLoginMsg('Zu viele fehlgeschlagene Anmeldeversuche. Ein Administrator muss dein Konto freischalten (oder warte '+cd+' Sek.).',true); return; } }
   const btn = document.querySelector('.primary-btn');
   btn.disabled=true; btn.style.opacity=.6;
   const { data, error } = await sb.auth.signInWithPassword({ email: toEmail(u), password: p });
   btn.disabled=false; btn.style.opacity=1;
   if(error || !data.user){
-    document.getElementById('inp-user').classList.add('input-error');
-    document.getElementById('inp-pw').classList.add('input-error');
-    document.getElementById('login-err').textContent='Falscher Benutzername oder Passwort.';
-    document.getElementById('login-err').style.display='block';
-    document.getElementById('inp-pw').value='';
+    await handleLoginFail(u);
     return;
   }
+  lfSet(u,{}); try{ sb.rpc('login_erfolg').then(()=>{},()=>{}); }catch(e){}
   await onLoggedIn(data.user, u);
 }
 async function onLoggedIn(authUser, displayName){
@@ -8642,7 +8881,7 @@ function sdRefreshIfOpen(){
 }
 async function reloadSendungen(){ await loadAllData(); renderSendungen(); sdRefreshIfOpen(); showToast('Aktualisiert. ✓'); }
 const _rbOrig=renderBestellungen; renderBestellungen=function(){ _rbOrig.apply(this,arguments); try{ sdRefreshIfOpen(); }catch(e){} };
-const _rfOrig=refresh; refresh=function(){ _rfOrig.apply(this,arguments); try{ if(document.getElementById('page-sendungen')?.classList.contains('active')) renderSendungen(); updateSdBadge(); }catch(e){} };
+const _rfOrig=refresh; refresh=function(){ _rfOrig.apply(this,arguments); try{ if(document.getElementById('page-sendungen')?.classList.contains('active')) renderSendungen(); updateSdBadge(); updateLockBadge(); }catch(e){} };
 setInterval(async()=>{
   if(document.hidden||!currentUserId||!document.getElementById('page-sendungen')?.classList.contains('active')) return;
   await loadAllData(); renderSendungen(); sdRefreshIfOpen();
@@ -8694,6 +8933,66 @@ function dashShip(){
   }).join('');
   updateSdBadge();
 }
+
+// ══ v21: Handbuch ══
+function openHandbuch(ch){
+  const body=document.getElementById('hb-body');
+  if(!body.dataset.ready){ body.innerHTML=document.getElementById('manual-tpl').innerHTML; body.dataset.ready='1'; }
+  document.getElementById('hb-search').value=''; hbFilter(); openModal('handbuch');
+  if(ch){ setTimeout(()=>{ const el=document.getElementById('hb-ch-'+ch); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },80); }
+  else document.querySelector('#modal-handbuch .modal')?.scrollTo(0,0);
+}
+function hbFilter(){
+  const q=(document.getElementById('hb-search')?.value||'').trim().toLowerCase(); let n=0;
+  document.querySelectorAll('#hb-body .hb-ch').forEach(c=>{ const ok=!q||c.textContent.toLowerCase().includes(q); c.style.display=ok?'':'none'; if(ok) n++; });
+  const none=document.getElementById('hb-none'); if(none) none.style.display=n?'none':'block';
+}
+function printHandbuch(){
+  const w=window.open('','_blank'); if(!w){ showToast('Pop-up wurde blockiert.','⚠'); return; }
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>NicoFlow Systemhandbuch</title><style>body{font:13px/1.6 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 20px;color:#222}h1{color:#D9600E;font-size:20px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:28px;page-break-after:avoid}h2{font-size:15px;margin:18px 0 6px;page-break-after:avoid}table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #ddd;padding:6px 9px;text-align:left;font-size:12px}th{background:#f6e3d4}code{background:#f3f3f3;padding:1px 5px;border-radius:4px}tr{page-break-inside:avoid}</style><h1 style="font-size:30px;border:0;margin-top:0">NicoFlow Systemhandbuch</h1>${document.getElementById('manual-tpl').innerHTML}<script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
+  w.document.close();
+}
+
+// ══ v21: Anmelde-Schutz ══
+const LOGIN_MAX=5, LOGIN_COOLDOWN_MS=300000;
+const lfKey=u=>'nm_lf_'+String(u).toLowerCase();
+function lfGet(u){ try{ return JSON.parse(localStorage.getItem(lfKey(u))||'{}'); }catch(e){ return {}; } }
+function lfSet(u,o){ try{ localStorage.setItem(lfKey(u),JSON.stringify(o)); }catch(e){} }
+function loginCooldownLeft(u){ const o=lfGet(u); return o.until?Math.max(0,Math.ceil((o.until-Date.now())/1000)):0; }
+function showLoginMsg(t,lock){ const e=document.getElementById('login-err'); e.textContent=t; e.style.display='block'; e.classList.toggle('is-lock',!!lock); }
+async function handleLoginFail(u){
+  document.getElementById('inp-user').classList.add('input-error'); document.getElementById('inp-pw').classList.add('input-error');
+  document.getElementById('inp-pw').value='';
+  let locked=false, rest=null;
+  try{ const {data,error}=await sb.rpc('login_fehlversuch',{ p_username:String(u).toLowerCase() }); if(!error&&data){ locked=!!data.gesperrt; rest=(data.rest==null?null:Number(data.rest)); } }catch(e){}
+  const o=lfGet(u); o.n=(o.n||0)+1;
+  if(!locked && rest===null && o.n>=LOGIN_MAX){ locked=true; o.until=Date.now()+LOGIN_COOLDOWN_MS; }
+  lfSet(u,o);
+  if(locked){
+    showLoginMsg('🔒 Zu viele fehlgeschlagene Anmeldeversuche. Das Konto ist gesperrt — bitte wende dich an einen Administrator, er muss es freischalten.',true);
+    showToast('Konto gesperrt — Administrator kontaktieren.','🔒');
+  } else {
+    const r = rest!==null ? rest : LOGIN_MAX-o.n;
+    showLoginMsg('Falscher Benutzername oder Passwort.'+(r<=2&&r>0?` Noch ${r} Versuch${r===1?'':'e'}, danach wird das Konto gesperrt.`:''),false);
+  }
+}
+function lockedUsers(){ return M.users.filter(u=>u.gesperrt && u.gesperrt_grund==='fehlversuche'); }
+function lockBanner(){
+  const el=document.getElementById('ul-locked-banner'); if(!el) return;
+  const l=lockedUsers(); el.style.display=l.length?'':'none';
+  el.innerHTML=l.length?`<div class="lock-banner"><b>🔒 ${l.length} Konto${l.length===1?'':'en'} nach zu vielen Fehlversuchen gesperrt</b>${l.map(u=>`<div class="lock-row"><span>${escapeHtml(u.username)}${u.gesperrt_am?' · '+fmtDateTime(u.gesperrt_am):''}</span><button class="btn btn-primary btn-sm" onclick="toggleLockUser('${u.id}',false)">Entsperren</button></div>`).join('')}</div>`:'';
+}
+function updateLockBadge(){
+  const el=document.getElementById('tk-dot-einstellungen'); if(!el) return;
+  const n=currentRole()==='admin'?lockedUsers().length:0;
+  el.textContent=n>9?'9+':String(n); el.classList.toggle('show',n>0);
+  if(n>0&&!window._lockToast){ window._lockToast=1; showToast(`${n} Konto${n===1?'':'en'} gesperrt — bitte prüfen.`,'🔒'); }
+}
+const _rulOrig=renderUserList; renderUserList=function(){ _rulOrig.apply(this,arguments); try{ lockBanner(); updateLockBadge(); }catch(e){} };
+setInterval(async()=>{
+  if(document.hidden||!currentUserId||currentRole()!=='admin') return;
+  await loadAllData(); try{ renderUserList(); }catch(e){}
+},60000);
 </script>
 
 </body>
