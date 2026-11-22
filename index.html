@@ -2022,6 +2022,26 @@ label.fl{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;lette
 .pin-keys button.sm{font-size:20px;color:var(--ink-soft)}
 .pin-shake{animation:pinShake .35s}
 @keyframes pinShake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+/* ══ v23 · VEREDELUNG: Bewegung, Tiefe, Fokus ══ */
+.page.active{animation:pgIn .28s cubic-bezier(.22,.9,.3,1)}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.page.active{animation:none}}
+.bento-dash .stat-cell{position:relative;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}
+.bento-dash .stat-cell::before{content:"";position:absolute;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,var(--sage),var(--accent2));opacity:.85}
+.bento-dash .stat-cell:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--sage) 50%,var(--line));box-shadow:0 14px 30px -18px color-mix(in srgb,var(--sage) 60%,#000)}
+.card{transition:border-color .18s,box-shadow .18s}
+html[data-mode="light"] .card{box-shadow:0 1px 2px rgba(60,40,10,.05),0 8px 24px -16px rgba(60,40,10,.18)}
+.scale-tick{position:relative}
+.scale-tick.active::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--sage)}
+.btn-primary,.primary-btn{transition:transform .12s,filter .15s,box-shadow .15s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px -10px var(--sage)}
+.btn-primary:active,.primary-btn:active{transform:translateY(0) scale(.985)}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
+.modal{animation:mdIn .22s cubic-bezier(.22,.9,.3,1)}
+@keyframes mdIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -2123,6 +2143,7 @@ label.fl{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;lette
 </div>
 
 <!-- APP -->
+
 <div id="offline-banner">📡 Keine Internetverbindung — Daten können veraltet sein</div>
 <div id="app-screen">
 <div id="app-boot-loading" class="app-boot-loading" style="display:none">
@@ -7457,6 +7478,7 @@ function renderBestellungen(){
 // ══════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════
+
 // ══ v22: AUSWERTUNG (Übersicht) & NACHBESTELL-VORSCHLAG (Lager) ══
 function soldOrders(){ return S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId)); }
 function ymKey(d){ return String(d||'').slice(0,7); }
@@ -7477,22 +7499,9 @@ function renderAuswertung(){
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0"><div style="font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap">${m.v?fmt(m.v):'–'}</div><div style="width:100%;height:110px;display:flex;align-items:flex-end"><div style="width:100%;height:${Math.max(m.v?4:2,h)}%;background:${last?'var(--sage)':'color-mix(in srgb,var(--sage) 38%,var(--paper3))'};border-radius:6px 6px 2px 2px" title="${m.n} Bestellungen"></div></div><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600">${m.l}</div></div>`; }).join('');
   const cur=months[5].v, prev=months[4].v;
   const delta=prev>0?Math.round((cur-prev)/prev*100):null;
-  const since=new Date(Date.now()-90*864e5).toISOString().slice(0,10);
-  const prod={}, cust={};
-  sold.filter(b=>String(b.date||'')>=since).forEach(b=>{
-    (b.items||[]).forEach(it=>{ prod[it.prod]=(prod[it.prod]||0)+(Number(it.stueck)||0); });
-    const w=sdWho(b); cust[w]=(cust[w]||0)+displayTotal(b);
-  });
-  const top=(o,n)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n);
-  const tp=top(prod,5), tc=top(cust,5);
-  const mx1=Math.max(1,...tp.map(x=>x[1])), mx2=Math.max(1,...tc.map(x=>x[1]));
-  const row=(label,val,txt,mx)=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px"><div style="flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</div><div style="flex:1;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden"><div style="width:${Math.round(val/mx*100)}%;height:100%;background:var(--sage)"></div></div><div style="flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink-soft)">${txt}</div></div>`;
-  el.innerHTML=`<div class="card-head"><h3>📈 Auswertung</h3><span class="ps" style="margin:0">${delta===null?'':`Dieser Monat ${delta>=0?'+':''}${delta} % zum Vormonat`}</span></div>
+  el.innerHTML=`<div class="card-head"><h3>📊 Umsatzentwicklung</h3><span class="ps" style="margin:0">${delta===null?'':`Dieser Monat ${delta>=0?'+':''}${delta} % zum Vormonat`}</span></div>
   <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">Umsatz der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;margin-top:22px">
-    <div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Top-Produkte · 90 Tage</div>${tp.length?tp.map(([id,v])=>row(`${PROD_MAP[id]?.icon||''} ${escapeHtml(PROD_MAP[id]?.name||id)}`,v,v+' Stk.',mx1)).join(''):'<div class="ps">Noch keine Verkäufe.</div>'}</div>
-    <div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Top-Kunden · 90 Tage</div>${tc.length?tc.map(([n,v])=>row(escapeHtml(n),v,fmt(v),mx2)).join(''):'<div class="ps">Noch keine Verkäufe.</div>'}</div>
-  </div></div>`;
+  </div>`;
 }
 function renderNachbestellung(){
   if(typeof lagerManuellTableMissing!=='undefined' && lagerManuellTableMissing) return;
@@ -9281,13 +9290,21 @@ function openPalette(){
   if(!currentUserId) return;
   const ex=document.getElementById('palette'); if(ex){ ex.remove(); return; }
   const o=document.createElement('div'); o.id='palette';
-  o.innerHTML='<div class="pal-box"><input id="pal-in" placeholder="Seite suchen … (Esc schließt)" autocomplete="off"><div id="pal-list"></div></div>';
+  o.innerHTML='<div class="pal-box"><input id="pal-in" placeholder="Seite, Kunde oder Bestellung suchen … (Esc schließt)" autocomplete="off"><div id="pal-list"></div></div>';
   document.body.appendChild(o);
   const ticks=[...document.querySelectorAll('.scale-tick')].filter(t=>t.style.display!=='none');
   const inp=o.querySelector('#pal-in'), list=o.querySelector('#pal-list');
   const draw=()=>{ const q=inp.value.toLowerCase(); list.innerHTML='';
-    ticks.map(t=>({t,n:t.textContent.replace(/\s+/g,' ').trim().replace(/^\d+\s?/,'')})).filter(x=>x.n.toLowerCase().includes(q)).slice(0,8).forEach((x,i)=>{
-      const d=document.createElement('div'); d.className='pal-item'+(i?'':' on'); d.textContent=x.n; d.onclick=()=>{ o.remove(); x.t.click(); }; list.appendChild(d); }); };
+    const items=ticks.map(t=>({t,n:t.textContent.replace(/\s+/g,' ').trim().replace(/^\d+\s?/,'')})).filter(x=>x.n.toLowerCase().includes(q)).slice(0,8).map(x=>({n:x.n,go:()=>x.t.click()}));
+    const role=currentRole();
+    if(q.length>=2 && (role==='user'||role==='special')){
+      (S.kunden||[]).filter(k=>(k.vorname+' '+k.nachname).toLowerCase().includes(q)).slice(0,5).forEach(k=>items.push({n:'👤 '+k.vorname+' '+k.nachname,go:()=>{ nav('kunden'); try{ openKundeDetail(k.id); }catch(e){} }}));
+      const num=q.replace('#','');
+      (S.bestellungen||[]).filter(b=>(/^\d+$/.test(num)&&String(b.id).startsWith(num))||sdWho(b).toLowerCase().includes(q)||(b.items||[]).some(it=>(PROD_MAP[it.prod]?.name||'').toLowerCase().includes(q)))
+        .sort((a,b)=>b.id-a.id).slice(0,6).forEach(b=>items.push({n:'🧾 #'+b.id+' · '+sdWho(b)+' · '+fmt(displayTotal(b))+(b.paid?' ✓':''),go:()=>{ nav('bestellungen'); try{ openOrderDetail(b.id); }catch(e){} }}));
+    }
+    items.forEach((x,i)=>{
+      const d=document.createElement('div'); d.className='pal-item'+(i?'':' on'); d.textContent=x.n; d.onclick=()=>{ o.remove(); x.go(); }; list.appendChild(d); }); };
   draw(); inp.oninput=draw;
   inp.onkeydown=e=>{ if(e.key==='Enter') list.querySelector('.pal-item')?.click(); if(e.key==='Escape') o.remove(); };
   o.onclick=e=>{ if(e.target===o) o.remove(); };
