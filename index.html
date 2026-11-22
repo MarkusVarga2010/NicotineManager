@@ -3124,6 +3124,7 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label" data-i18n="order.customer">Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row" id="od-batch-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" id="od-batch-btn" onclick="openBatchPickup()">📋 Alle offenen Bestellungen dieses Kunden</button></div>
+      <div class="about-row" id="od-repeat-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" onclick="repeatOrder()">🔁 Erneut bestellen</button></div>
       <div class="about-row"><span data-i18n="best.th.bestelltam">Bestellt am</span><span id="od-datum"></span></div>
       <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
       <div class="about-row" id="od-angekommen-row" style="display:none"><span data-i18n="best.th.angekommenam">Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
@@ -4279,7 +4280,7 @@ async function onLoggedIn(authUser, displayName){
   applyLiquidGlass(false);
   setLang(VS.lang||'de');
   applyRoleUI();
-  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); document.body.classList.toggle('nb-ready',['user','special'].includes(currentRole())); backupReminder(); }catch(e){}
+  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); document.body.classList.toggle('nb-ready',['user','special'].includes(currentRole())); if(currentRole()==='admin') subscribePush(); backupReminder(); }catch(e){}
   if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
@@ -7553,6 +7554,52 @@ function backupReminder(){
   let last=0; try{ last=+localStorage.getItem('nm_last_backup')||0; }catch(e){}
   if(Date.now()-last>7*864e5) setTimeout(()=>showToast('Tipp: Mach wieder eine Datensicherung (Einstellungen → Export).','💾'),4000);
 }
+
+// ══ v26: Erneut bestellen, Inventur, Push ══
+function repeatOrder(){
+  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId); if(!b) return;
+  closeModal('orderdetail'); openModal('bestellung');
+  const sel=document.getElementById('nb-kunde'); if(sel) sel.value=String(b.kId);
+  orderItems=(b.items||[]).filter(it=>PROD_MAP[it.prod]).map(it=>({uid:Date.now()+Math.random(),prod:it.prod,stueck:it.stueck||1,variant:it.variante||defaultVariantId(it.prod,false)}));
+  if(!orderItems.length) addOrderItem(); else renderOrderItems();
+  showToast('Bestellung übernommen — Menge prüfen und anlegen.','🔁');
+}
+function openInventur(){
+  if(lagerManuellTableMissing){ showToast('Lagerbestand ist noch nicht eingerichtet.','⚠'); return; }
+  let o=document.getElementById('inv-bg'); if(o) o.remove();
+  o=document.createElement('div'); o.id='inv-bg'; o.className='modal-bg show'; o.style.zIndex=120;
+  o.innerHTML=`<div class="modal"><div class="modal-head"><h3>📋 Inventur</h3><button class="modal-close" onclick="document.getElementById('inv-bg').remove()" aria-label="Schließen">✕</button></div><div class="modal-body"><div class="ps" style="margin-bottom:10px">Gib ein, was du tatsächlich gezählt hast. Leere Felder bleiben unverändert.</div>${PRODUCTS.map(p=>{ const cur=S.lagerManuell[p.id]?.menge; return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${p.icon} ${escapeHtml(p.name)}</b><div class="ps" style="margin:0">Soll: ${cur==null?'—':cur}</div></div><span id="inv-d-${p.id}" class="mono" style="min-width:48px;text-align:right"></span><input type="number" min="0" inputmode="numeric" id="inv-${p.id}" style="width:84px" placeholder="Zählung" oninput="invDiff('${p.id}')"/></div>`; }).join('')}</div><div class="modal-foot"><button class="btn btn-ghost" onclick="document.getElementById('inv-bg').remove()">Abbrechen</button><button class="btn btn-primary" onclick="applyInventur()">Bestand übernehmen</button></div></div>`;
+  document.body.appendChild(o);
+}
+function invDiff(id){
+  const v=document.getElementById('inv-'+id).value, el=document.getElementById('inv-d-'+id); if(!el) return;
+  if(v===''){ el.textContent=''; return; }
+  const d=Math.round(+v)-(S.lagerManuell[id]?.menge||0);
+  el.textContent=(d>0?'+':'')+d; el.style.color=d===0?'var(--ink-faint)':d>0?'var(--success)':'var(--rust)';
+}
+async function applyInventur(){
+  let n=0;
+  for(const p of PRODUCTS){
+    const v=document.getElementById('inv-'+p.id)?.value; if(v===''||v==null) continue;
+    const d=Math.max(0,Math.round(+v))-(S.lagerManuell[p.id]?.menge||0);
+    if(d!==0 || !S.lagerManuell[p.id]){ await adjustLagerbestand(p.id,d); n++; }
+  }
+  document.getElementById('inv-bg')?.remove();
+  renderLagerbestand(); renderDashboard();
+  showToast(n?`Inventur übernommen (${n} Produkt${n===1?'':'e'}). ✓`:'Keine Abweichungen.','📋');
+}
+// Echte Push-Nachrichten (brauchen VAPID_PUBLIC_KEY in config.js und die Dateien im Ordner push/)
+function b64ToU8(b){ const p='='.repeat((4-b.length%4)%4), r=(b+p).replace(/-/g,'+').replace(/_/g,'/'), raw=atob(r); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0))); }
+async function subscribePush(){
+  try{
+    if(typeof VAPID_PUBLIC_KEY==='undefined'||!VAPID_PUBLIC_KEY||!('PushManager' in window)||Notification.permission!=='granted') return false;
+    const reg=await navigator.serviceWorker.ready;
+    const sub=(await reg.pushManager.getSubscription())||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID_PUBLIC_KEY)});
+    const j=sub.toJSON();
+    const {error}=await sb.from('push_subscriptions').upsert({user_id:currentUserId,endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth},{onConflict:'endpoint'});
+    return !error;
+  }catch(e){ console.warn('Push:',e); return false; }
+}
 // ══ v22: AUSWERTUNG (Übersicht) & NACHBESTELL-VORSCHLAG (Lager) ══
 function soldOrders(){ return S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId)); }
 function ymKey(d){ return String(d||'').slice(0,7); }
@@ -7623,7 +7670,7 @@ function renderNachbestellung(){
     if(menge<=schw||reach<14) rows.push({p,menge,rate,reach,need});
   });
   rows.sort((a,b)=>a.reach-b.reach); window._reorderRows=rows;
-  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">Basis: ${DAYS} Tage</span><button class="btn btn-ghost btn-sm" onclick="copyReorder()">📋 Liste kopieren</button></div></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
+  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">Basis: ${DAYS} Tage</span><button class="btn btn-ghost btn-sm" onclick="openInventur()">📋 Inventur</button><button class="btn btn-ghost btn-sm" onclick="copyReorder()">Liste kopieren</button></div></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
 }
 function renderDashboard(){
   try{ renderAuswertung(); renderOffenePosten(); renderGewinnVerteilung(); }catch(e){ console.warn(e); }
@@ -8174,6 +8221,7 @@ function openOrderDetail(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b){showToast('Bestellung nicht gefunden.','⚠');return;}
   currentDetailOrderId = id;
+  { const rr=document.getElementById('od-repeat-row'); if(rr) rr.style.display=(!b.fuerLieferant&&b.kId&&['user','special'].includes(currentRole()))?'flex':'none'; }
   const k=S.kunden.find(x=>x.id===b.kId);
 
   document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
@@ -8851,9 +8899,48 @@ function exportData(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click(); try{ localStorage.setItem('nm_last_backup',String(Date.now())); }catch(e){}
   showToast('Export heruntergeladen. ↓');
 }
-function importData(e){
-  showToast('Import ist mit der Online-Datenbank derzeit nicht verfügbar. Daten direkt in Supabase einspielen.', '⚠');
-  e.target.value='';
+// Backup-Import: liest eine mit "Export" erstellte JSON-Datei und legt Kunden und Bestellungen
+// in der Online-Datenbank neu an (für das angemeldete Konto). Bereits vorhandene Kunden (gleicher
+// Name) werden wiederverwendet, bereits vorhandene Bestellungen (gleicher Kunde, Datum, Betrag,
+// Positionen) übersprungen — ein zweiter Import legt also nichts doppelt an.
+async function importData(e){
+  const input=e.target, file=input.files&&input.files[0]; input.value='';
+  if(!file) return;
+  let data;
+  try{ data=JSON.parse(await file.text()); }catch(err){ showToast('Datei ist kein gültiges Backup (JSON).','⚠'); return; }
+  const st=data&&data.state;
+  if(!st||!Array.isArray(st.kunden)||!Array.isArray(st.bestellungen)){ showToast('Datei enthält kein NicoFlow-Backup.','⚠'); return; }
+  const norm=x=>String(x||'').trim().toLowerCase();
+  const nameKey=k=>norm(k.vorname)+'|'+norm(k.nachname);
+  const sig=(kId,b)=>[kId,b.date,Number(b.total).toFixed(2),JSON.stringify((b.items||[]).map(i=>[i.prod,i.stueck,i.variante||null]))].join('#');
+  const eigeneKunden=st.kunden;
+  const bestellungen=st.bestellungen.filter(b=>!b.fuerLieferant && b.kId!=null);
+  const have=new Set(S.bestellungen.filter(b=>!b.fuerLieferant).map(b=>sig(b.kId,b)));
+  const kMap={}; // alte Kunden-ID -> neue/vorhandene ID
+  let newK=0;
+  eigeneKunden.forEach(k=>{ const ex=S.kunden.find(x=>nameKey(x)===nameKey(k)); if(ex) kMap[k.id]=ex.id; else newK++; });
+  const todo=bestellungen.filter(b=>{ const kk=eigeneKunden.find(k=>k.id===b.kId); if(!kk) return false; const nid=kMap[kk.id]; return !(nid!=null && have.has(sig(nid,b))); });
+  if(!todo.length && !newK){ showToast('Nichts zu importieren — alles ist schon vorhanden. ✓'); return; }
+  if(!(await confirmDialog(`${newK} neue(r) Kunde(n) und ${todo.length} Bestellung(en) werden hinzugefügt. Vorhandene Daten bleiben unverändert.`,{title:'Backup importieren?',confirmText:'Importieren',danger:false}))) return;
+  let okK=0, okB=0, fail=0;
+  for(const k of eigeneKunden){
+    if(kMap[k.id]!=null) continue;
+    const { data:row, error }=await sb.from('kunden').insert({ user_id:currentUserId, vorname:k.vorname, nachname:k.nachname }).select().single();
+    if(error){ fail++; continue; }
+    kMap[k.id]=row.id; okK++;
+  }
+  for(const b of todo){
+    const nid=kMap[b.kId]; if(nid==null){ fail++; continue; }
+    const payload={ user_id:currentUserId, kunde_id:nid, items:b.items||[], subtotal:Number(b.subtotal)||0,
+      discount_type:b.discountType||null, discount_value:b.discountValue||0, total:Number(b.total)||0,
+      paid:!!b.paid, delivered:!!b.delivered, fuer_lieferant:false, bestelldatum:b.date||today(),
+      bezahlt_am:b.paidAt||null, angekommen_am:b.deliveredAt||null, notiz:b.notiz||null, vorauszahlung:b.vorauszahlung||0 };
+    let { error }=await sb.from('bestellungen').insert(payload);
+    if(error && isMissingColumnError(error,'vorauszahlung')){ const { vorauszahlung:_v, ...rest }=payload; ({ error }=await sb.from('bestellungen').insert(rest)); }
+    if(error) fail++; else okB++;
+  }
+  await loadAllData(); refresh();
+  showToast(`Import fertig: ${okK} Kunde(n), ${okB} Bestellung(en)${fail?` · ${fail} fehlgeschlagen`:''}. ✓`,'↑');
 }
 async function clearOrders(){
   if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen'})))return;
@@ -9583,7 +9670,7 @@ function openNotifCenter(){ const l=nfLog(); l.forEach(x=>x.seen=true); nfSave(l
 async function enableSysNotif(){
   if(!('Notification' in window)){ showToast('Dieser Browser unterstützt keine Systembenachrichtigungen.','⚠'); return; }
   const r=await Notification.requestPermission(); renderNotifCenter();
-  if(r==='granted') sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test');
+  if(r==='granted'){ sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test'); subscribePush(); }
 }
 // Live-Aktualisierung: bei jeder Änderung an Profilen Daten neu laden
 let _lockT=null;
