@@ -2050,6 +2050,9 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
 .pt{letter-spacing:-.025em}
 .card-head h3{display:flex;align-items:center;gap:8px}
 .tab-group .tab-btn{transition:background .15s,color .15s}
+
+#nb-fab{display:none;position:fixed;right:16px;bottom:16px;z-index:60;padding:13px 18px;border:0;border-radius:999px;background:var(--sage);color:var(--on-accent);font:700 14px 'Manrope',sans-serif;box-shadow:0 12px 28px -10px var(--sage);cursor:pointer}
+@media (max-width:900px){ body.nb-ready #nb-fab{display:block} }
 </style>
 </head>
 <body>
@@ -2151,6 +2154,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
 </div>
 
 <!-- APP -->
+<button id="nb-fab" onclick="openModal('bestellung')" aria-label="Neue Bestellung">＋ Bestellung</button>
 
 <div id="offline-banner">📡 Keine Internetverbindung — Daten können veraltet sein</div>
 <div id="app-screen">
@@ -2238,7 +2242,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
           <svg class="bento-ic-bg"><use href="#ic-trend"/></svg>
           <div class="sc-lab"><svg class="lab-ic"><use href="#ic-trend"/></svg><span data-i18n="dash.gesamtgewinn">Gesamtgewinn</span></div>
           <div class="sc-v mono" id="d-gewinn">0,00 €</div>
-          <div class="sc-sub">Verkauf − Einkauf · alle Verkäufe</div>
+          <div class="sc-sub">Verkauf − Einkauf · nach Rabatt</div>
         </div>
         <div class="stat-cell" data-bento="best">
           <svg class="bento-ic-bg"><use href="#ic-receipt"/></svg>
@@ -3891,7 +3895,7 @@ let lagerManuellTableMissing = false;
 let lagerSchwelleSpalteMissing = false;
 let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
-let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark',fontSize:'md',liquidGlass:true,lang:'de'};
+let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),fontSize:'md',liquidGlass:true,lang:'de'};
 // Ältere Backups/Local-Storage-Stände kennen diese Felder evtl. noch nicht — sinnvolle
 // Defaults nachrüsten, statt dass z.B. die Schriftgröße plötzlich "undefined" ist.
 if(VS.fontSize==null) VS.fontSize='md';
@@ -4275,7 +4279,7 @@ async function onLoggedIn(authUser, displayName){
   applyLiquidGlass(false);
   setLang(VS.lang||'de');
   applyRoleUI();
-  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); }catch(e){}
+  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); document.body.classList.toggle('nb-ready',['user','special'].includes(currentRole())); backupReminder(); }catch(e){}
   if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
@@ -4298,7 +4302,7 @@ async function forceLockedLogout(){
 }
 async function doLogout(){
   try{ if(M.profile&&currentUser) localStorage.setItem('nm_last_login',JSON.stringify({u:currentUser,m:M.profile.auth_modus||'passwort'})); }catch(e){}
-  closeModal('pwforce');
+  closeModal('pwforce'); document.body.classList.remove('nb-ready');
   await sb.auth.signOut();
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -5692,6 +5696,9 @@ async function addKunde(){
   if(!v){ setFieldError('nk-vorname','Bitte Vorname eingeben.'); hasError=true; }
   if(!n){ setFieldError('nk-nachname','Bitte Nachname eingeben.'); hasError=true; }
   if(hasError) return;
+  if(S.kunden.some(k=>k.vorname.trim().toLowerCase()===v.toLowerCase()&&k.nachname.trim().toLowerCase()===n.toLowerCase())){
+    if(!(await confirmDialog(`„${v} ${n}“ gibt es schon. Trotzdem noch einmal anlegen?`,{title:'Kunde existiert bereits',confirmText:'Trotzdem anlegen',danger:false}))) return;
+  }
   const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
   if(error){ showToast(dbErrorMsg(error,'Kunde konnte nicht angelegt werden.'),'⚠'); return; }
   S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
@@ -7487,6 +7494,65 @@ function renderBestellungen(){
 // DASHBOARD
 // ══════════════════════════════════════════════
 
+
+// ══ v25: Monatsbericht, Gewinnverteilung, Erinnerung, Komfort ══
+function monthBounds(k){ return k; }
+function ordersOfMonth(k){ return soldOrders().filter(b=>ymKey(b.date)===k); }
+function monthLabel(k){ const [y,m]=k.split('-'); return new Date(+y,+m-1,1).toLocaleDateString('de-DE',{month:'long',year:'numeric'}); }
+function aggregate(orders){
+  const prod={}, cust={}; let um=0, gw=0, paid=0, open=0;
+  orders.forEach(b=>{
+    const t=displayTotal(b), g=orderProfit(b); um+=t; gw+=g; if(b.paid) paid+=t; else open+=restAmount(b);
+    (b.items||[]).forEach(it=>{ const vk=it.preis!=null?it.preis:(S.preise[it.prod]||0), ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0), n=it.stueck||0; const o=prod[it.prod]||(prod[it.prod]={n:0,um:0,gw:0}); o.n+=n; o.um+=vk*n; o.gw+=(vk-ek)*n; });
+    const w=sdWho(b).replace(/^◆ /,''); const c=cust[w]||(cust[w]={um:0,gw:0,n:0}); c.um+=t; c.gw+=g; c.n++;
+  });
+  return {prod,cust,um,gw,paid,open,n:orders.length};
+}
+function renderGewinnVerteilung(){
+  if(['besteller','admin','service'].includes(currentRole())) return;
+  const el=ensureCard('d-gverteilung','#d-posten'); if(!el) return;
+  const since=new Date(Date.now()-90*864e5).toISOString().slice(0,10);
+  const a=aggregate(soldOrders().filter(b=>String(b.date||'')>=since));
+  const tp=Object.entries(a.prod).sort((x,y)=>y[1].gw-x[1].gw).slice(0,5), tc=Object.entries(a.cust).sort((x,y)=>y[1].gw-x[1].gw).slice(0,5);
+  if(!tp.length){ el.style.display='none'; return; }
+  el.style.display='';
+  const mx1=Math.max(1,...tp.map(x=>Math.abs(x[1].gw))), mx2=Math.max(1,...tc.map(x=>Math.abs(x[1].gw)));
+  const row=(l,v,mx)=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px"><div style="flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l}</div><div style="flex:1;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden"><div style="width:${Math.round(Math.abs(v)/mx*100)}%;height:100%;background:${v>=0?'var(--success)':'var(--rust)'}"></div></div><div style="font-variant-numeric:tabular-nums;color:var(--ink-soft)">${fmt(v)}</div></div>`;
+  el.innerHTML=`<div class="card-head"><h3>💰 Woran du verdienst</h3><span class="ps" style="margin:0">Gewinn · letzte 90 Tage</span></div><div style="padding:8px 18px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px"><div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Nach Produkt</div>${tp.map(([id,v])=>row((PROD_MAP[id]?.icon||'')+' '+escapeHtml(PROD_MAP[id]?.name||id),v.gw,mx1)).join('')}</div><div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Nach Kunde</div>${tc.map(([n,v])=>row(escapeHtml(n),v.gw,mx2)).join('')}</div></div>`;
+}
+function monatsbericht(){
+  if(typeof window.jspdf==='undefined'){ showToast('PDF-Modul konnte nicht geladen werden.','⚠'); return; }
+  const k=document.getElementById('mb-month')?.value; if(!k) return;
+  const orders=ordersOfMonth(k), a=aggregate(orders);
+  const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); const m=16, W=doc.internal.pageSize.getWidth();
+  doc.setFillColor(255,122,41); doc.roundedRect(m-.5,11.5,9,9,2.2,2.2,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255); doc.text('N',m+4,17.3,{align:'center'});
+  doc.setFontSize(15); doc.setTextColor(20,20,20); doc.text('NicoFlow · Monatsbericht',m+12,15.5);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,110,110); doc.text(monthLabel(k)+' · erstellt am '+fmtDate(today()),m+12,20.5);
+  const pdfFmt=v=>fmt(v).replace(/\u00a0/g,' ');
+  const kp=[['Umsatz',pdfFmt(a.um)],['Gewinn',pdfFmt(a.gw)],['Bestellungen',String(a.n)],['Bezahlt',pdfFmt(a.paid)],['Noch offen',pdfFmt(a.open)]];
+  const bw=(W-2*m-4*3)/5; kp.forEach(([l,v],i)=>{ const x=m+i*(bw+3); doc.setDrawColor(220); doc.roundedRect(x,28,bw,17,2,2); doc.setFontSize(7.5); doc.setTextColor(120); doc.text(l.toUpperCase(),x+3,33); doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(20); doc.text(v,x+3,41); doc.setFont('helvetica','normal'); });
+  let y=54;
+  const tbl=(title,head,body)=>{ if(!body.length) return; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20); doc.text(title,m,y); doc.autoTable({startY:y+2,head:[head],body,margin:{left:m,right:m},styles:{fontSize:8.5,cellPadding:2},headStyles:{fillColor:[255,122,41],textColor:255}}); y=doc.lastAutoTable.finalY+9; };
+  tbl('Produkte',['Produkt','Stück','Umsatz','Gewinn'],Object.entries(a.prod).sort((x,z)=>z[1].gw-x[1].gw).map(([id,v])=>[PROD_MAP[id]?.name||id,v.n,pdfFmt(v.um),pdfFmt(v.gw)]));
+  tbl('Kunden',['Kunde','Bestellungen','Umsatz','Gewinn'],Object.entries(a.cust).sort((x,z)=>z[1].um-x[1].um).map(([n,v])=>[n,v.n,pdfFmt(v.um),pdfFmt(v.gw)]));
+  tbl('Bestellungen',['Nr.','Datum','Kunde','Betrag','Status'],orders.sort((x,z)=>x.id-z.id).map(b=>['#'+b.id,fmtDate(b.date),sdWho(b).replace(/^◆ /,''),pdfFmt(displayTotal(b)),b.paid?'bezahlt':'offen']));
+  doc.save('nicoflow-monatsbericht-'+k+'.pdf'); showToast('Monatsbericht erstellt. ✓','📄');
+}
+function remindText(o){
+  const name=o.k?o.k.vorname:o.w;
+  return `Hallo ${name}, kurze Erinnerung: Es ist noch ein Betrag von ${fmt(o.sum)} offen (Bestellung${o.ids.length===1?'':'en'} ${o.ids.map(x=>'#'+x).join(', ')}). Danke dir! 🙏`;
+}
+function postenWhatsApp(i){ const o=(window._postenRows||[])[i]; if(!o) return; window.open('https://wa.me/?text='+encodeURIComponent(remindText(o)),'_blank','noopener'); }
+async function copyReorder(){
+  const l=(window._reorderRows||[]).filter(r=>r.need>0).map(r=>`${r.need}× ${r.p.name}`);
+  if(!l.length){ showToast('Nichts nachzubestellen.','✓'); return; }
+  showToast((await copyText('Bestellung:\n'+l.join('\n')))?'Nachbestell-Liste kopiert. ✓':'Kopieren nicht möglich.','🛒');
+}
+function backupReminder(){
+  if(['besteller','admin','service'].includes(currentRole())||!(S.bestellungen||[]).length) return;
+  let last=0; try{ last=+localStorage.getItem('nm_last_backup')||0; }catch(e){}
+  if(Date.now()-last>7*864e5) setTimeout(()=>showToast('Tipp: Mach wieder eine Datensicherung (Einstellungen → Export).','💾'),4000);
+}
 // ══ v22: AUSWERTUNG (Übersicht) & NACHBESTELL-VORSCHLAG (Lager) ══
 function soldOrders(){ return S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId)); }
 function ymKey(d){ return String(d||'').slice(0,7); }
@@ -7497,7 +7563,9 @@ function ensureCard(id,anchorSel,pos){
 }
 let auswMode='umsatz';
 function setAuswMode(m){ auswMode=m; renderAuswertung(); }
-function orderProfit(b){ let g=0; (b.items||[]).forEach(it=>{ const vk=it.preis!=null?it.preis:(S.preise[it.prod]||0), ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0); g+=(vk-ek)*(it.stueck||0); }); return g; }
+function orderEk(b){ let e=0; (b.items||[]).forEach(it=>{ const ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0); e+=ek*(it.stueck||0); }); return e; }
+// Gewinn = tatsächlicher Erlös (nach Rabatt) minus Einkauf zum Bestellzeitpunkt
+function orderProfit(b){ return displayTotal(b)-orderEk(b); }
 function copyText(t){
   if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t).then(()=>true,()=>false);
   const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} a.remove(); return Promise.resolve(ok);
@@ -7514,7 +7582,7 @@ function renderOffenePosten(){
   window._postenRows=rows;
   if(!rows.length){ el.style.display='none'; return; }
   el.style.display='';
-  el.innerHTML=`<div class="card-head"><h3>⏰ Offene Posten</h3><span class="ps" style="margin:0">Älteste zuerst</span></div><div style="padding:4px 18px 12px">`+rows.map((o,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${escapeHtml(o.w)}</b><div class="ps" style="margin:2px 0 0;${o.days>=14?'color:var(--rust)':''}">${o.ids.length} Bestellung${o.ids.length===1?'':'en'} · seit ${o.days} Tag${o.days===1?'':'en'}</div></div><div style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(o.sum)}</div><button class="btn btn-ghost btn-sm" onclick="postenRemind(${i})" title="Erinnerungstext kopieren">💬 Erinnern</button></div>`).join('')+'</div>';
+  el.innerHTML=`<div class="card-head"><h3>⏰ Offene Posten</h3><span class="ps" style="margin:0">Älteste zuerst</span></div><div style="padding:4px 18px 12px">`+rows.map((o,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${escapeHtml(o.w)}</b><div class="ps" style="margin:2px 0 0;${o.days>=14?'color:var(--rust)':''}">${o.ids.length} Bestellung${o.ids.length===1?'':'en'} · seit ${o.days} Tag${o.days===1?'':'en'}</div></div><div style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(o.sum)}</div><button class="btn btn-ghost btn-sm" onclick="postenRemind(${i})" title="Erinnerungstext kopieren">📋</button><button class="btn btn-ghost btn-sm" onclick="postenWhatsApp(${i})" title="Per WhatsApp senden">💬</button></div>`).join('')+'</div>';
 }
 async function postenRemind(i){
   const o=(window._postenRows||[])[i]; if(!o) return;
@@ -7535,7 +7603,7 @@ function renderAuswertung(){
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0"><div style="font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap">${m.v?fmt(m.v):'–'}</div><div style="width:100%;height:110px;display:flex;align-items:flex-end"><div style="width:100%;height:${Math.max(m.v?4:2,h)}%;background:${last?'var(--sage)':'color-mix(in srgb,var(--sage) 38%,var(--paper3))'};border-radius:6px 6px 2px 2px" title="${m.n} Bestellungen"></div></div><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600">${m.l}</div></div>`; }).join('');
   const cur=months[5].v, prev=months[4].v;
   const delta=prev>0?Math.round((cur-prev)/prev*100):null;
-  el.innerHTML=`<div class="card-head"><h3>📊 ${gw?'Gewinn':'Umsatz'}entwicklung</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">${delta===null?'':`${delta>=0?'+':''}${delta} % zum Vormonat`}</span><div class="tab-group"><button type="button" class="tab-btn${gw?'':' active'}" onclick="setAuswMode('umsatz')">Umsatz</button><button type="button" class="tab-btn${gw?' active':''}" onclick="setAuswMode('gewinn')">Gewinn</button></div></div></div>
+  el.innerHTML=`<div class="card-head"><h3>📊 ${gw?'Gewinn':'Umsatz'}entwicklung</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">${delta===null?'':`${delta>=0?'+':''}${delta} % zum Vormonat`}</span> <select id="mb-month" style="width:auto;font-size:12px;padding:5px 8px">${[...months].reverse().map(m=>`<option value="${m.k}">${monthLabel(m.k)}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" onclick="monatsbericht()">📄 Monatsbericht</button><div class="tab-group"><button type="button" class="tab-btn${gw?'':' active'}" onclick="setAuswMode('umsatz')">Umsatz</button><button type="button" class="tab-btn${gw?' active':''}" onclick="setAuswMode('gewinn')">Gewinn</button></div></div></div>
   <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">${gw?'Gewinn':'Umsatz'} der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
   </div>`;
 }
@@ -7554,11 +7622,11 @@ function renderNachbestellung(){
     const need=Math.max(0,Math.ceil(rate*DAYS+schw-menge));
     if(menge<=schw||reach<14) rows.push({p,menge,rate,reach,need});
   });
-  rows.sort((a,b)=>a.reach-b.reach);
-  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><span class="ps" style="margin:0">Basis: Verbrauch der letzten ${DAYS} Tage</span></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
+  rows.sort((a,b)=>a.reach-b.reach); window._reorderRows=rows;
+  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">Basis: ${DAYS} Tage</span><button class="btn btn-ghost btn-sm" onclick="copyReorder()">📋 Liste kopieren</button></div></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
 }
 function renderDashboard(){
-  try{ renderAuswertung(); renderOffenePosten(); }catch(e){ console.warn(e); }
+  try{ renderAuswertung(); renderOffenePosten(); renderGewinnVerteilung(); }catch(e){ console.warn(e); }
   // Abholstatistik: Ø Zeit zwischen Code-Vergabe und Bezahlung/Abholung.
   const pStats = computePickupStats();
   const pCard=document.getElementById('d-pickup-stat-card');
@@ -7683,11 +7751,7 @@ function renderDashboard(){
   let gewinn=0;
   S.bestellungen.forEach(b=>{
     if(b.fuerLieferant && b.userId===currentUserId) return;
-    (b.items||[]).forEach(it=>{
-      const verkaufStk = it.preis!=null ? it.preis : (S.preise[it.prod]||0);
-      const einkaufStk = it.ek!=null ? it.ek : (S.einkauf?.[it.prod]||0);
-      gewinn += (verkaufStk-einkaufStk) * (it.stueck||0);
-    });
+    gewinn += orderProfit(b);
   });
   const gEl=document.getElementById('d-gewinn');
   if(gEl){ gEl.textContent=fmt(gewinn); gEl.style.color = gewinn>=0 ? 'var(--success-deep)' : 'var(--rust)'; }
@@ -8784,7 +8848,7 @@ async function saveContactInfo(){
 }
 function exportData(){
   const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click(); try{ localStorage.setItem('nm_last_backup',String(Date.now())); }catch(e){}
   showToast('Export heruntergeladen. ↓');
 }
 function importData(e){
