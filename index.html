@@ -4246,7 +4246,7 @@ async function onLoggedIn(authUser, displayName){
   applyLiquidGlass(false);
   setLang(VS.lang||'de');
   applyRoleUI();
-  try{ startOrderRealtime(); updateNotifUI(); askNotifOnce(); }catch(e){}
+  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); }catch(e){}
   if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
@@ -5117,6 +5117,7 @@ function applyLiquidGlass(on){
 // ══════════════════════════════════════════════
 function renderLagerbestand(){
   renderLagerManuell();
+  try{ renderNachbestellung(); }catch(e){ console.warn(e); }
 }
 // ── Tatsächlicher Bestand (manuell) ─────────────────────────────────────────
 // Einfache Zähl-/Abgleich-Funktion: hat nichts mit Ein-/Verkaufspreisen oder Bestellungen zu tun.
@@ -7444,7 +7445,63 @@ function renderBestellungen(){
 // ══════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════
+// ══ v22: AUSWERTUNG (Übersicht) & NACHBESTELL-VORSCHLAG (Lager) ══
+function soldOrders(){ return S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId)); }
+function ymKey(d){ return String(d||'').slice(0,7); }
+function ensureCard(id,anchorSel,pos){
+  let el=document.getElementById(id);
+  if(!el){ const a=document.querySelector(anchorSel); if(!a) return null; el=document.createElement('div'); el.id=id; el.className='card'; a.insertAdjacentElement(pos||'beforebegin',el); }
+  return el;
+}
+function renderAuswertung(){
+  if(currentRole()==='besteller') return;
+  const el=ensureCard('d-auswertung','#d-stock-alert-card'); if(!el) return;
+  const sold=soldOrders();
+  const months=[]; const now=new Date();
+  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({k:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),l:d.toLocaleDateString('de-DE',{month:'short'}),v:0,n:0}); }
+  sold.forEach(b=>{ const m=months.find(x=>x.k===ymKey(b.date)); if(m){ m.v+=displayTotal(b); m.n++; } });
+  const max=Math.max(1,...months.map(m=>m.v));
+  const bars=months.map((m,i)=>{ const h=Math.round(m.v/max*100), last=i===months.length-1;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0"><div style="font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap">${m.v?fmt(m.v):'–'}</div><div style="width:100%;height:110px;display:flex;align-items:flex-end"><div style="width:100%;height:${Math.max(m.v?4:2,h)}%;background:${last?'var(--sage)':'color-mix(in srgb,var(--sage) 38%,var(--paper3))'};border-radius:6px 6px 2px 2px" title="${m.n} Bestellungen"></div></div><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600">${m.l}</div></div>`; }).join('');
+  const cur=months[5].v, prev=months[4].v;
+  const delta=prev>0?Math.round((cur-prev)/prev*100):null;
+  const since=new Date(Date.now()-90*864e5).toISOString().slice(0,10);
+  const prod={}, cust={};
+  sold.filter(b=>String(b.date||'')>=since).forEach(b=>{
+    (b.items||[]).forEach(it=>{ prod[it.prod]=(prod[it.prod]||0)+(Number(it.stueck)||0); });
+    const w=sdWho(b); cust[w]=(cust[w]||0)+displayTotal(b);
+  });
+  const top=(o,n)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n);
+  const tp=top(prod,5), tc=top(cust,5);
+  const mx1=Math.max(1,...tp.map(x=>x[1])), mx2=Math.max(1,...tc.map(x=>x[1]));
+  const row=(label,val,txt,mx)=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px"><div style="flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</div><div style="flex:1;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden"><div style="width:${Math.round(val/mx*100)}%;height:100%;background:var(--sage)"></div></div><div style="flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink-soft)">${txt}</div></div>`;
+  el.innerHTML=`<div class="card-head"><h3>📈 Auswertung</h3><span class="ps" style="margin:0">${delta===null?'':`Dieser Monat ${delta>=0?'+':''}${delta} % zum Vormonat`}</span></div>
+  <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">Umsatz der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;margin-top:22px">
+    <div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Top-Produkte · 90 Tage</div>${tp.length?tp.map(([id,v])=>row(`${PROD_MAP[id]?.icon||''} ${escapeHtml(PROD_MAP[id]?.name||id)}`,v,v+' Stk.',mx1)).join(''):'<div class="ps">Noch keine Verkäufe.</div>'}</div>
+    <div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Top-Kunden · 90 Tage</div>${tc.length?tc.map(([n,v])=>row(escapeHtml(n),v,fmt(v),mx2)).join(''):'<div class="ps">Noch keine Verkäufe.</div>'}</div>
+  </div></div>`;
+}
+function renderNachbestellung(){
+  if(typeof lagerManuellTableMissing!=='undefined' && lagerManuellTableMissing) return;
+  const el=ensureCard('lager-reorder','#lager-manuell-card'); if(!el) return;
+  const DAYS=30, since=new Date(Date.now()-DAYS*864e5).toISOString().slice(0,10);
+  const use={};
+  soldOrders().filter(b=>String(b.date||'')>=since).forEach(b=>(b.items||[]).forEach(it=>{ use[it.prod]=(use[it.prod]||0)+(Number(it.stueck)||0); }));
+  (S.eigenverbrauch||[]).filter(e=>String(e.erfasstAm||'')>=since).forEach(e=>{ use[e.produkt]=(use[e.produkt]||0)+(Number(e.menge)||0); });
+  const rows=[];
+  PRODUCTS.forEach(p=>{
+    const entry=S.lagerManuell[p.id]; if(!entry) return;
+    const rate=(use[p.id]||0)/DAYS, menge=entry.menge||0, schw=entry.schwelle!=null?entry.schwelle:5;
+    const reach=rate>0?menge/rate:Infinity;
+    const need=Math.max(0,Math.ceil(rate*DAYS+schw-menge));
+    if(menge<=schw||reach<14) rows.push({p,menge,rate,reach,need});
+  });
+  rows.sort((a,b)=>a.reach-b.reach);
+  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><span class="ps" style="margin:0">Basis: Verbrauch der letzten ${DAYS} Tage</span></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
+}
 function renderDashboard(){
+  try{ renderAuswertung(); }catch(e){ console.warn(e); }
   // Abholstatistik: Ø Zeit zwischen Code-Vergabe und Bezahlung/Abholung.
   const pStats = computePickupStats();
   const pCard=document.getElementById('d-pickup-stat-card');
@@ -9303,7 +9360,6 @@ function updateLockBadge(){
   const el=document.getElementById('tk-dot-einstellungen'); if(!el) return;
   const n=currentRole()==='admin'?lockedUsers().length:0;
   el.textContent=n>9?'9+':String(n); el.classList.toggle('show',n>0);
-  if(n>0&&!window._lockToast){ window._lockToast=1; showToast(`${n} Konto${n===1?'':'en'} gesperrt — bitte prüfen.`,'🔒'); }
 }
 const _rulOrig=renderUserList; renderUserList=function(){ _rulOrig.apply(this,arguments); try{ lockBanner(); updateLockBadge(); }catch(e){} };
 setInterval(async()=>{
@@ -9371,9 +9427,8 @@ function checkNewLocks(){
 }
 function updateNotifUI(){
   const adm=currentRole()==='admin';
-  const unseen=nfLog().filter(x=>!x.seen).length;
-  const n=(adm?lockedUsers().length:0)+unseen;
-  ['bell-btn','bell-btn-m'].forEach(id=>{ const x=document.getElementById(id); if(x) x.style.display=''; });
+  const n=adm?lockedUsers().length:0;
+  ['bell-btn','bell-btn-m'].forEach(id=>{ const x=document.getElementById(id); if(x) x.style.display=adm?'':'none'; });
   ['bell-n','bell-n-m'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=n>9?'9+':(n||''); e.classList.toggle('show',n>0); } });
   if(document.getElementById('modal-notif')?.classList.contains('show')) renderNotifCenter();
 }
@@ -9387,7 +9442,7 @@ function updateLockBadge(){
 }
 function renderNotifCenter(){
   const l=currentRole()==='admin'?lockedUsers():[];
-  const hist=nfLog().map(x=>`<div class="lock-row" style="align-items:flex-start;padding:10px 0"><div><b>${escapeHtml(x.title.replace('NicoFlow · ',''))}</b><div class="ps" style="margin:2px 0 0">${escapeHtml(x.body)} · ${fmtDateTime(new Date(x.t).toISOString())}</div></div></div>`).join('');
+  const hist=[].map(x=>`<div class="lock-row" style="align-items:flex-start;padding:10px 0"><div><b>${escapeHtml(x.title.replace('NicoFlow · ',''))}</b><div class="ps" style="margin:2px 0 0">${escapeHtml(x.body)} · ${fmtDateTime(new Date(x.t).toISOString())}</div></div></div>`).join('');
   document.getElementById('notif-list').innerHTML=(l.length||hist)?(l.map(u=>`<div class="lock-row" style="align-items:flex-start;padding:12px 0"><div><b>🔒 Konto „${escapeHtml(u.username)}“ gesperrt</b><div class="ps" style="margin:2px 0 0">Zu viele fehlgeschlagene Anmeldeversuche${u.gesperrt_am?' · '+fmtDateTime(u.gesperrt_am):''}. Ein Administrator muss das Konto freischalten.</div></div><button class="btn btn-primary btn-sm" onclick="toggleLockUser('${u.id}',false)">Entsperren</button></div>`).join('')+hist):'<div class="ec" style="padding:24px 0"><div class="ec-t">Keine neuen Benachrichtigungen</div><div class="ec-s">Neue Bestellungen, Ankünfte und Zahlungen erscheinen hier sofort.</div></div>';
   const perm=document.getElementById('notif-perm'); if(!perm) return;
   if(!('Notification' in window)) perm.innerHTML='<div class="ps">Dieser Browser unterstützt keine Systembenachrichtigungen. Meldungen erscheinen in der App.</div>';
