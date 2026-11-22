@@ -4882,8 +4882,20 @@ async function changeOwnPassword(){
   if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
   const { data: _su } = await sb.auth.getUser();
-  const { error: vErr } = await sb.auth.signInWithPassword({ email: (_su&&_su.user&&_su.user.email) || toEmail(currentUser), password: old });
-  if(vErr){ setFieldError('pwc-old','Aktuelles Passwort ist falsch.'); return; }
+  const mails=[...new Set([_su&&_su.user&&_su.user.email, toEmail(currentUser), M.profile&&M.profile.username?toEmail(M.profile.username):null].filter(Boolean))];
+  const pws=[...new Set([old, old.trim()])];
+  let vErr=null, ok=false;
+  for(const em of mails){ for(const pw of pws){
+    const r=await sb.auth.signInWithPassword({ email:em, password:pw });
+    if(!r.error){ ok=true; break; }
+    vErr=r.error;
+    if(!/invalid login|invalid credentials/i.test(r.error.message||'')) break;
+  } if(ok) break; }
+  if(!ok){
+    const m=(vErr&&vErr.message)||'';
+    setFieldError('pwc-old', /invalid login|invalid credentials/i.test(m) ? 'Aktuelles Passwort ist falsch.' : ('Prüfung fehlgeschlagen: '+(m||'unbekannter Fehler')+' — bitte kurz warten und erneut versuchen.'));
+    return;
+  }
   const err=await applyNewPassword(n1);
   if(err){ setFieldError('pwc-new', pwErrText(err)); return; }
   ['pwc-old','pwc-new','pwc-new2'].forEach(id=>document.getElementById(id).value='');
