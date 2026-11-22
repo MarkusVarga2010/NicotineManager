@@ -2042,6 +2042,14 @@ tbody tr{transition:background .12s}
 tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
 .modal{animation:mdIn .22s cubic-bezier(.22,.9,.3,1)}
 @keyframes mdIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+
+/* ══ v24 · Atmosphäre ══ */
+#app-screen::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(60% 40% at 85% -10%,color-mix(in srgb,var(--sage) 9%,transparent),transparent 70%),radial-gradient(50% 35% at 0% 100%,color-mix(in srgb,var(--accent2) 6%,transparent),transparent 70%)}
+.bento-dash .stat-cell .sc-v{font-size:30px}
+.ph-eyebrow{color:var(--sage-deep)!important;font-weight:600}
+.pt{letter-spacing:-.025em}
+.card-head h3{display:flex;align-items:center;gap:8px}
+.tab-group .tab-btn{transition:background .15s,color .15s}
 </style>
 </head>
 <body>
@@ -7487,20 +7495,48 @@ function ensureCard(id,anchorSel,pos){
   if(!el){ const a=document.querySelector(anchorSel); if(!a) return null; el=document.createElement('div'); el.id=id; el.className='card'; a.insertAdjacentElement(pos||'beforebegin',el); }
   return el;
 }
+let auswMode='umsatz';
+function setAuswMode(m){ auswMode=m; renderAuswertung(); }
+function orderProfit(b){ let g=0; (b.items||[]).forEach(it=>{ const vk=it.preis!=null?it.preis:(S.preise[it.prod]||0), ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0); g+=(vk-ek)*(it.stueck||0); }); return g; }
+function copyText(t){
+  if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t).then(()=>true,()=>false);
+  const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} a.remove(); return Promise.resolve(ok);
+}
+function renderOffenePosten(){
+  if(currentRole()==='besteller'||currentRole()==='admin'||currentRole()==='service') return;
+  const el=ensureCard('d-posten','#d-auswertung'); if(!el) return;
+  const g={};
+  S.bestellungen.filter(b=>!b.paid && !(b.fuerLieferant && b.userId===currentUserId)).forEach(b=>{
+    const w=sdWho(b).replace(/^◆ /,''); const o=g[w]||(g[w]={w,sum:0,ids:[],oldest:b.date,k:S.kunden.find(x=>x.id===b.kId)});
+    o.sum+=restAmount(b); o.ids.push(b.id); if(String(b.date)<String(o.oldest)) o.oldest=b.date;
+  });
+  const rows=Object.values(g).filter(o=>o.sum>0).map(o=>({...o,days:Math.max(0,Math.floor((Date.now()-new Date(o.oldest).getTime())/864e5))})).sort((a,b)=>b.days-a.days||b.sum-a.sum).slice(0,8);
+  window._postenRows=rows;
+  if(!rows.length){ el.style.display='none'; return; }
+  el.style.display='';
+  el.innerHTML=`<div class="card-head"><h3>⏰ Offene Posten</h3><span class="ps" style="margin:0">Älteste zuerst</span></div><div style="padding:4px 18px 12px">`+rows.map((o,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${escapeHtml(o.w)}</b><div class="ps" style="margin:2px 0 0;${o.days>=14?'color:var(--rust)':''}">${o.ids.length} Bestellung${o.ids.length===1?'':'en'} · seit ${o.days} Tag${o.days===1?'':'en'}</div></div><div style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(o.sum)}</div><button class="btn btn-ghost btn-sm" onclick="postenRemind(${i})" title="Erinnerungstext kopieren">💬 Erinnern</button></div>`).join('')+'</div>';
+}
+async function postenRemind(i){
+  const o=(window._postenRows||[])[i]; if(!o) return;
+  const name=o.k?o.k.vorname:o.w;
+  const t=`Hallo ${name}, kurze Erinnerung: Es ist noch ein Betrag von ${fmt(o.sum)} offen (Bestellung${o.ids.length===1?'':'en'} ${o.ids.map(x=>'#'+x).join(', ')}). Danke dir! 🙏`;
+  showToast((await copyText(t))?'Erinnerungstext kopiert — jetzt einfach einfügen. ✓':'Kopieren nicht möglich.', '💬');
+}
 function renderAuswertung(){
   if(currentRole()==='besteller') return;
   const el=ensureCard('d-auswertung','#d-stock-alert-card'); if(!el) return;
   const sold=soldOrders();
   const months=[]; const now=new Date();
   for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({k:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),l:d.toLocaleDateString('de-DE',{month:'short'}),v:0,n:0}); }
-  sold.forEach(b=>{ const m=months.find(x=>x.k===ymKey(b.date)); if(m){ m.v+=displayTotal(b); m.n++; } });
-  const max=Math.max(1,...months.map(m=>m.v));
-  const bars=months.map((m,i)=>{ const h=Math.round(m.v/max*100), last=i===months.length-1;
+  const gw=auswMode==='gewinn';
+  sold.forEach(b=>{ const m=months.find(x=>x.k===ymKey(b.date)); if(m){ m.v+=gw?orderProfit(b):displayTotal(b); m.n++; } });
+  const max=Math.max(1,...months.map(m=>Math.abs(m.v)));
+  const bars=months.map((m,i)=>{ const h=Math.round(Math.abs(m.v)/max*100), last=i===months.length-1;
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0"><div style="font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap">${m.v?fmt(m.v):'–'}</div><div style="width:100%;height:110px;display:flex;align-items:flex-end"><div style="width:100%;height:${Math.max(m.v?4:2,h)}%;background:${last?'var(--sage)':'color-mix(in srgb,var(--sage) 38%,var(--paper3))'};border-radius:6px 6px 2px 2px" title="${m.n} Bestellungen"></div></div><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600">${m.l}</div></div>`; }).join('');
   const cur=months[5].v, prev=months[4].v;
   const delta=prev>0?Math.round((cur-prev)/prev*100):null;
-  el.innerHTML=`<div class="card-head"><h3>📊 Umsatzentwicklung</h3><span class="ps" style="margin:0">${delta===null?'':`Dieser Monat ${delta>=0?'+':''}${delta} % zum Vormonat`}</span></div>
-  <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">Umsatz der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
+  el.innerHTML=`<div class="card-head"><h3>📊 ${gw?'Gewinn':'Umsatz'}entwicklung</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">${delta===null?'':`${delta>=0?'+':''}${delta} % zum Vormonat`}</span><div class="tab-group"><button type="button" class="tab-btn${gw?'':' active'}" onclick="setAuswMode('umsatz')">Umsatz</button><button type="button" class="tab-btn${gw?' active':''}" onclick="setAuswMode('gewinn')">Gewinn</button></div></div></div>
+  <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">${gw?'Gewinn':'Umsatz'} der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
   </div>`;
 }
 function renderNachbestellung(){
@@ -7522,7 +7558,7 @@ function renderNachbestellung(){
   el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><span class="ps" style="margin:0">Basis: Verbrauch der letzten ${DAYS} Tage</span></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
 }
 function renderDashboard(){
-  try{ renderAuswertung(); }catch(e){ console.warn(e); }
+  try{ renderAuswertung(); renderOffenePosten(); }catch(e){ console.warn(e); }
   // Abholstatistik: Ø Zeit zwischen Code-Vergabe und Bezahlung/Abholung.
   const pStats = computePickupStats();
   const pCard=document.getElementById('d-pickup-stat-card');
