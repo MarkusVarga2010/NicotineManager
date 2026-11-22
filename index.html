@@ -4131,7 +4131,8 @@ function allowedPages(role){
   if(role==='besteller') return ['besteller','einstellungen'];
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  return ['dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
+  const base=['dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
+  return role==='special' ? [...base,'besteller'] : base; // Lieferanten dürfen zusätzlich bei anderen Lieferanten bestellen
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -4516,7 +4517,7 @@ let bsCart=[];
 let bsSelected=new Set();
 let bsFresh=null;
 function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
-function bsSuppliers(){ return M.users.filter(u=>u.role==='special' && !u.gesperrt).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
+function bsSuppliers(){ return M.users.filter(u=>u.role==='special' && !u.gesperrt && u.id!==currentUserId).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
 function bsCartQty(){ return bsCart.reduce((n,l)=>n+l.stueck,0); }
 async function reloadBesteller(){ await loadAllData(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 function setBsTab(tab){
@@ -4527,7 +4528,7 @@ function setBsTab(tab){
 }
 function renderBesteller(){
   const sub=document.getElementById('bs-sub');
-  if(sub) sub.textContent=`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`;
+  if(sub) sub.textContent=(currentRole()==='special'?`Bestelle bei anderen Lieferanten — an bis zu ${bsMax()} Lieferanten gleichzeitig.`:`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`);
   renderBsShop(); renderBsOrders(); updateBsCartBadge();
 }
 function updateBsCartBadge(){
@@ -4635,7 +4636,7 @@ async function submitBsBestellung(){
   const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
   const items=bsCart.map(l=>({prod:l.prod, stueck:l.stueck, wunsch:l.wunsch}));
   const notiz=document.getElementById('bs-notiz').value.trim()||null;
-  const { error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
+  const { error } = await sb.rpc(currentRole()==='special'?'lieferant_bestellen':'besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
   btn.disabled=false; btn.style.opacity=1;
   if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
   const n=bsSelected.size;
@@ -4770,7 +4771,7 @@ function renderBsTrack(){
 async function reloadBsTrack(){ await loadAllData(); renderBsTrack(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 // Automatische Aktualisierung, solange ein Besteller angemeldet und die Seite sichtbar ist.
 setInterval(async()=>{
-  if(document.hidden || currentRole()!=='besteller' || !currentUserId) return;
+  if(document.hidden || (currentRole()!=='besteller'&&!(currentRole()==='special'&&document.getElementById('page-besteller')?.classList.contains('active'))) || !currentUserId) return;
   await loadAllData(); renderBesteller();
   if(document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack();
 }, 45000);
@@ -4980,6 +4981,8 @@ function applyRoleUI(){
   // Das gesamte Menü läuft jetzt ausschließlich über den Hamburger/die Seitenleiste
   // (keine separate mobile Tableiste mehr) — Sichtbarkeit einzelner Punkte hängt nur
   // noch von den Rollenrechten ab.
+  const bTick=document.getElementById('nav-besteller-tick');
+  if(bTick&&bTick.lastElementChild) bTick.lastElementChild.textContent = role==='special' ? 'Bei Lieferanten bestellen' : 'Meine Bestellungen';
   const lTick=document.getElementById('nav-lieferant-tick');
   if(lTick) lTick.style.display = allowed.includes('lieferant') ? 'flex' : 'none';
   const isSpecial = role==='special';
