@@ -1794,265 +1794,6 @@ td,th{white-space:normal}
 .bell-n.show{display:inline-flex}
 .hamburger{position:relative}
 #bell-btn-m .bell-n{position:absolute;top:-5px;right:-5px;margin:0}
-
-/* ══════════════════════════════════════════════════════════════
-   v22 · ÜBERARBEITETES DESIGN — angelehnt an das bisherige Orange
-   Bisherige Schriften & Orange-Akzent, 1px-Linien statt Glas/Glow.
-   ══════════════════════════════════════════════════════════════ */
-:root{
-  --paper:#0C0D10; --paper2:#14171C; --paper3:#1B1F26;
-  --line:#242932; --line2:#303744;
-  --ink:#ECEEF2; --ink-soft:#A0A6B2; --ink-faint:#6E7585;
-  --sage:#FF7A29; --sage-deep:#FFA65C; --sage-bg:#2B1B0D;
-  --accent2:#29D9B3; --accent3:#4C8DFF; --accent4:#F5527A;
-  --rust:#F87171; --rust-bg:#2A1517;
-  --gold:#E0B25A; --gold-bg:#2A2312;
-  --success:#34D399; --success-deep:#6EE7B7; --success-bg:#0F2A21;
-  --amber:#FBBF24; --amber-deep:#FCD34D; --amber-bg:#2D2409;
-  --lieferant:#F472B6; --lieferant-deep:#F9A8D4; --lieferant-bg:#2D1522;
-  --kunde:#60A5FA; --kunde-deep:#93C5FD; --kunde-bg:#11213A;
-  --r:10px; --r-lg:14px; --on-accent:#111;
-  --foil:linear-gradient(90deg,var(--sage),var(--accent2));
-  --grad-brand:linear-gradient(180deg,var(--accent2),var(--sage));
-  --edge:var(--line);
-  --shadow-card:none;
-}
-html[data-mode="light"]{
-  --paper:#FAF8F3; --paper2:#FFFFFF; --paper3:#F4F1EA;
-  --line:#E6E0D2; --line2:#D6CDB8;
-  --ink:#111318; --ink-soft:#4A5160; --ink-faint:#8890A0;
-  --sage:#D9600E; --sage-deep:#B94D08; --sage-bg:#FFE9D6;
-  --accent2:#0C9A7C; --accent3:#2563EB; --accent4:#DB2777; --on-accent:#fff;
-  --rust:#DC2626; --rust-bg:#FDEAEA;
-  --gold:#A87413; --gold-bg:#FBF0D6;
-  --success:#059669; --success-deep:#047857; --success-bg:#DDF7EB;
-  --amber:#B45309; --amber-deep:#92400E; --amber-bg:#FEF1CC;
-  --lieferant:#DB2777; --lieferant-deep:#A21650; --lieferant-bg:#FCE7F1;
-  --kunde:#2563EB; --kunde-deep:#1D4ED8; --kunde-bg:#E3EDFE;
-  --shadow-card:0 1px 2px rgba(16,24,40,.05);
-}
-html,body{font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif}
-body{background:var(--paper);background-image:none;font-size:14px;font-feature-settings:"cv11" 0,"ss01" 0;letter-spacing:-.003em;-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:650;letter-spacing:-.015em}
-.mono,.sc-v,td,.otv{font-variant-numeric:tabular-nums}
-::-webkit-scrollbar-thumb{background:var(--line2)}
-::selection{background:color-mix(in srgb,var(--sage) 28%,transparent);color:var(--ink)}
-.tb-name span,.login-brand h1 span{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--sage)!important}
-.card::after,.kcard::after,.pc::after,.set-card::after,.dose-card::after,.modal::after,.login-card::after,.stat-cell::after,#toast::after,#update-banner::after,.tab-group::after,.vshop-card::after,.lager-pc::after,.es-quickadd::after,.danger-zone::after,.service-banner::after{display:none}
-
-/* ── Anmeldung ── */
-#login-screen,html[data-mode="light"] #login-screen{background-color:var(--paper)!important;background-image:radial-gradient(70% 45% at 50% -5%,color-mix(in srgb,var(--sage) 20%,transparent),transparent 70%)!important;animation:none}
-.login-wrap{max-width:380px;animation:none}
-.login-label,.login-divider{display:none}
-.login-logo{width:56px;height:56px;margin:0 auto 18px;animation:none;filter:none}
-.login-brand{margin-bottom:22px}
-.login-brand h1{font-size:28px;font-weight:700;letter-spacing:-.03em}
-.login-brand .sub{font-size:13px;letter-spacing:0;color:var(--ink-soft)}
-.login-card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 24px 50px -28px rgba(0,0,0,.55)}
-.login-card::before{display:none}
-.login-hint{font-family:'Manrope',sans-serif}
-.primary-btn,html[data-mode="light"] .primary-btn{background:var(--sage)!important;color:var(--on-accent)!important;border-radius:8px;box-shadow:none!important;padding:11px 16px;font-size:14px;font-weight:600;letter-spacing:0}
-.primary-btn::before{display:none}
-.primary-btn:hover{filter:brightness(1.08);transform:none}
-.login-err{border-radius:8px;font-family:'Manrope',sans-serif;font-size:12.5px}
-
-/* ── Seitenleiste ── */
-.sidebar{width:252px;background:var(--paper);border-right:1px solid var(--line)}
-.sidebar::after{display:none}
-.sb-brand{padding:18px 16px 12px;border-bottom:none;gap:10px}
-.sb-brand::before{display:none}
-.tb-mark{width:34px;height:34px;filter:none}
-.tb-name{font-size:16px;font-weight:700;letter-spacing:-.02em}
-.sb-brand .sub{font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--ink-faint)}
-.scalebar{padding:4px 10px 10px;gap:1px}
-.nav-group{padding:16px 10px 6px;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--ink-faint)}
-.scale-tick{padding:8px 10px;gap:10px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--ink-soft);background:transparent;box-shadow:none}
-.scale-tick:hover:not(.active){background:var(--paper3);color:var(--ink)}
-.scale-tick.active{background:color-mix(in srgb,var(--sage) 13%,transparent);color:var(--sage-deep);box-shadow:none;font-weight:600}
-.scale-tick .tk-ic{width:20px;height:20px;border-radius:0;background:none!important;color:inherit;opacity:.9}
-.scale-tick.active .tk-ic{background:none!important;color:var(--sage-deep)}
-.scale-tick .tk-ic .svg-ic{width:17px;height:17px}
-.sb-footer{padding:12px;border-top:1px solid var(--line)}
-.tb-av{background:var(--sage);color:var(--on-accent);box-shadow:none;border-radius:50%;font-family:'Manrope',sans-serif}
-.tb-user-role{font-family:'Manrope',sans-serif;letter-spacing:.02em}
-.logout-btn{border-radius:8px;font-family:'Manrope',sans-serif;font-size:12.5px}
-.mobile-topbar{background:var(--paper);border-bottom:1px solid var(--line)}
-.hamburger{border-radius:8px}
-
-/* ── Seitenkopf ── */
-.main{max-width:1240px;padding:32px 40px 80px}
-.page.active{animation:fade .22s ease both}
-.page.active>.card,.page.active>.dose-card,.page.active>.stat-strip>*,.page.active>.pg>*,.page.active>.kg>*,.page.active>.sg>*,.page.active>.set-card{animation:none}
-.ph{margin-bottom:24px;padding-bottom:0;border-bottom:none}
-.ph::before,.ph::after{display:none}
-.ph-eyebrow{padding:0;background:none;color:var(--ink-faint);font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0;text-transform:none;margin-bottom:4px}
-.pt{background:none;-webkit-text-fill-color:currentColor;color:var(--ink);font-size:26px;font-weight:700;letter-spacing:-.03em}
-.ps{color:var(--ink-soft);font-size:13.5px}
-
-/* ── Buttons ── */
-.btn{border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;letter-spacing:0;box-shadow:none}
-.btn:hover{transform:none}
-.btn-sm{padding:6px 11px;font-size:12.5px}
-.btn-ghost{background:var(--paper2);border:1px solid var(--line2);color:var(--ink);box-shadow:var(--shadow-card)}
-.btn-ghost:hover{background:var(--paper3);border-color:var(--line2);color:var(--ink);box-shadow:none}
-.btn-primary,html[data-mode="light"] .btn-primary{background:var(--sage);color:var(--on-accent);border:0;font-weight:600;box-shadow:none;border-radius:8px;padding:9px 16px}
-.btn-sm.btn-primary{padding:6px 12px}
-.btn-primary:hover{filter:brightness(1.1);transform:none;box-shadow:none}
-.btn-danger{background:transparent;border:1px solid color-mix(in srgb,var(--rust) 45%,transparent);color:var(--rust);border-radius:8px}
-.btn-danger:hover{background:var(--rust);color:#fff}
-.status-btn{border-radius:6px;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:0;padding:5px 10px}
-.ic-btn{border-radius:8px}
-.ic-btn:hover{transform:none}
-
-/* ── Badges ── */
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:0;border-radius:6px;font-family:'Manrope',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none}
-.badge::before{display:none}
-.tab-btn .badge{border-radius:99px}
-
-/* ── Karten & Flächen ── */
-.card,.set-card,.dose-card,.pc,.kcard,.shop-card,.vshop-card,.lager-pc,.bs-group,.sd-card,.stat-strip,.danger-zone,.service-banner,.login-card{box-shadow:var(--shadow-card)}
-.card,.bento-dash .stat-cell,.bento-dash [data-bento],.modal{border:1px solid var(--line);background:var(--paper2)}
-.card,.set-card,.dose-card,.pc,.kcard,.shop-card,.vshop-card,.lager-pc,.sd-card,.bs-group{border-radius:12px}
-.card,.set-card,.dose-card,.pc,.lager-pc,.shop-card,.vshop-card,.sd-card{background:var(--paper2);border:1px solid var(--line)}
-.kcard{background:var(--paper2);border:1px solid var(--line)}
-.card:hover,.set-card:hover,.dose-card:hover,.pc:hover,.lager-pc:hover,.vshop-card:hover,.shop-card:hover,.kcard:hover,.sd-card:hover,.bento-dash .stat-cell:hover{transform:none;box-shadow:var(--shadow-card)}
-.card:hover,.set-card:hover,.dose-card:hover,.pc:hover,.lager-pc:hover,.vshop-card:hover{border-color:var(--line2)}
-.kcard:hover,.sd-card:hover,.shop-card:hover{border-color:color-mix(in srgb,var(--sage) 55%,var(--line))}
-.card{margin-bottom:16px}
-.card-head{padding:14px 18px;background:transparent;border-bottom:1px solid var(--line)}
-.card-head::before{display:none}
-.card-head h3{font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.01em}
-.sch{padding:16px 18px}
-.sch-ic{border-radius:8px;background:var(--sage-bg);color:var(--sage-deep)}
-.scb{padding:16px 18px}
-.dose-card{padding:20px}
-.dose-label{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0;text-transform:none}
-.dose-vals{font-family:'Manrope',sans-serif;font-size:12.5px}
-.dose-track{height:10px;box-shadow:none;border:0;background:var(--paper3)}
-.dose-fill-seg{box-shadow:none}
-.dose-ticks span{font-family:'Manrope',sans-serif}
-.ec-ic{background:var(--paper3);color:var(--ink-faint);border-radius:12px}
-.pc-eyebrow{font-family:'Manrope',sans-serif;font-size:11.5px;letter-spacing:0;text-transform:none}
-.pc-val{color:var(--ink)}
-
-/* ── Kennzahlen ── */
-.stat-strip.bento-dash,.stat-strip.bento-dash.has-lieferant{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:16px}
-.bento-dash .stat-cell,.bento-dash [data-bento]{border-radius:12px;padding:18px;background:var(--paper2);box-shadow:var(--shadow-card)}
-.bento-dash [data-bento="debt"],.bento-dash [data-bento="profit"],.bento-dash [data-bento="lief"]{background:var(--paper2)}
-.bento-dash .stat-cell::before{display:none}
-.bento-dash .stat-cell:hover{border-color:var(--line2)}
-.bento-dash .stat-cell .bento-ic-bg{top:16px;right:16px;width:34px;height:34px;padding:8px;border-radius:9px;background:color-mix(in srgb,currentColor 12%,transparent);stroke-width:1.9}
-.stat-cell .sc-lab{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink-soft);margin-bottom:10px}
-.stat-cell .sc-v,.bento-dash .stat-cell .sc-v,.bento-dash [data-bento="debt"] .sc-v,.bento-dash [data-bento="profit"] .sc-v{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.035em}
-.stat-cell .sc-sub{font-size:12px;color:var(--ink-faint)}
-.stat-strip:not(.bento-dash){border-radius:12px;border:1px solid var(--line);box-shadow:none;overflow:hidden}
-.stat-strip:not(.bento-dash) .stat-cell{background:var(--paper2)}
-.stat-cell::before{display:none}
-.rev-bar-fill{background:var(--grad-brand)}
-.rev-bar-track,.stat-bar-track{border:0;background:var(--paper3)}
-.rev-bar-val,.rev-bar-label{font-family:'Manrope',sans-serif}
-.stat-bar-fill{background:var(--sage)}
-
-/* ── Tabellen ── */
-th{padding:10px 18px;background:transparent;color:var(--ink-faint);font-family:'Manrope',sans-serif;font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;border-bottom:1px solid var(--line)}
-td{padding:13px 18px;font-size:13.5px;border-bottom:1px solid var(--line)}
-tbody tr,tbody tr:hover{box-shadow:none}
-tbody tr:hover{background:color-mix(in srgb,var(--paper3) 70%,transparent)}
-
-/* ── Formulare ── */
-input,select,textarea{background:var(--paper);border:1px solid var(--line2);border-radius:8px;padding:9px 12px;font-size:13.5px}
-input:focus,select:focus,textarea:focus{background:var(--paper);border-color:var(--sage);box-shadow:0 0 0 3px color-mix(in srgb,var(--sage) 22%,transparent)}
-label.fl{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink-soft);margin-bottom:6px}
-.toggle input:checked+.tt{background:var(--sage)}
-.field-err{font-size:12px}
-
-/* ── Tabs (segmentiert) ── */
-.tab-group{background:var(--paper3);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
-.tab-btn{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--ink-soft)}
-.tab-btn:hover:not(.active){transform:none;color:var(--ink)}
-.tab-btn.active,.tab-btn.active.tab-bestellt,.tab-btn.active.tab-bezahlt,.tab-btn.active.tab-kunde,.tab-btn.active.tab-lieferant{background:var(--paper2);color:var(--ink);box-shadow:0 0 0 1px var(--line2),0 1px 2px rgba(0,0,0,.18)}
-
-/* ── Dialoge ── */
-.modal-bg.show{background:rgba(6,7,10,.6)}
-.modal{border-radius:16px;box-shadow:0 30px 70px -24px rgba(0,0,0,.65)}
-.modal-head{padding:18px 22px;border-bottom:1px solid var(--line)}
-.modal-head::after{display:none}
-.modal-head h3{font-size:16px;font-weight:650}
-.modal-body{padding:22px}
-.modal-foot{padding:14px 22px;border-top:1px solid var(--line)}
-.modal-close{border-radius:8px}
-#toast{background:var(--ink);color:var(--paper);border:0;border-radius:10px;font-family:'Manrope',sans-serif;box-shadow:0 14px 34px -12px rgba(0,0,0,.55)}
-#toast .btn-ghost{background:transparent;color:inherit;border-color:color-mix(in srgb,currentColor 35%,transparent)}
-#update-banner{border-radius:12px;border:1px solid var(--line2);background:var(--paper2);box-shadow:0 16px 40px -16px rgba(0,0,0,.55)}
-#update-banner .ub-ic{background:var(--sage);box-shadow:none;border-radius:10px}
-.tour-pop,.pal-box{border-radius:14px}
-.tour-eyebrow{font-family:'Manrope',sans-serif;letter-spacing:.04em}
-
-/* ── Sendungen, Tracking, Sonstiges ── */
-.trk2-hero{background:var(--paper2);border:1px solid var(--line2);border-radius:12px}
-.trk2-hero.done{background:var(--success-bg);border-color:color-mix(in srgb,var(--success) 40%,var(--line))}
-.trk2-ic{background:var(--paper3)}
-.sd-bar span{background:var(--sage)}
-.sd-dir{font-family:'Manrope',sans-serif;letter-spacing:.03em;border-radius:6px}
-.sd-id{font-family:'Manrope',sans-serif}
-.es-quickadd{background:var(--paper3)}
-.abholcode-box,.od-tl-dot{border-radius:10px}
-.hb h1{font-family:'Manrope',sans-serif;color:var(--ink)}
-.role-card,.bs-line,.bs-pick,.oi,.batch-item,.trk-form,.cs-who{border-radius:10px}
-.chip{border-radius:8px;font-family:'Manrope',sans-serif}
-.chip.on{background:var(--sage);border-color:var(--sage);color:var(--on-accent)}
-.kk-hello b{color:var(--ink)}
-
-@media(max-width:900px){.main{padding:24px 16px 56px}}
-@media(max-width:600px){.main{padding:20px 14px 48px}.pt{font-size:22px}}
-
-/* ── PIN-Nummernfeld ── */
-#pin-pad{display:none;text-align:center}
-#login-screen.pin-mode #pin-pad{display:block}
-#login-screen.pin-mode .login-card,#login-screen.pin-mode .login-divider,#login-screen.pin-mode .login-label,#login-screen.pin-mode #auth-switch-btn,#login-screen.pin-mode .login-hint,#login-screen.pin-mode .lang-switch{display:none!important}
-.pin-user{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:16px}
-.pin-dots{display:flex;justify-content:center;gap:12px;height:18px;margin-bottom:8px}
-.pin-dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line2);transition:.12s}
-.pin-dots i.on{background:var(--sage);border-color:var(--sage);transform:scale(1.05)}
-.pin-err{min-height:20px;font-size:12.5px;color:var(--rust);margin-bottom:10px}
-.pin-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:290px;margin:0 auto 16px}
-.pin-keys button{height:64px;border-radius:50%;width:64px;justify-self:center;border:1px solid var(--line);background:var(--paper2);color:var(--ink);font:600 24px 'Space Grotesk','Manrope',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.pin-keys button:active{background:var(--sage-bg);border-color:var(--sage)}
-.pin-keys button.go{background:var(--sage);border-color:var(--sage);color:var(--on-accent)}
-.pin-keys button.sm{font-size:20px;color:var(--ink-soft)}
-.pin-shake{animation:pinShake .35s}
-@keyframes pinShake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
-
-/* ══ v23 · VEREDELUNG: Bewegung, Tiefe, Fokus ══ */
-.page.active{animation:pgIn .28s cubic-bezier(.22,.9,.3,1)}
-@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.page.active{animation:none}}
-.bento-dash .stat-cell{position:relative;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}
-.bento-dash .stat-cell::before{content:"";position:absolute;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,var(--sage),var(--accent2));opacity:.85}
-.bento-dash .stat-cell:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--sage) 50%,var(--line));box-shadow:0 14px 30px -18px color-mix(in srgb,var(--sage) 60%,#000)}
-.card{transition:border-color .18s,box-shadow .18s}
-html[data-mode="light"] .card{box-shadow:0 1px 2px rgba(60,40,10,.05),0 8px 24px -16px rgba(60,40,10,.18)}
-.scale-tick{position:relative}
-.scale-tick.active::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--sage)}
-.btn-primary,.primary-btn{transition:transform .12s,filter .15s,box-shadow .15s}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px -10px var(--sage)}
-.btn-primary:active,.primary-btn:active{transform:translateY(0) scale(.985)}
-:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
-tbody tr{transition:background .12s}
-tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
-.modal{animation:mdIn .22s cubic-bezier(.22,.9,.3,1)}
-@keyframes mdIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
-
-/* ══ v24 · Atmosphäre ══ */
-#app-screen::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(60% 40% at 85% -10%,color-mix(in srgb,var(--sage) 9%,transparent),transparent 70%),radial-gradient(50% 35% at 0% 100%,color-mix(in srgb,var(--accent2) 6%,transparent),transparent 70%)}
-.bento-dash .stat-cell .sc-v{font-size:30px}
-.ph-eyebrow{color:var(--sage-deep)!important;font-weight:600}
-.pt{letter-spacing:-.025em}
-.card-head h3{display:flex;align-items:center;gap:8px}
-.tab-group .tab-btn{transition:background .15s,color .15s}
-
-#nb-fab{display:none;position:fixed;right:16px;bottom:16px;z-index:60;padding:13px 18px;border:0;border-radius:999px;background:var(--sage);color:var(--on-accent);font:700 14px 'Manrope',sans-serif;box-shadow:0 12px 28px -10px var(--sage);cursor:pointer}
-@media (max-width:900px){ body.nb-ready #nb-fab{display:block} }
 </style>
 </head>
 <body>
@@ -2122,13 +1863,6 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
       <div class="sub" data-i18n="app.tagline">Bestand · Bestellungen · Dosierung</div>
     </div>
     <div class="login-divider"><span></span><i style="font-style:normal"><svg class="svg-ic"><use href="#ic-lock"/></svg><span data-i18n="login.access">ZUGANG</span></i><span></span></div>
-    <div id="pin-pad">
-      <div class="pin-user" id="pin-user"></div>
-      <div class="pin-dots" id="pin-dots"></div>
-      <div class="pin-err" id="pin-err"></div>
-      <div class="pin-keys"><button type="button" onclick="pinKey('1')">1</button><button type="button" onclick="pinKey('2')">2</button><button type="button" onclick="pinKey('3')">3</button><button type="button" onclick="pinKey('4')">4</button><button type="button" onclick="pinKey('5')">5</button><button type="button" onclick="pinKey('6')">6</button><button type="button" onclick="pinKey('7')">7</button><button type="button" onclick="pinKey('8')">8</button><button type="button" onclick="pinKey('9')">9</button><button type="button" class="sm" onclick="pinKey('c')" aria-label="Löschen">⌫</button><button type="button" onclick="pinKey('0')">0</button><button type="button" class="go" onclick="pinKey('ok')" aria-label="Anmelden">→</button></div>
-      <button type="button" class="auth-switch" onclick="pinOther()">Anderer Benutzer</button>
-    </div>
     <div class="login-card" id="login-card-login">
       <div class="fw"><label class="fl" data-i18n="login.username">Benutzername</label><input id="inp-user" placeholder="admin" autocomplete="username" oninput="clearFieldError('inp-user')"/><div class="field-err" id="inp-user-err"></div></div>
       <div class="fw"><label class="fl" data-i18n="login.password">Passwort</label><input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" oninput="clearFieldError('inp-pw')" onkeydown="if(event.key==='Enter')doLogin()"/><div class="field-err" id="inp-pw-err"></div></div>
@@ -2154,8 +1888,6 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
 </div>
 
 <!-- APP -->
-<button id="nb-fab" onclick="openModal('bestellung')" aria-label="Neue Bestellung">＋ Bestellung</button>
-
 <div id="offline-banner">📡 Keine Internetverbindung — Daten können veraltet sein</div>
 <div id="app-screen">
 <div id="app-boot-loading" class="app-boot-loading" style="display:none">
@@ -2242,7 +1974,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
           <svg class="bento-ic-bg"><use href="#ic-trend"/></svg>
           <div class="sc-lab"><svg class="lab-ic"><use href="#ic-trend"/></svg><span data-i18n="dash.gesamtgewinn">Gesamtgewinn</span></div>
           <div class="sc-v mono" id="d-gewinn">0,00 €</div>
-          <div class="sc-sub">Verkauf − Einkauf · nach Rabatt</div>
+          <div class="sc-sub">Verkauf − Einkauf · alle Verkäufe</div>
         </div>
         <div class="stat-cell" data-bento="best">
           <svg class="bento-ic-bg"><use href="#ic-receipt"/></svg>
@@ -2604,13 +2336,16 @@ create policy "eigenverbrauch eigener user"
               <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="changeOwnPassword()">Speichern</button></div>
             </div>
             <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
-              <label class="fl" style="margin-bottom:5px">📞 Telefon &amp; Adresse (optional)</label>
+              <label class="fl" style="margin-bottom:5px">👤 Name, Telefon &amp; Adresse (optional)</label>
               <div class="ps" style="margin:-2px 0 8px">Wird deinen Lieferantenkunden auf ihrer "Beim Lieferanten"-Seite als Kontakt angezeigt (Anrufen/Route).</div>
+              <div class="mr2" style="margin-bottom:8px"><input id="set-vorname" placeholder="Vorname" maxlength="60"/><input id="set-nachname" placeholder="Nachname" maxlength="60"/></div>
               <div class="mr2" style="margin-bottom:8px"><input id="set-telefon" placeholder="Telefonnummer"/><input id="set-adresse" placeholder="Adresse"/></div>
               <div style="display:flex;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="saveContactInfo()">Kontaktdaten speichern</button></div>
               <div class="ec" id="set-contact-setup-hint" style="display:none;padding:10px 0 0;text-align:left">
-                <div class="ec-s">Dafür fehlen in Supabase noch zwei Spalten. SQL zum Anlegen:</div>
-                <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:8px;overflow-x:auto;white-space:pre-wrap">alter table profiles add column if not exists telefon text;
+                <div class="ec-s">Dafür fehlen in Supabase noch Spalten (oder profil_felder.sql ausführen). SQL zum Anlegen:</div>
+                <pre style="text-align:left;font-size:11px;background:var(--paper3);border-radius:var(--r);padding:12px;margin-top:8px;overflow-x:auto;white-space:pre-wrap">alter table profiles add column if not exists vorname text;
+alter table profiles add column if not exists nachname text;
+alter table profiles add column if not exists telefon text;
 alter table profiles add column if not exists adresse text;</pre>
               </div>
             </div>
@@ -2673,6 +2408,11 @@ alter table profiles add column if not exists adresse text;</pre>
                 <select id="nu-linked"><option value="">Keine Verknüpfung</option></select>
                 <div class="ps" style="margin-top:5px">Der Benutzer kann Bestellungen dann wahlweise an dieses Spezial-Konto übermitteln.</div>
               </div>
+              <div class="sr-label" style="margin:14px 0 8px">Persönliche Daten (optional)</div>
+              <div class="mr2" style="margin-bottom:8px"><div><label class="fl">Vorname</label><input id="nu-vorname" maxlength="60"/></div><div><label class="fl">Nachname</label><input id="nu-nachname" maxlength="60"/></div></div>
+              <div class="mr2" style="margin-bottom:8px"><div><label class="fl">Telefon</label><input id="nu-telefon" maxlength="40" inputmode="tel"/></div><div><label class="fl">E-Mail</label><input id="nu-email" type="email" maxlength="120"/></div></div>
+              <div class="mr2" style="margin-bottom:8px"><div><label class="fl">Adresse</label><input id="nu-adresse" maxlength="120"/></div><div><label class="fl">Geburtsdatum</label><input id="nu-dob" type="date" min="1900-01-01"/></div></div>
+              <div style="margin-bottom:12px"><label class="fl">Notiz</label><textarea id="nu-notiz" rows="2" maxlength="300" style="resize:vertical"></textarea></div>
               <button class="btn btn-ghost btn-sm" onclick="addUser()" style="width:100%;justify-content:center">＋ Account anlegen</button>
             </div>
           </div>
@@ -2695,7 +2435,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">22.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">21.2.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -3031,7 +2771,10 @@ alter table profiles add column if not exists adresse text;</pre>
         <div id="eu-linked-wrap"><label class="fl">Verknüpft mit</label><select id="eu-linked"><option value="">Keine Verknüpfung</option></select></div>
         <div id="eu-max-wrap" style="display:none"><label class="fl">Max. Lieferanten</label><input type="number" id="eu-max" min="1" max="50"/></div>
       </div>
-      <div class="mr2" style="margin-bottom:12px"><div><label class="fl">Telefon</label><input id="eu-telefon" maxlength="40"/></div><div><label class="fl">Adresse</label><input id="eu-adresse" maxlength="120"/></div></div>
+      <div class="mr2" style="margin-bottom:12px"><div><label class="fl">Vorname</label><input id="eu-vorname" maxlength="60"/></div><div><label class="fl">Nachname</label><input id="eu-nachname" maxlength="60"/></div></div>
+      <div class="mr2" style="margin-bottom:12px"><div><label class="fl">Telefon</label><input id="eu-telefon" maxlength="40" inputmode="tel"/></div><div><label class="fl">Adresse</label><input id="eu-adresse" maxlength="120"/></div></div>
+      <div class="mr2" style="margin-bottom:12px"><div><label class="fl">E-Mail</label><input id="eu-email" type="email" maxlength="120"/></div><div><label class="fl">Geburtsdatum</label><input id="eu-dob" type="date" min="1900-01-01"/></div></div>
+      <div style="margin-bottom:12px"><label class="fl">Notiz</label><textarea id="eu-notiz" rows="2" maxlength="300" style="resize:vertical"></textarea></div>
       <div style="border-top:1px solid var(--line);padding-top:14px">
         <label class="fl" style="margin-bottom:6px">🔑 Zugangsdaten</label>
         <input type="password" id="eu-pw" placeholder="Leer lassen = Passwort bleibt" autocomplete="new-password"/>
@@ -3124,7 +2867,6 @@ alter table profiles add column if not exists adresse text;</pre>
       <div class="about-row" id="od-von-row" style="display:none"><span>Von</span><span id="od-von" style="color:var(--lieferant-deep);font-weight:600"></span></div>
       <div class="about-row"><span id="od-kunde-label" data-i18n="order.customer">Kunde</span><span id="od-kunde"></span></div>
       <div class="about-row" id="od-batch-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" id="od-batch-btn" onclick="openBatchPickup()">📋 Alle offenen Bestellungen dieses Kunden</button></div>
-      <div class="about-row" id="od-repeat-row" style="display:none"><span></span><button class="btn btn-ghost btn-sm" onclick="repeatOrder()">🔁 Erneut bestellen</button></div>
       <div class="about-row"><span data-i18n="best.th.bestelltam">Bestellt am</span><span id="od-datum"></span></div>
       <div class="about-row" id="od-lieferstatus-row" style="display:none"><span>Lieferstatus</span><span id="od-lieferstatus"></span></div>
       <div class="about-row" id="od-angekommen-row" style="display:none"><span data-i18n="best.th.angekommenam">Angekommen am</span><span id="od-angekommen-am" style="color:var(--success-deep);font-weight:600"></span></div>
@@ -3298,7 +3040,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <h2>Neue Konten</h2>
 <ul>
 <li><b>Besteller</b> registrieren sich selbst auf dem Login-Bildschirm („Neu hier? Als Besteller registrieren“).</li>
-<li>Alle anderen Konten legt der <b>Administrator</b> unter Einstellungen → Benutzer → „Neuen Account anlegen“ an. Er vergibt ein vorläufiges Passwort. Beim ersten Login muss die Person ein eigenes festlegen.</li>
+<li>Alle anderen Konten legt der <b>Administrator</b> unter Einstellungen → Benutzer → „Neuen Account anlegen“ an. Er vergibt ein vorläufiges Passwort und kann optional Vor- und Nachname, Telefon, Adresse, E-Mail, Geburtsdatum und eine Notiz erfassen. Beim ersten Login muss die Person ein eigenes festlegen.</li>
 <li>Der Administrator kann Konten <b>bearbeiten</b> (Name, Rolle, Telefon, Adresse, Zugangsdaten), <b>sperren</b> (die Person wird sofort abgemeldet) und <b>löschen</b>. Das eigene Konto lässt sich nicht sperren.</li>
 <li>Nach <b>5 falschen Anmeldeversuchen</b> wird ein Konto automatisch gesperrt. Der Administrator bekommt eine <b>Benachrichtigung</b> (🔔-Symbol, Zähler am Menüpunkt Einstellungen und, wenn erlaubt, eine Systembenachrichtigung) und schaltet das Konto in der Benutzerliste mit „Entsperren“ wieder frei.</li>
 </ul>
@@ -3896,7 +3638,7 @@ let lagerManuellTableMissing = false;
 let lagerSchwelleSpalteMissing = false;
 let variantenTableMissing = false;
 let M = { profile:null, users:[], service:{history:[], lastDate:null, nextDue:null, due:false} };
-let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),fontSize:'md',liquidGlass:true,lang:'de'};
+let VS = JSON.parse(localStorage.getItem('nm_vis')||'null') || {themeIdx:0,anim:true,compact:false,mode:'dark',fontSize:'md',liquidGlass:true,lang:'de'};
 // Ältere Backups/Local-Storage-Stände kennen diese Felder evtl. noch nicht — sinnvolle
 // Defaults nachrüsten, statt dass z.B. die Schriftgröße plötzlich "undefined" ist.
 if(VS.fontSize==null) VS.fontSize='md';
@@ -3918,12 +3660,13 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '22.0.0';
+const CURRENT_UI_VERSION = '21.2.0';
 const WHATS_NEW = {
-  '22.0.0': [
-    'Überarbeitetes Design: ruhiger, flacher und professioneller — bekannte Farben, klarere Karten, Tabellen und Formulare.',
-    'PIN-Login: Ist für dein Konto eine PIN eingestellt, erscheint beim Öffnen nur noch das Nummernfeld.',
-    'Benachrichtigungen funktionieren jetzt auch auf dem Handy (neue Bestellungen, Ankunft, Zahlung) — unter 🔔 aktivierbar.'
+  '21.2.0': [
+    'Neue Accounts mit Personendaten: beim Anlegen lassen sich Vorname, Nachname, Telefon, Adresse, E-Mail, Geburtsdatum und eine Notiz erfassen (alles optional).',
+    'Dieselben Angaben stehen unter „Benutzer bearbeiten“ zur Verfügung. In der Benutzerliste erscheint der Klarname neben dem Benutzernamen, und die Suche findet auch nach Name und Telefon.',
+    'Die Kundenkarte eines Kontos zeigt jetzt den Klarnamen. Jeder kann Vor- und Nachname außerdem selbst unter „Mein Konto“ ergänzen.',
+    'E-Mail, Geburtsdatum und Notiz liegen in einer geschützten Tabelle, die nur der Administrator (und die Person selbst) lesen kann (benötigt profil_felder.sql).'
   ],
   '21.1.0': [
     'Administratoren bekommen jetzt echte Benachrichtigungen, sobald ein Konto nach zu vielen Fehlversuchen gesperrt wird: Meldung sofort in der App, 🔔-Symbol mit Zähler, und — wenn erlaubt — eine Systembenachrichtigung des Geräts.',
@@ -4165,8 +3908,7 @@ function allowedPages(role){
   if(role==='besteller') return ['besteller','einstellungen'];
   if(role==='admin') return ['einstellungen'];
   if(role==='service') return ['service'];
-  const base=['dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
-  return role==='special' ? [...base,'besteller'] : base; // Lieferanten dürfen zusätzlich bei anderen Lieferanten bestellen
+  return ['dashboard','bestellungen','sendungen','lieferant','kunden','lieferantenkunden','preise','lagerbestand','eigenverbrauch','einstellungen']; // 'user'/'special'
 }
 function canSeePage(id){ return allowedPages(currentRole()).includes(id); }
 function homePage(){ return allowedPages(currentRole())[0]; }
@@ -4174,54 +3916,6 @@ function homePage(){ return allowedPages(currentRole())[0]; }
 // ══════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════
-
-// ══ v22: PIN-Nummernfeld ══
-let _pinBuf='', _pinUser='', _pinBusy=false;
-function initPinMode(){
-  const ls=document.getElementById('login-screen'); if(!ls) return;
-  let st=null; try{ st=JSON.parse(localStorage.getItem('nm_last_login')||'null'); }catch(e){}
-  if(st&&st.m==='pin'&&st.u){ _pinUser=st.u; _pinBuf=''; document.getElementById('pin-user').textContent='Hallo, '+cap(st.u); document.getElementById('pin-err').textContent=''; ls.classList.add('pin-mode'); renderPin(); }
-  else ls.classList.remove('pin-mode');
-}
-function renderPin(){
-  const n=Math.max(4,_pinBuf.length);
-  document.getElementById('pin-dots').innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<_pinBuf.length?'on':''}"></i>`).join('');
-}
-async function pinKey(k){
-  if(_pinBusy) return;
-  const err=document.getElementById('pin-err');
-  if(k==='c'){ _pinBuf=_pinBuf.slice(0,-1); }
-  else if(k==='ok'){ return pinSubmit(); }
-  else if(_pinBuf.length<8){ _pinBuf+=k; }
-  err.textContent=''; renderPin();
-}
-async function pinSubmit(){
-  const err=document.getElementById('pin-err');
-  if(_pinBuf.length<4){ err.textContent='PIN: 4–8 Ziffern.'; return; }
-  _pinBusy=true;
-  document.getElementById('inp-user').value=_pinUser; document.getElementById('inp-pw').value=_pinBuf;
-  try{ await doLogin(); }catch(e){}
-  _pinBusy=false;
-  const ls=document.getElementById('login-screen');
-  if(ls && ls.style.display!=='none'){
-    const le=document.getElementById('login-err');
-    err.textContent=(le&&le.style.display!=='none'&&le.textContent)||'Falsche PIN.';
-    _pinBuf=''; renderPin();
-    const d=document.getElementById('pin-dots'); d.classList.remove('pin-shake'); void d.offsetWidth; d.classList.add('pin-shake');
-    try{ navigator.vibrate&&navigator.vibrate(120); }catch(e){}
-  } else { _pinBuf=''; document.getElementById('inp-pw').value=''; }
-}
-function pinOther(){
-  document.getElementById('login-screen').classList.remove('pin-mode');
-  document.getElementById('inp-user').value=''; document.getElementById('inp-pw').value='';
-  try{ localStorage.removeItem('nm_last_login'); }catch(e){}
-}
-document.addEventListener('keydown',e=>{
-  const ls=document.getElementById('login-screen');
-  if(!ls||!ls.classList.contains('pin-mode')||ls.style.display==='none') return;
-  if(/^[0-9]$/.test(e.key)) pinKey(e.key); else if(e.key==='Backspace') pinKey('c'); else if(e.key==='Enter') pinKey('ok');
-});
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initPinMode); else initPinMode();
 async function doLogin(){
   const u = document.getElementById('inp-user').value.trim();
   const p = document.getElementById('inp-pw').value;
@@ -4262,7 +3956,6 @@ async function onLoggedIn(authUser, displayName){
   }
   M.profile = prof;
   currentUser = prof.username || displayName || authUser.email.split('@')[0];
-  try{ localStorage.setItem('nm_last_login',JSON.stringify({u:displayName||currentUser,m:prof.auth_modus||'passwort'})); }catch(e){}
 
   document.getElementById('login-err').style.display='none';
   document.getElementById('tb-av').textContent=currentUser[0].toUpperCase();
@@ -4280,7 +3973,6 @@ async function onLoggedIn(authUser, displayName){
   applyLiquidGlass(false);
   setLang(VS.lang||'de');
   applyRoleUI();
-  try{ updateNotifUI(); if(currentRole()==='admin') askNotifOnce(); document.body.classList.toggle('nb-ready',['user','special'].includes(currentRole())); if(currentRole()==='admin') subscribePush(); backupReminder(); }catch(e){}
   if(currentRole()!=='besteller') checkServiceDue();
   nav(homePage());
   if(bootLoading) bootLoading.style.display='none';
@@ -4302,16 +3994,13 @@ async function forceLockedLogout(){
   le.style.display='block';
 }
 async function doLogout(){
-  try{ if(M.profile&&currentUser) localStorage.setItem('nm_last_login',JSON.stringify({u:currentUser,m:M.profile.auth_modus||'passwort'})); }catch(e){}
-  closeModal('pwforce'); document.body.classList.remove('nb-ready');
+  closeModal('pwforce');
   await sb.auth.signOut();
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('inp-pw').value='';
   currentUser=null; currentUserId=null; M.profile=null;
-  try{ if(window._ordCh){ sb.removeChannel(window._ordCh); window._ordCh=null; } }catch(e){}
   setAuthMode('login');
-  initPinMode();
 }
 
 // ══════════════════════════════════════════════
@@ -4551,7 +4240,7 @@ let bsCart=[];
 let bsSelected=new Set();
 let bsFresh=null;
 function bsMax(){ return Math.max(1, parseInt(M.profile?.max_lieferanten)||BESTELLER_DEFAULT_MAX); }
-function bsSuppliers(){ return M.users.filter(u=>u.role==='special' && !u.gesperrt && u.id!==currentUserId).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
+function bsSuppliers(){ return M.users.filter(u=>u.role==='special' && !u.gesperrt).sort((a,b)=>a.username.localeCompare(b.username,'de')); }
 function bsCartQty(){ return bsCart.reduce((n,l)=>n+l.stueck,0); }
 async function reloadBesteller(){ await loadAllData(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 function setBsTab(tab){
@@ -4562,7 +4251,7 @@ function setBsTab(tab){
 }
 function renderBesteller(){
   const sub=document.getElementById('bs-sub');
-  if(sub) sub.textContent=(currentRole()==='special'?`Bestelle bei anderen Lieferanten — an bis zu ${bsMax()} Lieferanten gleichzeitig.`:`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`);
+  if(sub) sub.textContent=`Wähle deine Artikel und sende die Bestellung an bis zu ${bsMax()} Lieferanten gleichzeitig.`;
   renderBsShop(); renderBsOrders(); updateBsCartBadge();
 }
 function updateBsCartBadge(){
@@ -4670,7 +4359,7 @@ async function submitBsBestellung(){
   const btn=document.getElementById('bs-submit-btn'); btn.disabled=true; btn.style.opacity=.6;
   const items=bsCart.map(l=>({prod:l.prod, stueck:l.stueck, wunsch:l.wunsch}));
   const notiz=document.getElementById('bs-notiz').value.trim()||null;
-  const { error } = await sb.rpc(currentRole()==='special'?'lieferant_bestellen':'besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
+  const { error } = await sb.rpc('besteller_bestellen', { p_items:items, p_notiz:notiz, p_lieferanten:[...bsSelected] });
   btn.disabled=false; btn.style.opacity=1;
   if(error){ showToast(error.message || 'Bestellung konnte nicht gesendet werden.','⚠'); return; }
   const n=bsSelected.size;
@@ -4805,7 +4494,7 @@ function renderBsTrack(){
 async function reloadBsTrack(){ await loadAllData(); renderBsTrack(); renderBesteller(); showToast('Aktualisiert. ✓'); }
 // Automatische Aktualisierung, solange ein Besteller angemeldet und die Seite sichtbar ist.
 setInterval(async()=>{
-  if(document.hidden || (currentRole()!=='besteller'&&!(currentRole()==='special'&&document.getElementById('page-besteller')?.classList.contains('active'))) || !currentUserId) return;
+  if(document.hidden || currentRole()!=='besteller' || !currentUserId) return;
   await loadAllData(); renderBesteller();
   if(document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack();
 }, 45000);
@@ -4916,20 +4605,8 @@ async function changeOwnPassword(){
   if(n2!==n1){ setFieldError('pwc-new2','Die Passwörter stimmen nicht überein.'); bad=true; }
   if(bad) return;
   const { data: _su } = await sb.auth.getUser();
-  const mails=[...new Set([_su&&_su.user&&_su.user.email, toEmail(currentUser), M.profile&&M.profile.username?toEmail(M.profile.username):null].filter(Boolean))];
-  const pws=[...new Set([old, old.trim()])];
-  let vErr=null, ok=false;
-  for(const em of mails){ for(const pw of pws){
-    const r=await sb.auth.signInWithPassword({ email:em, password:pw });
-    if(!r.error){ ok=true; break; }
-    vErr=r.error;
-    if(!/invalid login|invalid credentials/i.test(r.error.message||'')) break;
-  } if(ok) break; }
-  if(!ok){
-    const m=(vErr&&vErr.message)||'';
-    setFieldError('pwc-old', /invalid login|invalid credentials/i.test(m) ? 'Aktuelles Passwort ist falsch.' : ('Prüfung fehlgeschlagen: '+(m||'unbekannter Fehler')+' — bitte kurz warten und erneut versuchen.'));
-    return;
-  }
+  const { error: vErr } = await sb.auth.signInWithPassword({ email: (_su&&_su.user&&_su.user.email) || toEmail(currentUser), password: old });
+  if(vErr){ setFieldError('pwc-old','Aktuelles Passwort ist falsch.'); return; }
   const err=await applyNewPassword(n1);
   if(err){ setFieldError('pwc-new', pwErrText(err)); return; }
   ['pwc-old','pwc-new','pwc-new2'].forEach(id=>document.getElementById(id).value='');
@@ -4979,6 +4656,8 @@ function openEditUser(id){
   document.getElementById('eu-max').value=u.max_lieferanten||BESTELLER_DEFAULT_MAX;
   document.getElementById('eu-telefon').value=u.telefon||'';
   document.getElementById('eu-adresse').value=u.adresse||'';
+  document.getElementById('eu-vorname').value=u.vorname||''; document.getElementById('eu-nachname').value=u.nachname||'';
+  { const d=(M.details||{})[id]||{}; document.getElementById('eu-email').value=d.email||''; document.getElementById('eu-dob').value=d.geburtsdatum?String(d.geburtsdatum).slice(0,10):''; document.getElementById('eu-notiz').value=d.notiz||''; }
   document.getElementById('eu-pw').value=''; document.getElementById('eu-force').checked=true; document.getElementById('eu-modus').value=u.auth_modus||'passwort'; applyModusToInput(document.getElementById('eu-pw'), u.auth_modus||'passwort', false, true); document.getElementById('eu-pw').placeholder='Leer lassen = bleibt unverändert';
   onEuRoleChange();
   openModal('edituser');
@@ -4995,6 +4674,7 @@ async function saveEditUser(){
   const modus=document.getElementById('eu-modus').value, modusChanged=modus!==(u.auth_modus||'passwort');
   if(modusChanged && !pw){ showToast('Anmeldeart geändert: bitte neue '+(modus==='pin'?'PIN':'neues Passwort')+' setzen.','⚠'); return; }
   if(pw){ const e=checkSecret(modus,pw); if(e){ showToast(e,'⚠'); return; } }
+  { const ve=validateProfileFields(readProfileFields('eu')); if(ve){ showToast(ve,'⚠'); return; } }
   if(linked && linkCycle(id,linked)){ showToast('Zirkuläre Verknüpfung nicht möglich.','⚠'); return; }
   const { error } = await sb.rpc('admin_update_user', { p_user_id:id, p_username:name, p_role:role, p_telefon:telefon||null, p_adresse:adresse||null, p_linked_to:null, p_max:max });
   if(error){ showToast(error.message||'Speichern fehlgeschlagen.','⚠'); return; }
@@ -5002,6 +4682,9 @@ async function saveEditUser(){
     const { error: lErr } = await sb.rpc('set_user_link', { p_user_id:id, p_linked_to:linked });
     if(lErr){ showToast(rpcErrText(lErr,'Verknüpfung konnte nicht gespeichert werden.'),'⚠'); u.linked_to=null; return; }
   }
+  { const pf=readProfileFields('eu'); const pErr=await saveProfileFields(id,pf);
+    if(pErr){ showToast(rpcErrText(pErr,'Persönliche Daten konnten nicht gespeichert werden.')+' — bitte profil_felder.sql in Supabase ausführen.','⚠'); }
+    else { Object.assign(u,{vorname:pf.vorname,nachname:pf.nachname}); M.details=M.details||{}; M.details[id]={user_id:id,email:pf.email,geburtsdatum:pf.geburtsdatum,notiz:pf.notiz}; } }
   if(pw){
     const { error: pErr } = await sb.rpc('admin_set_credentials', { p_user_id:id, p_modus:modus, p_secret:pw, p_force:force });
     if(pErr){ showToast(pErr.message||'Zugangsdaten konnten nicht gesetzt werden.','⚠'); }
@@ -5027,8 +4710,6 @@ function applyRoleUI(){
   // Das gesamte Menü läuft jetzt ausschließlich über den Hamburger/die Seitenleiste
   // (keine separate mobile Tableiste mehr) — Sichtbarkeit einzelner Punkte hängt nur
   // noch von den Rollenrechten ab.
-  const bTick=document.getElementById('nav-besteller-tick');
-  if(bTick&&bTick.lastElementChild) bTick.lastElementChild.textContent = role==='special' ? 'Bei Lieferanten bestellen' : 'Meine Bestellungen';
   const lTick=document.getElementById('nav-lieferant-tick');
   if(lTick) lTick.style.display = allowed.includes('lieferant') ? 'flex' : 'none';
   const isSpecial = role==='special';
@@ -5163,7 +4844,6 @@ function applyLiquidGlass(on){
 // ══════════════════════════════════════════════
 function renderLagerbestand(){
   renderLagerManuell();
-  try{ renderNachbestellung(); }catch(e){ console.warn(e); }
 }
 // ── Tatsächlicher Bestand (manuell) ─────────────────────────────────────────
 // Einfache Zähl-/Abgleich-Funktion: hat nichts mit Ein-/Verkaufspreisen oder Bestellungen zu tun.
@@ -5697,9 +5377,6 @@ async function addKunde(){
   if(!v){ setFieldError('nk-vorname','Bitte Vorname eingeben.'); hasError=true; }
   if(!n){ setFieldError('nk-nachname','Bitte Nachname eingeben.'); hasError=true; }
   if(hasError) return;
-  if(S.kunden.some(k=>k.vorname.trim().toLowerCase()===v.toLowerCase()&&k.nachname.trim().toLowerCase()===n.toLowerCase())){
-    if(!(await confirmDialog(`„${v} ${n}“ gibt es schon. Trotzdem noch einmal anlegen?`,{title:'Kunde existiert bereits',confirmText:'Trotzdem anlegen',danger:false}))) return;
-  }
   const { data, error } = await sb.from('kunden').insert({ user_id:currentUserId, vorname:v, nachname:n }).select().single();
   if(error){ showToast(dbErrorMsg(error,'Kunde konnte nicht angelegt werden.'),'⚠'); return; }
   S.kunden.push({id:data.id, vorname:data.vorname, nachname:data.nachname, userId:data.user_id});
@@ -6789,7 +6466,7 @@ async function openKundenkarte(type,id){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
   const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
-  _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (usernameOf(id)||currentUser) };
+  _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (fullNameOf(id)||usernameOf(id)||currentUser) };
   const ed=document.getElementById('kk-edit'); if(ed) ed.style.display='none';
   renderKk(); openModal('kundenkarte');
 }
@@ -7494,186 +7171,7 @@ function renderBestellungen(){
 // ══════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════
-
-
-// ══ v25: Monatsbericht, Gewinnverteilung, Erinnerung, Komfort ══
-function monthBounds(k){ return k; }
-function ordersOfMonth(k){ return soldOrders().filter(b=>ymKey(b.date)===k); }
-function monthLabel(k){ const [y,m]=k.split('-'); return new Date(+y,+m-1,1).toLocaleDateString('de-DE',{month:'long',year:'numeric'}); }
-function aggregate(orders){
-  const prod={}, cust={}; let um=0, gw=0, paid=0, open=0;
-  orders.forEach(b=>{
-    const t=displayTotal(b), g=orderProfit(b); um+=t; gw+=g; if(b.paid) paid+=t; else open+=restAmount(b);
-    (b.items||[]).forEach(it=>{ const vk=it.preis!=null?it.preis:(S.preise[it.prod]||0), ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0), n=it.stueck||0; const o=prod[it.prod]||(prod[it.prod]={n:0,um:0,gw:0}); o.n+=n; o.um+=vk*n; o.gw+=(vk-ek)*n; });
-    const w=sdWho(b).replace(/^◆ /,''); const c=cust[w]||(cust[w]={um:0,gw:0,n:0}); c.um+=t; c.gw+=g; c.n++;
-  });
-  return {prod,cust,um,gw,paid,open,n:orders.length};
-}
-function renderGewinnVerteilung(){
-  if(['besteller','admin','service'].includes(currentRole())) return;
-  const el=ensureCard('d-gverteilung','#d-posten'); if(!el) return;
-  const since=new Date(Date.now()-90*864e5).toISOString().slice(0,10);
-  const a=aggregate(soldOrders().filter(b=>String(b.date||'')>=since));
-  const tp=Object.entries(a.prod).sort((x,y)=>y[1].gw-x[1].gw).slice(0,5), tc=Object.entries(a.cust).sort((x,y)=>y[1].gw-x[1].gw).slice(0,5);
-  if(!tp.length){ el.style.display='none'; return; }
-  el.style.display='';
-  const mx1=Math.max(1,...tp.map(x=>Math.abs(x[1].gw))), mx2=Math.max(1,...tc.map(x=>Math.abs(x[1].gw)));
-  const row=(l,v,mx)=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px"><div style="flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l}</div><div style="flex:1;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden"><div style="width:${Math.round(Math.abs(v)/mx*100)}%;height:100%;background:${v>=0?'var(--success)':'var(--rust)'}"></div></div><div style="font-variant-numeric:tabular-nums;color:var(--ink-soft)">${fmt(v)}</div></div>`;
-  el.innerHTML=`<div class="card-head"><h3>💰 Woran du verdienst</h3><span class="ps" style="margin:0">Gewinn · letzte 90 Tage</span></div><div style="padding:8px 18px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px"><div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Nach Produkt</div>${tp.map(([id,v])=>row((PROD_MAP[id]?.icon||'')+' '+escapeHtml(PROD_MAP[id]?.name||id),v.gw,mx1)).join('')}</div><div><div style="font-size:12px;color:var(--ink-faint);font-weight:600">Nach Kunde</div>${tc.map(([n,v])=>row(escapeHtml(n),v.gw,mx2)).join('')}</div></div>`;
-}
-function monatsbericht(){
-  if(typeof window.jspdf==='undefined'){ showToast('PDF-Modul konnte nicht geladen werden.','⚠'); return; }
-  const k=document.getElementById('mb-month')?.value; if(!k) return;
-  const orders=ordersOfMonth(k), a=aggregate(orders);
-  const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); const m=16, W=doc.internal.pageSize.getWidth();
-  doc.setFillColor(255,122,41); doc.roundedRect(m-.5,11.5,9,9,2.2,2.2,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255); doc.text('N',m+4,17.3,{align:'center'});
-  doc.setFontSize(15); doc.setTextColor(20,20,20); doc.text('NicoFlow · Monatsbericht',m+12,15.5);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,110,110); doc.text(monthLabel(k)+' · erstellt am '+fmtDate(today()),m+12,20.5);
-  const pdfFmt=v=>fmt(v).replace(/\u00a0/g,' ');
-  const kp=[['Umsatz',pdfFmt(a.um)],['Gewinn',pdfFmt(a.gw)],['Bestellungen',String(a.n)],['Bezahlt',pdfFmt(a.paid)],['Noch offen',pdfFmt(a.open)]];
-  const bw=(W-2*m-4*3)/5; kp.forEach(([l,v],i)=>{ const x=m+i*(bw+3); doc.setDrawColor(220); doc.roundedRect(x,28,bw,17,2,2); doc.setFontSize(7.5); doc.setTextColor(120); doc.text(l.toUpperCase(),x+3,33); doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(20); doc.text(v,x+3,41); doc.setFont('helvetica','normal'); });
-  let y=54;
-  const tbl=(title,head,body)=>{ if(!body.length) return; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20); doc.text(title,m,y); doc.autoTable({startY:y+2,head:[head],body,margin:{left:m,right:m},styles:{fontSize:8.5,cellPadding:2},headStyles:{fillColor:[255,122,41],textColor:255}}); y=doc.lastAutoTable.finalY+9; };
-  tbl('Produkte',['Produkt','Stück','Umsatz','Gewinn'],Object.entries(a.prod).sort((x,z)=>z[1].gw-x[1].gw).map(([id,v])=>[PROD_MAP[id]?.name||id,v.n,pdfFmt(v.um),pdfFmt(v.gw)]));
-  tbl('Kunden',['Kunde','Bestellungen','Umsatz','Gewinn'],Object.entries(a.cust).sort((x,z)=>z[1].um-x[1].um).map(([n,v])=>[n,v.n,pdfFmt(v.um),pdfFmt(v.gw)]));
-  tbl('Bestellungen',['Nr.','Datum','Kunde','Betrag','Status'],orders.sort((x,z)=>x.id-z.id).map(b=>['#'+b.id,fmtDate(b.date),sdWho(b).replace(/^◆ /,''),pdfFmt(displayTotal(b)),b.paid?'bezahlt':'offen']));
-  doc.save('nicoflow-monatsbericht-'+k+'.pdf'); showToast('Monatsbericht erstellt. ✓','📄');
-}
-function remindText(o){
-  const name=o.k?o.k.vorname:o.w;
-  return `Hallo ${name}, kurze Erinnerung: Es ist noch ein Betrag von ${fmt(o.sum)} offen (Bestellung${o.ids.length===1?'':'en'} ${o.ids.map(x=>'#'+x).join(', ')}). Danke dir! 🙏`;
-}
-function postenWhatsApp(i){ const o=(window._postenRows||[])[i]; if(!o) return; window.open('https://wa.me/?text='+encodeURIComponent(remindText(o)),'_blank','noopener'); }
-async function copyReorder(){
-  const l=(window._reorderRows||[]).filter(r=>r.need>0).map(r=>`${r.need}× ${r.p.name}`);
-  if(!l.length){ showToast('Nichts nachzubestellen.','✓'); return; }
-  showToast((await copyText('Bestellung:\n'+l.join('\n')))?'Nachbestell-Liste kopiert. ✓':'Kopieren nicht möglich.','🛒');
-}
-function backupReminder(){
-  if(['besteller','admin','service'].includes(currentRole())||!(S.bestellungen||[]).length) return;
-  let last=0; try{ last=+localStorage.getItem('nm_last_backup')||0; }catch(e){}
-  if(Date.now()-last>7*864e5) setTimeout(()=>showToast('Tipp: Mach wieder eine Datensicherung (Einstellungen → Export).','💾'),4000);
-}
-
-// ══ v26: Erneut bestellen, Inventur, Push ══
-function repeatOrder(){
-  const b=S.bestellungen.find(x=>x.id===currentDetailOrderId); if(!b) return;
-  closeModal('orderdetail'); openModal('bestellung');
-  const sel=document.getElementById('nb-kunde'); if(sel) sel.value=String(b.kId);
-  orderItems=(b.items||[]).filter(it=>PROD_MAP[it.prod]).map(it=>({uid:Date.now()+Math.random(),prod:it.prod,stueck:it.stueck||1,variant:it.variante||defaultVariantId(it.prod,false)}));
-  if(!orderItems.length) addOrderItem(); else renderOrderItems();
-  showToast('Bestellung übernommen — Menge prüfen und anlegen.','🔁');
-}
-function openInventur(){
-  if(lagerManuellTableMissing){ showToast('Lagerbestand ist noch nicht eingerichtet.','⚠'); return; }
-  let o=document.getElementById('inv-bg'); if(o) o.remove();
-  o=document.createElement('div'); o.id='inv-bg'; o.className='modal-bg show'; o.style.zIndex=120;
-  o.innerHTML=`<div class="modal"><div class="modal-head"><h3>📋 Inventur</h3><button class="modal-close" onclick="document.getElementById('inv-bg').remove()" aria-label="Schließen">✕</button></div><div class="modal-body"><div class="ps" style="margin-bottom:10px">Gib ein, was du tatsächlich gezählt hast. Leere Felder bleiben unverändert.</div>${PRODUCTS.map(p=>{ const cur=S.lagerManuell[p.id]?.menge; return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${p.icon} ${escapeHtml(p.name)}</b><div class="ps" style="margin:0">Soll: ${cur==null?'—':cur}</div></div><span id="inv-d-${p.id}" class="mono" style="min-width:48px;text-align:right"></span><input type="number" min="0" inputmode="numeric" id="inv-${p.id}" style="width:84px" placeholder="Zählung" oninput="invDiff('${p.id}')"/></div>`; }).join('')}</div><div class="modal-foot"><button class="btn btn-ghost" onclick="document.getElementById('inv-bg').remove()">Abbrechen</button><button class="btn btn-primary" onclick="applyInventur()">Bestand übernehmen</button></div></div>`;
-  document.body.appendChild(o);
-}
-function invDiff(id){
-  const v=document.getElementById('inv-'+id).value, el=document.getElementById('inv-d-'+id); if(!el) return;
-  if(v===''){ el.textContent=''; return; }
-  const d=Math.round(+v)-(S.lagerManuell[id]?.menge||0);
-  el.textContent=(d>0?'+':'')+d; el.style.color=d===0?'var(--ink-faint)':d>0?'var(--success)':'var(--rust)';
-}
-async function applyInventur(){
-  let n=0;
-  for(const p of PRODUCTS){
-    const v=document.getElementById('inv-'+p.id)?.value; if(v===''||v==null) continue;
-    const d=Math.max(0,Math.round(+v))-(S.lagerManuell[p.id]?.menge||0);
-    if(d!==0 || !S.lagerManuell[p.id]){ await adjustLagerbestand(p.id,d); n++; }
-  }
-  document.getElementById('inv-bg')?.remove();
-  renderLagerbestand(); renderDashboard();
-  showToast(n?`Inventur übernommen (${n} Produkt${n===1?'':'e'}). ✓`:'Keine Abweichungen.','📋');
-}
-// Echte Push-Nachrichten (brauchen VAPID_PUBLIC_KEY in config.js und die Dateien im Ordner push/)
-function b64ToU8(b){ const p='='.repeat((4-b.length%4)%4), r=(b+p).replace(/-/g,'+').replace(/_/g,'/'), raw=atob(r); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0))); }
-async function subscribePush(){
-  try{
-    if(typeof VAPID_PUBLIC_KEY==='undefined'||!VAPID_PUBLIC_KEY||!('PushManager' in window)||Notification.permission!=='granted') return false;
-    const reg=await navigator.serviceWorker.ready;
-    const sub=(await reg.pushManager.getSubscription())||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID_PUBLIC_KEY)});
-    const j=sub.toJSON();
-    const {error}=await sb.from('push_subscriptions').upsert({user_id:currentUserId,endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth},{onConflict:'endpoint'});
-    return !error;
-  }catch(e){ console.warn('Push:',e); return false; }
-}
-// ══ v22: AUSWERTUNG (Übersicht) & NACHBESTELL-VORSCHLAG (Lager) ══
-function soldOrders(){ return S.bestellungen.filter(b=>!(b.fuerLieferant && b.userId===currentUserId)); }
-function ymKey(d){ return String(d||'').slice(0,7); }
-function ensureCard(id,anchorSel,pos){
-  let el=document.getElementById(id);
-  if(!el){ const a=document.querySelector(anchorSel); if(!a) return null; el=document.createElement('div'); el.id=id; el.className='card'; a.insertAdjacentElement(pos||'beforebegin',el); }
-  return el;
-}
-let auswMode='umsatz';
-function setAuswMode(m){ auswMode=m; renderAuswertung(); }
-function orderEk(b){ let e=0; (b.items||[]).forEach(it=>{ const ek=it.ek!=null?it.ek:(S.einkauf?.[it.prod]||0); e+=ek*(it.stueck||0); }); return e; }
-// Gewinn = tatsächlicher Erlös (nach Rabatt) minus Einkauf zum Bestellzeitpunkt
-function orderProfit(b){ return displayTotal(b)-orderEk(b); }
-function copyText(t){
-  if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t).then(()=>true,()=>false);
-  const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} a.remove(); return Promise.resolve(ok);
-}
-function renderOffenePosten(){
-  if(currentRole()==='besteller'||currentRole()==='admin'||currentRole()==='service') return;
-  const el=ensureCard('d-posten','#d-auswertung'); if(!el) return;
-  const g={};
-  S.bestellungen.filter(b=>!b.paid && !(b.fuerLieferant && b.userId===currentUserId)).forEach(b=>{
-    const w=sdWho(b).replace(/^◆ /,''); const o=g[w]||(g[w]={w,sum:0,ids:[],oldest:b.date,k:S.kunden.find(x=>x.id===b.kId)});
-    o.sum+=restAmount(b); o.ids.push(b.id); if(String(b.date)<String(o.oldest)) o.oldest=b.date;
-  });
-  const rows=Object.values(g).filter(o=>o.sum>0).map(o=>({...o,days:Math.max(0,Math.floor((Date.now()-new Date(o.oldest).getTime())/864e5))})).sort((a,b)=>b.days-a.days||b.sum-a.sum).slice(0,8);
-  window._postenRows=rows;
-  if(!rows.length){ el.style.display='none'; return; }
-  el.style.display='';
-  el.innerHTML=`<div class="card-head"><h3>⏰ Offene Posten</h3><span class="ps" style="margin:0">Älteste zuerst</span></div><div style="padding:4px 18px 12px">`+rows.map((o,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${escapeHtml(o.w)}</b><div class="ps" style="margin:2px 0 0;${o.days>=14?'color:var(--rust)':''}">${o.ids.length} Bestellung${o.ids.length===1?'':'en'} · seit ${o.days} Tag${o.days===1?'':'en'}</div></div><div style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(o.sum)}</div><button class="btn btn-ghost btn-sm" onclick="postenRemind(${i})" title="Erinnerungstext kopieren">📋</button><button class="btn btn-ghost btn-sm" onclick="postenWhatsApp(${i})" title="Per WhatsApp senden">💬</button></div>`).join('')+'</div>';
-}
-async function postenRemind(i){
-  const o=(window._postenRows||[])[i]; if(!o) return;
-  const name=o.k?o.k.vorname:o.w;
-  const t=`Hallo ${name}, kurze Erinnerung: Es ist noch ein Betrag von ${fmt(o.sum)} offen (Bestellung${o.ids.length===1?'':'en'} ${o.ids.map(x=>'#'+x).join(', ')}). Danke dir! 🙏`;
-  showToast((await copyText(t))?'Erinnerungstext kopiert — jetzt einfach einfügen. ✓':'Kopieren nicht möglich.', '💬');
-}
-function renderAuswertung(){
-  if(currentRole()==='besteller') return;
-  const el=ensureCard('d-auswertung','#d-stock-alert-card'); if(!el) return;
-  const sold=soldOrders();
-  const months=[]; const now=new Date();
-  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({k:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),l:d.toLocaleDateString('de-DE',{month:'short'}),v:0,n:0}); }
-  const gw=auswMode==='gewinn';
-  sold.forEach(b=>{ const m=months.find(x=>x.k===ymKey(b.date)); if(m){ m.v+=gw?orderProfit(b):displayTotal(b); m.n++; } });
-  const max=Math.max(1,...months.map(m=>Math.abs(m.v)));
-  const bars=months.map((m,i)=>{ const h=Math.round(Math.abs(m.v)/max*100), last=i===months.length-1;
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0"><div style="font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap">${m.v?fmt(m.v):'–'}</div><div style="width:100%;height:110px;display:flex;align-items:flex-end"><div style="width:100%;height:${Math.max(m.v?4:2,h)}%;background:${last?'var(--sage)':'color-mix(in srgb,var(--sage) 38%,var(--paper3))'};border-radius:6px 6px 2px 2px" title="${m.n} Bestellungen"></div></div><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600">${m.l}</div></div>`; }).join('');
-  const cur=months[5].v, prev=months[4].v;
-  const delta=prev>0?Math.round((cur-prev)/prev*100):null;
-  el.innerHTML=`<div class="card-head"><h3>📊 ${gw?'Gewinn':'Umsatz'}entwicklung</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">${delta===null?'':`${delta>=0?'+':''}${delta} % zum Vormonat`}</span> <select id="mb-month" style="width:auto;font-size:12px;padding:5px 8px">${[...months].reverse().map(m=>`<option value="${m.k}">${monthLabel(m.k)}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" onclick="monatsbericht()">📄 Monatsbericht</button><div class="tab-group"><button type="button" class="tab-btn${gw?'':' active'}" onclick="setAuswMode('umsatz')">Umsatz</button><button type="button" class="tab-btn${gw?' active':''}" onclick="setAuswMode('gewinn')">Gewinn</button></div></div></div>
-  <div style="padding:16px 18px"><div style="font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px">${gw?'Gewinn':'Umsatz'} der letzten 6 Monate</div><div style="display:flex;gap:8px;align-items:flex-end">${bars}</div>
-  </div>`;
-}
-function renderNachbestellung(){
-  if(typeof lagerManuellTableMissing!=='undefined' && lagerManuellTableMissing) return;
-  const el=ensureCard('lager-reorder','#lager-manuell-card'); if(!el) return;
-  const DAYS=30, since=new Date(Date.now()-DAYS*864e5).toISOString().slice(0,10);
-  const use={};
-  soldOrders().filter(b=>String(b.date||'')>=since).forEach(b=>(b.items||[]).forEach(it=>{ use[it.prod]=(use[it.prod]||0)+(Number(it.stueck)||0); }));
-  (S.eigenverbrauch||[]).filter(e=>String(e.erfasstAm||'')>=since).forEach(e=>{ use[e.produkt]=(use[e.produkt]||0)+(Number(e.menge)||0); });
-  const rows=[];
-  PRODUCTS.forEach(p=>{
-    const entry=S.lagerManuell[p.id]; if(!entry) return;
-    const rate=(use[p.id]||0)/DAYS, menge=entry.menge||0, schw=entry.schwelle!=null?entry.schwelle:5;
-    const reach=rate>0?menge/rate:Infinity;
-    const need=Math.max(0,Math.ceil(rate*DAYS+schw-menge));
-    if(menge<=schw||reach<14) rows.push({p,menge,rate,reach,need});
-  });
-  rows.sort((a,b)=>a.reach-b.reach); window._reorderRows=rows;
-  el.innerHTML=`<div class="card-head"><h3>🛒 Nachbestell-Vorschlag</h3><div style="display:flex;align-items:center;gap:10px"><span class="ps" style="margin:0">Basis: ${DAYS} Tage</span><button class="btn btn-ghost btn-sm" onclick="openInventur()">📋 Inventur</button><button class="btn btn-ghost btn-sm" onclick="copyReorder()">Liste kopieren</button></div></div><div style="padding:6px 18px 14px">`+(rows.length?rows.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${r.p.icon} ${escapeHtml(r.p.name)}</b><div class="ps" style="margin:2px 0 0">Bestand ${r.menge} · ${r.rate>0?'reicht noch ca. '+(r.reach<1?'< 1 Tag':Math.round(r.reach)+' Tage'):'kein Verbrauch erfasst'}</div></div><div style="text-align:right"><div style="font-weight:700;font-variant-numeric:tabular-nums">${r.need||'–'} Stk.</div><div class="ps" style="margin:0">nachbestellen</div></div></div>`).join(''):'<div class="ps" style="padding:14px 0">Alles gut: Aktuell ist keine Nachbestellung nötig. ✓</div>')+'</div>';
-}
 function renderDashboard(){
-  try{ renderAuswertung(); renderOffenePosten(); renderGewinnVerteilung(); }catch(e){ console.warn(e); }
   // Abholstatistik: Ø Zeit zwischen Code-Vergabe und Bezahlung/Abholung.
   const pStats = computePickupStats();
   const pCard=document.getElementById('d-pickup-stat-card');
@@ -7798,7 +7296,11 @@ function renderDashboard(){
   let gewinn=0;
   S.bestellungen.forEach(b=>{
     if(b.fuerLieferant && b.userId===currentUserId) return;
-    gewinn += orderProfit(b);
+    (b.items||[]).forEach(it=>{
+      const verkaufStk = it.preis!=null ? it.preis : (S.preise[it.prod]||0);
+      const einkaufStk = it.ek!=null ? it.ek : (S.einkauf?.[it.prod]||0);
+      gewinn += (verkaufStk-einkaufStk) * (it.stueck||0);
+    });
   });
   const gEl=document.getElementById('d-gewinn');
   if(gEl){ gEl.textContent=fmt(gewinn); gEl.style.color = gewinn>=0 ? 'var(--success-deep)' : 'var(--rust)'; }
@@ -8221,7 +7723,6 @@ function openOrderDetail(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b){showToast('Bestellung nicht gefunden.','⚠');return;}
   currentDetailOrderId = id;
-  { const rr=document.getElementById('od-repeat-row'); if(rr) rr.style.display=(!b.fuerLieferant&&b.kId&&['user','special'].includes(currentRole()))?'flex':'none'; }
   const k=S.kunden.find(x=>x.id===b.kId);
 
   document.getElementById('od-id').textContent = '#'+String(b.id).padStart(5,'0');
@@ -8803,7 +8304,7 @@ function renderUserList(){
       : '<span style="font-size:10px;color:var(--success)">●</span>';
     return `<div class="ul-item"${u.gesperrt?' style="opacity:.6"':''}>
       <div class="ul-av">${escapeHtml(u.username.charAt(0).toUpperCase())}</div>
-      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}${u.gesperrt?' <span class="badge b-offen" style="margin-left:6px">Gesperrt</span>':''}</div>
+      <div class="ul-info"><div class="ul-name">${escapeHtml(u.username)}${fullNameOf(u.id)?` <span style="color:var(--ink-soft);font-weight:500">· ${escapeHtml(fullNameOf(u.id))}</span>`:''}${u.id===currentUserId?' <span style="color:var(--ink-faint);font-weight:400">(du)</span>':''}${u.gesperrt?' <span class="badge b-offen" style="margin-left:6px">Gesperrt</span>':''}</div>
         <div class="ul-role">${u.auth_modus==='pin'?'🔢 PIN':'🔑 Passwort'}${u.first_login?'<span class="ul-meta">⏳ Wechsel beim nächsten Login</span>':''}</div></div>
       ${ctrl}
       <button class="ic-btn" onclick="openEditUser('${u.id}')" title="Benutzer bearbeiten" aria-label="Benutzer bearbeiten">✏️</button>
@@ -8812,7 +8313,7 @@ function renderUserList(){
     </div>`;
   };
   const groups=ROLE_ORDER.filter(r=>ulFilter==='all'||ulFilter===r).map(r=>{
-    const us=M.users.filter(u=>u.role===r && (!q||String(u.username).toLowerCase().includes(q))).sort((a,b)=>String(a.username).localeCompare(String(b.username),'de'));
+    const us=M.users.filter(u=>u.role===r && (!q||(String(u.username)+' '+fullNameOf(u.id)+' '+(u.telefon||'')).toLowerCase().includes(q))).sort((a,b)=>String(a.username).localeCompare(String(b.username),'de'));
     if(!us.length) return '';
     return `<div class="ul-group"><div class="ul-group-head">${ROLE_INFO[r].icon} ${ROLE_INFO[r].label} <span>${us.length}</span></div>${us.map(row).join('')}</div>`;
   }).join('');
@@ -8835,6 +8336,7 @@ async function addUser(){
   const eNu=checkSecret(modusNu,p);
   if(!n){ showToast('Bitte Benutzernamen eingeben.','⚠'); return; }
   if(eNu){ showToast(eNu,'⚠'); return; }
+  { const ve=validateProfileFields(readProfileFields('nu')); if(ve){ showToast(ve,'⚠'); return; } }
   // Konto mit zufälligem Start-Passwort anlegen, danach PIN/Passwort + Anmeldeart serverseitig setzen
   const { data, error } = await sb.rpc('create_app_user', { p_username:n, p_password:randomPw(), p_role:r, p_linked_to: null });
   if(error){ console.error('create_app_user',error); showToast(rpcErrText(error,'Benutzer konnte nicht angelegt werden.'), '⚠'); return; }
@@ -8847,6 +8349,14 @@ async function addUser(){
   const { error: fErr } = await sb.rpc('admin_set_credentials', { p_user_id:data, p_modus:modusNu, p_secret:p, p_force:true });
   M.users.push({ id:data, username:n, role:r, first_login:!fErr, linked_to: linkOk?(linked||null):null, auth_modus:modusNu });
   if(fErr) showToast('Angelegt, aber Passwortwechsel-Pflicht konnte nicht gesetzt werden (app_struktur_setup.sql ausführen).','⚠');
+  { const pf=readProfileFields('nu');
+    if(Object.values(pf).some(Boolean)){
+      const pErr=await saveProfileFields(data,pf);
+      if(pErr){ showToast(rpcErrText(pErr,'Persönliche Daten konnten nicht gespeichert werden.')+' — bitte profil_felder.sql in Supabase ausführen.','⚠'); }
+      else { const nu=M.users.find(x=>x.id===data); if(nu) Object.assign(nu,{vorname:pf.vorname,nachname:pf.nachname,telefon:pf.telefon,adresse:pf.adresse}); M.details=M.details||{}; M.details[data]={user_id:data,email:pf.email,geburtsdatum:pf.geburtsdatum,notiz:pf.notiz}; }
+    }
+    ['vorname','nachname','telefon','adresse','email','dob','notiz'].forEach(k=>{ const e=document.getElementById('nu-'+k); if(e) e.value=''; });
+  }
   document.getElementById('nu-name').value='';document.getElementById('nu-pw').value='';onNuRoleChange();
   document.getElementById('nu-linked').value='';
   renderUserList();if(!fErr) showToast('Benutzer angelegt — muss beim ersten Login ein neues Passwort setzen. ✓');
@@ -8896,51 +8406,12 @@ async function saveContactInfo(){
 }
 function exportData(){
   const blob=new Blob([JSON.stringify({state:S, service:M.service, exported:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click(); try{ localStorage.setItem('nm_last_backup',String(Date.now())); }catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nicoflow-backup-'+today()+'.json';a.click();
   showToast('Export heruntergeladen. ↓');
 }
-// Backup-Import: liest eine mit "Export" erstellte JSON-Datei und legt Kunden und Bestellungen
-// in der Online-Datenbank neu an (für das angemeldete Konto). Bereits vorhandene Kunden (gleicher
-// Name) werden wiederverwendet, bereits vorhandene Bestellungen (gleicher Kunde, Datum, Betrag,
-// Positionen) übersprungen — ein zweiter Import legt also nichts doppelt an.
-async function importData(e){
-  const input=e.target, file=input.files&&input.files[0]; input.value='';
-  if(!file) return;
-  let data;
-  try{ data=JSON.parse(await file.text()); }catch(err){ showToast('Datei ist kein gültiges Backup (JSON).','⚠'); return; }
-  const st=data&&data.state;
-  if(!st||!Array.isArray(st.kunden)||!Array.isArray(st.bestellungen)){ showToast('Datei enthält kein NicoFlow-Backup.','⚠'); return; }
-  const norm=x=>String(x||'').trim().toLowerCase();
-  const nameKey=k=>norm(k.vorname)+'|'+norm(k.nachname);
-  const sig=(kId,b)=>[kId,b.date,Number(b.total).toFixed(2),JSON.stringify((b.items||[]).map(i=>[i.prod,i.stueck,i.variante||null]))].join('#');
-  const eigeneKunden=st.kunden;
-  const bestellungen=st.bestellungen.filter(b=>!b.fuerLieferant && b.kId!=null);
-  const have=new Set(S.bestellungen.filter(b=>!b.fuerLieferant).map(b=>sig(b.kId,b)));
-  const kMap={}; // alte Kunden-ID -> neue/vorhandene ID
-  let newK=0;
-  eigeneKunden.forEach(k=>{ const ex=S.kunden.find(x=>nameKey(x)===nameKey(k)); if(ex) kMap[k.id]=ex.id; else newK++; });
-  const todo=bestellungen.filter(b=>{ const kk=eigeneKunden.find(k=>k.id===b.kId); if(!kk) return false; const nid=kMap[kk.id]; return !(nid!=null && have.has(sig(nid,b))); });
-  if(!todo.length && !newK){ showToast('Nichts zu importieren — alles ist schon vorhanden. ✓'); return; }
-  if(!(await confirmDialog(`${newK} neue(r) Kunde(n) und ${todo.length} Bestellung(en) werden hinzugefügt. Vorhandene Daten bleiben unverändert.`,{title:'Backup importieren?',confirmText:'Importieren',danger:false}))) return;
-  let okK=0, okB=0, fail=0;
-  for(const k of eigeneKunden){
-    if(kMap[k.id]!=null) continue;
-    const { data:row, error }=await sb.from('kunden').insert({ user_id:currentUserId, vorname:k.vorname, nachname:k.nachname }).select().single();
-    if(error){ fail++; continue; }
-    kMap[k.id]=row.id; okK++;
-  }
-  for(const b of todo){
-    const nid=kMap[b.kId]; if(nid==null){ fail++; continue; }
-    const payload={ user_id:currentUserId, kunde_id:nid, items:b.items||[], subtotal:Number(b.subtotal)||0,
-      discount_type:b.discountType||null, discount_value:b.discountValue||0, total:Number(b.total)||0,
-      paid:!!b.paid, delivered:!!b.delivered, fuer_lieferant:false, bestelldatum:b.date||today(),
-      bezahlt_am:b.paidAt||null, angekommen_am:b.deliveredAt||null, notiz:b.notiz||null, vorauszahlung:b.vorauszahlung||0 };
-    let { error }=await sb.from('bestellungen').insert(payload);
-    if(error && isMissingColumnError(error,'vorauszahlung')){ const { vorauszahlung:_v, ...rest }=payload; ({ error }=await sb.from('bestellungen').insert(rest)); }
-    if(error) fail++; else okB++;
-  }
-  await loadAllData(); refresh();
-  showToast(`Import fertig: ${okK} Kunde(n), ${okB} Bestellung(en)${fail?` · ${fail} fehlgeschlagen`:''}. ✓`,'↑');
+function importData(e){
+  showToast('Import ist mit der Online-Datenbank derzeit nicht verfügbar. Daten direkt in Supabase einspielen.', '⚠');
+  e.target.value='';
 }
 async function clearOrders(){
   if(!(await confirmDialog('Das betrifft alle Geräte/Benutzer und kann nicht rückgängig gemacht werden.', {title:'Wirklich ALLE Bestellungen löschen?', confirmText:'Alle löschen'})))return;
@@ -9477,21 +8948,13 @@ function openPalette(){
   if(!currentUserId) return;
   const ex=document.getElementById('palette'); if(ex){ ex.remove(); return; }
   const o=document.createElement('div'); o.id='palette';
-  o.innerHTML='<div class="pal-box"><input id="pal-in" placeholder="Seite, Kunde oder Bestellung suchen … (Esc schließt)" autocomplete="off"><div id="pal-list"></div></div>';
+  o.innerHTML='<div class="pal-box"><input id="pal-in" placeholder="Seite suchen … (Esc schließt)" autocomplete="off"><div id="pal-list"></div></div>';
   document.body.appendChild(o);
   const ticks=[...document.querySelectorAll('.scale-tick')].filter(t=>t.style.display!=='none');
   const inp=o.querySelector('#pal-in'), list=o.querySelector('#pal-list');
   const draw=()=>{ const q=inp.value.toLowerCase(); list.innerHTML='';
-    const items=ticks.map(t=>({t,n:t.textContent.replace(/\s+/g,' ').trim().replace(/^\d+\s?/,'')})).filter(x=>x.n.toLowerCase().includes(q)).slice(0,8).map(x=>({n:x.n,go:()=>x.t.click()}));
-    const role=currentRole();
-    if(q.length>=2 && (role==='user'||role==='special')){
-      (S.kunden||[]).filter(k=>(k.vorname+' '+k.nachname).toLowerCase().includes(q)).slice(0,5).forEach(k=>items.push({n:'👤 '+k.vorname+' '+k.nachname,go:()=>{ nav('kunden'); try{ openKundeDetail(k.id); }catch(e){} }}));
-      const num=q.replace('#','');
-      (S.bestellungen||[]).filter(b=>(/^\d+$/.test(num)&&String(b.id).startsWith(num))||sdWho(b).toLowerCase().includes(q)||(b.items||[]).some(it=>(PROD_MAP[it.prod]?.name||'').toLowerCase().includes(q)))
-        .sort((a,b)=>b.id-a.id).slice(0,6).forEach(b=>items.push({n:'🧾 #'+b.id+' · '+sdWho(b)+' · '+fmt(displayTotal(b))+(b.paid?' ✓':''),go:()=>{ nav('bestellungen'); try{ openOrderDetail(b.id); }catch(e){} }}));
-    }
-    items.forEach((x,i)=>{
-      const d=document.createElement('div'); d.className='pal-item'+(i?'':' on'); d.textContent=x.n; d.onclick=()=>{ o.remove(); x.go(); }; list.appendChild(d); }); };
+    ticks.map(t=>({t,n:t.textContent.replace(/\s+/g,' ').trim().replace(/^\d+\s?/,'')})).filter(x=>x.n.toLowerCase().includes(q)).slice(0,8).forEach((x,i)=>{
+      const d=document.createElement('div'); d.className='pal-item'+(i?'':' on'); d.textContent=x.n; d.onclick=()=>{ o.remove(); x.t.click(); }; list.appendChild(d); }); };
   draw(); inp.oninput=draw;
   inp.onkeydown=e=>{ if(e.key==='Enter') list.querySelector('.pal-item')?.click(); if(e.key==='Escape') o.remove(); };
   o.onclick=e=>{ if(e.target===o) o.remove(); };
@@ -9566,7 +9029,7 @@ async function handleLoginFail(u){
     showLoginMsg('Falscher Benutzername oder Passwort.'+(r<=2&&r>0?` Noch ${r} Versuch${r===1?'':'e'}, danach wird das Konto gesperrt.`:''),false);
   }
 }
-function lockedUsers(){ return M.users.filter(u=>u.gesperrt && u.gesperrt_grund!=='admin'); }
+function lockedUsers(){ return M.users.filter(u=>u.gesperrt && u.gesperrt_grund==='fehlversuche'); }
 function lockBanner(){
   const el=document.getElementById('ul-locked-banner'); if(!el) return;
   const l=lockedUsers(); el.style.display=l.length?'':'none';
@@ -9576,6 +9039,7 @@ function updateLockBadge(){
   const el=document.getElementById('tk-dot-einstellungen'); if(!el) return;
   const n=currentRole()==='admin'?lockedUsers().length:0;
   el.textContent=n>9?'9+':String(n); el.classList.toggle('show',n>0);
+  if(n>0&&!window._lockToast){ window._lockToast=1; showToast(`${n} Konto${n===1?'':'en'} gesperrt — bitte prüfen.`,'🔒'); }
 }
 const _rulOrig=renderUserList; renderUserList=function(){ _rulOrig.apply(this,arguments); try{ lockBanner(); updateLockBadge(); }catch(e){} };
 setInterval(async()=>{
@@ -9584,51 +9048,12 @@ setInterval(async()=>{
 },60000);
 
 // ══ v21.1: Admin-Benachrichtigungen ══
-async function sysNotify(title,body,tag){
+function sysNotify(title,body,tag){
   if(!('Notification' in window)||Notification.permission!=='granted') return;
-  const opts={body,tag:tag||'nf',renotify:true,icon:'icons/icon-192.png',badge:'icons/favicon.png',vibrate:[180,80,180]};
   try{
-    let reg=swReg;
-    if(!reg&&navigator.serviceWorker){ reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),1500))]); }
-    if(reg&&reg.showNotification){ await reg.showNotification(title,opts); return; }
-  }catch(e){}
-  try{ new Notification(title,{body,tag:opts.tag,icon:opts.icon}); }catch(e){}
-}
-// Eigener Benachrichtigungsverlauf (alle Rollen)
-function nfLog(){ try{ return JSON.parse(localStorage.getItem('nm_nflog_'+currentUserId)||'[]'); }catch(e){ return []; } }
-function nfSave(l){ try{ localStorage.setItem('nm_nflog_'+currentUserId,JSON.stringify(l.slice(0,30))); }catch(e){} }
-function nfPush(title,body,tag){
-  const l=nfLog(); l.unshift({t:Date.now(),title,body,seen:false}); nfSave(l);
-  showToast(body,'🔔');
-  sysNotify(title,body,tag);
-  updateNotifUI();
-}
-let _ordT=null;
-function startOrderRealtime(){
-  if(window._ordCh||!currentUserId) return;
-  try{
-    window._ordCh=sb.channel('order-watch-'+currentUserId).on('postgres_changes',{event:'*',schema:'public',table:'bestellungen'},p=>{
-      try{
-        const n=p.new||{}; if(!n.id) return;
-        const old=(S.bestellungen||[]).find(o=>o.id===n.id);
-        if(p.eventType==='INSERT'){ if(old||n.user_id===currentUserId) return; nfPush('NicoFlow · Neue Bestellung','Neue Bestellung #'+n.id+' ist eingegangen.','ord-'+n.id); }
-        else if(p.eventType==='UPDATE'&&old&&!n.deleted_at){
-          if(!old.delivered&&n.delivered) nfPush('NicoFlow · Bestellung angekommen','Bestellung #'+n.id+' ist angekommen.','ordd-'+n.id);
-          else if(!old.paid&&n.paid) nfPush('NicoFlow · Bestellung bezahlt','Bestellung #'+n.id+' wurde bezahlt.','ordp-'+n.id);
-        }
-      }catch(e){}
-      clearTimeout(_ordT); _ordT=setTimeout(async()=>{ await loadAllData(); },1500);
-    }).subscribe();
-  }catch(e){}
-}
-function askNotifOnce(){
-  if(!('Notification' in window)||Notification.permission!=='default') return;
-  try{ if(localStorage.getItem('nm_notif_asked')) return; }catch(e){}
-  document.addEventListener('click',async function h(){
-    document.removeEventListener('click',h);
-    try{ localStorage.setItem('nm_notif_asked','1'); }catch(e){}
-    try{ const r=await Notification.requestPermission(); if(r==='granted') sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test'); renderNotifCenter(); }catch(e){}
-  },{once:true});
+    if(swReg&&swReg.showNotification) swReg.showNotification(title,{body,tag,icon:'icons/icon-192.png',badge:'icons/favicon.png'});
+    else new Notification(title,{body,tag,icon:'icons/icon-192.png'});
+  }catch(e){ try{ new Notification(title,{body}); }catch(_){} }
 }
 function checkNewLocks(){
   const key='nm_lock_notified_'+currentUserId; let seen;
@@ -9641,36 +9066,34 @@ function checkNewLocks(){
   showToast(`Konto gesperrt: ${names} — Administrator muss freischalten.`,'🔒');
   sysNotify('NicoFlow · Konto gesperrt',`${names}: zu viele fehlgeschlagene Anmeldeversuche. Bitte freischalten.`,'lock-'+fresh[0].id);
 }
-function updateNotifUI(){
+function updateNotifUI(n){
   const adm=currentRole()==='admin';
-  const n=adm?lockedUsers().length:0;
   ['bell-btn','bell-btn-m'].forEach(id=>{ const x=document.getElementById(id); if(x) x.style.display=adm?'':'none'; });
-  ['bell-n','bell-n-m'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=n>9?'9+':(n||''); e.classList.toggle('show',n>0); } });
+  ['bell-n','bell-n-m'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=n||''; e.classList.toggle('show',n>0); } });
   if(document.getElementById('modal-notif')?.classList.contains('show')) renderNotifCenter();
 }
 function updateLockBadge(){
   const adm=currentRole()==='admin', n=adm?lockedUsers().length:0;
   const el=document.getElementById('tk-dot-einstellungen');
   if(el){ el.textContent=n>9?'9+':String(n); el.classList.toggle('show',n>0); }
-  updateNotifUI();
+  updateNotifUI(n);
   if(!adm) return;
   checkNewLocks(); startLockRealtime();
 }
 function renderNotifCenter(){
-  const l=currentRole()==='admin'?lockedUsers():[];
-  const hist=[].map(x=>`<div class="lock-row" style="align-items:flex-start;padding:10px 0"><div><b>${escapeHtml(x.title.replace('NicoFlow · ',''))}</b><div class="ps" style="margin:2px 0 0">${escapeHtml(x.body)} · ${fmtDateTime(new Date(x.t).toISOString())}</div></div></div>`).join('');
-  document.getElementById('notif-list').innerHTML=(l.length||hist)?(l.map(u=>`<div class="lock-row" style="align-items:flex-start;padding:12px 0"><div><b>🔒 Konto „${escapeHtml(u.username)}“ gesperrt</b><div class="ps" style="margin:2px 0 0">Zu viele fehlgeschlagene Anmeldeversuche${u.gesperrt_am?' · '+fmtDateTime(u.gesperrt_am):''}. Ein Administrator muss das Konto freischalten.</div></div><button class="btn btn-primary btn-sm" onclick="toggleLockUser('${u.id}',false)">Entsperren</button></div>`).join('')+hist):'<div class="ec" style="padding:24px 0"><div class="ec-t">Keine neuen Benachrichtigungen</div><div class="ec-s">Neue Bestellungen, Ankünfte und Zahlungen erscheinen hier sofort.</div></div>';
+  const l=lockedUsers();
+  document.getElementById('notif-list').innerHTML=l.length?l.map(u=>`<div class="lock-row" style="align-items:flex-start;padding:12px 0"><div><b>🔒 Konto „${escapeHtml(u.username)}“ gesperrt</b><div class="ps" style="margin:2px 0 0">Zu viele fehlgeschlagene Anmeldeversuche${u.gesperrt_am?' · '+fmtDateTime(u.gesperrt_am):''}. Ein Administrator muss das Konto freischalten.</div></div><button class="btn btn-primary btn-sm" onclick="toggleLockUser('${u.id}',false)">Entsperren</button></div>`).join(''):'<div class="ec" style="padding:24px 0"><div class="ec-t">Keine neuen Benachrichtigungen</div><div class="ec-s">Gesperrte Konten erscheinen hier sofort.</div></div>';
   const perm=document.getElementById('notif-perm'); if(!perm) return;
   if(!('Notification' in window)) perm.innerHTML='<div class="ps">Dieser Browser unterstützt keine Systembenachrichtigungen. Meldungen erscheinen in der App.</div>';
-  else if(Notification.permission==='granted') perm.innerHTML='<div class="ps">✓ Systembenachrichtigungen sind aktiv (Handy: App am besten zum Home-Bildschirm hinzufügen).</div>';
+  else if(Notification.permission==='granted') perm.innerHTML='<div class="ps">✓ Systembenachrichtigungen sind aktiv (solange NicoFlow geöffnet ist).</div>';
   else if(Notification.permission==='denied') perm.innerHTML='<div class="ps">Systembenachrichtigungen sind blockiert. Erlaube sie in den Browser-/Geräteeinstellungen für diese Seite.</div>';
   else perm.innerHTML='<button class="btn btn-ghost btn-sm" onclick="enableSysNotif()">🔔 Systembenachrichtigungen aktivieren</button><div class="ps" style="margin-top:6px">Dann meldet dein Gerät eine Sperre auch, wenn NicoFlow im Hintergrund läuft.</div>';
 }
-function openNotifCenter(){ const l=nfLog(); l.forEach(x=>x.seen=true); nfSave(l); renderNotifCenter(); openModal('notif'); updateNotifUI(); }
+function openNotifCenter(){ renderNotifCenter(); openModal('notif'); }
 async function enableSysNotif(){
   if(!('Notification' in window)){ showToast('Dieser Browser unterstützt keine Systembenachrichtigungen.','⚠'); return; }
   const r=await Notification.requestPermission(); renderNotifCenter();
-  if(r==='granted'){ sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test'); subscribePush(); }
+  if(r==='granted') sysNotify('NicoFlow','Benachrichtigungen sind aktiv. ✓','test');
 }
 // Live-Aktualisierung: bei jeder Änderung an Profilen Daten neu laden
 let _lockT=null;
@@ -9684,6 +9107,44 @@ function startLockRealtime(){
 }
 const _dloOrig=doLogout;
 doLogout=async function(){ try{ if(window._lockCh){ sb.removeChannel(window._lockCh); window._lockCh=null; } }catch(e){} return _dloOrig.apply(this,arguments); };
+
+// ══ v21.2: Personendaten bei Accounts ══
+function readProfileFields(pre){
+  const g=id=>((document.getElementById(pre+'-'+id)||{}).value||'').trim()||null;
+  return {vorname:g('vorname'),nachname:g('nachname'),telefon:g('telefon'),adresse:g('adresse'),email:g('email'),geburtsdatum:g('dob'),notiz:g('notiz')};
+}
+function validateProfileFields(pf){
+  if(pf.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(pf.email)) return 'Bitte eine gültige E-Mail-Adresse eingeben.';
+  if(pf.geburtsdatum){ const a=ageOf(pf.geburtsdatum); if(a===null||a<0||a>120) return 'Bitte ein gültiges Geburtsdatum eingeben.'; }
+  return '';
+}
+async function saveProfileFields(userId,pf){
+  const { error }=await sb.rpc('admin_set_profil',{ p_user_id:userId, p_vorname:pf.vorname, p_nachname:pf.nachname, p_telefon:pf.telefon, p_adresse:pf.adresse, p_email:pf.email, p_geburtsdatum:pf.geburtsdatum, p_notiz:pf.notiz });
+  return error;
+}
+function fullNameOf(userId){ const u=M.users.find(x=>x.id===userId); return u?[u.vorname,u.nachname].filter(Boolean).join(' '):''; }
+// Admin: geschützte Zusatzdaten mitladen
+const _ladOrig=loadAllData;
+loadAllData=async function(){
+  await _ladOrig.apply(this,arguments);
+  try{
+    if(currentRole()==='admin'){ const { data }=await sb.from('profil_details').select('*'); M.details={}; (data||[]).forEach(r=>{ M.details[r.user_id]=r; }); }
+  }catch(e){}
+};
+// Eigene Daten (Name, Telefon, Adresse)
+const _rsOrig=renderSettings;
+renderSettings=function(){ _rsOrig.apply(this,arguments); const a=document.getElementById('set-vorname'),b=document.getElementById('set-nachname'); if(a) a.value=(M.profile&&M.profile.vorname)||''; if(b) b.value=(M.profile&&M.profile.nachname)||''; };
+async function saveContactInfo(){
+  const g=id=>(document.getElementById(id).value||'').trim();
+  const patch={ vorname:g('set-vorname'), nachname:g('set-nachname'), telefon:g('set-telefon'), adresse:g('set-adresse') };
+  const { error }=await sb.from('profiles').update(patch).eq('id',currentUserId);
+  const hint=document.getElementById('set-contact-setup-hint');
+  if(error){ hint.style.display='block'; showToast('Konnte nicht gespeichert werden — siehe Hinweis unten.','⚠'); return; }
+  hint.style.display='none';
+  if(M.profile) Object.assign(M.profile,patch);
+  const me=M.users.find(u=>u.id===currentUserId); if(me) Object.assign(me,patch);
+  showToast('Daten gespeichert. ✓');
+}
 </script>
 
 </body>
