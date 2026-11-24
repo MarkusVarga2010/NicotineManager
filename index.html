@@ -2435,7 +2435,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">22.0.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">22.1.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -2795,22 +2795,8 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="kk-art" id="kk-art" aria-hidden="true"></div><div class="kk-wm" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="wmg" gradientUnits="userSpaceOnUse" x1="130" y1="110" x2="380" y2="400"><stop offset="0" stop-color="#FFB27A"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><g fill="none" stroke="url(#wmg)" stroke-width="56" stroke-linecap="round"><path d="M164 372V140"/><path d="M348 372V140"/><path d="M164 152L348 360"/></g></svg></div>
         <div class="kk-sn" id="kk-sn" aria-hidden="true"></div>
         <div class="kk-top"><div class="kk-logo"><span class="kk-mark"><svg class="svg-ic "><use href="#ic-wave"/></svg></span><span class="kk-brand">NicoFlow</span></div><span class="kk-pill">KUNDENKARTE</span></div>
-        <div class="kk-mid"><div class="kk-photo" id="kk-photo" onclick="toggleKkEdit(true)" title="Foto &amp; Geburtsdatum bearbeiten"></div><div class="kk-txt"><div class="kk-chiprow"><span class="kk-chip-g" aria-hidden="true"></span><svg class="kk-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6c3 3.5 3 8.5 0 12"/><path d="M12 4c4.5 5 4.5 11 0 16"/><path d="M16 2c6 6.5 6 13.5 0 20"/></svg></div><div class="kk-lab">HALLO,</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-meta"><div><i>KUNDE SEIT</i><b id="kk-since">—</b></div><div><i>GEBURTSDATUM</i><b id="kk-dobv">—</b></div><div><i>TYP</i><b id="kk-typ">—</b></div><div><i>KARTEN-ID</i><b id="kk-id">—</b></div></div>
+        <div class="kk-mid"><div class="kk-txt"><div class="kk-chiprow"><span class="kk-chip-g" aria-hidden="true"></span><svg class="kk-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6c3 3.5 3 8.5 0 12"/><path d="M12 4c4.5 5 4.5 11 0 16"/><path d="M16 2c6 6.5 6 13.5 0 20"/></svg></div><div class="kk-lab">HALLO,</div><div class="kk-name" id="kk-name"></div><div class="kk-nr" id="kk-nr"></div></div></div><div class="kk-meta"><div><i>KUNDE SEIT</i><b id="kk-since">—</b></div><div><i>TYP</i><b id="kk-typ">—</b></div><div><i>KARTEN-ID</i><b id="kk-id">—</b></div></div>
         <div class="kk-bc" id="kk-bc" onclick="showKkFullscreen()" title="Antippen für Vollbild"></div><div class="kk-foot"><span><b>●</b> AKTIV</span><span>ZUM SCANNEN VORZEIGEN · NUR PERSÖNLICH</span></div>
-      </div>
-      <button type="button" class="kk-edit-btn" onclick="toggleKkEdit()"><svg class="svg-ic"><use href="#ic-card"/></svg>Foto &amp; Geburtsdatum <span id="kk-edit-state"></span></button>
-      <div class="kk-edit" id="kk-edit" style="display:none">
-        <div class="kk-ed-row">
-          <button type="button" class="kk-ed-ph" id="kk-ed-ph" onclick="document.getElementById('kk-file').click()" aria-label="Foto aufnehmen oder wählen"></button>
-          <div class="kk-ed-f">
-            <label class="fl" for="kk-dob">Geburtsdatum</label>
-            <input type="date" id="kk-dob" min="1900-01-01"/>
-            <input type="file" id="kk-file" accept="image/*" capture="user" hidden onchange="kkPickPhoto(this)"/>
-            <div class="kk-ed-btns"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('kk-file').click()">Foto aufnehmen / wählen</button><button type="button" class="btn btn-ghost btn-sm" onclick="kkClearPhoto()">Entfernen</button></div>
-          </div>
-        </div>
-        <div class="ps" style="margin:2px 0 12px">Das Foto dient der Übergabe als Abgleich mit der Person. Das Geburtsdatum ergänzt die Karte (nur zur Vollständigkeit).</div>
-        <button type="button" class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveKkProfile()">Speichern</button>
       </div>
       <div class="kk-actions">
         <button type="button" class="kk-act" onclick="showKkFullscreen()"><svg class="svg-ic "><use href="#ic-expand"/></svg>Vollbild</button>
@@ -2957,7 +2943,7 @@ alter table profiles add column if not exists adresse text;</pre>
   <div class="modal" style="max-width:420px">
     <div class="modal-head"><h3><svg class="svg-ic h-ic"><use href="#ic-scan"/></svg>Übergabe bestätigen</h3><button class="modal-close" onclick="closeModal('abholcode-confirm')" aria-label="Schließen">✕</button></div>
     <div class="modal-body">
-      <div class="cs-who"><div class="cs-av" id="ac-who-av"></div><div class="cs-who-t"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div><div class="cs-age" id="ac-age"></div></div></div>
+      <div class="cs-who"><div class="cs-av" id="ac-who-av"></div><div class="cs-who-t"><div class="cs-who-k">Übergabe an</div><div class="cs-who-v" id="ac-who"></div><div class="cs-who-s" id="ac-who-sub"></div></div></div>
       <div style="margin:-4px 0 12px"><button class="btn btn-ghost btn-sm" id="ac-show-card" onclick="showHolderCard()" style="width:100%;justify-content:center">Karte des Inhabers ansehen / senden / drucken</button></div>
       <div class="cs-steps"><div class="cs-step"><i>1</i>Karte vorzeigen lassen</div><div class="cs-step"><i>2</i>Strichcode in den Rahmen halten</div><div class="cs-step"><i>3</i>Übergabe wird bestätigt</div></div>
       <div class="ac-scan-wrap">
@@ -3166,17 +3152,17 @@ alter table profiles add column if not exists adresse text;</pre>
 </section>
 <section class="hb-ch" id="hb-ch-6"><h1>6. Kundenkarte und Übergabe</h1>
 <h2>Was ist die Kundenkarte?</h2>
-<p>Jeder Kunde und jedes Konto bekommt eine Karte mit einem <b>Strichcode</b> (Code 128, Nummer im Format <code>NFK-XXXX-XXXX-XXXX</code>). Die Karte zeigt Logo-Wasserzeichen, Name, Foto, „Kunde seit“, Geburtsdatum, Typ, Karten-ID und den Strichcode.</p>
+<p>Jeder Kunde und jedes Konto bekommt eine Karte mit einem <b>Strichcode</b> (Code 128, Nummer im Format <code>NFK-XXXX-XXXX-XXXX</code>). Die Karte zeigt Logo-Wasserzeichen, Name, „Kunde seit“, Typ, Karten-ID und den Strichcode.</p>
 <ul>
 <li><b>Vollbild:</b> Der Strichcode wird groß auf weißem Grund angezeigt, damit er sich gut scannen lässt.</li>
 <li><b>Als Bild</b> speichern oder teilen, <b>Drucken</b> im Scheckkartenformat.</li>
-<li><b>Foto und Geburtsdatum</b> erfassen: Das Foto dient als Abgleich bei der Übergabe.</li>
+
 <li><b>Neu ausstellen:</b> Sperrt die alte Karte sofort, zum Beispiel bei Verlust.</li>
 <li>Konten (Besteller, Lieferantenkunden, Lieferanten) bekommen ihre Karte beim Anmelden automatisch. Für eigene Kunden wird sie beim ersten Öffnen erstellt.</li>
 </ul>
 <h2>Übergabe in 3 Schritten</h2>
 <ol>
-<li>Beim Klick auf <b>Abholen</b> oder <b>Persönlich übergeben</b> öffnet sich das Scan-Fenster. Oben siehst du Name, Foto und Geburtsdatum der Person, für die die Bestellung bestimmt ist.</li>
+<li>Beim Klick auf <b>Abholen</b> oder <b>Persönlich übergeben</b> öffnet sich das Scan-Fenster. Oben siehst du den Namen der Person, für die die Bestellung bestimmt ist.</li>
 <li>Die Person zeigt ihre Karte. Du hältst den Strichcode <b>quer und ruhig</b> in den Rahmen. Ein Blitzlicht-Knopf hilft bei wenig Licht.</li>
 <li>Das System prüft, ob die Karte zur Person der Bestellung gehört, und bestätigt die Übergabe. Eine falsche Karte wird mit dem Namen des echten Inhabers abgelehnt.</li>
 </ol>
@@ -3660,8 +3646,12 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '22.0.0';
+const CURRENT_UI_VERSION = '22.1.0';
 const WHATS_NEW = {
+  '22.1.0': [
+    'Die Kundenkarte kommt jetzt ohne Foto und ohne Geburtsdatum aus: Sie zeigt Logo, Name, Kartennummer, „Kunde seit“, Typ, Karten-ID und den Strichcode.',
+    'Bei der Übergabe erscheint nur noch der Name des Karteninhabers — kein Foto-Abgleich und keine Altersanzeige mehr. „Als Bild“ und „Drucken“ passen sich an.'
+  ],
   '22.0.0': [
     'Lieferanten können wieder bei ihrem Lieferanten bestellen: Die Bestellung trägt jetzt den Lieferanten direkt mit, die Preise und Varianten des Lieferanten werden zuverlässig geladen (benötigt betrieb_setup.sql).',
     'Fit für den Betrieb mit vielen Nutzern: Daten werden seitenweise geladen (keine stille 1000-Zeilen-Grenze mehr), automatische Aktualisierungen laden nur noch offene Bestellungen statt alles, Kundenkarten-Fotos werden erst bei Bedarf geholt.',
@@ -4063,7 +4053,7 @@ async function loadAllData(){
   statusLogMissing = !!logRes.error;
   S.statusLog = {};
   (logRes.data||[]).forEach(r=>{ (S.statusLog[r.bestellung_id]=S.statusLog[r.bestellung_id]||[]).push(r); });
-  let kRes = await fetchAll(()=>sb.from('kundenkarten').select('id,subject_type,subject_id,code,geburtsdatum,created_at,revoked_at').is('revoked_at',null).order('id'));
+  let kRes = await fetchAll(()=>sb.from('kundenkarten').select('id,subject_type,subject_id,code,created_at,revoked_at').is('revoked_at',null).order('id'));
   if(kRes.error) kRes = await fetchAll(()=>sb.from('kundenkarten').select('*').is('revoked_at',null).order('id'));
   kartenMissing = !!kRes.error;
   S.karten = {};
@@ -6394,12 +6384,9 @@ function openCardScan(ids,mode,onDone){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   _cs={ids,mode,onDone,holder:orderHolderName(b)};
   document.getElementById('ac-who').textContent=_cs.holder;
-  const hc=cardOfHolder(b), av=document.getElementById('ac-who-av'), ag=document.getElementById('ac-age');
+  const av=document.getElementById('ac-who-av');
+  av.classList.remove('has-photo'); av.style.backgroundImage='';
   av.textContent=String(_cs.holder||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
-  av.classList.toggle('has-photo',!!(hc&&hc.foto)); av.style.backgroundImage=(hc&&hc.foto)?`url('${hc.foto}')`:'';
-  if(hc&&hc.foto) av.textContent='';
-  if(hc&&hc.foto===undefined){ sb.from('kundenkarten').select('foto').eq('id',hc.id).maybeSingle().then(({data})=>{ hc.foto=data?(data.foto||null):null; if(hc.foto){ av.classList.add('has-photo'); av.style.backgroundImage=`url('${hc.foto}')`; av.textContent=''; } }); }
-  const ab=ageBadge(hc); ag.className='cs-age '+ab.cls; ag.textContent=ab.txt;
   document.getElementById('ac-who-sub').textContent = mode==='batch' ? `${ids.length} Bestellungen werden abgeschlossen` : `Bestellung #${b.id}`;
   document.getElementById('ac-result').style.display='none';
   document.getElementById('ac-input').value=''; document.getElementById('ac-reason').value='';
@@ -6432,7 +6419,7 @@ async function verifyCardCode(raw){
   const { data, error }=await sb.rpc('verify_kundenkarte',{ p_code:code, p_order_id:_cs.ids[0] });
   if(error){ showCardResult('err', /does not exist|function/i.test(error.message||'') ? 'Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).' : escapeHtml(error.message||'Prüfung fehlgeschlagen.')); return; }
   if(data && data.ok){
-    showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b> · bitte Foto abgleichen</span>`);
+    showCardResult('ok',`<b class="cs-t">Karte bestätigt</b><span>Inhaber: <b>${escapeHtml(data.name||_cs.holder)}</b></span>`);
     setTimeout(()=>finishCardHandover(`Übergabe per Kundenkarte bestätigt (${data.name||_cs.holder})`),1800);
   } else if(data && data.reason==='wrong_person'){
     showCardResult('err',`<b class="cs-t">Falsche Karte</b><span>Diese Karte gehört zu <b>${escapeHtml(data.holder||'einer anderen Person')}</b> — die Bestellung ist für <b>${escapeHtml(_cs.holder)}</b>.</span>`+_retryBtn);
@@ -6474,9 +6461,8 @@ async function issueCard(type,id,silent){
 async function openKundenkarte(type,id){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
-  if(c.foto===undefined){ const { data:fd }=await sb.from('kundenkarten').select('foto').eq('id',c.id).maybeSingle(); c.foto=fd?(fd.foto||null):null; }
   const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
-  _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (fullNameOf(id)||usernameOf(id)||currentUser) };
+  _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:null, dob:null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (fullNameOf(id)||usernameOf(id)||currentUser) };
   const ed=document.getElementById('kk-edit'); if(ed) ed.style.display='none';
   renderKk(); openModal('kundenkarte');
 }
@@ -6526,64 +6512,14 @@ function kkArtSvg(code,W,H){
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="kkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A52"/><stop offset=".55" stop-color="#FF7A29"/><stop offset="1" stop-color="#29D9B3"/></linearGradient></defs><g fill="none" stroke="url(#kkg)" stroke-width="1.1">${paths}</g></svg>`;
 }
 
-// ── Foto & Geburtsdatum ──────────────────────────────────────
-let _kkDraft={foto:null,dob:''};
+// ── (Foto & Geburtsdatum auf der Karte entfernt) ──
 function ageOf(iso){
   const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||''); if(!m) return null;
   const n=new Date(); let a=n.getFullYear()-(+m[1]); const dm=(n.getMonth()+1)-(+m[2]);
   if(dm<0||(dm===0&&n.getDate()<(+m[3]))) a--; return a;
 }
 function fmtDob(iso){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||''); return m?`${m[3]}.${m[2]}.${m[1]}`:''; }
-function cardOfHolder(b){ const h=b&&holderRef(b); return h ? S.karten[cardKey(h.type,h.id)] : null; }
-function ageBadge(card){
-  const dob=card&&card.geburtsdatum;
-  return dob ? {cls:'ok',txt:'Geb. '+fmtDob(dob)} : {cls:'',txt:''};   // nur Information, keine Prüfung
-}
-function renderKkPhoto(){
-  const el=document.getElementById('kk-photo'); if(!el||!_kk) return;
-  const a=ageOf(_kk.dob);
-  el.innerHTML=(_kk.foto?`<div class="kp-img" style="background-image:url('${_kk.foto}')"></div>`:'<div class="kp-img empty"><svg class="svg-ic"><use href="#ic-card"/></svg></div>')
-    +`<div class="kp-cap${_kk.dob?'':' warn'}">${_kk.dob?('GEB. '+fmtDob(_kk.dob)):'FOTO / GEB. FEHLT'}</div>`;
-  document.querySelector('.kk-card')?.classList.toggle('has-photo',true); kkMeta();
-  const st=document.getElementById('kk-edit-state');
-  if(st){ const full=_kk.foto&&_kk.dob; st.className=full?'ok':'no'; st.textContent=full?'✓ vollständig':'unvollständig'; }
-}
-function toggleKkEdit(open){
-  const el=document.getElementById('kk-edit'); if(!el) return;
-  const show = open===true ? true : el.style.display==='none';
-  el.style.display=show?'block':'none';
-  if(show){ _kkDraft={foto:_kk.foto||null,dob:_kk.dob||''}; document.getElementById('kk-dob').value=_kkDraft.dob; document.getElementById('kk-dob').max=new Date().toISOString().slice(0,10); paintKkDraft(); el.scrollIntoView({block:'nearest',behavior:'smooth'}); }
-}
-function paintKkDraft(){
-  const b=document.getElementById('kk-ed-ph'); if(!b) return;
-  if(_kkDraft.foto){ b.style.backgroundImage=`url('${_kkDraft.foto}')`; b.classList.add('has'); b.innerHTML=''; }
-  else { b.style.backgroundImage=''; b.classList.remove('has'); b.innerHTML='<svg class="svg-ic"><use href="#ic-card"/></svg>Foto'; }
-}
-function kkClearPhoto(){ _kkDraft.foto=null; paintKkDraft(); }
-function kkPickPhoto(inp){
-  const f=inp.files&&inp.files[0]; inp.value=''; if(!f) return;
-  const img=new Image(), url=URL.createObjectURL(f);
-  img.onload=()=>{
-    URL.revokeObjectURL(url);
-    const W=240,H=300, c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
-    const sc=Math.max(W/img.width,H/img.height), sw=W/sc, sh=H/sc;
-    x.fillStyle='#fff'; x.fillRect(0,0,W,H);
-    x.drawImage(img,(img.width-sw)/2,(img.height-sh)*.35,sw,sh,0,0,W,H);   // Gesicht liegt meist im oberen Drittel
-    _kkDraft.foto=c.toDataURL('image/jpeg',.74); paintKkDraft();
-  };
-  img.onerror=()=>{ URL.revokeObjectURL(url); showToast('Das Bild konnte nicht gelesen werden.','⚠'); };
-  img.src=url;
-}
-async function saveKkProfile(){
-  if(!_kk) return;
-  const dob=document.getElementById('kk-dob').value||'';
-  if(dob){ const a=ageOf(dob); if(a===null||a<0||a>120){ showToast('Bitte ein gültiges Geburtsdatum eingeben.','⚠'); return; } }
-  const { error }=await sb.rpc('kundenkarte_profil_setzen',{ p_card_id:String(_kk.rowId), p_foto:_kkDraft.foto||null, p_geburtsdatum:dob||null });
-  if(error){ showToast(/does not exist|function|schema cache/i.test(error.message||'') ? 'Bitte zuerst kundenkarte_foto_geburtsdatum.sql ausführen.' : (error.message||'Speichern fehlgeschlagen.'),'⚠'); return; }
-  _kk.foto=_kkDraft.foto||null; _kk.dob=dob||null;
-  const c=S.karten[cardKey(_kk.type,_kk.id)]; if(c){ c.foto=_kk.foto; c.geburtsdatum=_kk.dob; }
-  renderKkPhoto(); document.getElementById('kk-edit').style.display='none'; showToast('Gespeichert. ✓');
-}
+function renderKkPhoto(){ kkMeta(); }
 const KK_WAVE='<svg class="svg-ic"><use href="#ic-wave"/></svg>';
 function renderKk(){
   document.getElementById('kk-name').textContent=_kk.name;
@@ -6612,7 +6548,6 @@ async function reissueCard(){
   delete S.karten[cardKey(_kk.type,_kk.id)];
   const c=await issueCard(_kk.type,_kk.id); if(!c) return;
   _kk.code=c.code; _kk.rowId=c.id; _kk.since=c.created_at||_kk.since;
-  if(_kk.foto||_kk.dob){ const r=await sb.rpc('kundenkarte_profil_setzen',{ p_card_id:String(c.id), p_foto:_kk.foto||null, p_geburtsdatum:_kk.dob||null }); if(!r.error){ c.foto=_kk.foto; c.geburtsdatum=_kk.dob; } }
   renderKk(); showToast('Neue Karte ausgestellt. ✓');
 }
 function printKk(){
@@ -8767,7 +8702,7 @@ function checkWhatsNew(){
 function kkMeta(){
   if(!_kk) return;
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
-  set('kk-since',_kk.since?fmtDate(_kk.since):'—'); set('kk-dobv',_kk.dob?fmtDob(_kk.dob):'—'); set('kk-typ',_kk.type==='kunde'?'Kunde':'Konto'); set('kk-id',kkSerial(_kk.code));
+  set('kk-since',_kk.since?fmtDate(_kk.since):'—'); set('kk-typ',_kk.type==='kunde'?'Kunde':'Konto'); set('kk-id',kkSerial(_kk.code));
 }
 function printKk(){
   if(!_kk) return;
@@ -8786,7 +8721,7 @@ function printKk(){
 </style><div class="c"><div class="art">${kkArtSvg(_kk.code)}</div><div class="art wm"><svg viewBox="0 0 512 512"><g fill="none" stroke="#FF7A29" stroke-width="56" stroke-linecap="round"><path d="M164 372V140"/><path d="M348 372V140"/><path d="M164 152L348 360"/></g></svg></div>
 <div class="t"><div class="l"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c2.5-6 4.5 6 7 0s4.5 6 7 0 2.5-3 4-3"/></svg></span><span class="b">NicoFlow</span></div><span class="p">KUNDENKARTE</span></div>
 <div class="mid">${_kk.foto?`<div class="ph2"><img src="${_kk.foto}"/></div>`:''}<div><div class="k">INHABER</div><div class="n">${escapeHtml(_kk.name)}</div><div class="r">${fmtCard(_kk.code)}</div></div></div>
-<div class="me"><div><i>KUNDE SEIT</i><b>${_kk.since?fmtDate(_kk.since):'—'}</b></div><div><i>GEBURTSDATUM</i><b>${_kk.dob?fmtDob(_kk.dob):'—'}</b></div><div><i>TYP</i><b>${_kk.type==='kunde'?'Kunde':'Konto'}</b></div><div><i>KARTEN-ID</i><b>${kkSerial(_kk.code)}</b></div></div>
+<div class="me"><div><i>KUNDE SEIT</i><b>${_kk.since?fmtDate(_kk.since):'—'}</b></div><div><i>TYP</i><b>${_kk.type==='kunde'?'Kunde':'Konto'}</b></div><div><i>KARTEN-ID</i><b>${kkSerial(_kk.code)}</b></div></div>
 <div class="bc">${barcodeSvg(_kk.code,'#000')}</div></div><script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
   w.document.close();
 }
@@ -8824,8 +8759,8 @@ async function saveKkImage(){
   x.fillStyle='#EBC77A'; x.font='500 25px ui-monospace,Menlo,Consolas,monospace'; x.fillText(sp(fmtCard(_kk.code),'\u2009'),tx,272);
   // Meta
   x.strokeStyle='rgba(255,255,255,.14)'; x.lineWidth=1.5; x.beginPath(); x.moveTo(56,338); x.lineTo(W-56,338); x.stroke();
-  const meta=[['KUNDE SEIT',_kk.since?fmtDate(_kk.since):'—'],['GEBURTSDATUM',_kk.dob?fmtDob(_kk.dob):'—'],['TYP',_kk.type==='kunde'?'Kunde':'Konto'],['KARTEN-ID',kkSerial(_kk.code)]];
-  meta.forEach((m,i)=>{ const mx=56+i*240; x.fillStyle='rgba(255,255,255,.5)'; x.font='600 14px ui-monospace,Menlo,monospace'; x.fillText(sp(m[0],'\u2009'),mx,366); x.fillStyle='#fff'; x.font='700 24px system-ui,sans-serif'; x.fillText(m[1],mx,396); });
+  const meta=[['KUNDE SEIT',_kk.since?fmtDate(_kk.since):'—'],['TYP',_kk.type==='kunde'?'Kunde':'Konto'],['KARTEN-ID',kkSerial(_kk.code)]];
+  meta.forEach((m,i)=>{ const mx=56+i*300; x.fillStyle='rgba(255,255,255,.5)'; x.font='600 14px ui-monospace,Menlo,monospace'; x.fillText(sp(m[0],'\u2009'),mx,366); x.fillStyle='#fff'; x.font='700 24px system-ui,sans-serif'; x.fillText(m[1],mx,396); });
   // Strichcode
   x.save(); x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=30; x.shadowOffsetY=10; x.fillStyle='#fff'; rr(40,414,W-80,184,26); x.fill(); x.restore();
   drawBarcode(x,_kk.code,60,430,W-120,150);
