@@ -2435,7 +2435,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div class="sch"><div class="sch-ic">ℹ</div><div><h3>Über die App</h3><p>Version und Infos</p></div></div>
         <div class="scb">
           <div class="about-row"><span>App-Name</span><span>NicoFlow</span></div>
-          <div class="about-row"><span>Version</span><span id="app-version">21.2.0</span></div>
+          <div class="about-row"><span>Version</span><span id="app-version">22.0.0</span></div>
           <div class="about-row"><span>Speicher</span><span>localStorage (Browser)</span></div>
           <div class="about-row"><span>Updates</span><span><button class="btn btn-ghost btn-sm" onclick="checkForUpdates()">⟲ Nach Updates suchen</button></span></div>
           <div class="about-row"><span>Neuerungen</span><span><button class="btn btn-ghost btn-sm" onclick="showWhatsNewModal(null)">✨ Was ist neu</button></span></div>
@@ -3660,8 +3660,14 @@ function onKeyActivate(e){
     e.currentTarget.click();
   }
 }
-const CURRENT_UI_VERSION = '21.2.0';
+const CURRENT_UI_VERSION = '22.0.0';
 const WHATS_NEW = {
+  '22.0.0': [
+    'Lieferanten können wieder bei ihrem Lieferanten bestellen: Die Bestellung trägt jetzt den Lieferanten direkt mit, die Preise und Varianten des Lieferanten werden zuverlässig geladen (benötigt betrieb_setup.sql).',
+    'Fit für den Betrieb mit vielen Nutzern: Daten werden seitenweise geladen (keine stille 1000-Zeilen-Grenze mehr), automatische Aktualisierungen laden nur noch offene Bestellungen statt alles, Kundenkarten-Fotos werden erst bei Bedarf geholt.',
+    'Flüssiger: Suche mit Verzögerung statt bei jedem Tastendruck, lange Listen (Kunden, Sendungen) zeigen zuerst die ersten Einträge mit „Mehr anzeigen“, Massenaktionen laufen in Paketen.',
+    'Sicherer im Alltag: Doppelklicks beim Speichern, Bestellen und Bezahlen werden abgefangen, unerwartete Fehler werden gemeldet statt still zu scheitern.'
+  ],
   '21.2.0': [
     'Neue Accounts mit Personendaten: beim Anlegen lassen sich Vorname, Nachname, Telefon, Adresse, E-Mail, Geburtsdatum und eine Notiz erfassen (alles optional).',
     'Dieselben Angaben stehen unter „Benutzer bearbeiten“ zur Verfügung. In der Benutzerliste erscheint der Klarname neben dem Benutzernamen, und die Suche findet auch nach Name und Telefon.',
@@ -4022,14 +4028,14 @@ async function loadAllData(){
   // Laden mitgeholt, sondern erst bei Bedarf (siehe loadTrash()) — spart bei wachsender
   // Historie unnötige Datenmenge beim täglichen Start der App.
   const [kundenRes, bestRes, preiseRes, usersRes, svcStatusRes, svcLogRes, schuldenRes, variantenRes, lagerManuellRes, eigenverbrauchRes] = await Promise.all([
-    sb.from('kunden').select('*').order('created_at'),
-    sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false}),
-    sb.from('preise').select('*'),
-    sb.from('profiles').select('*').order('created_at'),
+    fetchAll(()=>sb.from('kunden').select('*').order('id')),
+    fetchAll(()=>sb.from('bestellungen').select('*').is('deleted_at', null).order('id', {ascending:false})),
+    fetchAll(()=>sb.from('preise').select('*').order('user_id').order('produkt_id')),
+    fetchAll(()=>sb.from('profiles').select('*').order('id')),
     sb.from('service_status').select('*').eq('user_id', currentUserId).maybeSingle(),
-    sb.from('service_log').select('*').order('service_date', {ascending:false}),
+    sb.from('service_log').select('*').order('service_date', {ascending:false}).limit(200),
     sb.from('eigene_schulden').select('*').eq('user_id', currentUserId).order('id', {ascending:false}),
-    sb.from('produkt_varianten').select('*').order('id'),
+    fetchAll(()=>sb.from('produkt_varianten').select('*').order('id')),
     sb.from('lagerbestand_manuell').select('*').eq('user_id', currentUserId),
     sb.from('eigenverbrauch').select('*').eq('user_id', currentUserId).order('erfasst_am', {ascending:false}),
   ]);
@@ -4053,11 +4059,12 @@ async function loadAllData(){
       S.lieferantEinkauf[p.produkt_id]=Number(p.einkaufspreis||0);
     }
   });
-  const logRes = await sb.from('bestell_status_log').select('*').order('created_at');
+  const logRes = await fetchAll(()=>sb.from('bestell_status_log').select('*').order('created_at'));
   statusLogMissing = !!logRes.error;
   S.statusLog = {};
   (logRes.data||[]).forEach(r=>{ (S.statusLog[r.bestellung_id]=S.statusLog[r.bestellung_id]||[]).push(r); });
-  const kRes = await sb.from('kundenkarten').select('*').is('revoked_at',null);
+  let kRes = await fetchAll(()=>sb.from('kundenkarten').select('id,subject_type,subject_id,code,geburtsdatum,created_at,revoked_at').is('revoked_at',null).order('id'));
+  if(kRes.error) kRes = await fetchAll(()=>sb.from('kundenkarten').select('*').is('revoked_at',null).order('id'));
   kartenMissing = !!kRes.error;
   S.karten = {};
   (kRes.data||[]).forEach(c=>{ S.karten[cardKey(c.subject_type,c.subject_id)]=c; });
@@ -4495,7 +4502,7 @@ async function reloadBsTrack(){ await loadAllData(); renderBsTrack(); renderBest
 // Automatische Aktualisierung, solange ein Besteller angemeldet und die Seite sichtbar ist.
 setInterval(async()=>{
   if(document.hidden || currentRole()!=='besteller' || !currentUserId) return;
-  await loadAllData(); renderBesteller();
+  await refreshOrdersOnly(); renderBesteller();
   if(document.getElementById('modal-bstrack')?.classList.contains('show')) renderBsTrack();
 }, 45000);
 
@@ -5503,6 +5510,7 @@ function renderKunden(){
   let items = S.kunden.map(k=>({type:'kunde', name:`${k.vorname} ${k.nachname}`, k}));
   if(searchTerm) items = items.filter(it=>it.name.toLowerCase().includes(searchTerm));
   items.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  window._kundenTrunc=Math.max(0,items.length-150); items=items.slice(0,150);
 
   if(!S.kunden.length){
     g.innerHTML='';em.style.display='block';
@@ -6245,13 +6253,13 @@ async function submitLbBestellung(){
   const { data, error } = await sb.from('bestellungen').insert({
     user_id:currentUserId, kunde_id:null, items, subtotal, total:subtotal,
     discount_type:null, discount_value:0, paid:false, delivered:false,
-    fuer_lieferant:true, bestelldatum: today(), notiz
+    fuer_lieferant:true, bestelldatum: today(), notiz, lieferant_id: supplierId
   }).select().single();
   if(error){ showToast(dbErrorMsg(error,'Bestellung konnte nicht angelegt werden.'),'⚠'); return; }
   S.bestellungen.unshift({
     id:data.id, kId:null, items:data.items, subtotal:Number(data.subtotal),
     discountType:null, discountValue:0,
-    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null, trackingToken:data.tracking_token||null
+    total:Number(data.total), paid:false, delivered:false, fuerLieferant:true, date:data.bestelldatum, paidAt:null, deliveredAt:null, userId:data.user_id, notiz:data.notiz||null, trackingToken:data.tracking_token||null, lieferantId:data.lieferant_id||supplierId
   });
   lbItems=[]; document.getElementById('lb-notiz').value='';
   closeModal('lbbestellung');
@@ -6390,6 +6398,7 @@ function openCardScan(ids,mode,onDone){
   av.textContent=String(_cs.holder||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
   av.classList.toggle('has-photo',!!(hc&&hc.foto)); av.style.backgroundImage=(hc&&hc.foto)?`url('${hc.foto}')`:'';
   if(hc&&hc.foto) av.textContent='';
+  if(hc&&hc.foto===undefined){ sb.from('kundenkarten').select('foto').eq('id',hc.id).maybeSingle().then(({data})=>{ hc.foto=data?(data.foto||null):null; if(hc.foto){ av.classList.add('has-photo'); av.style.backgroundImage=`url('${hc.foto}')`; av.textContent=''; } }); }
   const ab=ageBadge(hc); ag.className='cs-age '+ab.cls; ag.textContent=ab.txt;
   document.getElementById('ac-who-sub').textContent = mode==='batch' ? `${ids.length} Bestellungen werden abgeschlossen` : `Bestellung #${b.id}`;
   document.getElementById('ac-result').style.display='none';
@@ -6465,6 +6474,7 @@ async function issueCard(type,id,silent){
 async function openKundenkarte(type,id){
   if(kartenMissing){ showToast('Kundenkarten sind noch nicht eingerichtet (kundenkarten_setup.sql ausführen).','⚠'); return; }
   let c=S.karten[cardKey(type,id)] || await issueCard(type,id); if(!c) return;
+  if(c.foto===undefined){ const { data:fd }=await sb.from('kundenkarten').select('foto').eq('id',c.id).maybeSingle(); c.foto=fd?(fd.foto||null):null; }
   const k=type==='kunde' ? S.kunden.find(x=>x.id===id) : null;
   _kk={ type, id, code:c.code, rowId:c.id, since:c.created_at||null, foto:c.foto||null, dob:c.geburtsdatum||null, name: type==='kunde' ? (k?`${k.vorname} ${k.nachname}`:'Kunde') : (fullNameOf(id)||usernameOf(id)||currentUser) };
   const ed=document.getElementById('kk-edit'); if(ed) ed.style.display='none';
@@ -6930,7 +6940,7 @@ async function delAllBestellungen(){
 
   const nowIso=new Date().toISOString();
   const ids=list.map(b=>b.id);
-  const { error } = await sb.from('bestellungen').update({ deleted_at: nowIso }).in('id', ids);
+  const error = await bulkUpdateIds(ids,{ deleted_at: nowIso });
   if(error){ showToast(dbErrorMsg(error,'Löschen fehlgeschlagen. Wurde die Spalte "deleted_at" in der Tabelle "bestellungen" schon angelegt?'),'⚠'); return; }
   const idSet=new Set(ids);
   S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
@@ -6949,7 +6959,7 @@ async function delAllLbBestellungen(){
 
   const nowIso=new Date().toISOString();
   const ids=list.map(b=>b.id);
-  const { error } = await sb.from('bestellungen').update({ deleted_at: nowIso }).in('id', ids);
+  const error = await bulkUpdateIds(ids,{ deleted_at: nowIso });
   if(error){ showToast(dbErrorMsg(error,'Löschen fehlgeschlagen. Wurde die Spalte "deleted_at" in der Tabelle "bestellungen" schon angelegt?'),'⚠'); return; }
   const idSet=new Set(ids);
   S.bestellungen.forEach(b=>{ if(idSet.has(b.id)){ b.deletedAt=nowIso; S.trash.unshift(b); } });
@@ -6960,7 +6970,7 @@ async function delAllLbBestellungen(){
 // Stellt mehrere per "Alle löschen" in den Papierkorb verschobene Bestellungen auf einmal
 // wieder her — wird vom "↺ Rückgängig"-Button im Toast direkt nach dem Löschen genutzt.
 async function restoreBestellungenBulk(ids){
-  const { error } = await sb.from('bestellungen').update({ deleted_at: null }).in('id', ids);
+  const error = await bulkUpdateIds(ids,{ deleted_at: null });
   if(error){ showToast(dbErrorMsg(error,'Wiederherstellen fehlgeschlagen.'),'⚠'); return; }
   ids.forEach(id=>{
     const b=S.trash.find(x=>x.id===id);
@@ -8891,6 +8901,7 @@ function renderSendungen(){
   let list=all.filter(x=>sdFilter==='alle'||(sdFilter==='aktiv'&&!x.fin)||(sdFilter==='bereit'&&!x.fin&&['bereit','unterwegs'].includes(x.cur.k))||(sdFilter==='fertig'&&x.fin));
   if(q) list=list.filter(x=>(sdWho(x.b)+' '+sdProds(x.b)+' '+x.b.id).toLowerCase().includes(q));
   list.sort((a,c)=>(a.fin-c.fin)||((a.plan&&a.plan.start?new Date(a.plan.start):Infinity)-(c.plan&&c.plan.start?new Date(c.plan.start):Infinity))||(c.b.id-a.b.id));
+  window._sdTrunc=Math.max(0,list.length-sdLimit); list=list.slice(0,sdLimit);
   document.getElementById('sd-empty').style.display=list.length?'none':'block';
   grid.innerHTML=list.map(x=>{
     const late=sdLate(x);
@@ -8937,7 +8948,7 @@ const _rbOrig=renderBestellungen; renderBestellungen=function(){ _rbOrig.apply(t
 const _rfOrig=refresh; refresh=function(){ _rfOrig.apply(this,arguments); try{ if(document.getElementById('page-sendungen')?.classList.contains('active')) renderSendungen(); updateSdBadge(); updateLockBadge(); }catch(e){} };
 setInterval(async()=>{
   if(document.hidden||!currentUserId||!document.getElementById('page-sendungen')?.classList.contains('active')) return;
-  await loadAllData(); renderSendungen(); sdRefreshIfOpen();
+  await refreshOrdersOnly(); renderSendungen(); sdRefreshIfOpen();
 },60000);
 
 // ── Karte: persönliche Ansprache ──
@@ -9044,7 +9055,7 @@ function updateLockBadge(){
 const _rulOrig=renderUserList; renderUserList=function(){ _rulOrig.apply(this,arguments); try{ lockBanner(); updateLockBadge(); }catch(e){} };
 setInterval(async()=>{
   if(document.hidden||!currentUserId||currentRole()!=='admin') return;
-  await loadAllData(); try{ renderUserList(); }catch(e){}
+  await refreshProfilesOnly(); try{ renderUserList(); }catch(e){}
 },60000);
 
 // ══ v21.1: Admin-Benachrichtigungen ══
@@ -9101,7 +9112,7 @@ function startLockRealtime(){
   if(window._lockCh||currentRole()!=='admin') return;
   try{
     window._lockCh=sb.channel('lock-watch').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},()=>{
-      clearTimeout(_lockT); _lockT=setTimeout(async()=>{ await loadAllData(); try{ renderUserList(); }catch(e){} },1500);
+      clearTimeout(_lockT); _lockT=setTimeout(async()=>{ await refreshProfilesOnly(); try{ renderUserList(); }catch(e){} },1500);
     }).subscribe();
   }catch(e){}
 }
@@ -9145,6 +9156,85 @@ async function saveContactInfo(){
   const me=M.users.find(u=>u.id===currentUserId); if(me) Object.assign(me,patch);
   showToast('Daten gespeichert. ✓');
 }
+
+// ══ v22: Betrieb mit vielen Nutzern ══
+// Seitenweises Laden: PostgREST liefert standardmäßig max. 1000 Zeilen — sonst fehlen Daten still.
+async function fetchAll(make){
+  const size=1000; let from=0, out=[];
+  for(;;){
+    const { data, error }=await make().range(from,from+size-1);
+    if(error) return { data: out.length?out:null, error };
+    out=out.concat(data||[]);
+    if(!data||data.length<size) break;
+    from+=size;
+  }
+  return { data:out, error:null };
+}
+const chunk=(a,n)=>{ const r=[]; for(let i=0;i<a.length;i+=n) r.push(a.slice(i,i+n)); return r; };
+async function bulkUpdateIds(ids,patch){
+  for(const part of chunk(ids,150)){ const { error }=await sb.from('bestellungen').update(patch).in('id',part); if(error) return error; }
+  return null;
+}
+// Leichte Aktualisierung: nur offene Bestellungen (+ deren Statusverlauf) neu holen
+let _roBusy=null;
+function refreshOrdersOnly(){
+  if(_roBusy) return _roBusy;
+  if(!navigator.onLine) return Promise.resolve();
+  _roBusy=(async()=>{
+    try{
+      const open=await fetchAll(()=>sb.from('bestellungen').select('*').is('deleted_at',null).or('paid.eq.false,paid.is.null,delivered.eq.false,delivered.is.null').order('id',{ascending:false}));
+      if(open.error) return;
+      const map=new Map(S.bestellungen.map(b=>[b.id,b])), seen=new Set();
+      (open.data||[]).forEach(r=>{ map.set(r.id,mapBestellung(r)); seen.add(r.id); });
+      const stale=S.bestellungen.filter(b=>(!b.paid||!b.delivered)&&!seen.has(b.id)).map(b=>b.id);
+      for(const part of chunk(stale,100)){
+        const { data }=await sb.from('bestellungen').select('*').in('id',part);
+        (data||[]).forEach(r=>{ if(r.deleted_at) map.delete(r.id); else map.set(r.id,mapBestellung(r)); });
+      }
+      S.bestellungen=[...map.values()].sort((a,b)=>b.id-a.id);
+      if(!statusLogMissing){
+        const ids=S.bestellungen.filter(b=>!b.paid||!b.delivered).map(b=>b.id);
+        S.statusLog=S.statusLog||{};
+        for(const part of chunk(ids,100)){
+          const { data, error }=await sb.from('bestell_status_log').select('*').in('bestellung_id',part).order('created_at');
+          if(error) break;
+          part.forEach(id=>{ S.statusLog[id]=[]; });
+          (data||[]).forEach(r=>{ S.statusLog[r.bestellung_id].push(r); });
+        }
+      }
+    }catch(e){ console.warn('refreshOrdersOnly',e); } finally{ _roBusy=null; }
+  })();
+  return _roBusy;
+}
+async function refreshProfilesOnly(){
+  if(!navigator.onLine) return;
+  try{
+    const r=await fetchAll(()=>sb.from('profiles').select('*').order('id'));
+    if(r.error) return;
+    M.users=r.data||[];
+    const me=M.users.find(u=>u.id===currentUserId); if(me&&me.gesperrt) forceLockedLogout();
+    if(currentRole()==='admin'){ const { data }=await sb.from('profil_details').select('*'); M.details={}; (data||[]).forEach(x=>{ M.details[x.user_id]=x; }); }
+  }catch(e){}
+}
+// Suche mit Verzögerung
+const _rbpOrig=resetBestellPage; let _rbpT=null;
+resetBestellPage=function(){ clearTimeout(_rbpT); _rbpT=setTimeout(_rbpOrig,180); };
+// Lange Listen: erste Einträge zeigen, Rest per Knopf
+let sdLimit=60;
+function sdMore(){ sdLimit+=60; renderSendungen(); }
+function setSdFilter(f){ sdFilter=f; sdLimit=60; renderSendungen(); }
+const _rsdOrig=renderSendungen;
+renderSendungen=function(){ _rsdOrig.apply(this,arguments); const g=document.getElementById('sd-grid'); if(g&&window._sdTrunc>0) g.insertAdjacentHTML('beforeend',`<div style="grid-column:1/-1;text-align:center"><button class="btn btn-ghost btn-sm" onclick="sdMore()">Mehr anzeigen (${window._sdTrunc} weitere)</button></div>`); };
+const _rkOrig=renderKunden;
+renderKunden=function(){ _rkOrig.apply(this,arguments); const g=document.getElementById('kunden-grid'); if(g&&window._kundenTrunc>0) g.insertAdjacentHTML('beforeend',`<div class="ps" style="grid-column:1/-1;text-align:center">${window._kundenTrunc} weitere Kunden — bitte die Suche nutzen.</div>`); };
+// Doppelklick-Schutz
+['addBestellung','submitLbBestellung','submitBsBestellung','addKunde','addEigeneSchuld','addEigenverbrauch','addVariant','setPaid','saveSendungStatus','addUser'].forEach(n=>{
+  const f=window[n]; if(typeof f!=='function') return; const busy=new Set();
+  window[n]=async function(...a){ const k=JSON.stringify(a.filter(x=>typeof x!=='object')); if(busy.has(k)) return; busy.add(k); try{ return await f.apply(this,a); } finally{ busy.delete(k); } };
+});
+// Unerwartete Fehler sichtbar machen (nicht öfter als alle 8 Sek.)
+let _errT=0;
+window.addEventListener('unhandledrejection',e=>{ console.error(e.reason); if(Date.now()-_errT>8000){ _errT=Date.now(); showToast('Es ist ein Fehler aufgetreten. Bitte erneut versuchen.','⚠'); } });
 </script>
 
 </body>
