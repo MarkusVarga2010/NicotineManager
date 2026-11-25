@@ -1823,6 +1823,22 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage);bo
 .modal-head{border-bottom:1px solid var(--line)} .modal-foot{border-top:1px solid var(--line)}
 .bento-dash .stat-cell{border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hair)}
 .sc-v{font-family:'Space Grotesk','Manrope',sans-serif;letter-spacing:-.03em}
+
+/* ══════════ UPDATE 24 · FACELIFT ══════════ */
+::selection{background:color-mix(in srgb,var(--sage) 35%,transparent)}
+.ph{position:sticky;top:0;z-index:20;margin:-40px -36px 28px;padding:22px 36px 16px;background:color-mix(in srgb,var(--paper) 78%,transparent);backdrop-filter:blur(16px) saturate(1.2);border-bottom:1px solid var(--line)}
+.tab-btn{border-radius:999px;border:1px solid var(--line2);background:transparent;font-weight:600}
+.tab-btn.active{background:color-mix(in srgb,var(--sage) 16%,var(--paper2));border-color:var(--sage);color:var(--ink)}
+.stat-bar-fill,.rev-bar-fill{background:linear-gradient(90deg,var(--sage),var(--accent2))}
+.stat-bar-track{border:0;background:var(--paper3)}
+.set-card .sch{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.sch-ic{border-radius:12px;background:color-mix(in srgb,var(--sage) 14%,var(--paper3));color:var(--sage)}
+#toast{border:1px solid var(--line2);backdrop-filter:blur(14px);font-weight:600}
+#login-screen .auth-card,#login-screen .login-box{border:1px solid var(--line2);border-radius:28px;backdrop-filter:blur(22px) saturate(1.2);box-shadow:inset 0 1px 0 var(--hair),0 50px 90px -40px rgba(0,0,0,.8)}
+.shop-card{border-radius:22px}.shop-card:hover{border-color:var(--sage)}
+.ic-btn{border-radius:10px}.ic-btn:hover{background:color-mix(in srgb,var(--sage) 14%,transparent)}
+.kk-card{box-shadow:0 0 0 1px rgba(255,255,255,.07) inset,0 40px 70px -28px rgba(0,0,0,.8)}
+@media(max-width:820px){.ph{margin:-20px -16px 20px;padding:16px}.pt{font-size:24px}.card,.set-card{border-radius:16px}td{padding:12px 14px}}
 </style>
 </head>
 <body>
@@ -6818,7 +6834,7 @@ async function setPaid(id, newPaid){
   b.paid=newPaid; b.paidAt=patch.bezahlt_am; if(patch.total!=null) b.total=patch.total;
   renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();
   if(newPaid){
-    if(invAllowed(b)){ showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓'); printInvoice(id); }
+    if(invAllowed(b)){ showToast('Als bezahlt markiert. ✓'); if(confirm('Rechnung jetzt als PDF herunterladen?')) printInvoice(id); }
     else showToast('Als bezahlt markiert. ✓');
   } else {
     showToast('Als offen markiert.');
@@ -7847,12 +7863,15 @@ function printInvoiceFromDetail(){
 const INV_DEFAULTS={firma:'',name:'',zusatz:'',strasse:'',plz:'',ort:'',land:'Österreich',uid:'',email:'',telefon:'',web:'',bank:'',iban:'',bic:'',ziel:14,ust:0,steuerhinweis:'',prefix:'RE',intro:'',outro:'Vielen Dank für Ihren Einkauf!',farbe:'#FF7A29'};
 const INV_FIELDS=['firma','name','zusatz','strasse','plz','ort','land','uid','email','telefon','web','bank','iban','bic','ziel','ust','steuerhinweis','prefix','intro','outro','farbe'];
 let INV=Object.assign({},INV_DEFAULTS);
+let INVN={n:{},map:{}};
 const r2=n=>Math.round((Number(n)+Number.EPSILON)*100)/100;
 function loadInvProfile(authUser){
   let m={};
   try{ m=(authUser&&authUser.user_metadata&&authUser.user_metadata.inv)||{}; }catch(e){}
   if(!Object.keys(m).length){ try{ m=JSON.parse(localStorage.getItem('nf_inv_'+(authUser&&authUser.id))||'{}')||{}; }catch(e){ m={}; } }
   INV=Object.assign({},INV_DEFAULTS,m);
+  let q={}; try{ q=(authUser&&authUser.user_metadata&&authUser.user_metadata.inv_n)||JSON.parse(localStorage.getItem('nf_invn_'+(authUser&&authUser.id))||'{}')||{}; }catch(e){}
+  INVN={n:q.n||{},map:q.map||{}};
 }
 function hex2rgb(h){ const m=/^#?([0-9a-f]{6})$/i.exec(String(h||'')); const n=m?parseInt(m[1],16):0xFF7A29; return [(n>>16)&255,(n>>8)&255,n&255]; }
 function ibanOk(s){
@@ -7883,9 +7902,18 @@ function invRecipient(b,k){
   const nm=k?`${k.vorname||''} ${k.nachname||''}`.trim():'—';
   return { name:nm||'—', lines:(k&&k.adresse)?String(k.adresse).split(',').map(s=>s.trim()).filter(Boolean):[] };
 }
+function invPre(){ return (INV.prefix||'RE').replace(/[^A-Za-z0-9_-]/g,'').slice(0,8)||'RE'; }
 function invNumber(b){
+  if(INVN.map[b.id]) return INVN.map[b.id];
   const y=(b.date||today()).slice(0,4);
-  return `${(INV.prefix||'RE').replace(/[^A-Za-z0-9_-]/g,'').slice(0,8)||'RE'}-${y}-${String(b.id).padStart(5,'0')}`;
+  return `${invPre()}-${y}-${String((INVN.n[y]||0)+1).padStart(5,'0')}`;
+}
+function invAssign(b){
+  if(INVN.map[b.id]) return;
+  const y=(b.date||today()).slice(0,4), n=(INVN.n[y]||0)+1;
+  INVN.n[y]=n; INVN.map[b.id]=`${invPre()}-${y}-${String(n).padStart(5,'0')}`;
+  try{ localStorage.setItem('nf_invn_'+currentUserId,JSON.stringify(INVN)); }catch(e){}
+  try{ sb.auth.updateUser({data:{inv_n:INVN}}).catch(()=>{}); }catch(e){}
 }
 function invAddDays(iso,n){ const d=new Date(iso||Date.now()); d.setDate(d.getDate()+Number(n||0)); return d; }
 const invDate=d=>new Date(d).toLocaleDateString('de-DE');
@@ -7894,12 +7922,12 @@ const pdfMoney=n=>fmt(n).replace('−','-');
 // Kompakter Kopf (Lieferschein, Folgeseiten)
 function invDrawHeader(doc,subtitle){
   const W=doc.internal.pageSize.getWidth(), L=16, R=W-16, acc=hex2rgb(INV.farbe), s=invSender(), logo=invGetLogo();
-  doc.setFillColor(...acc); doc.rect(0,0,W,4,'F');
+  doc.setFillColor(...acc); doc.rect(0,0,5,297,'F');
   if(logo){
     const d=invFit(logo,42,12); doc.addImage(logo.data,logo.fmt,L,8.5,d.w,d.h);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,110,110); doc.text(subtitle,L,24);
   } else {
-    doc.setFillColor(...acc); doc.roundedRect(L-0.5,10,9,9,2.2,2.2,'F');
+    doc.setFillColor(24,26,31); doc.roundedRect(L-0.5,10,9,9,2.2,2.2,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255); doc.text((s.name[0]||'N').toUpperCase(),L+4,16.3,{align:'center'});
     doc.setFontSize(14); doc.setTextColor(20,20,20); doc.text(s.name.slice(0,34),L+12,15.2);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,110,110); doc.text(subtitle,L+12,20.5);
@@ -7907,7 +7935,7 @@ function invDrawHeader(doc,subtitle){
   const lines=[s.strasse,s.ortLine,[s.telefon,s.email].filter(Boolean).join('  ·  ')].filter(Boolean).slice(0,3);
   doc.setFontSize(8); doc.setTextColor(120,120,120);
   lines.forEach((t,i)=>doc.text(t,R,11+i*4.2,{align:'right'}));
-  doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.line(L,26,R,26);
+  doc.setDrawColor(228,230,234); doc.setLineWidth(0.25); doc.line(L,26,R,26);
 }
 
 function userRoleOf(id){ const u=(M.users||[]).find(x=>x.id===id); return u?u.role:null; }
@@ -8053,6 +8081,7 @@ function printInvoice(id){
   if(!invAllowed(b)){ showToast('Für Besteller werden keine Rechnungen erstellt.','ℹ'); return; }
   const k=S.kunden.find(x=>x.id===b.kId);
   if(!INV.firma && !INV.name && !INV.strasse && !INV.iban){ showToast('Tipp: Unter Einstellungen → „Rechnung & Briefkopf“ kannst du Absender, Adresse und Bankdaten hinterlegen.','ℹ'); }
+  invAssign(b);
   const doc=buildInvoicePdf(b,k);
   const kName=k?`${k.nachname}-${k.vorname}`.replace(/[^\w-]+/g,'_'):'kunde';
   doc.save(`${invNumber(b)}-${kName}.pdf`);
