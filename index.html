@@ -1797,6 +1797,32 @@ td,th{white-space:normal}
 .bell-n.show{display:inline-flex}
 .hamburger{position:relative}
 #bell-btn-m .bell-n{position:absolute;top:-5px;right:-5px;margin:0}
+
+/* ══════════ UPDATE 23 · FEINSCHLIFF ══════════ */
+:root{--glow:rgba(255,122,41,.13);--hair:rgba(255,255,255,.06)}
+html[data-mode="light"]{--glow:rgba(255,122,41,.10);--hair:rgba(255,255,255,.95)}
+*{scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+body{background-image:radial-gradient(900px 520px at 88% -8%,var(--glow),transparent 62%),radial-gradient(700px 420px at -6% 108%,rgba(41,217,179,.07),transparent 60%);background-attachment:fixed}
+.card,.set-card,.pc,.kcard,.bs-group,.shop-card,.dose-card{border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hair),0 1px 2px rgba(0,0,0,.12),0 20px 38px -26px rgba(0,0,0,.5)}
+.card:hover,.kcard:hover,.pc:hover,.shop-card:hover{transform:translateY(-1px);border-color:var(--line2)}
+.pt,.ph h1,.ph h2{font-family:'Space Grotesk','Manrope',system-ui,sans-serif;font-size:30px;letter-spacing:-.025em;font-weight:600}
+.card-head{border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.03em;font-weight:600;color:var(--ink-faint);background:transparent;border-bottom:1px solid var(--line2)}
+td{border-bottom:1px solid var(--line)}
+tbody tr:hover{background:color-mix(in srgb,var(--sage) 6%,transparent)}
+.badge{border-radius:999px;font-weight:600;padding:3px 10px}
+.btn-primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 22px -10px rgba(255,122,41,.75)}
+.btn-ghost{border:1px solid var(--line2);background:color-mix(in srgb,var(--paper3) 70%,transparent)}
+.btn-ghost:hover{border-color:var(--sage)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 4px color-mix(in srgb,var(--sage) 18%,transparent)}
+.scale-tick{border-radius:14px}
+.scale-tick.active{color:var(--ink);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sage) 38%,transparent),0 8px 20px -14px var(--sage)}
+.sidebar{border-right:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.15)}
+.modal-bg{backdrop-filter:blur(10px) saturate(1.1)}
+.modal{border:1px solid var(--line2)}
+.modal-head{border-bottom:1px solid var(--line)} .modal-foot{border-top:1px solid var(--line)}
+.bento-dash .stat-cell{border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hair)}
+.sc-v{font-family:'Space Grotesk','Manrope',sans-serif;letter-spacing:-.03em}
 </style>
 </head>
 <body>
@@ -3133,7 +3159,7 @@ alter table profiles add column if not exists adresse text;</pre>
 <li>Optional <b>Rabatt</b> (Prozent oder fester Betrag) und <b>Vorauszahlung</b>. Der <b>Restbetrag</b> (Nachzahlung) wird live berechnet.</li>
 <li>Mit „Bestellung anlegen“ speichern. Preise und Einkaufspreise werden <b>eingefroren</b>. Spätere Preisänderungen verändern diese Bestellung nicht.</li>
 <li>Status setzen (Kapitel 5), dann <b>Abholen</b> und <b>Bezahlt</b>. Beides ist unabhängig voneinander.</li>
-<li>Beim Klick auf <b>Bezahlt</b> wird automatisch eine <b>Rechnung als PDF</b> erstellt.</li>
+<li>Beim Klick auf <b>Bezahlt</b> wird automatisch eine <b>Rechnung als PDF</b> erstellt. Für Besteller gibt es keine Rechnungen – sie können nur bestellen.</li>
 </ol>
 <p>Ist ein Kunde mit individuellen Preisen hinterlegt, gelten diese (in der Liste mit ★ markiert).</p>
 <h2>4.2 Bestellung beim Lieferanten (dein Einkauf)</h2>
@@ -6792,8 +6818,8 @@ async function setPaid(id, newPaid){
   b.paid=newPaid; b.paidAt=patch.bezahlt_am; if(patch.total!=null) b.total=patch.total;
   renderBestellungen();renderKunden();renderLieferantenkundenSeite();renderLbHistory();renderDashboard();
   if(newPaid){
-    showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓');
-    printInvoice(id);
+    if(invAllowed(b)){ showToast('Als bezahlt markiert. Rechnung wird erstellt. ✓'); printInvoice(id); }
+    else showToast('Als bezahlt markiert. ✓');
   } else {
     showToast('Als offen markiert.');
   }
@@ -7703,7 +7729,7 @@ function openOrderDetail(id){
     notizRow.style.display='none';
   }
   document.getElementById('od-lieferschein-btn').style.display = b.fuerLieferant ? '' : 'none';
-  document.getElementById('od-rechnung-btn').style.display = b.fuerLieferant ? 'none' : '';
+  document.getElementById('od-rechnung-btn').style.display = (invAllowed(b) && !(b.fuerLieferant && b.userId===currentUserId)) ? '' : 'none';
 
   const liveUnpaidLieferant = b.fuerLieferant && !b.paid;
   document.getElementById('od-items').innerHTML = b.items.map(it=>{
@@ -7884,52 +7910,61 @@ function invDrawHeader(doc,subtitle){
   doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.line(L,26,R,26);
 }
 
+function userRoleOf(id){ const u=(M.users||[]).find(x=>x.id===id); return u?u.role:null; }
+// Rechnungen gibt es nur für Konten bzw. Kunden – nie für Besteller. Besteller können ausschließlich bestellen.
+function invAllowed(b){
+  if(!b || currentRole()==='besteller') return false;
+  if(b.fuerLieferant && userRoleOf(b.userId)==='besteller') return false;
+  return true;
+}
+function invEpcQr(iban,bic,name,amount,ref){
+  try{
+    if(typeof QRCode==='undefined') return null;
+    const txt=['BCD','002','1','SCT',String(bic||'').replace(/\s/g,''),String(name).slice(0,70),String(iban).replace(/\s/g,''),'EUR'+Number(amount).toFixed(2),'','',String(ref).slice(0,140)].join('\n');
+    const d=document.createElement('div'); d.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(d);
+    new QRCode(d,{text:txt,width:300,height:300,correctLevel:QRCode.CorrectLevel.M});
+    const c=d.querySelector('canvas'), u=c?c.toDataURL('image/png'):null; d.remove(); return u;
+  }catch(e){ return null; }
+}
 function buildInvoicePdf(b,k){
   const { jsPDF }=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
-  const W=210,H=297,L=20,R=W-20, acc=hex2rgb(INV.farbe), s=invSender(), rec=invRecipient(b,k), logo=invGetLogo(), nr=invNumber(b);
+  const W=210,H=297,L=22,R=W-18, acc=hex2rgb(INV.farbe), s=invSender(), rec=invRecipient(b,k), logo=invGetLogo(), nr=invNumber(b);
   const rate=Math.max(0,Number(INV.ust)||0);
-  const ink=[25,25,25], grey=[110,110,110], light=[225,225,225];
+  const ink=[24,26,31], grey=[116,121,130], light=[228,230,234], tint=[246,247,249];
+  const tx=(t,x,y,o)=>doc.text(String(t),x,y,o);
+  const font=(st,sz,c)=>{ doc.setFont('helvetica',st); doc.setFontSize(sz); doc.setTextColor(...c); };
+  const stripe=()=>{ doc.setFillColor(...acc); doc.rect(0,0,6,H,'F'); };
+  const miniHead=()=>{ stripe(); font('bold',9,ink); tx(s.name.slice(0,40),L,16); font('normal',9,grey); tx('Rechnung '+nr,R,16,{align:'right'}); };
 
-  const miniHead=()=>{ doc.setFillColor(...acc); doc.rect(0,0,W,5,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...ink); doc.text(s.name.slice(0,40),L,16); doc.setFont('helvetica','normal'); doc.setTextColor(...grey); doc.text('Rechnung '+nr,R,16,{align:'right'}); };
-
-  // ── Briefkopf ──
-  doc.setFillColor(...acc); doc.rect(0,0,W,5,'F');
-  if(logo){ const d=invFit(logo,55,20); doc.addImage(logo.data,logo.fmt,L,12,d.w,d.h); }
+  // ── Kopf ──
+  stripe();
+  if(logo){ const d=invFit(logo,52,18); doc.addImage(logo.data,logo.fmt,L,14,d.w,d.h); }
   else {
-    doc.setFillColor(...acc); doc.roundedRect(L,12,12,12,2.6,2.6,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255); doc.text((s.name[0]||'N').toUpperCase(),L+6,20.3,{align:'center'});
-    doc.setFontSize(17); doc.setTextColor(...ink); doc.text(s.name.slice(0,30),L+16,19.2);
-    if(INV.zusatz){ doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...grey); doc.text(INV.zusatz.slice(0,60),L+16,24.2); }
+    doc.setFillColor(...ink); doc.roundedRect(L,14,13,13,3.2,3.2,'F');
+    font('bold',14,[255,255,255]); tx((s.name[0]||'N').toUpperCase(),L+6.5,22.6,{align:'center'});
+    font('bold',15,ink); tx(s.name.slice(0,30),L+18,20.4);
+    if(INV.zusatz){ font('normal',8.5,grey); tx(INV.zusatz.slice(0,60),L+18,25.4); }
   }
-  const head=[s.person, s.strasse, s.ortLine, s.land&&s.land!=='Österreich'?s.land:'', s.telefon?('Tel. '+s.telefon):'', s.email, s.web].filter(Boolean);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...grey);
-  head.forEach((t,i)=>doc.text(String(t),R,13+i*4.1,{align:'right'}));
+  font('bold',28,ink); tx('Rechnung',R,24,{align:'right'});
+  font('bold',10,acc); tx(nr,R,31,{align:'right'});
 
-  // ── Absenderzeile + Empfänger (Fensterumschlag-Position) ──
-  const sline=[s.name,s.strasse,s.ortLine].filter(Boolean).join('  ·  ');
-  doc.setFontSize(7); doc.setTextColor(...grey); doc.text(sline.slice(0,90),L,48);
-  doc.setDrawColor(...light); doc.setLineWidth(0.2); doc.line(L,49.3,L+85,49.3);
-  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...ink); doc.text(rec.name.slice(0,40),L,56);
-  doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
-  rec.lines.slice(0,4).forEach((t,i)=>doc.text(t,L,61.5+i*5));
-
-  // ── Rechnungsinfos rechts ──
-  const ix=122, rows=[['Rechnungs-Nr.',nr],['Rechnungsdatum',invDate(b.date)],['Leistungsdatum',invDate(b.deliveredAt||b.date)]];
-  if(k) rows.push(['Kundennummer','K-'+String(k.id).padStart(4,'0')]);
+  // ── Empfänger & Eckdaten ──
+  font('normal',7,grey); tx([s.name,s.strasse,s.ortLine].filter(Boolean).join('  ·  ').slice(0,90),L,52);
+  doc.setDrawColor(...light); doc.setLineWidth(0.2); doc.line(L,53.4,L+82,53.4);
+  font('bold',11,ink); tx(rec.name.slice(0,40),L,60);
+  font('normal',10,ink); rec.lines.slice(0,4).forEach((t,i)=>tx(t,L,65.5+i*5));
+  const rows=[['Rechnungsdatum',invDate(b.date)],['Leistungsdatum',invDate(b.deliveredAt||b.date)]];
+  if(b.fuerLieferant) rows.push(['Konto',usernameOf(b.userId)]); else if(k) rows.push(['Kundennummer','K-'+String(k.id).padStart(4,'0')]);
   if(!b.paid && Number(INV.ziel)>0) rows.push(['Zahlbar bis',invDate(invAddDays(b.date,INV.ziel))]);
-  doc.setFontSize(8.5);
-  rows.forEach((r,i)=>{ const y=50+i*5.6; doc.setFont('helvetica','normal'); doc.setTextColor(...grey); doc.text(r[0],ix,y); doc.setFont('helvetica','bold'); doc.setTextColor(...ink); doc.text(String(r[1]),R,y,{align:'right'}); });
+  doc.setFillColor(...tint); doc.roundedRect(118,46,R-118,8+rows.length*6.2,3,3,'F');
+  rows.forEach((r,i)=>{ const y=54+i*6.2; font('normal',8.5,grey); tx(r[0],123,y); font('bold',8.5,ink); tx(r[1],R-5,y,{align:'right'}); });
 
-  // ── Titel ──
-  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(...ink); doc.text('Rechnung',L,96);
-  doc.setFillColor(...acc); doc.rect(L,98.3,14,1.1,'F');
-  if(b.paid){
-    doc.setDrawColor(60,140,90); doc.setLineWidth(0.5); doc.roundedRect(R-30,89,30,9,2,2,'S');
-    doc.setFontSize(10); doc.setTextColor(60,140,90); doc.text('BEZAHLT',R-15,95,{align:'center'});
-  }
-  let startY=106;
-  if(INV.intro){ doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...ink); const t=doc.splitTextToSize(INV.intro,R-L); doc.text(t,L,startY); startY+=t.length*4.6+4; }
+  // ── Status & Einleitung ──
+  let y=92; const chip=b.paid?['BEZAHLT',[46,139,87]]:['OFFEN',[196,120,20]];
+  doc.setDrawColor(...chip[1]); doc.setLineWidth(0.4); doc.roundedRect(L,y-4.6,22,7,3.5,3.5,'S'); font('bold',8,chip[1]); tx(chip[0],L+11,y+0.1,{align:'center'});
+  y+=10;
+  if(INV.intro){ font('normal',9.5,ink); const t=doc.splitTextToSize(INV.intro,R-L); doc.text(t,L,y); y+=t.length*4.6+3; }
 
   // ── Positionen ──
   const body=b.items.map((it,i)=>{
@@ -7938,67 +7973,75 @@ function buildInvoicePdf(b,k){
     return [String(i+1), p?prodLabel(it):it.prod, String(it.stueck), pdfMoney(preis), pdfMoney(r2(preis*it.stueck))];
   });
   doc.autoTable({
-    head:[['Pos.','Bezeichnung','Menge','Einzelpreis','Betrag']],
-    body, startY, margin:{left:L,right:W-R,top:32,bottom:34},
-    theme:'striped',
-    styles:{font:'helvetica',fontSize:9.5,textColor:ink,cellPadding:{top:2.6,bottom:2.6,left:2.5,right:2.5},lineWidth:0},
-    headStyles:{fillColor:acc,textColor:[255,255,255],fontStyle:'bold',fontSize:8.5},
-    alternateRowStyles:{fillColor:[247,247,247]},
-    columnStyles:{0:{cellWidth:12},2:{halign:'right',cellWidth:18},3:{halign:'right',cellWidth:30},4:{halign:'right',cellWidth:30,fontStyle:'bold'}},
+    head:[['Pos.','Bezeichnung','Menge','Einzelpreis','Betrag']], body, startY:y, margin:{left:L,right:W-R,top:30,bottom:34}, theme:'plain',
+    styles:{font:'helvetica',fontSize:9.5,textColor:ink,cellPadding:{top:3.4,bottom:3.4,left:2,right:2},lineWidth:0},
+    headStyles:{textColor:grey,fontStyle:'bold',fontSize:8},
+    columnStyles:{0:{cellWidth:12,textColor:grey},2:{halign:'right',cellWidth:18},3:{halign:'right',cellWidth:30},4:{halign:'right',cellWidth:30,fontStyle:'bold'}},
+    didParseCell:(d)=>{ if(d.section==='head' && d.column.index>=2) d.cell.styles.halign='right'; },
+    didDrawCell:(d)=>{
+      const c=d.cell, yy=c.y+c.height;
+      if(d.section==='head'){ doc.setDrawColor(...acc); doc.setLineWidth(0.5); } else { doc.setDrawColor(...light); doc.setLineWidth(0.2); }
+      doc.line(c.x,yy,c.x+c.width,yy);
+    },
     didDrawPage:(d)=>{ if(d.pageNumber>1) miniHead(); }
   });
 
   // ── Summen ──
-  let y=doc.lastAutoTable.finalY+9;
-  const need=62; if(y>H-34-need){ doc.addPage(); miniHead(); y=32; }
-  const sx=R-78;
-  const line=(label,val,o={})=>{ doc.setFont('helvetica',o.bold?'bold':'normal'); doc.setFontSize(o.size||10); doc.setTextColor(...(o.color||[70,70,70])); doc.text(label,sx,y); doc.text(val,R,y,{align:'right'}); y+=o.gap||6; };
+  let q=doc.lastAutoTable.finalY+8; if(q>H-110){ doc.addPage(); miniHead(); q=32; }
+  const sx=R-80;
+  const line=(l,v,c)=>{ font('normal',9.5,c||grey); tx(l,sx,q); font('bold',9.5,ink); tx(v,R,q,{align:'right'}); q+=6.2; };
   const total=r2(displayTotal(b));
   if(b.discountType){
     line('Zwischensumme',pdfMoney(b.subtotal));
-    line(b.discountType==='percent'?`Rabatt (-${b.discountValue}%)`:'Rabatt','-'+pdfMoney(r2(b.subtotal-total)),{color:[185,80,60]});
+    line(b.discountType==='percent'?`Rabatt (-${b.discountValue}%)`:'Rabatt','-'+pdfMoney(r2(b.subtotal-total)),[185,80,60]);
   }
   if(rate>0){
     const net=r2(total/(1+rate/100)), vat=r2(total-net);
     line('Nettobetrag',pdfMoney(net));
     line(`Umsatzsteuer ${String(rate).replace('.',',')} %`,pdfMoney(vat));
   }
-  doc.setDrawColor(...ink); doc.setLineWidth(0.5); doc.line(sx,y-3.6,R,y-3.6); y+=1.6;
-  line(rate>0?'Gesamtbetrag (brutto)':'Gesamtbetrag',pdfMoney(total),{bold:true,size:12.5,color:ink,gap:7.5});
+  q+=1.5; doc.setFillColor(...ink); doc.roundedRect(sx-4,q-5.6,R-sx+4,12.5,3,3,'F');
+  font('normal',9,[205,209,216]); tx(rate>0?'Gesamt (brutto)':'Gesamtbetrag',sx+1,q+2.2);
+  font('bold',14,[255,255,255]); tx(pdfMoney(total),R-4,q+2.8,{align:'right'}); q+=13;
   let rest=total;
   if(b.vorauszahlung>0){
-    line('Vorauszahlung','-'+pdfMoney(b.vorauszahlung));
-    rest=r2(restAmount(b));
-    line('Restbetrag',pdfMoney(rest),{bold:true,size:11,color:ink});
+    q+=2; line('Vorauszahlung','-'+pdfMoney(b.vorauszahlung)); rest=r2(restAmount(b));
+    font('bold',11,ink); tx('Restbetrag',sx,q); tx(pdfMoney(rest),R,q,{align:'right'}); q+=7;
   }
-  y+=3;
 
-  // ── Hinweise ──
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...ink);
+  // ── Hinweis, Zahlung, Dank ──
+  q+=4;
   const note=(INV.steuerhinweis||(rate>0?`Alle Preise verstehen sich inklusive ${String(rate).replace('.',',')} % Umsatzsteuer.`:'Gemäß § 6 Abs. 1 Z 27 UStG wird keine Umsatzsteuer berechnet.'));
-  const blocks=[];
-  blocks.push(...doc.splitTextToSize(note,R-L));
-  blocks.push('');
-  if(b.paid){ blocks.push(`Der Betrag wurde${b.paidAt?' am '+invDate(b.paidAt):''} dankend erhalten.`); }
+  font('normal',8.5,grey); const nl=doc.splitTextToSize(note,R-L);
+  const showPay=!b.paid && rest>0;
+  const qr=(showPay&&INV.iban)?invEpcQr(INV.iban,INV.bic,s.name,rest,nr):null;
+  const ph=qr?36:(showPay?(INV.iban?31:15):15);
+  if(q+nl.length*4+ph+22>H-30){ doc.addPage(); miniHead(); q=32; }
+  doc.text(nl,L,q); q+=nl.length*4+5;
+  doc.setFillColor(...tint); doc.roundedRect(L,q,R-L,ph,3,3,'F');
+  const tl=[];
+  if(b.paid){ tl.push(['b','Zahlung erhalten']); tl.push(['n',`Der Betrag wurde${b.paidAt?' am '+invDate(b.paidAt):''} dankend erhalten.`]); }
   else if(rest>0){
-    blocks.push(...doc.splitTextToSize(`Bitte überweisen Sie ${pdfMoney(rest)}${Number(INV.ziel)>0?' bis zum '+invDate(invAddDays(b.date,INV.ziel)):''} unter Angabe der Rechnungsnummer ${nr}${INV.iban?' auf folgendes Konto:':'.'}`,R-L));
-    if(INV.iban){ blocks.push(...doc.splitTextToSize(`${INV.bank?INV.bank+'  ·  ':''}IBAN ${ibanFmt(INV.iban)}${INV.bic?'  ·  BIC '+INV.bic:''}`,R-L)); }
+    tl.push(['b',`Bitte überweisen Sie ${pdfMoney(rest)}${Number(INV.ziel)>0?' bis zum '+invDate(invAddDays(b.date,INV.ziel)):''}`]);
+    tl.push(['n','Verwendungszweck: '+nr]);
+    if(INV.iban){ if(INV.bank) tl.push(['n',INV.bank]); tl.push(['n','IBAN '+ibanFmt(INV.iban)+(INV.bic?'    BIC '+INV.bic:'')]); }
   }
-  if(INV.outro){ blocks.push(''); blocks.push(...doc.splitTextToSize(INV.outro,R-L)); }
-  const hh=blocks.length*4.5; if(y+hh>H-30){ doc.addPage(); miniHead(); y=32; }
-  blocks.forEach((t,i)=>{ doc.text(t,L,y+i*4.5); });
+  tl.forEach(([w,t],i)=>{ font(w==='b'?'bold':'normal',9.5,ink); tx(t.slice(0,88),L+6,q+8+i*5.4); });
+  if(qr){ doc.addImage(qr,'PNG',R-32,q+4,24,24); font('normal',6.5,grey); tx('Mit Banking-App scannen',R-20,q+31.5,{align:'center'}); }
+  q+=ph+8;
+  if(INV.outro){ font('normal',9.5,ink); doc.text(doc.splitTextToSize(INV.outro,R-L),L,q); }
 
-  // ── Fußzeile auf jeder Seite ──
+  // ── Fußzeile ──
   const pages=doc.internal.getNumberOfPages();
   for(let i=1;i<=pages;i++){
     doc.setPage(i);
     doc.setDrawColor(...light); doc.setLineWidth(0.3); doc.line(L,H-26,R,H-26);
-    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...grey);
+    font('normal',7.5,grey);
     const c1=[s.name,s.strasse,s.ortLine].filter(Boolean);
     const c2=[s.telefon?'Tel. '+s.telefon:'',s.email,s.web].filter(Boolean);
     const c3=[s.uid?'UID '+s.uid:'',s.bank,s.iban?'IBAN '+ibanFmt(s.iban):'',s.bic?'BIC '+s.bic:''].filter(Boolean);
-    [[c1,L],[c2,L+58],[c3,L+110]].forEach(([c,x])=>c.forEach((t,j)=>doc.text(String(t),x,H-21+j*3.6)));
-    doc.text(`Seite ${i} von ${pages}`,R,H-5,{align:'right'});
+    [[c1,L],[c2,L+56],[c3,L+108]].forEach(([c,x])=>c.forEach((t,j)=>tx(t,x,H-21+j*3.6)));
+    tx(`Seite ${i} von ${pages}`,R,H-5,{align:'right'});
   }
   return doc;
 }
@@ -8007,6 +8050,7 @@ function printInvoice(id){
   const b=S.bestellungen.find(x=>x.id===id);
   if(!b){ showToast('Bestellung nicht gefunden.','⚠'); return; }
   if(typeof window.jspdf==='undefined'){ showToast('PDF-Modul konnte nicht geladen werden.','⚠'); return; }
+  if(!invAllowed(b)){ showToast('Für Besteller werden keine Rechnungen erstellt.','ℹ'); return; }
   const k=S.kunden.find(x=>x.id===b.kId);
   if(!INV.firma && !INV.name && !INV.strasse && !INV.iban){ showToast('Tipp: Unter Einstellungen → „Rechnung & Briefkopf“ kannst du Absender, Adresse und Bankdaten hinterlegen.','ℹ'); }
   const doc=buildInvoicePdf(b,k);
