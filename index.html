@@ -1868,6 +1868,26 @@ th:first-child,td:first-child{padding-left:18px}
 th:last-child,td:last-child{padding-right:18px}
 input,select,textarea{background:color-mix(in srgb,var(--paper3) 80%,transparent);border:1px solid var(--line2);transition:border-color .18s,box-shadow .18s}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* ══════════ UPDATE 26 · ATMOSPHÄRE + SCHNELLSUCHE ══════════ */
+.page.active>*{animation:pgIn .5s var(--ease2) both}
+.page.active>*:nth-child(2){animation-delay:.05s}.page.active>*:nth-child(3){animation-delay:.1s}.page.active>*:nth-child(4){animation-delay:.15s}.page.active>*:nth-child(n+5){animation-delay:.2s}
+.modal-bg.show .modal{animation:slideUp .35s var(--ease2) both}
+.stat-cell{position:relative;overflow:hidden}
+.stat-cell::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--sage),var(--accent2),transparent);opacity:.7}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px 160px at 0 0,color-mix(in srgb,var(--sage) 7%,transparent),transparent 70%)}
+.card{position:relative}
+.btn-primary{background-image:linear-gradient(180deg,rgba(255,255,255,.16),transparent 60%)}
+.badge{border:1px solid color-mix(in srgb,currentColor 25%,transparent)}
+.scale-tick.active::before{content:"";position:absolute;left:-10px;top:22%;bottom:22%;width:3px;border-radius:3px;background:var(--sage);box-shadow:0 0 12px var(--sage)}
+#cmdk{position:fixed;inset:0;z-index:9999;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 0;background:rgba(8,9,12,.55);backdrop-filter:blur(8px)}
+#cmdk.open{display:flex}
+#cmdk .cb{width:min(560px,100%);background:var(--paper2);border:1px solid var(--line2);border-radius:22px;box-shadow:0 60px 120px -30px rgba(0,0,0,.8);overflow:hidden;animation:slideUp .25s var(--ease2) both}
+#cmdk input{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:18px 22px;font-size:16px;background:transparent;color:var(--ink);box-shadow:none}
+#cmdk ul{list-style:none;margin:0;padding:8px;max-height:46vh;overflow:auto}
+#cmdk li{padding:12px 16px;border-radius:12px;cursor:pointer;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px}
+#cmdk li.sel{background:color-mix(in srgb,var(--sage) 16%,transparent);color:var(--ink)}
+#cmdk .ft{padding:10px 18px;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -9394,5 +9414,31 @@ let _errT=0;
 window.addEventListener('unhandledrejection',e=>{ console.error(e.reason); if(Date.now()-_errT>8000){ _errT=Date.now(); showToast('Es ist ein Fehler aufgetreten. Bitte erneut versuchen.','⚠'); } });
 </script>
 
+<script>
+/* Schnellsuche: Strg/Cmd+K */
+(function(){
+  const box=document.createElement('div'); box.id='cmdk';
+  box.innerHTML='<div class="cb"><input type="text" placeholder="Seite suchen …" autocomplete="off" aria-label="Schnellsuche"><ul></ul><div class="ft">↑ ↓ wählen · Enter öffnen · Esc schließen</div></div>';
+  document.body.appendChild(box);
+  const inp=box.querySelector('input'), ul=box.querySelector('ul'); let items=[],sel=0;
+  const entries=()=>[...document.querySelectorAll('.scale-tick')].filter(e=>getComputedStyle(e).display!=='none'&&e.textContent.trim()).map(e=>({el:e,t:e.textContent.trim().replace(/\s+/g,' ')}));
+  function draw(){ const q=inp.value.trim().toLowerCase(); items=entries().filter(x=>x.t.toLowerCase().includes(q)); sel=Math.min(sel,Math.max(0,items.length-1));
+    ul.innerHTML=''; items.forEach((x,i)=>{ const li=document.createElement('li'); li.className=i===sel?'sel':''; li.textContent=x.t; li.onclick=()=>go(i); ul.appendChild(li); });
+    if(!items.length){ const li=document.createElement('li'); li.textContent='Keine Treffer'; ul.appendChild(li); } }
+  function open(){ if(!entries().length) return; box.classList.add('open'); inp.value=''; sel=0; draw(); setTimeout(()=>inp.focus(),0); }
+  function close(){ box.classList.remove('open'); }
+  function go(i){ const x=items[i]; close(); if(x) x.el.click(); }
+  inp.addEventListener('input',()=>{ sel=0; draw(); });
+  box.addEventListener('mousedown',e=>{ if(e.target===box) close(); });
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); box.classList.contains('open')?close():open(); return; }
+    if(!box.classList.contains('open')) return;
+    if(e.key==='Escape') close();
+    else if(e.key==='ArrowDown'){ e.preventDefault(); sel=Math.min(sel+1,items.length-1); draw(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); sel=Math.max(sel-1,0); draw(); }
+    else if(e.key==='Enter'){ e.preventDefault(); go(sel); }
+  });
+})();
+</script>
 </body>
 </html>
