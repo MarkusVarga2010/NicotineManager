@@ -1888,6 +1888,24 @@ input,select,textarea{background:color-mix(in srgb,var(--paper3) 80%,transparent
 #cmdk li{padding:12px 16px;border-radius:12px;cursor:pointer;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px}
 #cmdk li.sel{background:color-mix(in srgb,var(--sage) 16%,transparent);color:var(--ink)}
 #cmdk .ft{padding:10px 18px;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line)}
+
+/* ══════════ BUCHHALTUNG ══════════ */
+#acct{position:fixed;inset:0;z-index:9000;display:none;overflow:auto;background:var(--paper)}#acct.open{display:block}
+.ac-wrap{max-width:1000px;margin:0 auto;padding:32px 24px 80px}
+.ac-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:22px}
+.ac-head small{color:var(--ink-faint);font-size:12px}.ac-head h2{font:600 32px 'Space Grotesk',sans-serif;letter-spacing:-.025em;margin:2px 0 0}
+.ac-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}.ac-tabs button{padding:9px 18px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--ink-soft);font-weight:600;cursor:pointer}
+.ac-tabs button.on{background:color-mix(in srgb,var(--sage) 16%,var(--paper2));border-color:var(--sage);color:var(--ink)}
+.ac-bar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.ac-t{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--paper2)}
+.ac-r{display:grid;grid-template-columns:150px 90px 1fr 100px 100px auto;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);font-size:14px}.ac-r:last-child{border:0}
+.ac-r .m{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.ac-r .g{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ac-r .a{display:flex;gap:6px}.ac-r .btn{padding:7px 12px;font-size:12.5px}
+.ac-b{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line2);color:var(--ink-soft);text-align:center}
+.ac-b.ok{color:#2e8b57;border-color:#2e8b5755}.ac-b.late{color:#d4572f;border-color:#d4572f66}.ac-b.x{color:var(--ink-faint)}
+.ac-e{padding:40px;text-align:center;color:var(--ink-faint)}
+.ac-k{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.ac-k div{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper2)}.ac-k small{display:block;color:var(--ink-faint)}.ac-k b{font:600 24px 'Space Grotesk',sans-serif;letter-spacing:-.02em}
+.ac-two{display:grid;grid-template-columns:1fr 1fr;gap:24px}.ac-two h4{margin:0 0 8px}.ac-top{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+@media(max-width:760px){.ac-r{grid-template-columns:1fr 1fr}.ac-k,.ac-two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -2019,6 +2037,8 @@ input,select,textarea{background:color-mix(in srgb,var(--paper3) 80%,transparent
         <div class="nav-group">Konto &amp; System</div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" onclick="nav('einstellungen');closeSidebar()"><span class="tk-n">08</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-settings"/></svg></span><span data-i18n="nav.einstellungen">Einstellungen</span><span class="tk-dot" id="tk-dot-einstellungen"></span></div>
         <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick" style="display:none" onclick="nav('service');closeSidebar()"><span class="tk-n">09</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-lifebuoy"/></svg></span><span data-i18n="nav.service">Service</span></div>
+        <div class="nav-group" id="nav-acct-group" style="display:none">Auswertung</div>
+        <div tabindex="0" role="button" onkeydown="onKeyActivate(event)" class="scale-tick tick-primary" id="nav-acct-tick" style="display:none" onclick="acctOpen();closeSidebar()"><span class="tk-n">★</span><span class="tk-ic"><svg class="svg-ic"><use href="#ic-receipt"/></svg></span><span>Buchhaltung</span></div>
       </nav>
       <div class="sb-footer">
         <button class="btn btn-ghost" id="bell-btn" style="display:none;width:100%;justify-content:center;margin-bottom:8px" onclick="closeSidebar();openNotifCenter()">🔔 Benachrichtigungen<span class="bell-n" id="bell-n"></span></button>
@@ -7912,7 +7932,7 @@ function printInvoiceFromDetail(){
 const INV_DEFAULTS={firma:'',name:'',zusatz:'',strasse:'',plz:'',ort:'',land:'Österreich',uid:'',email:'',telefon:'',web:'',bank:'',iban:'',bic:'',ziel:14,ust:0,steuerhinweis:'',prefix:'RE',intro:'',outro:'Vielen Dank für Ihren Einkauf!',farbe:'#FF7A29'};
 const INV_FIELDS=['firma','name','zusatz','strasse','plz','ort','land','uid','email','telefon','web','bank','iban','bic','ziel','ust','steuerhinweis','prefix','intro','outro','farbe'];
 let INV=Object.assign({},INV_DEFAULTS);
-let INVN={n:{},map:{}};
+let INVN={n:{},map:{},cn:{},m:{}};
 const r2=n=>Math.round((Number(n)+Number.EPSILON)*100)/100;
 function loadInvProfile(authUser){
   let m={};
@@ -7920,7 +7940,7 @@ function loadInvProfile(authUser){
   if(!Object.keys(m).length){ try{ m=JSON.parse(localStorage.getItem('nf_inv_'+(authUser&&authUser.id))||'{}')||{}; }catch(e){ m={}; } }
   INV=Object.assign({},INV_DEFAULTS,m);
   let q={}; try{ q=(authUser&&authUser.user_metadata&&authUser.user_metadata.inv_n)||JSON.parse(localStorage.getItem('nf_invn_'+(authUser&&authUser.id))||'{}')||{}; }catch(e){}
-  INVN={n:q.n||{},map:q.map||{}};
+  INVN={n:q.n||{},map:q.map||{},cn:q.cn||{},m:q.m||{}};
 }
 function hex2rgb(h){ const m=/^#?([0-9a-f]{6})$/i.exec(String(h||'')); const n=m?parseInt(m[1],16):0xFF7A29; return [(n>>16)&255,(n>>8)&255,n&255]; }
 function ibanOk(s){
@@ -8003,10 +8023,10 @@ function invEpcQr(iban,bic,name,amount,ref){
     const c=d.querySelector('canvas'), u=c?c.toDataURL('image/png'):null; d.remove(); return u;
   }catch(e){ return null; }
 }
-function buildInvoicePdf(b,k){
+function buildInvoicePdf(b,k,cn){
   const { jsPDF }=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
-  const W=210,H=297,L=22,R=W-18, acc=hex2rgb(INV.farbe), s=invSender(), rec=invRecipient(b,k), logo=invGetLogo(), nr=invNumber(b);
+  const W=210,H=297,L=22,R=W-18, acc=hex2rgb(INV.farbe), s=invSender(), rec=invRecipient(b,k), logo=invGetLogo(), nr=cn?cn.nr:invNumber(b);
   const rate=Math.max(0,Number(INV.ust)||0);
   const ink=[24,26,31], grey=[116,121,130], light=[228,230,234], tint=[246,247,249];
   const tx=(t,x,y,o)=>doc.text(String(t),x,y,o);
@@ -8023,7 +8043,7 @@ function buildInvoicePdf(b,k){
     font('bold',15,ink); tx(s.name.slice(0,30),L+18,20.4);
     if(INV.zusatz){ font('normal',8.5,grey); tx(INV.zusatz.slice(0,60),L+18,25.4); }
   }
-  font('bold',28,ink); tx('Rechnung',R,24,{align:'right'});
+  font('bold',28,ink); tx(cn?'Gutschrift':'Rechnung',R,24,{align:'right'});
   font('bold',10,acc); tx(nr,R,31,{align:'right'});
 
   // ── Empfänger & Eckdaten ──
@@ -8038,7 +8058,7 @@ function buildInvoicePdf(b,k){
   rows.forEach((r,i)=>{ const y=54+i*6.2; font('normal',8.5,grey); tx(r[0],123,y); font('bold',8.5,ink); tx(r[1],R-5,y,{align:'right'}); });
 
   // ── Status & Einleitung ──
-  let y=92; const chip=b.paid?['BEZAHLT',[46,139,87]]:['OFFEN',[196,120,20]];
+  let y=92; const chip=cn?['GUTSCHRIFT',[185,80,60]]:(b.paid?['BEZAHLT',[46,139,87]]:['OFFEN',[196,120,20]]);
   doc.setDrawColor(...chip[1]); doc.setLineWidth(0.4); doc.roundedRect(L,y-4.6,22,7,3.5,3.5,'S'); font('bold',8,chip[1]); tx(chip[0],L+11,y+0.1,{align:'center'});
   y+=10;
   if(INV.intro){ font('normal',9.5,ink); const t=doc.splitTextToSize(INV.intro,R-L); doc.text(t,L,y); y+=t.length*4.6+3; }
@@ -8097,7 +8117,8 @@ function buildInvoicePdf(b,k){
   doc.text(nl,L,q); q+=nl.length*4+5;
   doc.setFillColor(...tint); doc.roundedRect(L,q,R-L,ph,3,3,'F');
   const tl=[];
-  if(b.paid){ tl.push(['b','Zahlung erhalten']); tl.push(['n',`Der Betrag wurde${b.paidAt?' am '+invDate(b.paidAt):''} dankend erhalten.`]); }
+  if(cn){ tl.push(['b','Gutschrift zu Rechnung '+invNumber(b)]); tl.push(['n','Der Betrag wird erstattet bzw. mit offenen Forderungen verrechnet.']); }
+  else if(b.paid){ tl.push(['b','Zahlung erhalten']); tl.push(['n',`Der Betrag wurde${b.paidAt?' am '+invDate(b.paidAt):''} dankend erhalten.`]); }
   else if(rest>0){
     tl.push(['b',`Bitte überweisen Sie ${pdfMoney(rest)}${Number(INV.ziel)>0?' bis zum '+invDate(invAddDays(b.date,INV.ziel)):''}`]);
     tl.push(['n','Verwendungszweck: '+nr]);
@@ -9438,6 +9459,88 @@ window.addEventListener('unhandledrejection',e=>{ console.error(e.reason); if(Da
     else if(e.key==='ArrowUp'){ e.preventDefault(); sel=Math.max(sel-1,0); draw(); }
     else if(e.key==='Enter'){ e.preventDefault(); go(sel); }
   });
+})();
+</script>
+<script>
+(function(){
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sales=()=>S.bestellungen.filter(b=>invAllowed(b)&&!(b.fuerLieferant&&b.userId===currentUserId));
+const kOf=b=>S.kunden.find(x=>x.id===b.kId);
+const cust=b=>invRecipient(b,kOf(b)).name;
+const cn=()=>INVN.cn||(INVN.cn={}), mh=()=>INVN.m||(INVN.m={});
+const save=()=>{ try{localStorage.setItem('nf_invn_'+currentUserId,JSON.stringify(INVN));}catch(e){} try{sb.auth.updateUser({data:{inv_n:INVN}}).catch(()=>{});}catch(e){} };
+const dueOf=b=>invAddDays(b.date,INV.ziel||14);
+const overdue=b=>!b.paid&&INVN.map[b.id]&&!cn()[b.id]&&new Date(dueOf(b))<new Date(today());
+let tab='archiv', box;
+function cnPdf(b){
+  const c=cn()[b.id];
+  const cl={...b,items:b.items.map(i=>({...i,stueck:-i.stueck})),total:-b.total,subtotal:-(b.subtotal||b.total),paid:true,vorauszahlung:0,discountType:null};
+  buildInvoicePdf(cl,kOf(b),{nr:c.nr}).save(c.nr+'.pdf');
+}
+function mahnPdf(b){
+  const lvl=Math.min((mh()[b.id]||0)+1,3), T=['Zahlungserinnerung','1. Mahnung','Letzte Mahnung'][lvl-1];
+  const {jsPDF}=window.jspdf, d=new jsPDF({unit:'mm',format:'a4'}), s=invSender(), rec=invRecipient(b,kOf(b)), acc=hex2rgb(INV.farbe), L=22, R=190;
+  const t=(st,sz,c,x,y,txt,o)=>{ d.setFont('helvetica',st); d.setFontSize(sz); d.setTextColor(...c); d.text(txt,x,y,o); };
+  d.setFillColor(...acc); d.rect(0,0,6,297,'F');
+  t('bold',15,[24,26,31],L,22,s.name); t('normal',8.5,[116,121,130],L,27,[s.strasse,s.ortLine].filter(Boolean).join(' · '));
+  t('bold',11,[24,26,31],L,52,rec.name); rec.lines.slice(0,4).forEach((x,i)=>t('normal',10,[24,26,31],L,58+i*5,x));
+  t('normal',9,[116,121,130],R,52,invDate(today()),{align:'right'});
+  t('bold',22,[24,26,31],L,95,T);
+  const rest=restAmount(b), frist=invDate(invAddDays(today(),lvl===1?7:5));
+  const body=[`zu unserer Rechnung ${INVN.map[b.id]} vom ${invDate(b.date)} über ${pdfMoney(rest)} konnten wir bis heute keinen Zahlungseingang feststellen.`,
+    lvl===1?'Möglicherweise hat sich Ihre Zahlung mit diesem Schreiben überschnitten. Andernfalls bitten wir Sie, den offenen Betrag zu überweisen.':lvl===2?'Trotz unserer Zahlungserinnerung ist der Betrag nicht eingegangen. Wir bitten Sie, die Zahlung umgehend zu veranlassen.':'Dies ist unsere letzte Mahnung. Andernfalls behalten wir uns weitere Schritte vor.',
+    `Bitte überweisen Sie ${pdfMoney(rest)} bis spätestens ${frist}.`+(INV.iban?`\nIBAN ${ibanFmt(INV.iban)}${INV.bic?'  ·  BIC '+INV.bic:''}\nVerwendungszweck: ${INVN.map[b.id]}`:'')];
+  let y=108; t('normal',10,[24,26,31],L,y,'Sehr geehrte Damen und Herren,'); y+=8;
+  body.forEach(p=>{ const l=d.splitTextToSize(p,R-L); t('normal',10,[24,26,31],L,y,l); y+=l.length*5+4; });
+  t('normal',10,[24,26,31],L,y+4,'Freundliche Grüße'); t('bold',10,[24,26,31],L,y+10,s.name);
+  d.save(`${T.replace(/\W+/g,'-').toLowerCase()}-${INVN.map[b.id]}.pdf`);
+  mh()[b.id]=lvl; save();
+}
+function csv(){
+  const rows=[['Rechnungsnr','Datum','Kunde','Brutto','Status','Gutschrift']];
+  archiv().forEach(b=>rows.push([INVN.map[b.id],b.date,cust(b),Number(b.total).toFixed(2).replace('.',','),cn()[b.id]?'storniert':b.paid?'bezahlt':'offen',cn()[b.id]?cn()[b.id].nr:'']));
+  const blob=new Blob(['\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n')],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`rechnungen-${today()}.csv`; a.click();
+}
+const archiv=()=>sales().filter(b=>INVN.map[b.id]).sort((a,b)=>INVN.map[b.id]<INVN.map[a.id]?-1:1);
+const st=b=>cn()[b.id]?'<span class="ac-b x">Storniert</span>':b.paid?'<span class="ac-b ok">Bezahlt</span>':overdue(b)?'<span class="ac-b late">Überfällig</span>':'<span class="ac-b">Offen</span>';
+function vArchiv(){
+  const l=archiv(); if(!l.length) return '<p class="ac-e">Noch keine Rechnungen erstellt. Sie erscheinen hier, sobald du eine Rechnung herunterlädst.</p>';
+  return '<div class="ac-bar"><button class="btn btn-ghost" onclick="acctCsv()">CSV-Export</button></div><div class="ac-t">'+l.map(b=>`<div class="ac-r"><b>${E(INVN.map[b.id])}</b><span>${E(invDate(b.date))}</span><span class="g">${E(cust(b))}</span><span class="m">${E(pdfMoney(b.total))}</span>${st(b)}<span class="a"><button class="btn btn-ghost" onclick="acctInv(${JSON.stringify(b.id)})">Rechnung</button>${cn()[b.id]?`<button class="btn btn-ghost" onclick="acctCn(${JSON.stringify(b.id)})">Gutschrift</button>`:`<button class="btn btn-ghost" onclick="acctStorno(${JSON.stringify(b.id)})">Storno</button>`}</span></div>`).join('')+'</div>';
+}
+function vMahn(){
+  const l=sales().filter(overdue); if(!l.length) return '<p class="ac-e">Keine überfälligen Rechnungen. 🎉</p>';
+  return '<div class="ac-t">'+l.map(b=>{ const n=mh()[b.id]||0; return `<div class="ac-r"><b>${E(INVN.map[b.id])}</b><span>fällig ${E(invDate(dueOf(b)))}</span><span class="g">${E(cust(b))}</span><span class="m">${E(pdfMoney(restAmount(b)))}</span><span class="ac-b late">${n?n+'× gemahnt':'Überfällig'}</span><span class="a"><button class="btn btn-primary" onclick="acctMahn(${JSON.stringify(b.id)})">${['Erinnerung','1. Mahnung','Letzte Mahnung','Letzte Mahnung'][n]}</button></span></div>`; }).join('')+'</div>';
+}
+function vUmsatz(){
+  const paid=sales().filter(b=>b.paid&&!cn()[b.id]), m={}, c={}, p={}; const ym=today().slice(0,7), yy=today().slice(0,4);
+  paid.forEach(b=>{ const k=String(b.paidAt||b.date).slice(0,7); m[k]=(m[k]||0)+b.total; c[cust(b)]=(c[cust(b)]||0)+b.total; b.items.forEach(i=>{ const n=PROD_MAP[i.prod]?prodLabel(i):i.prod; p[n]=(p[n]||0)+i.stueck; }); });
+  const keys=[]; for(let i=11;i>=0;i--){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); keys.push(d.toISOString().slice(0,7)); }
+  const mx=Math.max(1,...keys.map(k=>m[k]||0));
+  const bars=keys.map((k,i)=>{ const h=Math.round((m[k]||0)/mx*140); return `<g><rect x="${i*50+8}" y="${160-h}" width="34" height="${h}" rx="7" fill="var(--sage)" opacity="${k===ym?1:.55}"><title>${k}: ${pdfMoney(m[k]||0)}</title></rect><text x="${i*50+25}" y="178" text-anchor="middle" font-size="10" fill="var(--ink-faint)">${k.slice(5)}</text></g>`; }).join('');
+  const sum=Object.keys(m).filter(k=>k.startsWith(yy)).reduce((s,k)=>s+m[k],0), open=sales().filter(b=>!b.paid&&INVN.map[b.id]&&!cn()[b.id]).reduce((s,b)=>s+restAmount(b),0);
+  const top=(o,f)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>`<div class="ac-top"><span>${E(n)}</span><b>${f(v)}</b></div>`).join('')||'<p class="ac-e">Noch keine Daten.</p>';
+  return `<div class="ac-k"><div><small>Umsatz ${yy}</small><b>${pdfMoney(sum)}</b></div><div><small>Dieser Monat</small><b>${pdfMoney(m[ym]||0)}</b></div><div><small>Offen</small><b>${pdfMoney(open)}</b></div></div>
+  <svg viewBox="0 0 600 186" style="width:100%;height:auto;margin:10px 0 22px">${bars}</svg>
+  <div class="ac-two"><div><h4>Top Kunden</h4>${top(c,pdfMoney)}</div><div><h4>Top Produkte (Stück)</h4>${top(p,v=>v)}</div></div>`;
+}
+function render(){
+  const T=[['archiv','Rechnungsarchiv'],['mahn','Mahnwesen'],['umsatz','Umsatz']];
+  box.querySelector('.ac-body').innerHTML=`<div class="ac-tabs">${T.map(([k,n])=>`<button class="${k===tab?'on':''}" onclick="acctTab('${k}')">${n}</button>`).join('')}</div>`+(tab==='archiv'?vArchiv():tab==='mahn'?vMahn():vUmsatz());
+}
+const byId=id=>S.bestellungen.find(x=>String(x.id)===String(id));
+window.acctTab=k=>{ tab=k; render(); };
+window.acctCsv=csv;
+window.acctInv=id=>{ const b=byId(id); if(b) printInvoice(b.id); };
+window.acctCn=id=>{ const b=byId(id); if(b&&cn()[b.id]) cnPdf(b); };
+window.acctMahn=id=>{ const b=byId(id); if(b){ mahnPdf(b); render(); } };
+window.acctStorno=id=>{ const b=byId(id); if(!b||cn()[b.id]||!confirm(`Rechnung ${INVN.map[b.id]} stornieren und Gutschrift erstellen?`)) return;
+  const y=today().slice(0,4), n=(INVN.n['G'+y]||0)+1; INVN.n['G'+y]=n; cn()[b.id]={nr:`GS-${y}-${String(n).padStart(5,'0')}`,date:today()}; save(); cnPdf(b); render(); };
+window.acctOpen=()=>{ if(!box){ box=document.createElement('div'); box.id='acct'; box.innerHTML='<div class="ac-wrap"><div class="ac-head"><div><small>Auswertung</small><h2>Buchhaltung</h2></div><button class="btn btn-ghost" onclick="acctClose()">Schließen ✕</button></div><div class="ac-body"></div></div>'; document.body.appendChild(box); document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&box.classList.contains('open')) acctClose(); }); }
+  render(); box.classList.add('open'); };
+window.acctClose=()=>box&&box.classList.remove('open');
+function sync(){ const ok=['user','special'].includes(currentRole())&&!!currentUserId; ['nav-acct-tick','nav-acct-group'].forEach(i=>{ const e=document.getElementById(i); if(e) e.style.display=ok?'':'none'; }); }
+const rf=window.refresh; window.refresh=function(){ const r=rf.apply(this,arguments); try{sync();}catch(e){} return r; };
 })();
 </script>
 </body>
