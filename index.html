@@ -1906,6 +1906,18 @@ input,select,textarea{background:color-mix(in srgb,var(--paper3) 80%,transparent
 .ac-k{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.ac-k div{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper2)}.ac-k small{display:block;color:var(--ink-faint)}.ac-k b{font:600 24px 'Space Grotesk',sans-serif;letter-spacing:-.02em}
 .ac-two{display:grid;grid-template-columns:1fr 1fr;gap:24px}.ac-two h4{margin:0 0 8px}.ac-top{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
 @media(max-width:760px){.ac-r{grid-template-columns:1fr 1fr}.ac-k,.ac-two{grid-template-columns:1fr}}
+/* ══════════ FAVORITEN & NOCHMAL BESTELLEN ══════════ */
+.shop-tile{position:relative}
+.fav-btn{position:absolute;top:8px;left:10px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);background:color-mix(in srgb,var(--paper2) 85%,transparent);color:var(--ink-soft);font-size:17px;line-height:1;cursor:pointer;transition:transform .18s var(--ease2),color .18s}
+.fav-btn:hover{transform:scale(1.12)}.fav-btn.on{color:#f5b301;border-color:#f5b30188}
+.fav-bar{display:flex;gap:8px;margin:0 0 14px}
+.fav-bar .chip.on{background:color-mix(in srgb,#f5b301 18%,var(--paper2));border-color:#f5b301;color:var(--ink)}
+.bs-again{display:flex;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+
+.ac-due{align-items:center;gap:14px;margin:0 0 18px;padding:14px 18px;border:1px solid #d4572f66;border-radius:var(--r-card,20px);background:color-mix(in srgb,#d4572f 10%,var(--paper2))}
+.ac-due>span{font-size:22px}.ac-due>div{flex:1}.ac-due b{display:block}.ac-due small{color:var(--ink-soft)}
+.bs-new{display:inline-block;margin-right:8px;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;background:var(--sage);color:#1a0d02}
+#bs-tab-orders.has-new::after{content:"";display:inline-block;width:8px;height:8px;margin-left:8px;border-radius:50%;background:var(--sage);box-shadow:0 0 10px var(--sage)}
 </style>
 </head>
 <body>
@@ -2076,6 +2088,7 @@ input,select,textarea{background:color-mix(in srgb,var(--paper3) 80%,transparent
         <div><h4>Service fällig</h4><p>Der jährliche Service steht an. Bitte den Service-Account kontaktieren.</p></div>
       </div>
 
+      <div id="ac-due" class="ac-due" style="display:none"><span>⚠️</span><div><b></b><small>Zeit für eine Zahlungserinnerung.</small></div><button class="btn btn-primary btn-sm" onclick="acctOpen();acctTab('mahn')">Zum Mahnwesen</button></div>
       <div class="stat-strip bento-dash">
         <div class="stat-cell s-debt" data-bento="debt">
           <svg class="bento-ic-bg"><use href="#ic-wallet"/></svg>
@@ -2613,6 +2626,7 @@ alter table profiles add column if not exists adresse text;</pre>
         <div><div class="ph-eyebrow">Shop</div><div class="pt">Bestellen</div><div class="ps" id="bs-sub"></div></div>
         <div class="pa">
           <button class="btn btn-ghost" onclick="openKundenkarte('user',currentUserId)" title="Meine Kundenkarte"><svg class="svg-ic h-ic"><use href="#ic-card"/></svg>Meine Karte</button>
+          <button class="btn btn-ghost" onclick="openHandbuch()" title="Handbuch">📘 Handbuch</button>
           <button class="btn btn-ghost" onclick="reloadBesteller()" title="Aktualisieren">↻</button>
           <button class="btn btn-primary" onclick="openBsModal()">🛒 Warenkorb<span class="bs-badge zero" id="bs-cart-count">0</span></button>
         </div>
@@ -3134,6 +3148,224 @@ alter table profiles add column if not exists adresse text;</pre>
   </div>
 </div>
 
+<template id="manual-besteller-tpl">
+<section class="hb-ch" id="hb-ch-1"><h1>1. Das Wichtigste in einfachen Worten</h1>
+<p>NicoFlow ist ein Programm, mit dem du Ware bestellst. Du suchst aus, was du brauchst, und schickst die Bestellung ab. Danach kannst du jederzeit nachsehen, wie weit sie ist.</p>
+<h2>Drei Wörter, die du kennen musst</h2>
+<ul><li><b>Besteller</b> – Das bist du. Du bestellst Ware.</li><li><b>Lieferant</b> – Die Person, bei der du bestellst und von der du die Ware bekommst.</li><li><b>Warenkorb</b> – Hier sammelst du alles, was du bestellen willst – wie in einem Geschäft.</li></ul>
+<h2>Der Ablauf in 4 Schritten</h2>
+<ol><li>Anmelden.</li><li>Ware in den Warenkorb legen und die Bestellung abschicken.</li><li>Nachsehen, wie weit die Bestellung ist.</li><li>Die Ware bekommen und die Karte zeigen.</li></ol>
+<p><b>Gut zu wissen:</b> Du kannst in der App <b>nur bestellen</b>. Eine <b>Rechnung</b> schreibt die App für Besteller nicht. Wie du bezahlst, sprichst du direkt mit deinem Lieferanten ab.</p>
+</section>
+<section class="hb-ch" id="hb-ch-2"><h1>2. Anmelden</h1>
+<h2>Das erste Mal: Registrieren</h2>
+<ol><li>Öffne NicoFlow. Du siehst den Anmeldebildschirm.</li><li>Tippe auf <b>„Neu hier? Als Besteller registrieren“</b>.</li><li>Denke dir einen <b>Benutzernamen</b> aus, zum Beispiel <i>max.muster</i>.</li><li>Wähle <b>Passwort</b> oder <b>PIN</b>. Eine PIN besteht nur aus Ziffern.</li><li>Gib dein Passwort ein. Es braucht <b>mindestens 10 Zeichen</b>. Gib es zur Kontrolle noch einmal ein.</li><li>Tippe auf <b>„Registrieren“</b>. Fertig.</li></ol>
+<h2>Danach: Anmelden</h2>
+<p>Gib deinen Benutzernamen und dein Passwort (oder deine PIN) ein. Tippe dann auf <b>„Anmelden“</b>.</p>
+<p><b>Tipp:</b> Schreibe dir deine Zugangsdaten auf und gib sie niemandem weiter.</p>
+</section>
+<section class="hb-ch" id="hb-ch-3"><h1>3. Etwas bestellen</h1>
+<p>Oben siehst du zwei Reiter: <b>Sortiment</b> (alles, was du bestellen kannst) und <b>Meine Bestellungen</b>. Zum Bestellen bleibst du im Sortiment.</p>
+<ol><li><b>Produkt finden.</b> Scrolle durch die Kacheln oder tippe oben ins Suchfeld und schreibe den Namen.</li><li><b>Menge einstellen.</b> Tippe auf <b>+</b> für mehr und auf <b>−</b> für weniger. Du kannst die Zahl auch eintippen.</li><li><b>Wunsch eintragen</b> (nur wenn ein Feld da ist). Bei manchen Produkten kannst du zum Beispiel einen Geschmack oder eine Marke wünschen. Schreibe das ins Feld.</li><li>Tippe auf <b>„In den Warenkorb“</b>. Auf der Kachel siehst du, wie viele du schon hast.</li><li>Mache das für alles, was du brauchst.</li><li>Tippe oben rechts auf <b>„Warenkorb“</b>. Prüfe, ob alles stimmt.</li><li><b>Lieferanten auswählen.</b> Setze einen Haken bei dem Lieferanten, bei dem du bestellen willst. Wählst du mehrere, bekommt jeder deine Bestellung. Ein Zähler zeigt, wie viele du wählen darfst.</li><li><b>Nachricht schreiben</b> (freiwillig). Zum Beispiel deine Adresse oder wann du Zeit hast.</li><li>Tippe auf den <b>Bestell-Button</b>. Du siehst eine Meldung, dass die Bestellung gesendet wurde.</li></ol>
+<h2>Schneller bestellen</h2>
+<ul><li><b>Favoriten:</b> Tippe oben auf der Kachel auf <b>☆</b>. Das Produkt wird zum <b>★ Favoriten</b> und steht ab jetzt ganz vorn. Mit <b>„★ Nur Favoriten“</b> siehst du nur diese.</li><li><b>Nochmal bestellen:</b> Tippe unter <b>Meine Bestellungen</b> bei einer alten Bestellung auf <b>↻ Nochmal bestellen</b>. Alle Artikel liegen dann wieder im Warenkorb. Prüfe sie und sende ab.</li></ul>
+<p><b>Es klappt nicht?:</b> Meist fehlt etwas. Ist der Warenkorb leer? Hast du keinen Lieferanten angehakt? Hast du mehr Lieferanten gewählt als erlaubt (meistens 3)? Die App sagt dir kurz, was fehlt.</p>
+</section>
+<section class="hb-ch" id="hb-ch-4"><h1>4. Sehen, wie weit deine Bestellung ist</h1>
+<p>Tippe auf den Reiter <b>Meine Bestellungen</b>. Dort steht jede deiner Bestellungen. Die neueste ist ganz oben.</p>
+<h2>Was die Wörter bedeuten</h2>
+<ul><li><b>bestätigt</b> – Dein Lieferant hat die Bestellung gesehen und angenommen.</li><li><b>bereit</b> – Deine Ware liegt für dich bereit.</li><li><b>unterwegs</b> – Deine Ware ist auf dem Weg zu dir.</li><li><b>übergeben</b> – Du hast die Ware bekommen. Fertig.</li></ul>
+<p>Wenn ein <b>Termin</b> und ein <b>Ort</b> ausgemacht sind, stehen sie bei der Bestellung. Den Stand trägt dein Lieferant ein, nicht du. Sieht es nicht aktuell aus, tippe oben auf <b>↻</b>.</p>
+<p>Hat sich seit deinem letzten Besuch etwas geändert, steht bei der Bestellung <b>„Neu: …“</b> und am Reiter ein Punkt. Sobald du die Bestellung öffnest, verschwindet die Markierung.</p>
+</section>
+<section class="hb-ch" id="hb-ch-5"><h1>5. Die Ware bekommen</h1>
+<p>Wenn du die Ware bekommst, scannt dein Lieferant deine <b>Kundenkarte</b>. So ist klar, dass du alles erhalten hast. Du musst nichts unterschreiben.</p>
+<ol><li>Tippe oben auf <b>„Meine Karte“</b>.</li><li>Halte das Handy so, dass dein Lieferant den <b>Strichcode</b> scannen kann.</li><li>Fertig. Die Bestellung steht jetzt auf <b>übergeben</b>.</li></ol>
+<p><b>Tipp:</b> Öffne die Karte schon vorher, dann musst du nicht lange suchen. Zeige sie nur der Person, von der du die Ware bekommst.</p>
+</section>
+<section class="hb-ch" id="hb-ch-6"><h1>6. Häufige Fragen</h1>
+<p><b>Bekomme ich eine Rechnung?</b><br>Nein. Als Besteller kannst du in der App nur bestellen. Frage deinen Lieferanten, wenn du einen Beleg brauchst.</p>
+<p><b>Ich finde ein Produkt nicht.</b><br>Probiere das Suchfeld oben im Sortiment. Ist es dort nicht, bieten deine Lieferanten es nicht an.</p>
+<p><b>Ich sehe keinen Lieferanten.</b><br>Dann ist für dich noch keiner freigeschaltet. Melde dich bei deinem Administrator.</p>
+<p><b>Ich kann keinen weiteren Lieferanten wählen.</b><br>Du hast dein Limit erreicht. Nimm bei einem anderen den Haken weg oder bitte deinen Administrator um ein höheres Limit.</p>
+<p><b>Ich möchte meine Bestellung ändern.</b><br>Dafür gibt es in der App keinen Knopf. Schreibe deinem Lieferanten.</p>
+<p><b>Die Anzeige ist nicht aktuell.</b><br>Tippe auf <b>↻</b> oder lade die Seite neu.</p>
+<p><b>Wo finde ich dieses Handbuch?</b><br>Im Menü unter <b>Einstellungen</b> oder oben auf der Bestellseite bei <b>„Handbuch“</b>.</p>
+</section>
+</template>
+
+<template id="manual-user-tpl">
+<section class="hb-ch" id="hb-ch-1"><h1>1. Das Wichtigste in einfachen Worten</h1>
+<p>Mit NicoFlow verwaltest du Verkauf, Einkauf und Lager an einem Ort. Du legst Kunden und Preise an, schreibst Bestellungen auf, begleitest jede Lieferung bis zur Übergabe und siehst, wer dir noch Geld schuldet.</p>
+<h2>Wörter, die du kennen musst</h2>
+<ul><li><b>Kunde</b> – Eine Person, die bei dir kauft. Du legst sie unter „Kunden“ an.</li><li><b>Bestellung</b> – Das, was ein Kunde bei dir bestellt hat.</li><li><b>Sendung</b> – Der Weg einer Bestellung bis zur Übergabe.</li><li><b>Kundenkarte</b> – Eine Karte mit Strichcode. Bei der Übergabe scannst du sie. Das ersetzt Unterschriften.</li><li><b>Lieferant</b> – Die Person, bei der du selbst einkaufst.</li></ul>
+<h2>Der Ablauf in 6 Schritten</h2>
+<ol><li>Preise eintragen.</li><li>Kunden anlegen.</li><li>Bestellung aufschreiben.</li><li>Status setzen: bestätigt, bereit, unterwegs.</li><li>Übergeben: Kundenkarte scannen.</li><li>Bezahlt abhaken und Rechnung erstellen.</li></ol>
+<p><b>Tipp:</b> Mit <b>Strg + K</b> (am Handy: Knopf <b>„Schnellsuche“</b> im Menü) springst du von überall zu jeder Seite.</p>
+</section>
+<section class="hb-ch" id="hb-ch-2"><h1>2. Anmelden und dein Konto</h1>
+<h2>Anmelden</h2>
+<p>Den Benutzernamen und ein vorläufiges Passwort bekommst du vom <b>Administrator</b>. Beim ersten Anmelden legst du ein <b>eigenes Passwort</b> fest.</p>
+<p>Dein Konto nutzt ein <b>Passwort</b> (mindestens 10 Zeichen) oder eine <b>PIN</b> (6 bis 8 Ziffern).</p>
+<p><b>Achtung:</b> Nach <b>5 falschen Versuchen</b> wird dein Konto gesperrt. Der Administrator schaltet es wieder frei.</p>
+<h2>Was du unter „Einstellungen“ findest</h2>
+<ul><li><b>Passwort oder PIN ändern.</b> Du musst dafür dein altes Passwort eingeben.</li><li><b>Telefon und Adresse</b> eintragen.</li><li><b>Mein Lieferant:</b> Wähle hier, bei wem du selbst einkaufst. Das brauchst du nur, wenn du einen Lieferanten hast.</li><li><b>Anzeige:</b> hell oder dunkel, Schriftgröße, Farben und Sprache.</li><li><b>Backup:</b> Deine Daten als Datei herunterladen.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-3"><h1>3. Preise, Kunden und Lager einrichten</h1>
+<h2>Preise</h2>
+<p>Öffne <b>Preise</b>. Trage für jedes Produkt den <b>Einkaufspreis</b> und den <b>Verkaufspreis</b> ein. Der Gewinn pro Stück erscheint sofort. Gespeichert wird automatisch, wenn du das Feld verlässt.</p>
+<p>Manche Produkte haben <b>Varianten</b> (Geschmack, Marke oder Farbe). Lege zuerst mindestens eine Variante an, sonst lässt sich das Produkt nicht bestellen. Jede Variante hat eigene Preise und kann ein Foto haben.</p>
+<h2>Kunden</h2>
+<ol><li>Öffne <b>Kunden</b>.</li><li>Lege einen neuen Kunden an.</li><li>Tippe auf einen Kunden. Du siehst vier Reiter: Infos, Bestellungen, Statistik und Preise.</li></ol>
+<p>Unter <b>Preise</b> beim Kunden kannst du einen Sonderpreis nur für ihn eintragen. Ist das Feld leer, gilt der normale Preis.</p>
+<h2>Lager</h2>
+<p>Unter <b>Lagerbestand</b> trägst du ein, was du vorrätig hast, und eine <b>Warnschwelle</b>. Die App zeigt dann: Auf Lager, Niedrig oder Leer. Kritische Produkte stehen oben.</p>
+<p>Was du selbst verbrauchst, buchst du unter <b>Eigenverbrauch</b>. Das senkt den Lagerbestand automatisch.</p>
+</section>
+<section class="hb-ch" id="hb-ch-4"><h1>4. Eine Bestellung aufschreiben</h1>
+<ol><li>Öffne <b>Bestellungen</b> und tippe auf <b>＋ Neue Bestellung</b>.</li><li>Wähle den <b>Kunden</b>.</li><li>Füge Produkte hinzu. Bei Produkten mit Variante tippst du auf die passende Bildkarte.</li><li>Wenn du willst: <b>Rabatt</b> (Prozent oder fester Betrag) und <b>Vorauszahlung</b> eintragen. Den Restbetrag rechnet die App für dich.</li><li>Tippe auf <b>„Bestellung anlegen“</b>.</li></ol>
+<p><b>Gut zu wissen:</b> Beim Speichern werden die Preise <b>eingefroren</b>. Ändert sich später ein Preis, bleibt diese Bestellung gleich.</p>
+<h2>Offen und Historie</h2>
+<p>Im Tab <b>Offen</b> steht alles, was noch nicht abgeholt oder nicht bezahlt ist. Im Tab <b>Historie</b> stehen erledigte Bestellungen. Dort gibt es auch <b>„Nochmal bestellen“</b>.</p>
+<p>Gelöschte Bestellungen landen im <b>Papierkorb</b> (unter Einstellungen). Dort kannst du sie 30 Tage lang zurückholen.</p>
+</section>
+<section class="hb-ch" id="hb-ch-5"><h1>5. Lieferung verfolgen und übergeben</h1>
+<p>Jede Bestellung geht durch sechs Stationen: <b>Bestellt → Bestätigt → Bereit → Unterwegs → Übergeben → Bezahlt</b>. „Bestellt“ und „Bezahlt“ ergeben sich von selbst. Die Stationen dazwischen setzt du.</p>
+<h2>Status setzen</h2>
+<ol><li>Öffne <b>Sendungen</b> oder tippe in der Bestellliste auf <b>📍</b>.</li><li>Öffne die Sendung.</li><li>Wähle im Formular <b>„Status aktualisieren“</b>: Bestätigt, Bereit zur Übergabe, Bin unterwegs oder Persönlich übergeben.</li><li>Schreibe bei Bedarf einen Hinweis. Dein Kunde sieht ihn.</li><li>Bei „Bereit“ und „Unterwegs“: Datum, Uhrzeit, Dauer und Treffpunkt eintragen. Die App warnt dich bei Terminüberschneidungen.</li></ol>
+<h2>Übergabe mit der Kundenkarte</h2>
+<ol><li>Tippe auf <b>Abholen</b> oder <b>Persönlich übergeben</b>. Das Scan-Fenster öffnet sich.</li><li>Die Person zeigt ihre Karte. Halte den Strichcode quer und ruhig in den Rahmen.</li><li>Die App prüft, ob die Karte zur Bestellung passt. Dann ist die Ware übergeben.</li></ol>
+<p>Klappt der Scan nicht, tippe die <b>Kartennummer</b> ein. Ist keine Karte dabei, wähle <b>„Ohne Karte bestätigen“</b> und trage einen Grund ein.</p>
+<p>Hat ein Kunde mehrere offene Bestellungen, schließt du alle mit <b>einem</b> Scan ab: Bestell-Detail → „Alle offenen Bestellungen dieses Kunden“.</p>
+<h2>Kunden informieren</h2>
+<ul><li><b>Verfolgungslink:</b> Jede Bestellung hat einen geheimen Link. Dein Kunde sieht damit ohne Anmeldung Stationen, Hinweise und Termin.</li><li><b>Erinnerung:</b> Wartet eine Bestellung seit 3 Tagen oder länger, erscheint „⏳ seit X T“. Ein Klick bereitet eine Nachricht vor.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-6"><h1>6. Bezahlen und Rechnung</h1>
+<ol><li>Tippe bei der Bestellung auf <b>Bezahlt</b>.</li><li>Die App fragt: <b>„Rechnung jetzt als PDF herunterladen?“</b> Mit „OK“ bekommst du die Rechnung.</li><li>Später findest du sie im Bestell-Detail oder unter <b>Buchhaltung</b>.</li></ol>
+<h2>Deine Rechnungsdaten</h2>
+<p>Trage <b>einmal</b> unter <b>Einstellungen → Rechnung &amp; Briefkopf</b> Name, Adresse, IBAN, Zahlungsziel, Umsatzsteuer und Logo ein. Eine Vorschau zeigt dir, wie deine Rechnung aussieht.</p>
+<p>Jede Rechnung bekommt eine <b>eigene Nummer</b>, die hochzählt (zum Beispiel RE-2026-00001). Lädst du dieselbe Rechnung noch einmal, bleibt die Nummer gleich.</p>
+<p><b>Wichtig:</b> Rechnungen gibt es für Kunden und Konten. <b>Besteller</b> bekommen keine Rechnung. Sie können nur bestellen.</p>
+<h2>Buchhaltung</h2>
+<p>Im Menü findest du <b>Buchhaltung</b> mit drei Reitern:</p>
+<ul><li><b>Rechnungsarchiv:</b> alle Rechnungen. Du kannst sie erneut laden, per <b>„Senden“</b> weitergeben (am Handy über das Teilen-Menü) und als CSV für den Steuerberater exportieren.</li><li><b>Mahnwesen:</b> überfällige Rechnungen. Du erstellst nacheinander Zahlungserinnerung, 1. Mahnung und Letzte Mahnung als PDF.</li><li><b>Umsatz:</b> Balkendiagramm der letzten 12 Monate, dazu Top-Kunden und Top-Produkte. Mit <b>„Monatsbericht“</b> erstellst du eine PDF-Seite mit Umsatz, Gewinn, offenen Posten und Top-Listen, für diesen Monat oder den Vormonat.</li></ul>
+<p><b>Storno:</b> Im Archiv erstellt „Storno“ eine Gutschrift mit eigener Nummer (GS-2026-00001). Die Rechnung steht danach als „Storniert“ da.</p>
+<p>Das Archiv zeigt nur Rechnungen, die nach dem Update erstellt wurden.</p>
+</section>
+<section class="hb-ch" id="hb-ch-7"><h1>7. Beim Lieferanten einkaufen</h1>
+<p>Auch du kaufst ein. Wähle dafür unter <b>Einstellungen → Mein Lieferant</b> deinen Lieferanten.</p>
+<ol><li>Öffne <b>Beim Lieferanten</b> und tippe auf <b>＋ Neue Bestellung</b>.</li><li>Wähle die Produkte. Die Preise kommen aus der Preisliste deines Lieferanten.</li><li>Dein Lieferant sieht die Bestellung und setzt den Status.</li><li>Ist die Ware da, erscheint das Banner <b>„abholbereit“</b>. Markiere sie als angekommen und bezahlt, einzeln oder gesammelt.</li><li>Einen <b>Lieferschein</b> kannst du als PDF laden.</li></ol>
+<p>Die Beträge folgen der <b>aktuellen Preisliste</b> deines Lieferanten, bis du bezahlt hast. Danach sind sie fest.</p>
+<p>Unter <b>Sonstige Schulden</b> trägst du Geld ein, das du jemand anderem schuldest, mit Notiz und „bezahlt“-Haken.</p>
+</section>
+<section class="hb-ch" id="hb-ch-8"><h1>8. Die Übersicht verstehen</h1>
+<p>Die <b>Übersicht</b> zeigt dir auf einen Blick, wie es läuft:</p>
+<ul><li><b>Offene Schulden:</b> Was andere dir noch schulden.</li><li><b>Gesamtgewinn:</b> Verkaufspreis minus Einkaufspreis über alle Verkäufe.</li><li><b>Eigene Schulden:</b> Was du selbst schuldest.</li><li><b>Offene Restbeträge:</b> Nachzahlungen bei Bestellungen mit Vorauszahlung.</li><li><b>Größte Schuldner</b> und <b>Aktive Sendungen:</b> Wer am meisten schuldet und welche Lieferungen bald anstehen.</li><li><b>Statistik:</b> Wochenumsatz, Top-5-Produkte und Top-5-Kunden.</li><li><b>Lagerwarnung:</b> Erscheint, sobald ein Produkt niedrig oder leer ist.</li><li><b>Überfällige Rechnungen:</b> Ein orangener Hinweis zeigt, wie viele Rechnungen überfällig sind und wie viel Geld das ist. Ein Klick bringt dich ins Mahnwesen.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-9"><h1>9. Häufige Fragen</h1>
+<p><b>Der Scanner erkennt die Karte nicht.</b><br>Strichcode quer halten, Abstand ändern, die Karte im Vollbild mit hoher Helligkeit zeigen oder den Blitz-Knopf nutzen. Der Kamerazugriff muss erlaubt sein. Notfalls die Kartennummer eintippen.</p>
+<p><b>Beim Lieferanten sehe ich keine Preise.</b><br>Wähle in den Einstellungen „Mein Lieferant“. Dein Lieferant muss Preise (und Varianten) eingetragen haben.</p>
+<p><b>Ein Produkt lässt sich nicht bestellen.</b><br>Bei Produkten mit Variante muss unter <b>Preise</b> zuerst mindestens ein Geschmack, eine Marke oder eine Farbe angelegt sein.</p>
+<p><b>Ich habe mein Passwort vergessen.</b><br>Melde dich beim Administrator. Er vergibt dir ein neues.</p>
+<p><b>Mein Konto ist gesperrt.</b><br>Das passiert nach 5 falschen Anmeldeversuchen. Der Administrator schaltet es frei.</p>
+<p><b>Die Daten wirken veraltet.</b><br>Prüfe, ob oben ein Offline-Hinweis steht. Mit Verbindung lade die Seite neu.</p>
+<p><b>Wo finde ich dieses Handbuch?</b><br>Unter <b>Einstellungen</b> oder in der Handbuch-Karte dort.</p>
+</section>
+</template>
+<template id="manual-special-tpl">
+<section class="hb-ch" id="hb-ch-1"><h1>1. Das Wichtigste in einfachen Worten</h1>
+<p>Mit NicoFlow verwaltest du Verkauf, Einkauf und Lager an einem Ort. Du legst Kunden und Preise an, schreibst Bestellungen auf, begleitest jede Lieferung bis zur Übergabe und siehst, wer dir noch Geld schuldet.</p>
+<h2>Wörter, die du kennen musst</h2>
+<ul><li><b>Kunde</b> – Eine Person, die bei dir kauft. Du legst sie unter „Kunden“ an.</li><li><b>Bestellung</b> – Das, was ein Kunde bei dir bestellt hat.</li><li><b>Sendung</b> – Der Weg einer Bestellung bis zur Übergabe.</li><li><b>Kundenkarte</b> – Eine Karte mit Strichcode. Bei der Übergabe scannst du sie. Das ersetzt Unterschriften.</li><li><b>Lieferant</b> – Die Person, bei der du selbst einkaufst.</li></ul>
+<h2>Der Ablauf in 6 Schritten</h2>
+<ol><li>Preise eintragen.</li><li>Kunden anlegen.</li><li>Bestellung aufschreiben.</li><li>Status setzen: bestätigt, bereit, unterwegs.</li><li>Übergeben: Kundenkarte scannen.</li><li>Bezahlt abhaken und Rechnung erstellen.</li></ol>
+<p><b>Du hast ein Spezial-Konto:</b> Das bedeutet: Andere können bei dir bestellen. Was dafür wichtig ist, steht in Kapitel 3.</p>
+<p><b>Tipp:</b> Mit <b>Strg + K</b> (am Handy: Knopf <b>„Schnellsuche“</b> im Menü) springst du von überall zu jeder Seite.</p>
+</section>
+<section class="hb-ch" id="hb-ch-2"><h1>2. Anmelden und dein Konto</h1>
+<h2>Anmelden</h2>
+<p>Den Benutzernamen und ein vorläufiges Passwort bekommst du vom <b>Administrator</b>. Beim ersten Anmelden legst du ein <b>eigenes Passwort</b> fest.</p>
+<p>Dein Konto nutzt ein <b>Passwort</b> (mindestens 10 Zeichen) oder eine <b>PIN</b> (6 bis 8 Ziffern).</p>
+<p><b>Achtung:</b> Nach <b>5 falschen Versuchen</b> wird dein Konto gesperrt. Der Administrator schaltet es wieder frei.</p>
+<h2>Was du unter „Einstellungen“ findest</h2>
+<ul><li><b>Passwort oder PIN ändern.</b> Du musst dafür dein altes Passwort eingeben.</li><li><b>Telefon und Adresse</b> eintragen. Das ist wichtig: Deine Kunden sehen daraus eine Kontaktkarte mit Anruf und Route.</li><li><b>Mein Lieferant:</b> Wähle hier, bei wem du selbst einkaufst. Das brauchst du nur, wenn du einen Lieferanten hast.</li><li><b>Anzeige:</b> hell oder dunkel, Schriftgröße, Farben und Sprache.</li><li><b>Backup:</b> Deine Daten als Datei herunterladen.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-3"><h1>3. Du als Lieferant</h1>
+<p>Dein Konto ist ein <b>Spezial-Konto</b>. Andere Benutzer können dich als ihren Lieferanten eintragen und bei dir bestellen. Dafür hast du den Menüpunkt <b>Lieferantenkunden</b>.</p>
+<h2>Wörter, die du kennen musst</h2>
+<ul><li><b>Lieferantenkunde</b> – Ein Konto, das dich als Lieferanten eingetragen hat und bei dir bestellt.</li><li><b>Eingang</b> – Du bestellst bei deinem eigenen Lieferanten.</li><li><b>Ausgang</b> – Jemand bestellt bei dir.</li><li><b>Kunde</b> – Deine eigene Kundenbestellung, ohne Konto.</li></ul>
+<h2>Lieferantenkunden</h2>
+<p>Unter <b>Lieferantenkunden</b> siehst du die Bestellungen, Umsätze und offenen Beträge dieser Konten. Du pflegst Status und Bezahlung wie bei normalen Bestellungen.</p>
+<h2>Damit andere bei dir bestellen können</h2>
+<ul><li>Trage unter <b>Preise</b> deine Preise und Varianten ein. Deine Kunden bestellen nach deiner Preisliste.</li><li>Trage in den Einstellungen <b>Telefon und Adresse</b> ein.</li><li>Setze den Status regelmäßig, damit deine Kunden den Stand sehen.</li></ul>
+<h2>Besteller</h2>
+<p><b>Besteller</b> sind selbst registrierte Konten. Sie bestellen im Shop bei mehreren Lieferanten gleichzeitig (meistens bei bis zu 3). Ihre Bestellung kommt bei dir an wie jede andere. Jeder Lieferant bearbeitet sie getrennt.</p>
+<p><b>Wichtig:</b> Für Bestellungen von Bestellern gibt es <b>keine Rechnung</b>. Der Rechnungs-Button erscheint dort nicht. Für andere Konten und Kunden erstellst du Rechnungen wie gewohnt.</p>
+<h2>Ketten</h2>
+<p>Auch du kannst bei einem übergeordneten Lieferanten einkaufen. So entsteht eine Kette: Du belieferst deine Kunden und bestellst selbst bei deinem Lieferanten.</p>
+</section>
+<section class="hb-ch" id="hb-ch-4"><h1>4. Preise, Kunden und Lager einrichten</h1>
+<h2>Preise</h2>
+<p>Öffne <b>Preise</b>. Trage für jedes Produkt den <b>Einkaufspreis</b> und den <b>Verkaufspreis</b> ein. Der Gewinn pro Stück erscheint sofort. Gespeichert wird automatisch, wenn du das Feld verlässt.</p>
+<p>Manche Produkte haben <b>Varianten</b> (Geschmack, Marke oder Farbe). Lege zuerst mindestens eine Variante an, sonst lässt sich das Produkt nicht bestellen. Jede Variante hat eigene Preise und kann ein Foto haben.</p>
+<h2>Kunden</h2>
+<ol><li>Öffne <b>Kunden</b>.</li><li>Lege einen neuen Kunden an.</li><li>Tippe auf einen Kunden. Du siehst vier Reiter: Infos, Bestellungen, Statistik und Preise.</li></ol>
+<p>Unter <b>Preise</b> beim Kunden kannst du einen Sonderpreis nur für ihn eintragen. Ist das Feld leer, gilt der normale Preis.</p>
+<h2>Lager</h2>
+<p>Unter <b>Lagerbestand</b> trägst du ein, was du vorrätig hast, und eine <b>Warnschwelle</b>. Die App zeigt dann: Auf Lager, Niedrig oder Leer. Kritische Produkte stehen oben.</p>
+<p>Was du selbst verbrauchst, buchst du unter <b>Eigenverbrauch</b>. Das senkt den Lagerbestand automatisch.</p>
+</section>
+<section class="hb-ch" id="hb-ch-5"><h1>5. Eine Bestellung aufschreiben</h1>
+<ol><li>Öffne <b>Bestellungen</b> und tippe auf <b>＋ Neue Bestellung</b>.</li><li>Wähle den <b>Kunden</b>.</li><li>Füge Produkte hinzu. Bei Produkten mit Variante tippst du auf die passende Bildkarte.</li><li>Wenn du willst: <b>Rabatt</b> (Prozent oder fester Betrag) und <b>Vorauszahlung</b> eintragen. Den Restbetrag rechnet die App für dich.</li><li>Tippe auf <b>„Bestellung anlegen“</b>.</li></ol>
+<p><b>Gut zu wissen:</b> Beim Speichern werden die Preise <b>eingefroren</b>. Ändert sich später ein Preis, bleibt diese Bestellung gleich.</p>
+<h2>Offen und Historie</h2>
+<p>Im Tab <b>Offen</b> steht alles, was noch nicht abgeholt oder nicht bezahlt ist. Im Tab <b>Historie</b> stehen erledigte Bestellungen. Dort gibt es auch <b>„Nochmal bestellen“</b>.</p>
+<p>Gelöschte Bestellungen landen im <b>Papierkorb</b> (unter Einstellungen). Dort kannst du sie 30 Tage lang zurückholen.</p>
+</section>
+<section class="hb-ch" id="hb-ch-6"><h1>6. Lieferung verfolgen und übergeben</h1>
+<p>Jede Bestellung geht durch sechs Stationen: <b>Bestellt → Bestätigt → Bereit → Unterwegs → Übergeben → Bezahlt</b>. „Bestellt“ und „Bezahlt“ ergeben sich von selbst. Die Stationen dazwischen setzt du.</p>
+<h2>Status setzen</h2>
+<ol><li>Öffne <b>Sendungen</b> oder tippe in der Bestellliste auf <b>📍</b>.</li><li>Öffne die Sendung.</li><li>Wähle im Formular <b>„Status aktualisieren“</b>: Bestätigt, Bereit zur Übergabe, Bin unterwegs oder Persönlich übergeben.</li><li>Schreibe bei Bedarf einen Hinweis. Dein Kunde sieht ihn.</li><li>Bei „Bereit“ und „Unterwegs“: Datum, Uhrzeit, Dauer und Treffpunkt eintragen. Die App warnt dich bei Terminüberschneidungen.</li></ol>
+<h2>Übergabe mit der Kundenkarte</h2>
+<ol><li>Tippe auf <b>Abholen</b> oder <b>Persönlich übergeben</b>. Das Scan-Fenster öffnet sich.</li><li>Die Person zeigt ihre Karte. Halte den Strichcode quer und ruhig in den Rahmen.</li><li>Die App prüft, ob die Karte zur Bestellung passt. Dann ist die Ware übergeben.</li></ol>
+<p>Klappt der Scan nicht, tippe die <b>Kartennummer</b> ein. Ist keine Karte dabei, wähle <b>„Ohne Karte bestätigen“</b> und trage einen Grund ein.</p>
+<p>Hat ein Kunde mehrere offene Bestellungen, schließt du alle mit <b>einem</b> Scan ab: Bestell-Detail → „Alle offenen Bestellungen dieses Kunden“.</p>
+<h2>Kunden informieren</h2>
+<ul><li><b>Verfolgungslink:</b> Jede Bestellung hat einen geheimen Link. Dein Kunde sieht damit ohne Anmeldung Stationen, Hinweise und Termin.</li><li><b>Erinnerung:</b> Wartet eine Bestellung seit 3 Tagen oder länger, erscheint „⏳ seit X T“. Ein Klick bereitet eine Nachricht vor.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-7"><h1>7. Bezahlen und Rechnung</h1>
+<ol><li>Tippe bei der Bestellung auf <b>Bezahlt</b>.</li><li>Die App fragt: <b>„Rechnung jetzt als PDF herunterladen?“</b> Mit „OK“ bekommst du die Rechnung.</li><li>Später findest du sie im Bestell-Detail oder unter <b>Buchhaltung</b>.</li></ol>
+<h2>Deine Rechnungsdaten</h2>
+<p>Trage <b>einmal</b> unter <b>Einstellungen → Rechnung &amp; Briefkopf</b> Name, Adresse, IBAN, Zahlungsziel, Umsatzsteuer und Logo ein. Eine Vorschau zeigt dir, wie deine Rechnung aussieht.</p>
+<p>Jede Rechnung bekommt eine <b>eigene Nummer</b>, die hochzählt (zum Beispiel RE-2026-00001). Lädst du dieselbe Rechnung noch einmal, bleibt die Nummer gleich.</p>
+<p><b>Wichtig:</b> Rechnungen gibt es für Kunden und Konten. <b>Besteller</b> bekommen keine Rechnung. Sie können nur bestellen.</p>
+<h2>Buchhaltung</h2>
+<p>Im Menü findest du <b>Buchhaltung</b> mit drei Reitern:</p>
+<ul><li><b>Rechnungsarchiv:</b> alle Rechnungen. Du kannst sie erneut laden, per <b>„Senden“</b> weitergeben (am Handy über das Teilen-Menü) und als CSV für den Steuerberater exportieren.</li><li><b>Mahnwesen:</b> überfällige Rechnungen. Du erstellst nacheinander Zahlungserinnerung, 1. Mahnung und Letzte Mahnung als PDF.</li><li><b>Umsatz:</b> Balkendiagramm der letzten 12 Monate, dazu Top-Kunden und Top-Produkte. Mit <b>„Monatsbericht“</b> erstellst du eine PDF-Seite mit Umsatz, Gewinn, offenen Posten und Top-Listen, für diesen Monat oder den Vormonat.</li></ul>
+<p><b>Storno:</b> Im Archiv erstellt „Storno“ eine Gutschrift mit eigener Nummer (GS-2026-00001). Die Rechnung steht danach als „Storniert“ da.</p>
+<p>Das Archiv zeigt nur Rechnungen, die nach dem Update erstellt wurden.</p>
+</section>
+<section class="hb-ch" id="hb-ch-8"><h1>8. Beim Lieferanten einkaufen</h1>
+<p>Auch du kaufst ein. Wähle dafür unter <b>Einstellungen → Mein Lieferant</b> deinen Lieferanten.</p>
+<ol><li>Öffne <b>Beim Lieferanten</b> und tippe auf <b>＋ Neue Bestellung</b>.</li><li>Wähle die Produkte. Die Preise kommen aus der Preisliste deines Lieferanten.</li><li>Dein Lieferant sieht die Bestellung und setzt den Status.</li><li>Ist die Ware da, erscheint das Banner <b>„abholbereit“</b>. Markiere sie als angekommen und bezahlt, einzeln oder gesammelt.</li><li>Einen <b>Lieferschein</b> kannst du als PDF laden.</li></ol>
+<p>Die Beträge folgen der <b>aktuellen Preisliste</b> deines Lieferanten, bis du bezahlt hast. Danach sind sie fest.</p>
+<p>Unter <b>Sonstige Schulden</b> trägst du Geld ein, das du jemand anderem schuldest, mit Notiz und „bezahlt“-Haken.</p>
+</section>
+<section class="hb-ch" id="hb-ch-9"><h1>9. Die Übersicht verstehen</h1>
+<p>Die <b>Übersicht</b> zeigt dir auf einen Blick, wie es läuft:</p>
+<ul><li><b>Offene Schulden:</b> Was andere dir noch schulden.</li><li><b>Gesamtgewinn:</b> Verkaufspreis minus Einkaufspreis über alle Verkäufe.</li><li><b>Eigene Schulden:</b> Was du selbst schuldest.</li><li><b>Offene Restbeträge:</b> Nachzahlungen bei Bestellungen mit Vorauszahlung.</li><li><b>Größte Schuldner</b> und <b>Aktive Sendungen:</b> Wer am meisten schuldet und welche Lieferungen bald anstehen.</li><li><b>Statistik:</b> Wochenumsatz, Top-5-Produkte und Top-5-Kunden.</li><li><b>Lagerwarnung:</b> Erscheint, sobald ein Produkt niedrig oder leer ist.</li><li><b>Überfällige Rechnungen:</b> Ein orangener Hinweis zeigt, wie viele Rechnungen überfällig sind und wie viel Geld das ist. Ein Klick bringt dich ins Mahnwesen.</li></ul>
+</section>
+<section class="hb-ch" id="hb-ch-10"><h1>10. Häufige Fragen</h1>
+<p><b>Der Scanner erkennt die Karte nicht.</b><br>Strichcode quer halten, Abstand ändern, die Karte im Vollbild mit hoher Helligkeit zeigen oder den Blitz-Knopf nutzen. Der Kamerazugriff muss erlaubt sein. Notfalls die Kartennummer eintippen.</p>
+<p><b>Beim Lieferanten sehe ich keine Preise.</b><br>Wähle in den Einstellungen „Mein Lieferant“. Dein Lieferant muss Preise (und Varianten) eingetragen haben.</p>
+<p><b>Ein Produkt lässt sich nicht bestellen.</b><br>Bei Produkten mit Variante muss unter <b>Preise</b> zuerst mindestens ein Geschmack, eine Marke oder eine Farbe angelegt sein.</p>
+<p><b>Ich habe mein Passwort vergessen.</b><br>Melde dich beim Administrator. Er vergibt dir ein neues.</p>
+<p><b>Mein Konto ist gesperrt.</b><br>Das passiert nach 5 falschen Anmeldeversuchen. Der Administrator schaltet es frei.</p>
+<p><b>Die Daten wirken veraltet.</b><br>Prüfe, ob oben ein Offline-Hinweis steht. Mit Verbindung lade die Seite neu.</p>
+<p><b>Ein Besteller hat keine Rechnung bekommen.</b><br>Das ist so gewollt. Besteller können nur bestellen. Rechnungen gibt es für Kunden und Konten.</p>
+<p><b>Wo finde ich dieses Handbuch?</b><br>Unter <b>Einstellungen</b> oder in der Handbuch-Karte dort.</p>
+</section>
+</template>
 <template id="manual-tpl">
 <section class="hb-ch" id="hb-ch-1"><h1>1. Das Wichtigste in 2 Minuten</h1>
 <p>NicoFlow ist ein Verwaltungssystem für Verkauf, Einkauf, Lager und Lieferungen. Du legst Kunden und Preise an, nimmst Bestellungen auf, verfolgst jede Lieferung bis zur Übergabe und siehst jederzeit, wer dir noch Geld schuldet und wie viel du verdienst.</p>
@@ -8028,14 +8260,14 @@ function buildInvoicePdf(b,k,cn){
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,L=22,R=W-18, acc=hex2rgb(INV.farbe), s=invSender(), rec=invRecipient(b,k), logo=invGetLogo(), nr=cn?cn.nr:invNumber(b);
   const rate=Math.max(0,Number(INV.ust)||0);
-  const ink=[24,26,31], grey=[116,121,130], light=[228,230,234], tint=[246,247,249];
+  const tintAcc=acc.map(v=>Math.round(v+(255-v)*0.92)); const ink=[24,26,31], grey=[116,121,130], light=[228,230,234], tint=[246,247,249];
   const tx=(t,x,y,o)=>doc.text(String(t),x,y,o);
   const font=(st,sz,c)=>{ doc.setFont('helvetica',st); doc.setFontSize(sz); doc.setTextColor(...c); };
-  const stripe=()=>{ doc.setFillColor(...acc); doc.rect(0,0,6,H,'F'); };
-  const miniHead=()=>{ stripe(); font('bold',9,ink); tx(s.name.slice(0,40),L,16); font('normal',9,grey); tx('Rechnung '+nr,R,16,{align:'right'}); };
+  const stripe=(first)=>{ doc.setFillColor(...tintAcc); doc.rect(6,0,W-6,first?42:24,'F'); doc.setFillColor(...acc); doc.rect(0,0,6,H,'F'); };
+  const miniHead=()=>{ stripe(false); font('bold',9,ink); tx(s.name.slice(0,40),L,16); font('normal',9,grey); tx('Rechnung '+nr,R,16,{align:'right'}); };
 
   // ── Kopf ──
-  stripe();
+  stripe(true);
   if(logo){ const d=invFit(logo,52,18); doc.addImage(logo.data,logo.fmt,L,14,d.w,d.h); }
   else {
     doc.setFillColor(...ink); doc.roundedRect(L,14,13,13,3.2,3.2,'F');
@@ -8060,6 +8292,9 @@ function buildInvoicePdf(b,k,cn){
   // ── Status & Einleitung ──
   let y=92; const chip=cn?['GUTSCHRIFT',[185,80,60]]:(b.paid?['BEZAHLT',[46,139,87]]:['OFFEN',[196,120,20]]);
   doc.setDrawColor(...chip[1]); doc.setLineWidth(0.4); doc.roundedRect(L,y-4.6,22,7,3.5,3.5,'S'); font('bold',8,chip[1]); tx(chip[0],L+11,y+0.1,{align:'center'});
+  { const _t=r2(displayTotal(b)), _v=(!b.paid&&b.vorauszahlung>0)?r2(restAmount(b)):_t;
+    font('normal',8.5,grey); tx(cn?'Gutschriftsbetrag':(b.paid?'Bezahlter Betrag':'Zu zahlen'),R,y-4.4,{align:'right'});
+    font('bold',19,cn?[185,80,60]:(b.paid?[46,139,87]:ink)); tx(pdfMoney(_v),R,y+3.6,{align:'right'}); }
   y+=10;
   if(INV.intro){ font('normal',9.5,ink); const t=doc.splitTextToSize(INV.intro,R-L); doc.text(t,L,y); y+=t.length*4.6+3; }
 
@@ -8419,6 +8654,14 @@ function renderSettings(){
   });
   if(isBesteller){
     ['set-card-backup','set-card-danger'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+    const hc=document.getElementById('set-card-handbuch');
+    if(hc){ const ps=hc.querySelector('.ps'); if(ps) ps.textContent='Alles Wichtige zum Bestellen und zu deinen Bestellungen.';
+      const ch=hc.querySelector('.chips'); if(ch) ch.innerHTML=[['1','Das Wichtigste'],['2','Anmelden'],['3','Etwas bestellen'],['4','Stand ansehen'],['5','Ware bekommen'],['6','Häufige Fragen']].map(([n,t])=>`<button type="button" class="chip" onclick="openHandbuch(${n})">${n} · ${t}</button>`).join(''); }
+  }
+  if(role==='user'||role==='special'){
+    const hc=document.getElementById('set-card-handbuch');
+    if(hc){ const ps=hc.querySelector('.ps'); if(ps) ps.textContent='Dein Handbuch: Schritt für Schritt erklärt, passend zu deinem Konto.';
+      const ch=hc.querySelector('.chips'); if(ch) ch.innerHTML=HB_CHIPS[role==='special'?'s':'u'].map(([n,t])=>`<button type="button" class="chip" onclick="openHandbuch(${n})">${n} · ${t}</button>`).join(''); }
   }
   const userCard=document.getElementById('set-card-benutzer');
   if(userCard) userCard.style.display = isAdmin ? '' : 'none';
@@ -9153,9 +9396,14 @@ function dashShip(){
 }
 
 // ══ v21: Handbuch ══
+// Jede Rolle hat ihr eigenes Handbuch (Admin und Service: Systemhandbuch)
+const HB_CHIPS={"u": [[1, "Das Wichtigste in einfachen Worten"], [2, "Anmelden und dein Konto"], [3, "Preise, Kunden und Lager einrichten"], [4, "Eine Bestellung aufschreiben"], [5, "Lieferung verfolgen und übergeben"], [6, "Bezahlen und Rechnung"], [7, "Beim Lieferanten einkaufen"], [8, "Die Übersicht verstehen"], [9, "Häufige Fragen"]], "s": [[1, "Das Wichtigste in einfachen Worten"], [2, "Anmelden und dein Konto"], [3, "Du als Lieferant"], [4, "Preise, Kunden und Lager einrichten"], [5, "Eine Bestellung aufschreiben"], [6, "Lieferung verfolgen und übergeben"], [7, "Bezahlen und Rechnung"], [8, "Beim Lieferanten einkaufen"], [9, "Die Übersicht verstehen"], [10, "Häufige Fragen"]]};
+function hbKey(){ const r=currentRole(); return r==='besteller'?'b':r==='special'?'s':r==='user'?'u':'a'; }
+function hbTitle(){ return {b:'Handbuch für Besteller',u:'Handbuch für Benutzer',s:'Handbuch für Spezial-Konten',a:'Systemhandbuch'}[hbKey()]; }
 function openHandbuch(ch){
-  const body=document.getElementById('hb-body');
-  if(!body.dataset.ready){ body.innerHTML=document.getElementById('manual-tpl').innerHTML; body.dataset.ready='1'; }
+  const body=document.getElementById('hb-body'), key=hbKey();
+  if(body.dataset.ready!==key){ body.innerHTML=document.getElementById({b:'manual-besteller-tpl',u:'manual-user-tpl',s:'manual-special-tpl',a:'manual-tpl'}[key]).innerHTML; body.dataset.ready=key; }
+  const hh=document.querySelector('#modal-handbuch .modal-head h3'); if(hh) hh.innerHTML='<span style="margin-right:8px">📘</span>'+hbTitle();
   document.getElementById('hb-search').value=''; hbFilter(); openModal('handbuch');
   if(ch){ setTimeout(()=>{ const el=document.getElementById('hb-ch-'+ch); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },80); }
   else document.querySelector('#modal-handbuch .modal')?.scrollTo(0,0);
@@ -9167,7 +9415,7 @@ function hbFilter(){
 }
 function printHandbuch(){
   const w=window.open('','_blank'); if(!w){ showToast('Pop-up wurde blockiert.','⚠'); return; }
-  w.document.write(`<!doctype html><meta charset="utf-8"><title>NicoFlow Systemhandbuch</title><style>body{font:13px/1.6 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 20px;color:#222}h1{color:#D9600E;font-size:20px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:28px;page-break-after:avoid}h2{font-size:15px;margin:18px 0 6px;page-break-after:avoid}table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #ddd;padding:6px 9px;text-align:left;font-size:12px}th{background:#f6e3d4}code{background:#f3f3f3;padding:1px 5px;border-radius:4px}tr{page-break-inside:avoid}</style><h1 style="font-size:30px;border:0;margin-top:0">NicoFlow Systemhandbuch</h1>${document.getElementById('manual-tpl').innerHTML}<script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>NicoFlow ${hbTitle()}</title><style>body{font:13px/1.6 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 20px;color:#222}h1{color:#D9600E;font-size:20px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:28px;page-break-after:avoid}h2{font-size:15px;margin:18px 0 6px;page-break-after:avoid}table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #ddd;padding:6px 9px;text-align:left;font-size:12px}th{background:#f6e3d4}code{background:#f3f3f3;padding:1px 5px;border-radius:4px}tr{page-break-inside:avoid}</style><h1 style="font-size:30px;border:0;margin-top:0">NicoFlow Systemhandbuch</h1>${document.getElementById('manual-tpl').innerHTML}<script>onload=()=>setTimeout(()=>print(),300)<\/script>`);
   w.document.close();
 }
 
@@ -9506,7 +9754,7 @@ const archiv=()=>sales().filter(b=>INVN.map[b.id]).sort((a,b)=>INVN.map[b.id]<IN
 const st=b=>cn()[b.id]?'<span class="ac-b x">Storniert</span>':b.paid?'<span class="ac-b ok">Bezahlt</span>':overdue(b)?'<span class="ac-b late">Überfällig</span>':'<span class="ac-b">Offen</span>';
 function vArchiv(){
   const l=archiv(); if(!l.length) return '<p class="ac-e">Noch keine Rechnungen erstellt. Sie erscheinen hier, sobald du eine Rechnung herunterlädst.</p>';
-  return '<div class="ac-bar"><button class="btn btn-ghost" onclick="acctCsv()">CSV-Export</button></div><div class="ac-t">'+l.map(b=>`<div class="ac-r"><b>${E(INVN.map[b.id])}</b><span>${E(invDate(b.date))}</span><span class="g">${E(cust(b))}</span><span class="m">${E(pdfMoney(b.total))}</span>${st(b)}<span class="a"><button class="btn btn-ghost" onclick="acctInv(${JSON.stringify(b.id)})">Rechnung</button>${cn()[b.id]?`<button class="btn btn-ghost" onclick="acctCn(${JSON.stringify(b.id)})">Gutschrift</button>`:`<button class="btn btn-ghost" onclick="acctStorno(${JSON.stringify(b.id)})">Storno</button>`}</span></div>`).join('')+'</div>';
+  return '<div class="ac-bar"><button class="btn btn-ghost" onclick="acctCsv()">CSV-Export</button></div><div class="ac-t">'+l.map(b=>`<div class="ac-r"><b>${E(INVN.map[b.id])}</b><span>${E(invDate(b.date))}</span><span class="g">${E(cust(b))}</span><span class="m">${E(pdfMoney(b.total))}</span>${st(b)}<span class="a"><button class="btn btn-ghost" onclick="acctInv(${JSON.stringify(b.id)})">Rechnung</button><button class="btn btn-ghost" onclick="acctShare(${JSON.stringify(b.id)})">Senden</button>${cn()[b.id]?`<button class="btn btn-ghost" onclick="acctCn(${JSON.stringify(b.id)})">Gutschrift</button>`:`<button class="btn btn-ghost" onclick="acctStorno(${JSON.stringify(b.id)})">Storno</button>`}</span></div>`).join('')+'</div>';
 }
 function vMahn(){
   const l=sales().filter(overdue); if(!l.length) return '<p class="ac-e">Keine überfälligen Rechnungen. 🎉</p>';
@@ -9520,7 +9768,7 @@ function vUmsatz(){
   const bars=keys.map((k,i)=>{ const h=Math.round((m[k]||0)/mx*140); return `<g><rect x="${i*50+8}" y="${160-h}" width="34" height="${h}" rx="7" fill="var(--sage)" opacity="${k===ym?1:.55}"><title>${k}: ${pdfMoney(m[k]||0)}</title></rect><text x="${i*50+25}" y="178" text-anchor="middle" font-size="10" fill="var(--ink-faint)">${k.slice(5)}</text></g>`; }).join('');
   const sum=Object.keys(m).filter(k=>k.startsWith(yy)).reduce((s,k)=>s+m[k],0), open=sales().filter(b=>!b.paid&&INVN.map[b.id]&&!cn()[b.id]).reduce((s,b)=>s+restAmount(b),0);
   const top=(o,f)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>`<div class="ac-top"><span>${E(n)}</span><b>${f(v)}</b></div>`).join('')||'<p class="ac-e">Noch keine Daten.</p>';
-  return `<div class="ac-k"><div><small>Umsatz ${yy}</small><b>${pdfMoney(sum)}</b></div><div><small>Dieser Monat</small><b>${pdfMoney(m[ym]||0)}</b></div><div><small>Offen</small><b>${pdfMoney(open)}</b></div></div>
+  return `<div class="ac-bar" style="gap:8px"><button class="btn btn-ghost" onclick="acctReport(1)">Monatsbericht Vormonat</button><button class="btn btn-primary" onclick="acctReport(0)">Monatsbericht dieser Monat</button></div><div class="ac-k"><div><small>Umsatz ${yy}</small><b>${pdfMoney(sum)}</b></div><div><small>Dieser Monat</small><b>${pdfMoney(m[ym]||0)}</b></div><div><small>Offen</small><b>${pdfMoney(open)}</b></div></div>
   <svg viewBox="0 0 600 186" style="width:100%;height:auto;margin:10px 0 22px">${bars}</svg>
   <div class="ac-two"><div><h4>Top Kunden</h4>${top(c,pdfMoney)}</div><div><h4>Top Produkte (Stück)</h4>${top(p,v=>v)}</div></div>`;
 }
@@ -9532,6 +9780,9 @@ const byId=id=>S.bestellungen.find(x=>String(x.id)===String(id));
 window.acctTab=k=>{ tab=k; render(); };
 window.acctCsv=csv;
 window.acctInv=id=>{ const b=byId(id); if(b) printInvoice(b.id); };
+window.acctShare=async id=>{ const b=byId(id); if(!b) return; const nr=INVN.map[b.id], doc=buildInvoicePdf(b,kOf(b)), file=new File([doc.output('blob')],nr+'.pdf',{type:'application/pdf'});
+  try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Rechnung '+nr,text:`Rechnung ${nr} von ${invSender().name}`}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  doc.save(nr+'.pdf'); location.href='mailto:?subject='+encodeURIComponent('Rechnung '+nr)+'&body='+encodeURIComponent('Hallo,\n\nanbei die Rechnung '+nr+'. Das PDF wurde auf dein Gerät geladen, bitte hänge es an diese E-Mail an.\n\nFreundliche Grüße\n'+invSender().name); };
 window.acctCn=id=>{ const b=byId(id); if(b&&cn()[b.id]) cnPdf(b); };
 window.acctMahn=id=>{ const b=byId(id); if(b){ mahnPdf(b); render(); } };
 window.acctStorno=id=>{ const b=byId(id); if(!b||cn()[b.id]||!confirm(`Rechnung ${INVN.map[b.id]} stornieren und Gutschrift erstellen?`)) return;
@@ -9539,8 +9790,101 @@ window.acctStorno=id=>{ const b=byId(id); if(!b||cn()[b.id]||!confirm(`Rechnung 
 window.acctOpen=()=>{ if(!box){ box=document.createElement('div'); box.id='acct'; box.innerHTML='<div class="ac-wrap"><div class="ac-head"><div><small>Auswertung</small><h2>Buchhaltung</h2></div><button class="btn btn-ghost" onclick="acctClose()">Schließen ✕</button></div><div class="ac-body"></div></div>'; document.body.appendChild(box); document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&box.classList.contains('open')) acctClose(); }); }
   render(); box.classList.add('open'); };
 window.acctClose=()=>box&&box.classList.remove('open');
+window.acctOverdue=()=>{ try{ return sales().filter(overdue); }catch(e){ return []; } };
+window.acctReport=off=>{
+  const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-off); const ym=d.toISOString().slice(0,7);
+  const mname=d.toLocaleDateString('de-AT',{month:'long',year:'numeric'});
+  const all=sales().filter(b=>!cn()[b.id]), paid=all.filter(b=>b.paid&&String(b.paidAt||b.date).slice(0,7)===ym);
+  let rev=0,gain=0; const c={},p={};
+  paid.forEach(b=>{ rev+=b.total; c[cust(b)]=(c[cust(b)]||0)+b.total;
+    (b.items||[]).forEach(i=>{ const vk=i.preis!=null?i.preis:(S.preise[i.prod]||0), ek=i.ek!=null?i.ek:((S.einkauf||{})[i.prod]||0); gain+=(vk-ek)*(i.stueck||0); const n=PROD_MAP[i.prod]?prodLabel(i):i.prod; p[n]=(p[n]||0)+i.stueck; }); });
+  const issued=sales().filter(b=>INVN.map[b.id]&&String(b.date).slice(0,7)===ym).length;
+  const open=all.filter(b=>!b.paid&&INVN.map[b.id]).reduce((s,b)=>s+restAmount(b),0), late=all.filter(overdue).length;
+  const gs=Object.values(cn()).filter(x=>String(x.date).slice(0,7)===ym).length;
+  const {jsPDF}=window.jspdf, doc=new jsPDF({unit:'mm',format:'a4'}), s=invSender(), acc=hex2rgb(INV.farbe), ink=[24,26,31], grey=[116,121,130], L=22, R=192;
+  const tint=acc.map(v=>Math.round(v+(255-v)*0.92));
+  const t=(st,sz,col,x,y,txt,o)=>{ doc.setFont('helvetica',st); doc.setFontSize(sz); doc.setTextColor(...col); doc.text(String(txt),x,y,o); };
+  doc.setFillColor(...tint); doc.rect(6,0,204,42,'F'); doc.setFillColor(...acc); doc.rect(0,0,6,297,'F');
+  t('bold',10,acc,L,18,s.name.toUpperCase()); t('bold',28,ink,L,30,'Monatsbericht'); t('normal',12,grey,R,30,mname,{align:'right'});
+  const card=(x,y,w,l,v,col)=>{ doc.setFillColor(246,247,249); doc.roundedRect(x,y,w,24,3,3,'F'); t('normal',8.5,grey,x+5,y+8,l); t('bold',15,col||ink,x+5,y+18,v); };
+  const w=(R-L-8)/3;
+  card(L,54,w,'Umsatz (bezahlt)',pdfMoney(rev)); card(L+w+4,54,w,'Gewinn',pdfMoney(gain),[46,139,87]); card(L+2*(w+4),54,w,'Rechnungen erstellt',String(issued));
+  card(L,82,w,'Offene Posten gesamt',pdfMoney(open)); card(L+w+4,82,w,'Überfällig',String(late),late?[185,80,60]:ink); card(L+2*(w+4),82,w,'Gutschriften',String(gs));
+  const list=(title,o,f,x,y)=>{ t('bold',11,ink,x,y,title); doc.setDrawColor(...acc); doc.setLineWidth(0.5); doc.line(x,y+2.5,x+78,y+2.5);
+    const e=Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,6); if(!e.length) t('normal',9,grey,x,y+10,'Keine Daten in diesem Monat.');
+    e.forEach(([n,v],i)=>{ t('normal',9.5,ink,x,y+10+i*7,n.slice(0,28)); t('bold',9.5,ink,x+78,y+10+i*7,f(v),{align:'right'}); doc.setDrawColor(228,230,234); doc.setLineWidth(0.2); doc.line(x,y+12.5+i*7,x+78,y+12.5+i*7); }); };
+  list('Top-Kunden',c,pdfMoney,L,128); list('Top-Produkte (Stück)',p,v=>v,L+92,128);
+  t('normal',8,grey,L,285,`Erstellt am ${invDate(today())} · ${s.name}`);
+  doc.save(`monatsbericht-${ym}.pdf`);
+};
+
 function sync(){ const ok=['user','special'].includes(currentRole())&&!!currentUserId; ['nav-acct-tick','nav-acct-group'].forEach(i=>{ const e=document.getElementById(i); if(e) e.style.display=ok?'':'none'; }); }
 const rf=window.refresh; window.refresh=function(){ const r=rf.apply(this,arguments); try{sync();}catch(e){} return r; };
+})();
+</script>
+<script>
+(function(){
+/* Besteller: Favoriten und „Nochmal bestellen“ */
+let favOnly=false;
+const favGet=()=>{ try{ return JSON.parse(localStorage.getItem('nf_fav_'+currentUserId)||'[]'); }catch(e){ return []; } };
+const favSave=a=>{ try{ localStorage.setItem('nf_fav_'+currentUserId,JSON.stringify(a)); }catch(e){} };
+window.bsFav=id=>{ const a=favGet(), i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); favSave(a); renderBsShop(); };
+window.bsFavOnly=()=>{ favOnly=!favOnly; renderBsShop(); };
+function decorateShop(){
+  const grid=document.getElementById('bs-grid'); if(!grid) return;
+  const fav=new Set(favGet());
+  let bar=document.getElementById('bs-favbar');
+  if(!bar){ bar=document.createElement('div'); bar.id='bs-favbar'; bar.className='fav-bar'; grid.parentNode.insertBefore(bar,grid); }
+  bar.innerHTML=`<button type="button" class="chip${favOnly?' on':''}" onclick="bsFavOnly()">★ Nur Favoriten${fav.size?' ('+fav.size+')':''}</button>`;
+  const cards=[...grid.querySelectorAll('.shop-card')].map(c=>({c,id:(c.innerHTML.match(/bsAddToCart\('([^']+)'\)/)||[])[1]}));
+  cards.forEach(({c,id})=>{ const t=c.querySelector('.shop-tile'); if(!t||!id) return;
+    const b=document.createElement('button'); b.type='button'; b.className='fav-btn'+(fav.has(id)?' on':''); b.textContent=fav.has(id)?'★':'☆'; b.title='Favorit'; b.setAttribute('aria-label','Favorit'); b.onclick=()=>bsFav(id); t.appendChild(b);
+    if(favOnly&&!fav.has(id)) c.style.display='none'; });
+  cards.filter(x=>fav.has(x.id)).reverse().forEach(x=>grid.prepend(x.c));
+}
+function decorateOrders(){
+  document.querySelectorAll('#bs-list .bs-group').forEach(g=>{
+    if(g.querySelector('.bs-again')) return;
+    const m=(g.querySelector('.bs-group-head')?.textContent||'').match(/#(\d+)/); if(!m) return;
+    const d=document.createElement('div'); d.className='bs-again'; d.innerHTML=`<button type="button" class="btn btn-ghost btn-sm" onclick="bsReorder(${m[1]})">↻ Nochmal bestellen</button>`; g.appendChild(d); });
+}
+window.bsReorder=nr=>{
+  const b=S.bestellungen.find(x=>x.id===nr); if(!b) return;
+  (b.items||[]).forEach(it=>{ const w=(it.wunsch||'').trim(), ex=bsCart.find(l=>l.prod===it.prod&&l.wunsch===w);
+    if(ex) ex.stueck=Math.min(1000,ex.stueck+it.stueck); else bsCart.push({uid:Date.now()+Math.random(),prod:it.prod,stueck:it.stueck,wunsch:w}); });
+  setBsTab('shop'); renderBsShop(); updateBsCartBadge(); showToast('Die Artikel liegen wieder im Warenkorb. 🛒');
+};
+const rs=window.renderBsShop; window.renderBsShop=function(){ const r=rs.apply(this,arguments); try{decorateShop();}catch(e){} return r; };
+const ro=window.renderBsOrders; window.renderBsOrders=function(){ const r=ro.apply(this,arguments); try{decorateOrders();bsDecorateNew();}catch(e){} return r; };
+})();
+</script>
+<script>
+(function(){
+/* Hinweis auf überfällige Rechnungen (Übersicht) */
+function dueBanner(){
+  const el=document.getElementById('ac-due'); if(!el) return;
+  const l=(['user','special'].includes(currentRole())&&window.acctOverdue)?window.acctOverdue():[];
+  if(!l.length){ el.style.display='none'; return; }
+  const sum=l.reduce((s,b)=>s+restAmount(b),0);
+  el.style.display='flex'; el.querySelector('b').textContent=`${l.length} Rechnung${l.length===1?'':'en'} überfällig · ${pdfMoney(sum)}`;
+}
+const rd=window.renderDashboard; window.renderDashboard=function(){ const r=rd.apply(this,arguments); try{dueBanner();}catch(e){} return r; };
+/* Besteller: „Neu“-Markierung bei Statusänderung */
+const seenGet=()=>{ try{ return JSON.parse(localStorage.getItem('nf_seen_'+currentUserId)||'{}'); }catch(e){ return {}; } };
+const seenSet=o=>{ try{ localStorage.setItem('nf_seen_'+currentUserId,JSON.stringify(o)); }catch(e){} };
+const stepLabel=b=>{ const d=shipSteps(b).filter(x=>x.done); return d.length?d[d.length-1].l:''; };
+window.bsDecorateNew=function(){
+  const seen=seenGet(); let n=0, ch=false;
+  document.querySelectorAll('#bs-list .bs-rcpt').forEach(r=>{
+    const m=(r.getAttribute('onclick')||'').match(/openBsTrack\((\d+)\)/); if(!m) return;
+    const b=S.bestellungen.find(x=>String(x.id)===m[1]); if(!b) return; const l=stepLabel(b);
+    if(seen[m[1]]===undefined){ seen[m[1]]=l; ch=true; }
+    else if(seen[m[1]]!==l){ n++; const t=document.createElement('span'); t.className='bs-new'; t.textContent='Neu: '+l; r.insertAdjacentElement('afterbegin',t); }
+  });
+  if(ch) seenSet(seen);
+  const tab=document.getElementById('bs-tab-orders'); if(tab) tab.classList.toggle('has-new',n>0);
+};
+const ot=window.openBsTrack; window.openBsTrack=function(id){ const b=S.bestellungen.find(x=>x.id===id); if(b){ const s=seenGet(); s[b.id]=stepLabel(b); seenSet(s); } return ot.apply(this,arguments); };
 })();
 </script>
 </body>
